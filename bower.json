@@ -21,6 +21,7 @@
     "src"
   ],
   "devDependencies": {
-    "angular": "*"
+    "angular": "*",
+    "angular-mocks": "*"
   }
 }

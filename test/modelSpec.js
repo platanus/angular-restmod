@@ -1,0 +1,76 @@
+'use strict';
+
+describe("Restmod model class", function() {
+
+  var restmod,
+      httpBackend,
+      Book,
+      Chapter;
+
+  beforeEach(module('plRestmod'));
+
+  beforeEach(inject(function($restmod, $httpBackend) {
+    restmod = $restmod;
+    httpBackend = $httpBackend;
+
+    // Initialize mock api
+    httpBackend.when('GET', '/api/books?minPages=100').respond([ {name: 'Los piratas del Caribe' }]);
+    httpBackend.when('GET', '/api/books/1').respond(200, '{"id": 1, "chapters": [{"id": 2}]}');
+    httpBackend.when('POST', '/api/books').respond(200, { id: 1 });
+
+    // Initialize a couple of model types
+    Book = restmod('/api/books');
+  }));
+
+  describe('$search', function() {
+
+    it("contains spec with an expectation", function() {
+      var books = Book.$search({ minPages: 100 });
+      expect(books.length).toEqual(0);
+      httpBackend.flush();
+    	expect(books.length).toEqual(1);
+    });
+
+  });
+
+  describe('$build', function() {
+
+    it("should return book with a name", function() {
+        var book = Book.$build({name: "Los piratas del Caribe"});
+        expect(book.name).toEqual("Los piratas del Caribe");
+    });
+
+  });
+
+  describe("$create", function() {
+
+    it("should return book with a name", function() {
+      httpBackend.expectPOST('/api/books', {name: 'Los piratas del Caribe'});
+      Book.$create({name: "Los piratas del Caribe"});
+      httpBackend.flush();
+    });
+
+    // it("should allow an empty response", function() {
+    //     httpBackend.expectPOST('/api/books', {name: 'Los piratas del Caribe'}).respond(200, '');
+    //     Book.$create({name: "Los piratas del Caribe"});
+    //     httpBackend.flush();
+    // });
+
+    it("should assign an ID to the new resource", function() {
+        var book = Book.$create({name: "Los piratas del Caribe"});
+        expect(book.id).toBeUndefined();
+        httpBackend.flush();
+        expect(book.id).toEqual(1);
+    });
+
+    it("should bind to the new resource", function() {
+        var book = Book.$create({name: "Los piratas del Caribe"});
+        expect(book.$isBound()).toEqual(false);
+        httpBackend.flush();
+        expect(book.$isBound()).toEqual(true);
+    });
+
+  });
+
+});
+

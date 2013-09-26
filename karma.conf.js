@@ -13,7 +13,7 @@ module.exports = function(config) {
     files: [
 		// libraries
 		'bower_components/angular/angular.js',
-		// 'bower_components/angular-mocks/angular-mocks.js',
+		'bower_components/angular-mocks/angular-mocks.js',
 
 		// our app
 		'src/**/*.js',
