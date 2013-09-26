@@ -2,21 +2,29 @@
 
 describe("Restmod model instance", function() {
 
-  var restmod,
-      httpBackend,
+  var httpBackend,
       Book,
       Chapter;
 
   beforeEach(module('plRestmod'));
 
-  beforeEach(inject(function($restmod, $httpBackend) {
-    restmod = $restmod;
-    httpBackend = $httpBackend;
+  // generate a dummy module
+  beforeEach(module(function($provide) {
+    $provide.factory('Book', function($restmod) {
+      return $restmod('/api/books', { chapters: { hasMany: 'Chapter' } });
+    });
 
-    // Initialize a couple of model types
-    Chapter = restmod('/api/chapters');
-    Book = restmod('/api/books', {chapters: {hasMany: Chapter}});
+    $provide.factory('Chapter', function($restmod) {
+      return $restmod('/api/chapters');
+    });
   }));
+
+  // cache entities to be used in tests
+  beforeEach(inject(['$httpBackend', 'Book', 'Chapter', function($httpBackend, _Book, _Chapter) {
+    httpBackend = $httpBackend;
+    Book = _Book;
+    Chapter = _Chapter;
+  }]));
 
   describe('hasMany relation', function() {
 

@@ -223,7 +223,7 @@ angular.module('plRestmod', ['ng']).
      *
      * The `_url` parameter also accepts an url builder implementation.
      */
-    $get: ['$http', '$q', function($http, $q) {
+    $get: ['$http', '$q', '$injector', function($http, $q, $injector) {
 
       return function modelBuilderFactory(_url/* , _meta */) {
 
@@ -646,6 +646,8 @@ angular.module('plRestmod', ['ng']).
               parsers[_attr] = _using;
             } else {
               parsers[_attr] = function(_value) {
+                // TODO: can filter be preloaded?
+                // TODO: return $filter(_using)(_value, _opt);
                 // TODO: add other transformation sources?
                 return TR_CACHE[_using](_value, _opt);
               };
@@ -676,10 +678,11 @@ angular.module('plRestmod', ['ng']).
               var rel = this.$relcache[_name];
               if(!rel || _resetOrRaw) {
                 // TODO: is the call to nestedUrl enough to support a wide range of api scenarios?
-                var url = _opt.url || urlBuilder.nestedUrl(this, _opt.alias || _name, _type, _opt),
-                  raw = isArray(_resetOrRaw) ? _resetOrRaw : null;
+                var type = isString(_type) ? $injector.get(_type) : _type,
+                    url = _opt.url || urlBuilder.nestedUrl(this, _opt.alias || _name, type, _opt),
+                    raw = isArray(_resetOrRaw) ? _resetOrRaw : null;
 
-                this.$relcache[_name] = rel = _type.$collection(url, {}, raw);
+                this.$relcache[_name] = rel = type.$collection(url, {}, raw);
               }
               return rel;
             };
@@ -687,7 +690,7 @@ angular.module('plRestmod', ['ng']).
             // TODO: maybe registering as parser should be optional.
             parsers[_name] = function(_raw) {
               this[_name](_raw);
-            }
+            };
 
             return this;
           },
@@ -698,10 +701,11 @@ angular.module('plRestmod', ['ng']).
               if(!this.$relcache) this.$relcache = {};
               var rel = this.$relcache[_name];
               if(!rel || _resetOrRaw) {
-                var url = _opt.url || urlBuilder.nestedUrl(this, _opt.alias || _name, _type, _opt),
-                  raw = isObject(_resetOrRaw) ? _resetOrRaw : null;
+                var type = isString(_type) ? $injector.get(_type) : _type,
+                    url = _opt.url || urlBuilder.nestedUrl(this, _opt.alias || _name, type, _opt),
+                    raw = isObject(_resetOrRaw) ? _resetOrRaw : null;
 
-                this.$relcache[_name] = rel = _type.$buildRaw(raw, url, this);
+                this.$relcache[_name] = rel = type.$buildRaw(raw, url, this);
               }
               return rel;
             };
@@ -709,7 +713,7 @@ angular.module('plRestmod', ['ng']).
             // TODO: maybe registering as parser should be optional.
             parsers[_name] = function(_raw) {
               this[_name](_raw);
-            }
+            };
 
             return this;
           },
