@@ -18,7 +18,8 @@
     "karma.conf.js",
     "package.json",
     "test",
-    "src"
+    "src",
+    ".travis.yml"
   ],
   "devDependencies": {
     "angular": "*",
