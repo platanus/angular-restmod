@@ -17,7 +17,7 @@ var $restmodMinErr = angular.noop; //minErr('$restmod');
  *    return $restModel('api/books', {
  *      name: { primary: true },
  *      seen: { def: false, ignore: true },
- *      createdAt: { parse: 'rails-date' },
+ *      createdAt: { parse: 'railsDate' },
  *      chapters: { hasMany: Chapter },
  *      author: { hasOne: Author }
  *    }, function(_builder) {
@@ -650,6 +650,8 @@ angular.module('plRestmod', ['ng']).
           loadMeta: function(_meta) {
             if(_meta.$meta) {
               this.loadMeta(_meta.$meta);
+            } else if(isString(_meta)) {
+              this.loadMeta($injector.get(_meta));
             } else if(isArray(_meta)) {
               var i=0, meta;
               while((meta = _meta[i++])) {

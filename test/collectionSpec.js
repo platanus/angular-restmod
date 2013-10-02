@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Restmod model collection', function() {
+describe('Restmod model collection:', function() {
 
   var $httpBackend, Book;
 

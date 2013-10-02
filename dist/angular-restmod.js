@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.1.2 - 2013-09-26
+ * @version v0.1.3 - 2013-10-02
  * @link https://github.com/angular-platanus/angular-restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -24,7 +24,7 @@ var $restmodMinErr = angular.noop; //minErr('$restmod');
  *    return $restModel('api/books', {
  *      name: { primary: true },
  *      seen: { def: false, ignore: true },
- *      createdAt: { parse: 'rails-date' },
+ *      createdAt: { parse: 'railsDate' },
  *      chapters: { hasMany: Chapter },
  *      author: { hasOne: Author }
  *    }, function(_builder) {
@@ -657,6 +657,8 @@ angular.module('plRestmod', ['ng']).
           loadMeta: function(_meta) {
             if(_meta.$meta) {
               this.loadMeta(_meta.$meta);
+            } else if(isString(_meta)) {
+              this.loadMeta($injector.get(_meta));
             } else if(isArray(_meta)) {
               var i=0, meta;
               while((meta = _meta[i++])) {

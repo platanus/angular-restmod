@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Restmod model class', function() {
+describe('Restmod model class:', function() {
 
   var $httpBackend, Book;
 
