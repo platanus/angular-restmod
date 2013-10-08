@@ -93,113 +93,21 @@ angular.module('plRestmod', ['ng']).
     });
   }
 
-    /*
-     * The RESTfull url builder factory class
-     * TODO: Put this in a separate module.
-     */
-
-  var RestUrlBuilderFactory = function(_primary) {
-    this.primary = _primary;
-  };
-
-  RestUrlBuilderFactory.prototype = {
-    get: function(_baseUrl) {
-
-      var defaults = {
-        primary: this.primary
-      };
-
-      return {
-        /**
-         * called by builder when a primary: true attribute is found.
-         */
-        setPrimaryKey: function(_key) {
-          defaults.primary = _key;
-        },
-        /**
-         * called by collection whenever implicit key is used
-         */
-        inferKey: function(/* _context */) {
-          return defaults.primary;
-        },
-        /**
-         * Called by resource to resolve the resource's url
-         */
-        resourceUrl: function(_res) {
-          var partial = _res.$partial, pk;
-
-          if(!partial) {
-            // if no partial is provided, attempt to use pk with base url
-            pk = _res[defaults.primary];
-            if(pk === null || pk === undefined) return null;
-            if(_baseUrl) return _baseUrl + '/' + pk; // this preceeds context
-          }
-
-          if(_res.$context) {
-            // if a context is provided attemp to use it with partial or pk
-            var base = _col.$context.$url();
-            if(!base) return null;
-            return base + '/' + (partial || pk);
-          }
-
-          // finally return partial if given, if not return null.
-          return (partial || null);
-        },
-        /**
-         * Called by collections when an url is needed
-         *
-         * @param  {[type]} _col [description]
-         * @return {[type]}      [description]
-         */
-        collectionUrl: function(_col) {
-          if(_col.$context) {
-            var base = _col.$context.$url();
-            if(!base) return null;
-            return _col.$partial ? base + '/' + _col.$partial : base;
-          } else if(_col.$partial) {
-            return _col.$partial;
-          } else {
-            return _baseUrl;
-          }
-        },
-        /**
-         * called by an unbound resource whenever save is called
-         */
-        createUrl: function(_res) {
-          if(_res.$context) return _res.$context.$url();
-          return _baseUrl;
-        },
-        /**
-         * called by a bound resource whenever save is called
-         */
-        updateUrl: function(_res) {
-          return this.resourceUrl(_res);
-        },
-        /**
-         * called by a bound resource whenever destroy is called
-         */
-        destroyUrl: function(_res) {
-          return this.resourceUrl(_res);
+  /* Module Globals */
+  var URL_BUILDER_FC, // The url builder factory.
+      TR_CACHE = {
+        'rails-date': function(_string) {
+          if(!_string) return _string;
+          var m = _string.match(/(\d{2,4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/);
+          if(m) return new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10),
+            parseInt(m[4],10), parseInt(m[5],10), parseInt(m[6],10));
+          m = _string.match(/(\d{2,4})-(\d{2})-(\d{2})/);
+          if(m) return new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10));
+          m = _string.match(/(\d{2,4})\/(\d{2})\/(\d{2})/);
+          if(m) return new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10));
+          return null;
         }
       };
-    }
-  };
-
-    /* Module Globals */
-  var URL_BUILDER_FC = new RestUrlBuilderFactory('id'),
-    TR_CACHE = {
-      'rails-date': function(_string) {
-        if(!_string) return _string;
-        var m = _string.match(/(\d{2,4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/);
-        if(m) return new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10),
-          parseInt(m[4],10), parseInt(m[5],10), parseInt(m[6],10));
-        m = _string.match(/(\d{2,4})-(\d{2})-(\d{2})/);
-        if(m) return new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10));
-        m = _string.match(/(\d{2,4})\/(\d{2})\/(\d{2})/);
-        if(m) return new Date(parseInt(m[1],10), parseInt(m[2],10)-1, parseInt(m[3],10));
-        return null;
-      }
-    };
 
   return {
 
@@ -245,6 +153,9 @@ angular.module('plRestmod', ['ng']).
      * The `_url` parameter also accepts an url builder implementation.
      */
     $get: ['$http', '$q', '$injector', function($http, $q, $injector) {
+
+      // If no url builder was provided at configuration, inject the default builder
+      if(!URL_BUILDER_FC) URL_BUILDER_FC = new ($injector.get('RestUrlBuilderFactory'))('id');
 
       return function modelBuilderFactory(_url/* , _meta */) {
 
