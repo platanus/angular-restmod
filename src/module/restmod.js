@@ -2,66 +2,11 @@
 
 var $restmodMinErr = angular.noop; //minErr('$restmod');
 
-/*
- * Usage - Model Definition:
- *
- *  module('module'.factory('PagedModel', ['$restModel', function($restModel) {
- *    return $restmodFactory()
- *      .on('before_collection_fetch', function() {
- *      });
- *      .classDefine('nextPage', function() {
- *      });
- *  }]));
- *
- *  module('module').factory('Book', ['$restModel', 'Author', Chapter', function($restModel, Author, Chapter) {
- *    return $restModel('api/books', {
- *      name: { primary: true },
- *      seen: { def: false, ignore: true },
- *      createdAt: { parse: 'railsDate' },
- *      chapters: { hasMany: Chapter },
- *      author: { hasOne: Author }
- *    }, function(_builder) {
- *      _builder.parse(function(_rawData, _localData) {
- *
- *      });
- *      _builder.render(function(_localData, _toData) {
- *
- *      });
- *      _builder.before_create(function() {
- *        // Do something with book before persisting!
- *        });
- *    }, PagedModel);
- *  }]);
- *
- * Usage - Services/Controllers:
- *
- *  module('module').service('Library', ['Author', 'Book', function(Book) {
- *
- *    ...
- *
- *    // Get all books with more than 100 pages
- *    books = Book.$search({ minPages: 100 })
- *
- *    // Get all chapters that belong to the Book with name 'angular-for-dummies'
- *    chapters = Author.mock('angular-for-dummies').chapters().fetch();
- *
- *    // Add a chapter to the same book
- *    chapter = Book.mock('angular-for-dummies').chapters().create({ title: 'Angular And IE7', pages: 30 });
- *
- *    // Modify a book's author (without fetching data)
- *    Book.mock('angular-for-dummies').author().update({ name: 'A. Dummy' });
- *
- *    // Modify a loaded book
- *    book.rating = 3;
- *    book.$save();
- *
- *    ...
- *
- *  }]);
- *
+/**
+ * The Model provider
  */
 
-angular.module('plRestmod', ['ng']).
+angular.module('plRestmod').
   provider('$restmod', [function() {
 
   // Cache som angular stuff
@@ -94,7 +39,7 @@ angular.module('plRestmod', ['ng']).
   }
 
   /* Module Globals */
-  var URL_BUILDER_FC, // The url builder factory.
+  var URL_BUILDER_FC = null, // The url builder factory.
       TR_CACHE = {
         'rails-date': function(_string) {
           if(!_string) return _string;
@@ -154,7 +99,7 @@ angular.module('plRestmod', ['ng']).
      */
     $get: ['$http', '$q', '$injector', function($http, $q, $injector) {
 
-      // If no url builder was provided at configuration, inject the default builder
+      // If no url builder was provided at configuration, inject the default factory
       if(!URL_BUILDER_FC) URL_BUILDER_FC = new ($injector.get('RestUrlBuilderFactory'))('id');
 
       return function modelBuilderFactory(_url/* , _meta */) {
@@ -451,8 +396,8 @@ angular.module('plRestmod', ['ng']).
 
           // Since Array cannot be extended, use method injection
           // TODO: try to find a o(1) alternative...
-          for(var key in Model.collectionProto) {
-            if(Model.collectionProto.hasOwnProperty(key)) col[key] = Model.collectionProto[key];
+          for(var key in Model.$$collectionProto) {
+            if(Model.$$collectionProto.hasOwnProperty(key)) col[key] = Model.$$collectionProto[key];
           }
 
           col.$partial = _url;
@@ -465,7 +410,7 @@ angular.module('plRestmod', ['ng']).
           return col;
         };
 
-        Model.collectionProto = {
+        Model.$$collectionProto = {
           /**
            * Promise chaining method, keeps the collection instance as the chain context.
            *
@@ -582,6 +527,7 @@ angular.module('plRestmod', ['ng']).
 
         /*
          * Model builder interface definition
+         * TODO: put this in a separate file?
          */
 
         // TODO: types -> parser/renderer combos.
@@ -732,7 +678,7 @@ angular.module('plRestmod', ['ng']).
         Builder.loadMeta(Model.$meta);
 
         extend(Model, scopeProto);
-        extend(Model.collectionProto, scopeProto);
+        extend(Model.$$collectionProto, scopeProto);
         return Model;
       };
     }]
