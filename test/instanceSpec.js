@@ -26,6 +26,19 @@ describe('Restmod model instance:', function() {
 
   describe('hasMany relation', function() {
 
+    describe('when fetching a relation', function() {
+        beforeEach(function() {
+          $httpBackend.when('GET', '/api/books/1/chapters').respond(200, '[{"id": 2, "name": "The Second"}, {"id": 3, "name": "The third"}]');
+        });
+
+        it('should use proper route to fetch relation items', function() {
+          var chapters = Book.$build({ id: 1 }).chapters.$fetch();
+          $httpBackend.flush();
+          expect(chapters.length).toEqual(2);
+          expect(chapters[0] instanceof Chapter).toBeTruthy();
+        });
+    });
+
     describe('when retrieving inlined relation data', function() {
 
       beforeEach(function() {
@@ -35,8 +48,8 @@ describe('Restmod model instance:', function() {
       it('should load inline data into relation', function() {
         var book = Book.$find(1);
         $httpBackend.flush();
-        expect(book.chapters().length).toEqual(1);
-        expect(book.chapters()[0] instanceof Chapter).toBeTruthy();
+        expect(book.chapters.length).toEqual(1);
+        expect(book.chapters[0] instanceof Chapter).toBeTruthy();
       });
 
     });

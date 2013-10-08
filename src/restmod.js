@@ -123,51 +123,63 @@ angular.module('plRestmod', ['ng']).
           return defaults.primary;
         },
         /**
-         * called by buildCollection whenever a
-         */
-        queryUrl: function() {
-          return _baseUrl;
-        },
-        /**
-         * called by resource to resolve the resource's url
+         * Called by resource to resolve the resource's url
          */
         resourceUrl: function(_res) {
-          var pk = _res[defaults.primary];
-          if(pk === null || pk === undefined) return null;
-          // use base url if provided
-          if(_baseUrl) {
-            return _baseUrl + '/' + pk;
+          var partial = _res.$partial, pk;
+
+          if(!partial) {
+            // if no partial is provided, attempt to use pk with base url
+            pk = _res[defaults.primary];
+            if(pk === null || pk === undefined) return null;
+            if(_baseUrl) return _baseUrl + '/' + pk; // this preceeds context
           }
-          // use collection url as base url
-          if(_res.$context && _res.$context.$url) {
-            return _res.$context.$url + '/' + pk;
+
+          if(_res.$context) {
+            // if a context is provided attemp to use it with partial or pk
+            var base = _col.$context.$url();
+            if(!base) return null;
+            return base + '/' + (partial || pk);
           }
-          return null;
+
+          // finally return partial if given, if not return null.
+          return (partial || null);
+        },
+        /**
+         * Called by collections when an url is needed
+         *
+         * @param  {[type]} _col [description]
+         * @return {[type]}      [description]
+         */
+        collectionUrl: function(_col) {
+          if(_col.$context) {
+            var base = _col.$context.$url();
+            if(!base) return null;
+            return _col.$partial ? base + '/' + _col.$partial : base;
+          } else if(_col.$partial) {
+            return _col.$partial;
+          } else {
+            return _baseUrl;
+          }
         },
         /**
          * called by an unbound resource whenever save is called
          */
         createUrl: function(_res) {
-          if(_res.$context && _res.$context.$url) return _res.$context.$url;
+          if(_res.$context) return _res.$context.$url();
           return _baseUrl;
         },
         /**
          * called by a bound resource whenever save is called
          */
         updateUrl: function(_res) {
-          return _res.$url;
+          return this.resourceUrl(_res);
         },
         /**
          * called by a bound resource whenever destroy is called
          */
         destroyUrl: function(_res) {
-          return _res.$url;
-        },
-        /**
-         * called by resource to build a relation url
-         */
-        nestedUrl: function(_res, _alias) {
-          return _res.$url + '/' + _alias;
+          return this.resourceUrl(_res);
         }
       };
     }
@@ -238,12 +250,11 @@ angular.module('plRestmod', ['ng']).
 
         var urlBuilder = isObject(_url) ? _url : URL_BUILDER_FC.get(_url),
           ignored = {
-            $url: true,
+            $partial: true,
+            $context: true,
             $promise: true,
             $pending: true,
-            $error: true,
-            $context: true,
-            $relcache: true
+            $error: true
           },
           defaults = {},
           parsers = {},
@@ -308,14 +319,14 @@ angular.module('plRestmod', ['ng']).
          * Model constructor
          *
          * @param {object} _init Initial model data [optional]
-         * @param {string} _url Model url override [optional]
+         * @param {string} _url Model url override or partial url if context is given [optional]
          * @param {Model|Model.collection} _context Model context [internal]
          */
         var Model = function(_init, _url, _context) {
 
           this.$pending = false;
+          this.$partial = _url;
           this.$context = _context;
-          this.$url = _url;
 
           var key, value;
 
@@ -334,17 +345,16 @@ angular.module('plRestmod', ['ng']).
                 this[key] = _init[key];
               }
             }
-
-            if(!this.$url) this.$url = urlBuilder.resourceUrl(this);
           }
         };
 
         Model.prototype = extend({
           /**
-           * Return true if resource is bound to an url.
+           * Returns the url this object is bound to.
+           * @return {string} bound url.
            */
-          $isBound: function() {
-            return !!this.$url;
+          $url: function() {
+            return urlBuilder.resourceUrl(this);
           },
           /**
            * Allows calling custom hooks, usefull when implementing custom actions.
@@ -407,7 +417,6 @@ angular.module('plRestmod', ['ng']).
             callback('after_feed', this, _raw);
 
             // this.$original = original;
-            if(!this.$url) this.$url = urlBuilder.resourceUrl(this);
             return this;
           },
           /**
@@ -438,8 +447,8 @@ angular.module('plRestmod', ['ng']).
            */
           $fetch: function() {
             // verify that instance has a bound url
-            if(!this.$url) throw $restmodMinErr('notsup', 'Cannot fetch an unbound resource');
-            return this.$send({ method: 'GET', url: this.$url, feed: true }, function(_response) {
+            if(!this.$url()) throw $restmodMinErr('notsup', 'Cannot fetch an unbound resource');
+            return this.$send({ method: 'GET', url: this.$url(), feed: true }, function(_response) {
               var data = _response.data;
               if (!data || isArray(data)) {
                 throw $restmodMinErr('badresp', 'Expected object while feeding resource');
@@ -457,7 +466,7 @@ angular.module('plRestmod', ['ng']).
           $save: function() {
             var url;
 
-            if(this.$isBound()) {
+            if(this.$url()) {
               // If bound, update
 
               url = urlBuilder.updateUrl(this);
@@ -524,23 +533,23 @@ angular.module('plRestmod', ['ng']).
          *
          * @param {string} _url Bound url
          * @param {object} _params Fetch query parameteres
-         * @param {array} _raw Initial raw data
          */
-        Model.$collection = function(_url, _params, _raw) {
+        Model.$collection = function(_url, _params, _context) {
 
-          var col = extend([], Model.collectionProto);
+          var col = [];
 
-          col.$url = _url;
+          // Since Array cannot be extended, use method injection
+          // TODO: try to find a o(1) alternative...
+          for(var key in Model.collectionProto) {
+            if(Model.collectionProto.hasOwnProperty(key)) col[key] = Model.collectionProto[key];
+          }
+
+          col.$partial = _url;
+          col.$context = _context;
           col.$isCollection = true;
           col.$params = _params;
           col.$pending = false;
-
-          if(isArray(_raw)) {
-            forEach(_raw, col.$buildRaw, col);
-            col.$resolved = true;
-          } else {
-            col.$resolved = false;
-          }
+          col.$resolved = false;
 
           return col;
         };
@@ -560,7 +569,28 @@ angular.module('plRestmod', ['ng']).
             return this;
           },
           /**
-           * Begin a server request to populate the collection.
+           * Resets the collection's contents, marks collection as not $resolved
+           *
+           * @return {Model} self
+           */
+          $reset: function() {
+            this.$resolved = false;
+            this.length = 0;
+            return this;
+          },
+          /**
+           * Feeds raw collection data into the collection, marks collection as $resolved
+           *
+           * @param {array} _raw Data to add
+           * @return {Model} self
+           */
+          $feed: function(_raw) {
+            forEach(_raw, this.$buildRaw, this);
+            this.$resolved = true;
+            return this;
+          },
+          /**
+           * Begin a server request to populate collection.
            *
            * TODO: support POST data queries (complex queries scenarios)
            *
@@ -569,19 +599,18 @@ angular.module('plRestmod', ['ng']).
            */
           $fetch: function(_params) {
 
-            var params = _params ? extend({}, this.$params, _params) : this.$params;
+            var params = _params ? extend({}, this.$params || {}, _params) : this.$params;
 
-            send(this, { method: 'GET', url: this.$url, params: params }, function(_response) {
+            // TODO: check that collection is bound.
+            send(this, { method: 'GET', url: this.$url(), params: params }, function(_response) {
 
               var data = _response.data;
               if(!data || !isArray(data)) {
                 throw $restmodMinErr('badcfg', 'Error in resource {0} configuration. Expected response to be array');
               }
 
-              // reset collection data
-              this.length = 0;
-              forEach(data, this.$buildRaw, this);
-              this.$resolved = true;
+              // reset and feed retrieved data.
+              this.$reset().$feed(data);
 
               // execute callback
               callback('after_collection_fetch', this, _response);
@@ -598,9 +627,16 @@ angular.module('plRestmod', ['ng']).
         };
 
         /*
-         * The context prototype, shared by the Model type and collection instances.
+         * The scope prototype, shared by the Model type and collection instances.
          */
-        var contextProto = {
+        var scopeProto = {
+          /**
+           * Returns the url this collection is bound to.
+           * @return {string} bound url.
+           */
+          $url: function() {
+            return urlBuilder.collectionUrl(this);
+          },
           $build: function(_attr) {
             var obj = new Model(_attr, null, this);
             if(this.$isCollection) this.push(obj); // on collection, push new object
@@ -608,6 +644,10 @@ angular.module('plRestmod', ['ng']).
           },
           $buildRaw: function(_raw) {
             return this.$build(null).$feed(_raw);
+          },
+          $buildQuery: function(_params) {
+            _params = this.$params ? extend({}, this.$params, _params) : _params;
+            return Model.$collection(this.$partial, _params, this.$context);
           },
           $create: function(_attr, _success, _error) {
             return this.$build(_attr).$save(_success, _error);
@@ -623,18 +663,6 @@ angular.module('plRestmod', ['ng']).
 
             // dont use $build, find does not push into current collection.
             return (new Model(init, null, this)).$fetch(_success, _error);
-          },
-          $buildQuery: function(_params) {
-            var url, params;
-            if(this.$isCollection) {
-              url = this.$url;
-              params = extend({}, this.$params, _params);
-            } else {
-              url = urlBuilder.queryUrl();
-              if(!url) throw $restmodMinErr('notsup', 'Collection not supported by resource root');
-              params = _params;
-            }
-            return Model.$collection(url, params);
           },
           $search: function(_params, _success, _error) {
             return this.$buildQuery(_params).$fetch(_success, _error);
@@ -726,23 +754,13 @@ angular.module('plRestmod', ['ng']).
           /* Registers a model hasMany relation */
           hasMany: function(_name, _type, _opt) {
 
-            Model.prototype[_name] = function(_resetOrRaw) {
-              if(!this.$relcache) this.$relcache = {};
-              var rel = this.$relcache[_name];
-              if(!rel || _resetOrRaw) {
-                // TODO: is the call to nestedUrl enough to support a wide range of api scenarios?
-                var type = isString(_type) ? $injector.get(_type) : _type,
-                    url = _opt.url || urlBuilder.nestedUrl(this, _opt.alias || _name, type, _opt),
-                    raw = isArray(_resetOrRaw) ? _resetOrRaw : null;
-
-                this.$relcache[_name] = rel = type.$collection(url, {}, raw);
-              }
-              return rel;
+            defaults[_name] = function() {
+              if(typeof _type == 'string') _type = $injector.get(_type); // inject type (only the first time...)
+              return _type.$collection(_opt.alias || _name, null, this);
             };
 
-            // TODO: maybe registering as parser should be optional.
             parsers[_name] = function(_raw) {
-              this[_name](_raw);
+              this[_name].$feed(_raw);
             };
 
             return this;
@@ -750,22 +768,13 @@ angular.module('plRestmod', ['ng']).
           /* Registers a model hasOne relation */
           hasOne: function(_name, _type, _opt) {
 
-            Model.prototype[_name] = function(_resetOrRaw) {
-              if(!this.$relcache) this.$relcache = {};
-              var rel = this.$relcache[_name];
-              if(!rel || _resetOrRaw) {
-                var type = isString(_type) ? $injector.get(_type) : _type,
-                    url = _opt.url || urlBuilder.nestedUrl(this, _opt.alias || _name, type, _opt),
-                    raw = isObject(_resetOrRaw) ? _resetOrRaw : null;
-
-                this.$relcache[_name] = rel = type.$buildRaw(raw, url, this);
-              }
-              return rel;
+            defaults[_name] = function() {
+              if(typeof _type == 'string') _type = $injector.get(_type); // inject type (only the first time...)
+              return new _type(null, _opt.alias || _name, this); // return a prebound resource.
             };
 
-            // TODO: maybe registering as parser should be optional.
             parsers[_name] = function(_raw) {
-              this[_name](_raw);
+              this[_name].$feed(_raw);
             };
 
             return this;
@@ -785,7 +794,7 @@ angular.module('plRestmod', ['ng']).
               forEach(_name, function(_fun, _key) {
                 this.classDefine(_key, _fun);
               }, this);
-            } else contextProto[_name] = _fun;
+            } else scopeProto[_name] = _fun;
             return this;
           },
           /* Event listening and shorcuts */
@@ -811,8 +820,8 @@ angular.module('plRestmod', ['ng']).
         Model.$meta = arraySlice.call(arguments, 1);
         Builder.loadMeta(Model.$meta);
 
-        extend(Model, contextProto);
-        extend(Model.collectionProto, contextProto);
+        extend(Model, scopeProto);
+        extend(Model.collectionProto, scopeProto);
         return Model;
       };
     }]

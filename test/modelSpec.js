@@ -69,9 +69,9 @@ describe('Restmod model class:', function() {
 
     it('should bind to the new resource', function() {
       var book = Book.$create({name: 'Los piratas del Caribe'});
-      expect(book.$isBound()).toEqual(false);
+      expect(book.$url()).toEqual(null);
       $httpBackend.flush();
-      expect(book.$isBound()).toEqual(true);
+      expect(book.$url()).toEqual('/api/books/1');
     });
 
   });
