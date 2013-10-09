@@ -2,18 +2,22 @@
 
 describe('Restmod model instance:', function() {
 
-  var $httpBackend, Book, Chapter;
+  var $httpBackend, Book, Chapter, Page;
 
   beforeEach(module('plRestmod'));
 
   // generate a dummy module
   beforeEach(module(function($provide) {
     $provide.factory('Book', function($restmod) {
-      return $restmod('/api/books', { chapters: { hasMany: 'Chapter' } });
+      return $restmod('/api/books', { chapters: { hasMany: 'Chapter' }, pages: { hasMany: 'Page'} });
     });
 
     $provide.factory('Chapter', function($restmod) {
       return $restmod('/api/chapters');
+    });
+
+    $provide.factory('Page', function($restmod) {
+      return $restmod(null);
     });
   }));
 
@@ -22,6 +26,7 @@ describe('Restmod model instance:', function() {
     $httpBackend = $injector.get('$httpBackend');
     Book = $injector.get('Book');
     Chapter = $injector.get('Chapter');
+    Page = $injector.get('Page');
   }));
 
   describe('hasMany relation', function() {
@@ -50,6 +55,22 @@ describe('Restmod model instance:', function() {
         $httpBackend.flush();
         expect(book.chapters.length).toEqual(1);
         expect(book.chapters[0] instanceof Chapter).toBeTruthy();
+      });
+
+    });
+
+    describe('when retrieving inlined relation data with no private key', function() {
+
+      beforeEach(function() {
+        $httpBackend.when('GET', '/api/books/1').respond(200, '{"id": 1, "chapters": [{"id": 2}], "pages": [{"number": 1}]}');
+      });
+
+      it('should load inline data into relation', function() {
+        var book = Book.$find(1);
+        $httpBackend.flush();
+        expect(book.pages.length).toEqual(1);
+        expect(book.pages[0] instanceof Page).toBeTruthy();
+        expect(book.pages[0].$url()).toBeNull();
       });
 
     });

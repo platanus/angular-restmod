@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.2.1 - 2013-10-08
+ * @version v0.2.2 - 2013-10-08
  * @link https://github.com/angular-platanus/angular-restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -122,7 +122,7 @@ angular.module('plRestmod').
 
             if(_res.$context) {
               // if a context is provided attemp to use it with partial or pk
-              var base = _col.$context.$url();
+              var base = _res.$context.$url();
               if(!base) return null;
               return base + '/' + (partial || pk);
             }
