@@ -7,12 +7,15 @@
 angular.module('plRestmod').
   constant('RestUrlBuilderFactory', (function() {
 
-    var RestUrlBuilderFactory = function(_primary) {
+    var RestUrlBuilderFactory = function(_primary, _baseUrl) {
       this.primary = _primary;
+      this.baseUrl = _baseUrl;
     };
 
     RestUrlBuilderFactory.prototype = {
-      get: function(_baseUrl) {
+      get: function(_resUrl) {
+
+        if(this.baseUrl) _resUrl = this.baseUrl + '/' + _resUrl;
 
         var defaults = {
           primary: this.primary
@@ -41,7 +44,7 @@ angular.module('plRestmod').
               // if no partial is provided, attempt to use pk with base url
               pk = _res[defaults.primary];
               if(pk === null || pk === undefined) return null;
-              if(_baseUrl) return _baseUrl + '/' + pk; // this preceeds context
+              if(_resUrl) return _resUrl + '/' + pk; // this preceeds context
             }
 
             if(_res.$context) {
@@ -68,7 +71,7 @@ angular.module('plRestmod').
             } else if(_col.$partial) {
               return _col.$partial;
             } else {
-              return _baseUrl;
+              return _resUrl;
             }
           },
           /**
@@ -76,7 +79,7 @@ angular.module('plRestmod').
            */
           createUrl: function(_res) {
             if(_res.$context) return _res.$context.$url();
-            return _baseUrl;
+            return _resUrl;
           },
           /**
            * called by a bound resource whenever save is called
