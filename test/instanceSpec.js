@@ -59,10 +59,10 @@ describe('Restmod model instance:', function() {
 
     });
 
-    describe('when retrieving inlined relation data with null url', function() {
+    describe('when retrieving inlined relation data with no private key', function() {
 
       beforeEach(function() {
-        $httpBackend.when('GET', '/api/books/1').respond(200, '{"id": 1, "chapters": [{"id": 2}], "pages": [{"id": 1}]}');
+        $httpBackend.when('GET', '/api/books/1').respond(200, '{"id": 1, "chapters": [{"id": 2}], "pages": [{"number": 1}]}');
       });
 
       it('should load inline data into relation', function() {

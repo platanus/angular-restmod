@@ -49,7 +49,7 @@ angular.module('plRestmod').
 
             if(_res.$context) {
               // if a context is provided attemp to use it with partial or pk
-              var base = _col.$context.$url();
+              var base = _res.$context.$url();
               if(!base) return null;
               return base + '/' + (partial || pk);
             }
