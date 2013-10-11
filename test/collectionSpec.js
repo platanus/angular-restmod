@@ -27,7 +27,7 @@ describe('Restmod model collection:', function() {
     var query;
 
     beforeEach(function() {
-      query = Book.$collection(null, { keywords: 'pirate' });
+      query = Book.$collection({ keywords: 'pirate' });
     });
 
     it('should retrieve a collection of items of same type', function() {

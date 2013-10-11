@@ -7,32 +7,24 @@
 angular.module('plRestmod').
   constant('RestUrlBuilderFactory', (function() {
 
-    var RestUrlBuilderFactory = function(_primary, _baseUrl) {
-      this.primary = _primary;
-      this.baseUrl = _baseUrl;
-    };
+    return function(_primary, _baseUrl) {
 
-    RestUrlBuilderFactory.prototype = {
-      get: function(_resUrl) {
+      return function(_resUrl) {
 
-        if(this.baseUrl) _resUrl = this.baseUrl + '/' + _resUrl;
-
-        var defaults = {
-          primary: this.primary
-        };
+        if(_baseUrl) _resUrl = _baseUrl + '/' + _resUrl;
 
         return {
           /**
            * called by builder when a primary: true attribute is found.
            */
           setPrimaryKey: function(_key) {
-            defaults.primary = _key;
+            _primary = _key;
           },
           /**
            * called by collection whenever implicit key is used
            */
           inferKey: function(/* _context */) {
-            return defaults.primary;
+            return _primary;
           },
           /**
            * Called by resource to resolve the resource's url
@@ -42,7 +34,7 @@ angular.module('plRestmod').
 
             if(!partial) {
               // if no partial is provided, attempt to use pk with base url
-              pk = _res[defaults.primary];
+              pk = _res[_primary];
               if(pk === null || pk === undefined) return null;
               if(_resUrl) return _resUrl + '/' + pk; // this preceeds context
             }
@@ -94,8 +86,6 @@ angular.module('plRestmod').
             return this.resourceUrl(_res);
           }
         };
-      }
+      };
     };
-
-    return RestUrlBuilderFactory;
   })());
