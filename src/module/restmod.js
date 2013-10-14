@@ -17,7 +17,7 @@ angular.module('plRestmod')
     snakecase: function(_string, _sep) {
       if (typeof _string !== 'string') return _string;
       return _string.replace(/[A-Z]/g, function (match, index) {
-        return index === 0 ? match : _sep + match.toLowerCase();
+        return index === 0 ? match : (_sep || '_') + match.toLowerCase();
       });
     }
   })
@@ -53,13 +53,13 @@ angular.module('plRestmod')
         isObject = angular.isObject,
         isArray = angular.isArray,
         isString = angular.isString,
-        arraySlice = Array.prototype.slice,
-        camelcase = Utils.camelcase,
-        snakecase = Utils.snakecase;
+        arraySlice = Array.prototype.slice;
 
     /* Module Globals */
     var URL_BUILDER_FC, // The url builder factory.
-        MODEL_BUILDER_FC; // The model builder factory.
+        MODEL_BUILDER_FC, // The model builder factory.
+        DEF_NAME_DECODER = Utils.camelcase,
+        DEF_NAME_ENCODER = Utils.snakecase;
 
     return {
 
@@ -74,6 +74,30 @@ angular.module('plRestmod')
        */
       setUrlBuilder: function(_urlBuilderFactory) {
         URL_BUILDER_FC = _urlBuilderFactory;
+        return this;
+      },
+      /**
+       * Changes the way restmod renames attributes every time a server resource is serialized.
+       *
+       * This is intended to be used as a way of keeping property naming style consistent accross
+       * languajes. By default, property naming in js should use camelcase and property naming
+       * in JSON api should use snake case with underscores.
+       *
+       * In addition to support true|false to disable|enable renaming, this method accepts
+       * an object with custom decode|encode implementations.
+       *
+       * @param {boolean|object} _value
+       */
+      setAttributeRenaming: function(_value) {
+        if(!_value) {
+          DEF_NAME_DECODER = DEF_NAME_ENCODER = null;
+        } else if(_value === true) {
+          DEF_NAME_DECODER = Utils.camelcase;
+          DEF_NAME_ENCODER = Utils.snakecase;
+        } else {
+          DEF_NAME_DECODER = _value.decode;
+          DEF_NAME_ENCODER = _value.encode;
+        }
         return this;
       },
       /**
@@ -342,9 +366,6 @@ angular.module('plRestmod')
               return this;
             }
 
-            // IDEA: same as fetch, does not reset array
-            // $fetchMore: function(_params, _success, _error) {
-            // }
 
             // IDEA: $push, $remove, etc
           });
@@ -411,15 +432,15 @@ angular.module('plRestmod')
 
               // TODO: does undefined & 1 evaluates to 0 in every browser?
               // TODO: var original = {}; // enable change queries
-              var key, camelKey, decoder, value;
+              var key, decodedName, decoder, value;
               for(key in _raw) {
                 if(_raw.hasOwnProperty(key) && !((masks[key] || 0) & _mask)) {
-                  camelKey = camelcase(key);
-                  decoder = decoders[camelKey];
+                  decodedName = DEF_NAME_DECODER ? DEF_NAME_DECODER(key) : key;
+                  decoder = decoders[decodedName];
                   value = decoder ? decoder.call(this, _raw[key]) : _raw[key];
 
-                  // TODO: original[camelKey] = value;
-                  if(value !== undefined) this[camelKey] = value;
+                  // TODO: original[decodedName] = value;
+                  if(value !== undefined) this[decodedName] = value;
                 }
               }
 
@@ -437,11 +458,12 @@ angular.module('plRestmod')
             $encode: function(_mask) {
               if(!_mask) _mask = SyncMask.ENCODE_USER;
 
-              var key, encoder, raw = {};
+              var key, encodedName, encoder, raw = {};
               for(key in this) {
                 if(this.hasOwnProperty(key) && !((masks[key] || 0) & _mask)) {
+                  encodedName = DEF_NAME_ENCODER ? DEF_NAME_ENCODER(key) : key;
                   encoder = encoders[key];
-                  raw[snakecase(key, '_')] = encoder ? encoder.call(this, this[key]) : this[key];
+                  raw[encodedName] = encoder ? encoder.call(this, this[key]) : this[key];
                 }
               }
 
