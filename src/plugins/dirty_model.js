@@ -1,9 +1,8 @@
 angular.module('plRestmod').factory('DirtyModel', ['$restmod', function($restmod) {
   'use strict';
 
-	return $restmod.abstract(function() {
-		this
-      .afterFeed(function(_original) {
+  return $restmod.abstract(function() {
+    this.afterFeed(function(_original) {
         // store original information in a model's special property
         this.$original = _original;
       })
