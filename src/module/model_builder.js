@@ -61,7 +61,7 @@ angular.module('plRestmod')
       var mappings = {
         primary: ['attrPrimary'],
         init: ['attrDefault'],
-        ignore: ['attrIgnore'],
+        ignore: ['attrIgnored'],
         decode: ['attrDecoder', 'param', 'chain'],
         encode: ['attrEncoder', 'param', 'chain'],
         type: ['attrSerializer'],
