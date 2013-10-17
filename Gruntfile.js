@@ -14,28 +14,29 @@ module.exports = function(grunt) {
       ' * @license MIT License, http://www.opensource.org/licenses/MIT\n' +
       ' */\n'
     },
-    dirs: {
-      dest: 'dist'
+    bower: {
+      install: {}
     },
     concat: {
       options: {
         banner: '<%= meta.banner %>'
       },
       dist: {
-        src: ['src/module.js', 'src/module/*.js'],
-        dest: '<%= dirs.dest %>/<%= pkg.name %>.js'
+        files: {
+          'dist/<%= pkg.name %>.js': ['src/module.js', 'src/module/*.js'],
+          'dist/plugins/dirty_model.js': 'src/plugins/dirty_model.js'
+        }
       }
-    },
-    bower: {
-      install: {}
     },
     uglify: {
       options: {
         banner: '<%= meta.banner %>'
       },
       dist: {
-        src: ['<%= concat.dist.dest %>'],
-        dest: '<%= dirs.dest %>/<%= pkg.name %>.min.js'
+        files: {
+          'dist/<%= pkg.name %>.min.js': 'dist/<%= pkg.name %>.js',
+          'dist/plugins/dirty_model.min.js': 'dist/plugins/dirty_model.js'
+        }
       }
     },
     jshint: {
