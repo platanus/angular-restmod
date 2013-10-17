@@ -202,13 +202,13 @@ angular.module('plRestmod')
         attrIgnored: function(_attr, _mask, _reset) {
 
           if(_mask === true) {
-            _modelSpec.mask[_attr] = SyncMask.ALL;
+            _modelSpec.masks[_attr] = SyncMask.ALL;
           } else if(_mask === false) {
-            delete _modelSpec.mask[_attr];
+            delete _modelSpec.masks[_attr];
           } else if(_reset) {
-            _modelSpec.mask[_attr] = _mask;
+            _modelSpec.masks[_attr] = _mask;
           } else {
-            _modelSpec.mask[_attr] |= _mask;
+            _modelSpec.masks[_attr] |= _mask;
           }
 
           return this;
