@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Restmod model instance:', function() {
+describe('Restmod model behavior modifiers:', function() {
 
   var $httpBackend, Book, Chapter, Page;
 
@@ -9,7 +9,16 @@ describe('Restmod model instance:', function() {
   // generate a dummy module
   beforeEach(module(function($provide) {
     $provide.factory('Book', function($restmod) {
-      return $restmod('/api/books', { chapters: { hasMany: 'Chapter' }, pages: { hasMany: 'Page'} });
+      return $restmod('/api/books', {
+        createdAt: {
+          init: function() { return new Date(); },
+          decode: function(_v) { return new Date(); },
+          encode: 'date'
+        },
+        pageCount: { init: 10 },
+        chapters: { hasMany: 'Chapter' },
+        pages: { hasMany: 'Page'}
+      });
     });
 
     $provide.factory('Chapter', function($restmod) {
@@ -28,6 +37,38 @@ describe('Restmod model instance:', function() {
     Chapter = $injector.get('Chapter');
     Page = $injector.get('Page');
   }));
+
+  describe('attribute initializer', function() {
+    it('should assign a initial value to an attribute', function() {
+      var book = Book.$build();
+      expect(book.pageCount).toEqual(10);
+    });
+
+    it('should dynamically assign a initial value to an attribute', function() {
+      var book = Book.$build();
+      expect(book.createdAt instanceof Date).toBeTruthy();
+    });
+  });
+
+  describe('decoder', function() {
+      beforeEach(function() {
+        $httpBackend.when('GET', '/api/books/1').respond(200, '{"id": 1, "created_at": "2007-10-10"}');
+      });
+
+      it('should modify de incomming value for an attribute', function() {
+        var book = Book.$find(1);
+        $httpBackend.flush();
+        expect(book.createdAt instanceof Date).toBeTruthy();
+      });
+  });
+
+  describe('serializer', function() {
+
+  });
+
+  describe('mask', function() {
+
+  });
 
   describe('hasMany relation', function() {
 
