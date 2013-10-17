@@ -48,11 +48,8 @@ angular.module('plRestmod')
     // Cache some angular stuff
     var forEach = angular.forEach,
         extend = angular.extend,
-        noop = angular.noop,
-        isFunction = angular.isFunction,
         isObject = angular.isObject,
         isArray = angular.isArray,
-        isString = angular.isString,
         arraySlice = Array.prototype.slice;
 
     /* Module Globals */
@@ -133,14 +130,14 @@ angular.module('plRestmod')
         function loadMeta(_meta, _builder) {
           if(_meta.$meta) {
             loadMeta(_meta.$meta, _builder);
-          } else if(isString(_meta, _builder)) {
+          } else if(typeof _meta === 'string') {
             loadMeta($injector.get(_meta), _builder);
-          } else if(isArray(_meta, _builder)) {
+          } else if(isArray(_meta)) {
             var i=0, meta;
             while((meta = _meta[i++])) {
               loadMeta(meta, _builder);
             }
-          } else if(isFunction(_meta)) {
+          } else if(typeof _meta === 'function') {
             _meta.call(_builder, _builder);
           } else _builder.describe(_meta);
         }
@@ -194,7 +191,7 @@ angular.module('plRestmod')
 
               _target.$pending = false;
 
-              (_success||noop).call(_target, _response);
+              if(_success) _success.call(_target, _response);
 
               return _target;
 
@@ -203,7 +200,7 @@ angular.module('plRestmod')
               _target.$pending = false;
               _target.$error = true;
 
-              (_error||noop).call(_target, _response);
+              if(_error) _error.call(_target, _response);
 
               return $q.reject(_target);
             });
@@ -596,7 +593,7 @@ angular.module('plRestmod')
          * @return {object} The abstract model
          */
         restmod.abstract = function(/* mixins */) {
-          return { $isAbstract: true, $meta: arguments };
+          return { $isAbstract: true, $meta: arraySlice.call(arguments, 0) };
         };
 
         return restmod;
