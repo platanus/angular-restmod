@@ -1,5 +1,6 @@
+'use strict';
+
 angular.module('plRestmod').factory('DirtyModel', ['$restmod', function($restmod) {
-  'use strict';
 
   return $restmod.abstract(function() {
     this.afterFeed(function(_original) {

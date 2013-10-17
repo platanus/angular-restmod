@@ -1,3 +1,5 @@
+'use strict';
+
  /*
   * Model builder interface definition
   *
@@ -7,7 +9,6 @@
 
 angular.module('plRestmod')
   .factory('ModelBuilder', ['$injector', '$parse', '$filter', 'Utils', 'SyncMask', function($injector, $parse, $filter, Utils, SyncMask) {
-    'use strict';
 
     // Preload some angular stuff
 
