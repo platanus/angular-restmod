@@ -447,21 +447,20 @@ angular.module('plRestmod')
 
               // TODO: does undefined & 1 evaluates to 0 in every browser?
               // TODO: var original = {}; // enable change queries
-              var key, decodedName, decoder, value;
+              var key, decodedName, decoder, value, original = {};
               for(key in _raw) {
                 if(_raw.hasOwnProperty(key) && !((masks[key] || 0) & _mask)) {
                   decodedName = DEF_NAME_DECODER ? DEF_NAME_DECODER(key) : key;
                   decoder = decoders[decodedName];
                   value = decoder ? decoder.call(this, _raw[key]) : _raw[key];
 
-                  // TODO: original[decodedName] = value;
-                  if(value !== undefined) this[decodedName] = value;
+                  if(value !== undefined) {
+                    original[decodedName] = this[decodedName] = value;
+                  }
                 }
               }
 
-              callback('after_feed', this, _raw);
-
-              // TODO: this.$original = original;
+              callback('after_feed', this, original, _raw);
               return this;
             },
             /**
