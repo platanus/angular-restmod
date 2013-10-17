@@ -6,6 +6,21 @@ describe('Restmod builder:', function() {
 
   describe('when configuring', function() {
 
+    describe('pushModelBase', function() {
+
+      beforeEach(module(function($restmodProvider) {
+        $restmodProvider.pushModelBase({
+          createdAt: { init: 10 }
+        });
+      }));
+
+      if('should modify the mixin chain of every model', inject(function($restmod) {
+        var Book = $restmod('/api/books'),
+          book = Book.$build({ title: 'W' });
+        expect(book.createdAt).toBeDefined();
+      }));
+    });
+
     describe('setAttributeRenaming', function() {
 
       describe('when false is passed', function() {

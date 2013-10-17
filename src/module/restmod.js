@@ -59,10 +59,25 @@ angular.module('plRestmod')
     var URL_BUILDER_FC, // The url builder factory.
         MODEL_BUILDER_FC, // The model builder factory.
         DEF_NAME_DECODER = Utils.camelcase,
-        DEF_NAME_ENCODER = Utils.snakecase;
+        DEF_NAME_ENCODER = Utils.snakecase,
+        BASE_CHAIN = [];
 
     return {
-
+      /**
+       * Adds mixins to the base model chain.
+       *
+       * Non abstract models should NOT be added to this chain.
+       *
+       * Base model chain is by default empty, all mixins added to the chain are
+       * prepended to every generated model.
+       *
+       * $provider.pushModelBase('ChangeModel', 'LazyRelations', 'ThrottledModel')
+       *
+       */
+      pushModelBase: function(/* mixins */) {
+        Array.prototype.push.apply(BASE_CHAIN, arguments);
+        return this;
+      },
       /**
        * Change the default url builder.
        *
@@ -130,7 +145,7 @@ angular.module('plRestmod')
           } else _builder.describe(_meta);
         }
 
-        return function(_url/* , _meta */) {
+        var restmod = function(_url/* , _meta */) {
 
           var spec = {},
               urlBuilder = spec.urlBuilder = isObject(_url) ? _url : URL_BUILDER_FC(_url),
@@ -557,20 +572,35 @@ angular.module('plRestmod')
 
           /**
            * Model customization phase:
-           * * Load metadata from arguments.
-           * * Generate a new model builder for current model spec.
-           * * Process metadata recursively using the builder.
+           * * Generate a new model builder for current model spec
+           * * Process metadata from base chain
+           * * Process metadata from arguments
            */
 
+          Model.$isAbstract = false;
           Model.$meta = arraySlice.call(arguments, 1);
 
-          if(Model.$meta.length > 0) {
-            loadMeta(Model.$meta, MODEL_BUILDER_FC(spec));
-            // TODO postprocessing of collection prototype.
-          }
+          var builder = MODEL_BUILDER_FC(spec);
+          loadMeta(BASE_CHAIN, builder);
+          loadMeta(Model.$meta, builder);
+
+          // TODO postprocessing of collection prototype.
 
           return Model;
         };
+
+        /**
+         * Returns an abstract model.
+         *
+         * An abstract model is just a metadata container that can be included in a mixin chain.
+         *
+         * @return {object} The abstract model
+         */
+        restmod.abstract = function(/* mixins */) {
+          return { $isAbstract: true, $meta: arguments };
+        };
+
+        return restmod;
       }]
     };
   }]);
