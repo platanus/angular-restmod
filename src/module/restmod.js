@@ -250,8 +250,16 @@ angular.module('plRestmod')
             $url: function() {
               return urlBuilder.collectionUrl(this);
             },
-            $build: function(_attr) {
-              var obj = new Model(_attr, null, this);
+            $build: function(_key) {
+              var init, keyName;
+              if(!isObject(_key)) {
+                init = {};
+                keyName = urlBuilder.inferKey(this);
+                if(!keyName) throw $restmodMinErr('notsup', 'Cannot infer build key, use explicit mode');
+                init[keyName] = _key;
+              } else init = _key;
+
+              var obj = new Model(init, null, this);
               if(this.$isCollection) this.push(obj); // on collection, push new object
               return obj;
             },
