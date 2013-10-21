@@ -245,10 +245,12 @@ angular.module('plRestmod')
           spec.classProto = extend(Model, {
             /**
              * Returns the url this collection is bound to.
+             *
+             * @param {object} _opt Options to be passed to the url builder.
              * @return {string} bound url.
              */
-            $url: function() {
-              return urlBuilder.collectionUrl(this);
+            $url: function(_opt) {
+              return urlBuilder.collectionUrl(this, _opt);
             },
             $build: function(_key) {
               var init, keyName;
@@ -397,10 +399,12 @@ angular.module('plRestmod')
           spec.objectProto = Model.prototype = {
             /**
              * Returns the url this object is bound to.
+             *
+             * @param {object} _opt Options to be passed to the url builder.
              * @return {string} bound url.
              */
-            $url: function() {
-              return urlBuilder.resourceUrl(this);
+            $url: function(_opt) {
+              return urlBuilder.resourceUrl(this, _opt);
             },
             /**
              * Allows calling custom hooks, usefull when implementing custom actions.
