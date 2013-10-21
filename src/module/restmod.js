@@ -70,6 +70,15 @@ angular.module('plRestmod')
        *
        * $provider.pushModelBase('ChangeModel', 'LazyRelations', 'ThrottledModel')
        *
+       * // IDEA: replace configuration methods by model builder methods.
+       * pushModelBase(function() {
+       *   this.setNameDecoder();
+       *   this.setNameEncoder();
+       *   this.setHttpOptions();
+       *   this.setUrlOptions(); // shortcut for set builder factory using rest factory
+       *   this.setUrlBuilderFactory(urlBuilderFactoryFactory('.json'));
+       * });
+       *
        */
       pushModelBase: function(/* mixins */) {
         Array.prototype.push.apply(BASE_CHAIN, arguments);
@@ -124,7 +133,7 @@ angular.module('plRestmod')
       $get: ['$http', '$q', '$injector', function($http, $q, $injector) {
 
         // If no url builder was provided at configuration, inject the default factory
-        if(!URL_BUILDER_FC) URL_BUILDER_FC = $injector.get('RestUrlBuilderFactory')('id');
+        if(!URL_BUILDER_FC) URL_BUILDER_FC = $injector.get('restUrlBuilderFactory')();
         if(!MODEL_BUILDER_FC) MODEL_BUILDER_FC = $injector.get('ModelBuilder');
 
         function loadMeta(_meta, _builder) {
