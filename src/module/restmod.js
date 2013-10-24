@@ -53,11 +53,7 @@ angular.module('plRestmod')
         arraySlice = Array.prototype.slice;
 
     /* Module Globals */
-    var URL_BUILDER_FC, // The url builder factory.
-        MODEL_BUILDER_FC, // The model builder factory.
-        DEF_NAME_DECODER = Utils.camelcase,
-        DEF_NAME_ENCODER = Utils.snakecase,
-        BASE_CHAIN = [];
+    var BASE_CHAIN = [];
 
     return {
       /**
@@ -85,43 +81,6 @@ angular.module('plRestmod')
         return this;
       },
       /**
-       * Change the default url builder.
-       *
-       * The provided factory must implement a `get` method
-       * that receives the resource baseUrl and returns an
-       * url builder.
-       *
-       * TODO: describe url builder interface
-       */
-      setUrlBuilder: function(_urlBuilderFactory) {
-        URL_BUILDER_FC = _urlBuilderFactory;
-        return this;
-      },
-      /**
-       * Changes the way restmod renames attributes every time a server resource is serialized.
-       *
-       * This is intended to be used as a way of keeping property naming style consistent accross
-       * languajes. By default, property naming in js should use camelcase and property naming
-       * in JSON api should use snake case with underscores.
-       *
-       * In addition to support true|false to disable|enable renaming, this method accepts
-       * an object with custom decode|encode implementations.
-       *
-       * @param {boolean|object} _value
-       */
-      setAttributeRenaming: function(_value) {
-        if(!_value) {
-          DEF_NAME_DECODER = DEF_NAME_ENCODER = null;
-        } else if(_value === true) {
-          DEF_NAME_DECODER = Utils.camelcase;
-          DEF_NAME_ENCODER = Utils.snakecase;
-        } else {
-          DEF_NAME_DECODER = _value.decode;
-          DEF_NAME_ENCODER = _value.encode;
-        }
-        return this;
-      },
-      /**
        * The factory function, returns a new model builder factory.
        *
        * The model builder factory can be used to generate new model builder instances
@@ -131,10 +90,6 @@ angular.module('plRestmod')
        * The `_url` parameter also accepts an url builder implementation.
        */
       $get: ['$http', '$q', '$injector', function($http, $q, $injector) {
-
-        // If no url builder was provided at configuration, inject the default factory
-        if(!URL_BUILDER_FC) URL_BUILDER_FC = $injector.get('restUrlBuilderFactory')();
-        if(!MODEL_BUILDER_FC) MODEL_BUILDER_FC = $injector.get('ModelBuilder');
 
         function loadMeta(_meta, _builder) {
           if(_meta.$meta) {
@@ -147,17 +102,17 @@ angular.module('plRestmod')
               loadMeta(meta, _builder);
             }
           } else if(typeof _meta === 'function') {
-            _meta.call(_builder, _builder);
+            // TODO: maybe invoke should only be called for BASE_CHAIN functions
+            $injector.invoke(_meta, _builder, { $builder: _builder });
           } else _builder.describe(_meta);
         }
 
-        var restmod = function(_url/* , _meta */) {
+        var restmod = function(_urlParams/* , _meta */) {
 
           var spec = {
                 nameDecoder: Utils.camelcase,
                 nameEncoder: Utils.snakecase
               },
-              urlBuilder = spec.urlBuilder = isObject(_url) ? _url : URL_BUILDER_FC(_url),
               masks = spec.masks = {
                 $partial: SyncMask.ALL,
                 $context: SyncMask.ALL,
@@ -169,7 +124,7 @@ angular.module('plRestmod')
               decoders = spec.decoders = {},
               encoders = spec.encoders = {},
               callbacks = spec.callbacks = {},
-              nameEncoder, nameDecoder;
+              urlBuilder, nameEncoder, nameDecoder;
 
           // runs all callbacks associated with a given hook.
           function callback(_hook, _ctx /*, args */) {
@@ -601,11 +556,12 @@ angular.module('plRestmod')
           Model.$isAbstract = false;
           Model.$meta = arraySlice.call(arguments, 1);
 
-          var builder = MODEL_BUILDER_FC(spec);
+          var builder = $injector.get('ModelBuilder')(spec);
           loadMeta(BASE_CHAIN, builder);
           loadMeta(Model.$meta, builder);
 
           // Retrieve spec options
+          urlBuilder = (spec.urlBuilder || $injector.get('restUrlBuilderFactory')())(_urlParams);
           nameDecoder = spec.nameDecoder;
           nameEncoder = spec.nameEncoder;
 

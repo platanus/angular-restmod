@@ -4,8 +4,8 @@
  * Simple RESTful URL Builder implementation.
  */
 
-angular.module('plRestmod').
-  constant('restUrlBuilderFactory', (function() {
+angular.module('plRestmod')
+  .constant('restUrlBuilderFactory', (function() {
 
     // Url join function
     function joinUrl(_base/*, parts */) {
@@ -19,11 +19,11 @@ angular.module('plRestmod').
     return function(_options) {
 
       _options = _options || {};
+      var primary = _options.primary || 'id';
 
       return function(_resUrl) {
 
         if(_options.baseUrl) _resUrl = joinUrl(_options.baseUrl, _resUrl);
-        var primary = _options.primary || 'id';
 
         // gives the finishing touches to an url before returning
         function prepareUrl(_url, _opt) {
@@ -38,12 +38,6 @@ angular.module('plRestmod').
         }
 
         return {
-          /**
-           * called by builder when a primary: true attribute is found.
-           */
-          setPrimaryKey: function(_key) {
-            primary = _key;
-          },
           /**
            * called by collection whenever implicit key is used
            */
@@ -111,4 +105,25 @@ angular.module('plRestmod').
         };
       };
     };
-  })());
+  })())
+  .config(['$restmodProvider', function($restmodProvider) {
+    $restmodProvider.pushModelBase(['$injector', function($injector) {
+      /**
+       * The setRestUrlOptions extensions allows to easily setup a rest url builder factory
+       * for a given model chain.
+       *
+       * TODO: improve inheritance support.
+       *
+       * Available `options` are:
+       * * primary: the selected primary key, defaults to 'id'.
+       * * baseUrl: the api base url, this will be prepended to every url path.
+       * * extension: a extension to append to every generated url.
+       *
+       * @param  {object} _options Options
+       * @return {ModelBuilder} self
+       */
+      this.extend('setRestUrlOptions', function(_options) {
+        return this.setUrlBuilderFactory($injector.get('restUrlBuilderFactory')(_options));
+      });
+    }]);
+  }]);

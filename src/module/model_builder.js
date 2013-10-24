@@ -60,7 +60,6 @@ angular.module('plRestmod')
 
       // Available mappings.
       var mappings = {
-        primary: ['attrPrimary'],
         init: ['attrDefault'],
         ignore: ['attrIgnored'],
         decode: ['attrDecoder', 'param', 'chain'],
@@ -71,6 +70,24 @@ angular.module('plRestmod')
       };
 
       return {
+        setHttpOptions: function(_options) {
+          // TODO.
+        },
+        /**
+         * Change the default url builder.
+         *
+         * The provided factory will be called to provide an url builder
+         * for  implement a `get` method that receives the resource baseUrl
+         * and returns an url builder.
+         *
+         * TODO: describe url builder interface
+         *
+         * @param {function} _factory Url builder factory function.
+         */
+        setUrlBuilderFactory: function(_factory) {
+          _modelSpec.urlBuilderFactory = _factory;
+          return this;
+        },
         /**
          * Changes the way restmod renames attributes every time a server resource is decoded.
          *
@@ -203,18 +220,6 @@ angular.module('plRestmod')
 
         /// Attribute behavior
 
-        /**
-         * Sets attribute as primary key.
-         *
-         * Requires to be supported by the model's url builder.
-         *
-         * @param {string} _attr Attribute name
-         * @return {object} self
-         */
-        attrPrimary: function(_attr, _isPrimary) {
-          if(_isPrimary) _modelSpec.urlBuilder.addPrimaryKey(_attr);
-          return this;
-        },
         /**
          * Sets the default value for an attribute.
          *
