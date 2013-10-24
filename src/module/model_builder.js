@@ -72,6 +72,48 @@ angular.module('plRestmod')
 
       return {
         /**
+         * Changes the way restmod renames attributes every time a server resource is decoded.
+         *
+         * This is intended to be used as a way of keeping property naming style consistent accross
+         * languajes. By default, property naming in js should use camelcase and property naming
+         * in JSON api should use snake case with underscores.
+         *
+         * If `false` is given, then renaming is disabled
+         *
+         * @param {function|false} _value
+         * @return {object} self
+         */
+        setNameDecoder: function(_decoder) {
+          _modelSpec.nameDecoder = _decoder;
+          return this;
+        },
+        /**
+         * Changes the way restmod renames attributes every time a local resource is encoded to be sent.
+         *
+         * This is intended to be used as a way of keeping property naming style consistent accross
+         * languajes. By default, property naming in js should use camelcase and property naming
+         * in JSON api should use snake case with underscores.
+         *
+         * If `false` is given, then renaming is disabled
+         *
+         * @param {function|false} _value
+         * @return {object} self
+         */
+        setNameEncoder: function(_encoder) {
+          _modelSpec.nameEncoder = _encoder;
+          return this;
+        },
+        /**
+         * Disables renaming alltogether
+         *
+         * @return {object} self
+         */
+        disableRenaming: function() {
+          return this
+            .setNameDecoder(false)
+            .setNameEncoder(false);
+        },
+        /**
          * Extends the builder DSL
          *
          * Adds a function to de builder and alternatively maps the function to an

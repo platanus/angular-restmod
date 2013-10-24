@@ -153,7 +153,10 @@ angular.module('plRestmod')
 
         var restmod = function(_url/* , _meta */) {
 
-          var spec = {},
+          var spec = {
+                nameDecoder: Utils.camelcase,
+                nameEncoder: Utils.snakecase
+              },
               urlBuilder = spec.urlBuilder = isObject(_url) ? _url : URL_BUILDER_FC(_url),
               masks = spec.masks = {
                 $partial: SyncMask.ALL,
@@ -165,7 +168,8 @@ angular.module('plRestmod')
               defaults = spec.defaults = [],
               decoders = spec.decoders = {},
               encoders = spec.encoders = {},
-              callbacks = spec.callbacks = {};
+              callbacks = spec.callbacks = {},
+              nameEncoder, nameDecoder;
 
           // runs all callbacks associated with a given hook.
           function callback(_hook, _ctx /*, args */) {
@@ -468,7 +472,7 @@ angular.module('plRestmod')
               var key, decodedName, decoder, value, original = {};
               for(key in _raw) {
                 if(_raw.hasOwnProperty(key) && !((masks[key] || 0) & _mask)) {
-                  decodedName = DEF_NAME_DECODER ? DEF_NAME_DECODER(key) : key;
+                  decodedName = nameDecoder ? nameDecoder(key) : key;
                   decoder = decoders[decodedName];
                   value = decoder ? decoder.call(this, _raw[key]) : _raw[key];
 
@@ -493,7 +497,7 @@ angular.module('plRestmod')
               var key, encodedName, encoder, raw = {};
               for(key in this) {
                 if(this.hasOwnProperty(key) && !((masks[key] || 0) & _mask)) {
-                  encodedName = DEF_NAME_ENCODER ? DEF_NAME_ENCODER(key) : key;
+                  encodedName = nameEncoder ? nameEncoder(key) : key;
                   encoder = encoders[key];
                   raw[encodedName] = encoder ? encoder.call(this, this[key]) : this[key];
                 }
@@ -600,6 +604,10 @@ angular.module('plRestmod')
           var builder = MODEL_BUILDER_FC(spec);
           loadMeta(BASE_CHAIN, builder);
           loadMeta(Model.$meta, builder);
+
+          // Retrieve spec options
+          nameDecoder = spec.nameDecoder;
+          nameEncoder = spec.nameEncoder;
 
           // TODO postprocessing of collection prototype.
 
