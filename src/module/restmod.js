@@ -37,8 +37,7 @@ var bind = angular.bind,
 
 angular.module('plRestmod').provider('$restmod', function() {
 
-  /* Module Globals */
-  var BASE_CHAIN = [];
+  var BASE_CHAIN = []; // The base mixin chain
 
   return {
     /**
@@ -57,33 +56,18 @@ angular.module('plRestmod').provider('$restmod', function() {
       return this;
     },
     /**
-     * The factory function, returns a new model builder factory.
+     * The factory function, returns a new model type factory.
      *
-     * The model builder factory can be used to generate new model builder instances
-     * given an url and a series of metadata objects, once generated, the model builder
-     * can be used generate a new model.
+     * The model factory generates new model types using a rich building DSL.
      *
-     * The `_url` parameter also accepts an url builder implementation.
+     * The simplest usage of the model factory would be:
+     *
+     *    var Bike = $restmod('/api/bikes');
+     *
      */
     $get: ['$http', '$q', '$injector', '$parse', '$filter', function($http, $q, $injector, $parse, $filter) {
 
-      function loadMeta(_meta, _builder) {
-        if(_meta.$meta) {
-          loadMeta(_meta.$meta, _builder);
-        } else if(typeof _meta === 'string') {
-          loadMeta($injector.get(_meta), _builder);
-        } else if(isArray(_meta)) {
-          var i=0, meta;
-          while((meta = _meta[i++])) {
-            loadMeta(meta, _builder);
-          }
-        } else if(typeof _meta === 'function') {
-          // TODO: maybe invoke should only be called for BASE_CHAIN functions
-          $injector.invoke(_meta, _builder, { $builder: _builder });
-        } else _builder.describe(_meta);
-      }
-
-      var restmod = function(_urlParams/* , _meta */) {
+      var restmod = function(_urlParams/* , _mix */) {
 
         var masks = {
             $partial: SyncMask.ALL,
@@ -147,9 +131,7 @@ angular.module('plRestmod').provider('$restmod', function() {
         }
 
         /**
-         * The Model Type definition
-         *
-         * TODO: Describe model type
+         * Base Model Type generation
          */
 
         /**
@@ -182,163 +164,214 @@ angular.module('plRestmod').provider('$restmod', function() {
           }
         };
 
-        extend(Model, {
-          /**
-           * The Model mixin chain.
-           * @type {array}
-           */
-          $meta: arraySlice.call(arguments, 1),
-          /**
-           * Returns the url this collection is bound to.
-           *
-           * @param {object} _opt Options to be passed to the url builder.
-           * @return {string} bound url.
-           */
-          $url: function(_opt) {
-            return urlBuilder.collectionUrl(this, _opt);
-          },
-          $build: function(_key) {
-            var init, keyName;
-            if(!isObject(_key)) {
-              init = {};
-              keyName = urlBuilder.inferKey(this);
-              if(!keyName) throw $restmodMinErr('notsup', 'Cannot infer build key, use explicit mode');
-              init[keyName] = _key;
-            } else init = _key;
-
-            var obj = new Model(init, null, this);
-            if(this.$isCollection) this.push(obj); // on collection, push new object
-            return obj;
-          },
-          $buildRaw: function(_raw) {
-            return this.$build(null).$decode(_raw);
-          },
-          $create: function(_attr, _success, _error) {
-            return this.$build(_attr).$save(_success, _error);
-          },
-          $find: function(_key, _success, _error) {
-            var init, keyName;
-            if(!isObject(_key)) {
-              init = {};
-              keyName = urlBuilder.inferKey(this);
-              if(!keyName) throw $restmodMinErr('notsup', 'Cannot infer find key, use explicit mode');
-              init[keyName] = _key;
-            } else init = _key;
-
-            // dont use $build, find does not push into current collection.
-            return (new Model(init, null, this)).$fetch(_success, _error);
-          },
-          /**
-           * Builds a new collection
-           *
-           * @param  {[type]} _params  [description]
-           * @param  {[type]} _url     [description]
-           * @param  {[type]} _context [description]
-           * @return {[type]}          [description]
-           */
-          $collection: function(_params, _url, _context) {
-
-            _params = this.$params ? extend({}, this.$params, _params) : _params;
-
-            var col = [];
-
-            // Since Array cannot be extended, use method injection
-            // TODO: try to find a faster alternative, use for loop insted for example.
-            for(var key in this) {
-              if(this.hasOwnProperty(key)) col[key] = this[key];
-            }
-
-            col.$partial = _url || this.$partial;
-            col.$context = _context || this.$context;
-            col.$isCollection = true;
-            col.$params = _params;
-            col.$pending = false;
-            col.$resolved = false;
-
-            return col;
-          },
-          $search: function(_params, _success, _error) {
-            return this.$collection(_params).$fetch(_success, _error);
-          },
-          /**
-           * Promise chaining method, keeps the collection instance as the chain context.
-           *
-           * Usage: col.$fetch().$then(function() { });
-           *
-           * @param {function} _success success callback
-           * @param {function} _error error callback
-           * @return {Model} self
-           */
-          $then: function(_success, _error) {
-            if(this.$isCollection) {
-              this.$promise = this.$promise.then(_success, _error);
-            }
-            return this;
-          },
-          /**
-           * Resets the collection's contents, marks collection as not $resolved
-           *
-           * @return {Model} self
-           */
-          $reset: function() {
-            if(this.$isCollection) {
-              this.$resolved = false;
-              this.length = 0;
-            }
-            return this;
-          },
-          /**
-           * Feeds raw collection data into the collection, marks collection as $resolved
-           *
-           * @param {array} _raw Data to add
-           * @return {Model} self
-           */
-          $feed: function(_raw) {
-            if(this.$isCollection) {
-              forEach(_raw, this.$buildRaw, this);
-              this.$resolved = true;
-            }
-            return this;
-          },
-          /**
-           * Begin a server request to populate collection.
-           *
-           * TODO: support POST data queries (complex queries scenarios)
-           *
-           * @param {object} _params Additional request parameters, this parameters are not stored in collection.
-           * @return {[type]} [description]
-           */
-          $fetch: function(_params) {
-
-            if(this.$isCollection)
-            {
-              var params = _params ? extend({}, this.$params || {}, _params) : this.$params;
-
-              // TODO: check that collection is bound.
-              send(this, { method: 'GET', url: this.$url(), params: params }, function(_response) {
-
-                var data = _response.data;
-                if(!data || !isArray(data)) {
-                  throw $restmodMinErr('badcfg', 'Error in resource {0} configuration. Expected response to be array');
-                }
-
-                // reset and feed retrieved data.
-                this.$reset().$feed(data);
-
-                // execute callback
-                callback('after_collection_fetch', this, _response);
-              });
-            }
-
-            return this;
-          }
-
-          // IDEA: $push, $remove, etc
-        });
+        /**
+         * The Model mixin chain.
+         * @type {array}
+         */
+        Model.$chain = arraySlice.call(arguments, 1);
 
         /**
+         * Returns the url this collection is bound to.
          *
+         * @param {object} _opt Options to be passed to the url builder.
+         * @return {string} bound url.
          */
+        Model.$url = function(_opt) {
+          return urlBuilder.collectionUrl(this, _opt);
+        };
+
+        /**
+         * Builds a new instance of this model
+         *
+         * If `_init` is not an object, then its treated as a primary key.
+         *
+         * @param  {object} _init Initial values
+         * @return {Model} model instance
+         */
+        Model.$build = function(_init) {
+          var init, keyName;
+          if(!isObject(_init)) {
+            init = {};
+            keyName = urlBuilder.inferKey(this);
+            if(!keyName) throw $restmodMinErr('notsup', 'Cannot infer build key, use explicit mode');
+            init[keyName] = _init;
+          } else init = _init;
+
+          var obj = new Model(init, null, this);
+          if(this.$isCollection) this.push(obj); // on collection, push new object
+          return obj;
+        };
+
+        /**
+         * Builds a new instance of this model using undecoded data
+         *
+         * @param  {object} _raw Undecoded data
+         * @return {Model} model instance
+         */
+        Model.$buildRaw = function(_raw) {
+          return this.$build(null).$decode(_raw);
+        };
+
+        /**
+         * Builds and saves a new instance of this model
+         *
+         * @param  {[type]} _attr Data to be saved
+         * @return {Model} model instance
+         */
+        Model.$create = function(_attr) {
+          return this.$build(_attr).$save();
+        };
+
+        /**
+         * Attempts to resolve a resource using provided data
+         *
+         * If `_init` is not an object, then its treated as a primary key.
+         *
+         * @param  {object} _init Data to provide
+         * @return {Model} model instance
+         */
+        Model.$find = function(_init) {
+          var init, keyName;
+          if(!isObject(_init)) {
+            init = {};
+            keyName = urlBuilder.inferKey(this);
+            if(!keyName) throw $restmodMinErr('notsup', 'Cannot infer find key, use explicit mode');
+            init[keyName] = _init;
+          } else init = _init;
+
+          // dont use $build, find does not push into current collection.
+          return (new Model(init, null, this)).$fetch();
+        };
+
+        /**
+         * Builds a new Model collection
+         *
+         * Collections are bound to an api resource.
+         *
+         * @param  {object} _params  Additional query string parameters
+         * @param  {string} _url     Optional collection URL (relative to context)
+         * @param  {object} _context Collection context override
+         * @return {array} Extended array type
+         */
+        Model.$collection = function(_params, _url, _context) {
+
+          _params = this.$params ? extend({}, this.$params, _params) : _params;
+
+          var col = [];
+
+          // Since Array cannot be extended, use method injection
+          // TODO: try to find a faster alternative, use for loop instead for example.
+          for(var key in this) {
+            if(this.hasOwnProperty(key)) col[key] = this[key];
+          }
+
+          col.$partial = _url || this.$partial;
+          col.$context = _context || this.$context;
+          col.$isCollection = true;
+          col.$params = _params;
+          col.$pending = false;
+          col.$resolved = false;
+
+          return col;
+        };
+
+        /**
+         * Generates a new collection bound to this context and url and calls $fetch on it.
+         *
+         * @param {object} _params Collection parameters
+         * @return {array} Model collection
+         */
+        Model.$search = function(_params) {
+          return this.$collection(_params).$fetch();
+        };
+
+        // Collection exclusive methods
+
+        /**
+         * Promise chaining method, keeps the collection instance as the chain context.
+         *
+         * This method is for use in collections only.
+         *
+         * Usage: col.$fetch().$then(function() { });
+         *
+         * @param {function} _success success callback
+         * @param {function} _error error callback
+         * @return {Model} self
+         */
+        Model.$then = function(_success, _error) {
+          if(this.$isCollection) {
+            this.$promise = this.$promise.then(_success, _error);
+          }
+          return this;
+        };
+
+        /**
+         * Resets the collection's contents, marks collection as not $resolved
+         *
+         * This method is for use in collections only.
+         *
+         * @return {Model} self
+         */
+        Model.$reset = function() {
+          if(this.$isCollection) {
+            this.$resolved = false;
+            this.length = 0;
+          }
+          return this;
+        };
+
+        /**
+         * Feeds raw collection data into the collection, marks collection as $resolved
+         *
+         * This method is for use in collections only.
+         *
+         * @param {array} _raw Data to add
+         * @return {Model} self
+         */
+        Model.$feed = function(_raw) {
+          if(this.$isCollection) {
+            forEach(_raw, this.$buildRaw, this);
+            this.$resolved = true;
+          }
+          return this;
+        };
+
+        /**
+         * Begin a server request to populate collection.
+         *
+         * This method is for use in collections only.
+         *
+         * TODO: support POST data queries (complex queries scenarios)
+         *
+         * @param {object} _params Additional request parameters, these parameters are not stored in collection.
+         * @return {[type]} [description]
+         */
+        Model.$fetch = function(_params) {
+
+          if(this.$isCollection)
+          {
+            var params = _params ? extend({}, this.$params || {}, _params) : this.$params;
+
+            // TODO: check that collection is bound.
+            send(this, { method: 'GET', url: this.$url(), params: params }, function(_response) {
+
+              var data = _response.data;
+              if(!data || !isArray(data)) {
+                throw $restmodMinErr('badcfg', 'Error in resource {0} configuration. Expected response to be array');
+              }
+
+              // reset and feed retrieved data.
+              this.$reset().$feed(data);
+
+              // execute callback
+              callback('after_collection_fetch', this, _response);
+            });
+          }
+
+          return this;
+        };
+
+        // IDEA: $fetchMore, $push, $remove, etc
 
         Model.prototype = {
           /**
@@ -350,6 +383,7 @@ angular.module('plRestmod').provider('$restmod', function() {
           $url: function(_opt) {
             return urlBuilder.resourceUrl(this, _opt);
           },
+
           /**
            * Allows calling custom hooks, usefull when implementing custom actions.
            *
@@ -363,6 +397,7 @@ angular.module('plRestmod').provider('$restmod', function() {
             callback(this, _hook, arraySlice.call(arguments, 1));
             return this;
           },
+
           /**
            * Low level communication method, wraps the $http api.
            *
@@ -375,6 +410,7 @@ angular.module('plRestmod').provider('$restmod', function() {
             send(this, _options, _success, _error);
             return this;
           },
+
           /**
            * Promise chaining method, keeps the model instance as the chain context.
            *
@@ -388,6 +424,7 @@ angular.module('plRestmod').provider('$restmod', function() {
             this.$promise = this.$promise.then(_success, _error);
             return this;
           },
+
           /**
            * Feed raw data to this instance.
            *
@@ -399,7 +436,6 @@ angular.module('plRestmod').provider('$restmod', function() {
             if(!_mask) _mask = SyncMask.DECODE_USER;
 
             // TODO: does undefined & 1 evaluates to 0 in every browser?
-            // TODO: var original = {}; // enable change queries
             var key, decodedName, decoder, value, original = {};
             for(key in _raw) {
               if(_raw.hasOwnProperty(key) && !((masks[key] || 0) & _mask)) {
@@ -416,6 +452,7 @@ angular.module('plRestmod').provider('$restmod', function() {
             callback('after_feed', this, original, _raw);
             return this;
           },
+
           /**
            * Generate data to be sent to the server when creating/updating the resource.
            *
@@ -438,6 +475,7 @@ angular.module('plRestmod').provider('$restmod', function() {
 
             return raw;
           },
+
           /**
            * Begin a server request for updated resource data.
            *
@@ -456,6 +494,7 @@ angular.module('plRestmod').provider('$restmod', function() {
               this.$decode(data);
             });
           },
+
           /**
            * Begin a server request to create/update resource.
            *
@@ -504,6 +543,7 @@ angular.module('plRestmod').provider('$restmod', function() {
               });
             }
           },
+
           /**
            * Begin a server request to destroy the resource.
            *
@@ -524,6 +564,7 @@ angular.module('plRestmod').provider('$restmod', function() {
 
         /**
          * Model customization phase:
+         *
          * * Generate the model builder DSL
          * * Process metadata from base chain
          * * Process metadata from arguments
@@ -942,8 +983,27 @@ angular.module('plRestmod').provider('$restmod', function() {
           }
         };
 
-        loadMeta(BASE_CHAIN, Builder);
-        loadMeta(Model.$meta, Builder);
+        // use the builder to process a mixin chain
+        function loadMixinChain(_chain) {
+          for(var i = 0, l = _chain.length; i < l; i++) {
+            loadMixin(_chain[i]);
+          }
+        }
+
+        // use the builder to process a single mixin
+        function loadMixin(_mix) {
+          if(_mix.$chain) {
+            loadMixinChain(_mix.$chain);
+          } else if(typeof _mix === 'string') {
+            loadMixin($injector.get(_mix));
+          } else if(isArray(_mix) || isFunction(_mix)) {
+            // TODO: maybe invoke should only be called for BASE_CHAIN functions
+            $injector.invoke(_mix, Builder, { $builder: Builder });
+          } else Builder.describe(_mix);
+        }
+
+        loadMixinChain(BASE_CHAIN);
+        loadMixinChain(Model.$chain);
 
         /*
          * Mixin post-processing phase
@@ -965,7 +1025,7 @@ angular.module('plRestmod').provider('$restmod', function() {
        * @return {object} The abstract model
        */
       restmod.abstract = function(/* mixins */) {
-        return { $isAbstract: true, $meta: arraySlice.call(arguments, 0) };
+        return { $isAbstract: true, $chain: arraySlice.call(arguments, 0) };
       };
 
       return restmod;
