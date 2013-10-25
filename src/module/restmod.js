@@ -1,7 +1,5 @@
 'use strict';
 
-var $restmodMinErr = angular.noop; //minErr('$restmod');
-
 // The object property synchronization mask.
 var SyncMask = {
   NONE: 0x00,
@@ -193,7 +191,7 @@ angular.module('plRestmod').provider('$restmod', function() {
           if(!isObject(_init)) {
             init = {};
             keyName = urlBuilder.inferKey(this);
-            if(!keyName) throw $restmodMinErr('notsup', 'Cannot infer build key, use explicit mode');
+            if(!keyName) throw Error('Cannot infer key, use explicit mode');
             init[keyName] = _init;
           } else init = _init;
 
@@ -235,7 +233,7 @@ angular.module('plRestmod').provider('$restmod', function() {
           if(!isObject(_init)) {
             init = {};
             keyName = urlBuilder.inferKey(this);
-            if(!keyName) throw $restmodMinErr('notsup', 'Cannot infer find key, use explicit mode');
+            if(!keyName) throw Error('Cannot infer key, use explicit mode');
             init[keyName] = _init;
           } else init = _init;
 
@@ -299,9 +297,8 @@ angular.module('plRestmod').provider('$restmod', function() {
          * @return {Model} self
          */
         Model.$then = function(_success, _error) {
-          if(this.$isCollection) {
-            this.$promise = this.$promise.then(_success, _error);
-          }
+          if(!this.$isCollection) throw Error('$then is only supported by collections');
+          this.$promise = this.$promise.then(_success, _error);
           return this;
         };
 
@@ -313,10 +310,9 @@ angular.module('plRestmod').provider('$restmod', function() {
          * @return {Model} self
          */
         Model.$reset = function() {
-          if(this.$isCollection) {
-            this.$resolved = false;
-            this.length = 0;
-          }
+          if(!this.$isCollection) throw Error('$reset is only supported by collections');
+          this.$resolved = false;
+          this.length = 0;
           return this;
         };
 
@@ -329,10 +325,9 @@ angular.module('plRestmod').provider('$restmod', function() {
          * @return {Model} self
          */
         Model.$feed = function(_raw) {
-          if(this.$isCollection) {
-            forEach(_raw, this.$buildRaw, this);
-            this.$resolved = true;
-          }
+          if(!this.$isCollection) throw Error('$feed is only supported by collections');
+          forEach(_raw, this.$buildRaw, this);
+          this.$resolved = true;
           return this;
         };
 
@@ -348,25 +343,24 @@ angular.module('plRestmod').provider('$restmod', function() {
          */
         Model.$fetch = function(_params) {
 
-          if(this.$isCollection)
-          {
-            var params = _params ? extend({}, this.$params || {}, _params) : this.$params;
+          if(!this.$isCollection) throw Error('$fetch is only supported by collections');
 
-            // TODO: check that collection is bound.
-            send(this, { method: 'GET', url: this.$url(), params: params }, function(_response) {
+          var params = _params ? extend({}, this.$params || {}, _params) : this.$params;
 
-              var data = _response.data;
-              if(!data || !isArray(data)) {
-                throw $restmodMinErr('badcfg', 'Error in resource {0} configuration. Expected response to be array');
-              }
+          // TODO: check that collection is bound.
+          send(this, { method: 'GET', url: this.$url(), params: params }, function(_response) {
 
-              // reset and feed retrieved data.
-              this.$reset().$feed(data);
+            var data = _response.data;
+            if(!data || !isArray(data)) {
+              throw Error('Error in resource {0} configuration. Expected response to be array');
+            }
 
-              // execute callback
-              callback('after_collection_fetch', this, _response);
-            });
-          }
+            // reset and feed retrieved data.
+            this.$reset().$feed(data);
+
+            // execute callback
+            callback('after_collection_fetch', this, _response);
+          });
 
           return this;
         };
@@ -485,11 +479,11 @@ angular.module('plRestmod').provider('$restmod', function() {
            */
           $fetch: function() {
             // verify that instance has a bound url
-            if(!this.$url()) throw $restmodMinErr('notsup', 'Cannot fetch an unbound resource');
+            if(!this.$url()) throw Error('Cannot fetch an unbound resource');
             return this.$send({ method: 'GET', url: this.$url(), feed: true }, function(_response) {
               var data = _response.data;
               if (!data || isArray(data)) {
-                throw $restmodMinErr('badresp', 'Expected object while feeding resource');
+                throw Error('Expected object while feeding resource');
               }
               this.$decode(data);
             });
@@ -509,7 +503,7 @@ angular.module('plRestmod').provider('$restmod', function() {
               // If bound, update
 
               url = urlBuilder.updateUrl(this);
-              if(!url) throw $restmodMinErr('notsup', 'Update is not supported by this resource');
+              if(!url) throw Error('Update is not supported by this resource');
 
               callback('before_update', this);
               callback('before_save', this);
@@ -529,7 +523,7 @@ angular.module('plRestmod').provider('$restmod', function() {
               // If not bound create.
 
               url = urlBuilder.createUrl(this);
-              if(!url) throw $restmodMinErr('notsup', 'Create is not supported by this resource');
+              if(!url) throw Error('Create is not supported by this resource');
 
               callback('before_save', this);
               callback('before_create', this);
@@ -553,7 +547,7 @@ angular.module('plRestmod').provider('$restmod', function() {
            */
           $destroy: function() {
             var url = urlBuilder.destroyUrl(this);
-            if(!url) throw $restmodMinErr('notsup', 'Destroy is not supported by this resource');
+            if(!url) throw Error('Destroy is not supported by this resource');
 
             callback('before_destroy', this);
             return this.$send({ method: 'DELETE', url: url }, function() {
