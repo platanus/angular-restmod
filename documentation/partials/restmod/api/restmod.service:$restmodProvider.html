@@ -1,0 +1,24 @@
+<h1><code ng:non-bindable="">$restmodProvider</code>
+<span class="hint">( service in module <code ng:non-bindable="">restmod</code>
+ )</span>
+</h1>
+<div><h2 id="Description">Description</h2>
+<div class="description"><p>The $restmodProvider exposes $restmod configuration methods</p></div>
+<div class="member method"><h2 id="Methods">Methods</h2>
+<ul class="methods"><li><h3 id="pushModelBase">pushModelBase()</h3>
+<div class="pushmodelbase"><p>Adds mixins to the base model chain.</p>
+
+<p>Non abstract models should NOT be added to this chain.</p>
+
+<p>Base model chain is by default empty, all mixins added to the chain are
+prepended to every generated model.</p>
+
+<p>Usage:</p>
+
+<p>` <code>javascript
+$provider.pushModelBase('ChangeModel', 'LazyRelations', 'ThrottledModel')
+</code> </div>
+</li>
+</ul>
+</div>
+</div>

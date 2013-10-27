@@ -1,0 +1,325 @@
+<h1><code ng:non-bindable="">ModelBuilder</code>
+<span class="hint">( class in module <code ng:non-bindable="">restmod</code>
+ )</span>
+</h1>
+<div><h2 id="Description">Description</h2>
+<div class="description"><p>Provides the DSL for the model generator.</p>
+
+<p>TODO: link to model building overview</p></div>
+<div class="member method"><h2 id="Methods">Methods</h2>
+<ul class="methods"><li><h3 id="attrDecoder">attrDecoder(_name, _filter, _filterParam, _chain)</h3>
+<div class="attrdecoder"><p>Assigns a decoding function/filter to a given attribute.</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_name – {string} – </code>
+<p>Attribute name</p></li>
+<li><code class="plain">_filter – {string|function} – </code>
+<p>filter or function to register</p></li>
+<li><code class="plain">_filterParam – {mixed} – </code>
+<p>Misc filter parameter</p></li>
+<li><code class="plain">_chain – {boolean} – </code>
+<p>If true, filter is chained to the current attribute filter.</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="attrDefault">attrDefault(_attr, _init)</h3>
+<div class="attrdefault"><p>Sets the default value for an attribute.</p>
+
+<p>Defaults values are set only on object construction phase.</p>
+
+<p>if  <code class="plain">_init</code>  is a function, then its evaluated every time the
+default value is required.</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_attr – {string} – </code>
+<p>Attribute name</p></li>
+<li><code class="plain">_init – {mixed} – </code>
+<p>Defaulf value / iniline function</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="attrEncoder">attrEncoder(_name, _filter, _filterParam, _chain)</h3>
+<div class="attrencoder"><p>Assigns a encoding function/filter to a given attribute.</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_name – {string} – </code>
+<p>Attribute name</p></li>
+<li><code class="plain">_filter – {string|function} – </code>
+<p>filter or function to register</p></li>
+<li><code class="plain">_filterParam – {mixed} – </code>
+<p>Misc filter parameter</p></li>
+<li><code class="plain">_chain – {boolean} – </code>
+<p>If true, filter is chained to the current attribute filter.</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="attrExpression">attrExpression(_name, _expr)</h3>
+<div class="attrexpression"><p>Expression attributes are evaluated every time new data is fed to the model.</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_name – {string} – </code>
+<p>Attribute name</p></li>
+<li><code class="plain">_expr – {string} – </code>
+<p>Angular expression to evaluate</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="attrIgnored">attrIgnored(_attr, _mask, _reset)</h3>
+<div class="attrignored"><p>Ignores/un-ignores an attribute.</p>
+
+<p>This method changes the attribute masmask</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_attr – {string} – </code>
+<p>Attribute name</p></li>
+<li><code class="plain">_mask – {boolean|integer} – </code>
+<p>Ignore mask.</p></li>
+<li><code class="plain">_reset – {boolean} – </code>
+<p>If set to true, old mask is reset.</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{[type]}</code>
+– <p>[description]</p></div>
+</div>
+</li>
+<li><h3 id="attrSerializer">attrSerializer(_name, _serializer)</h3>
+<div class="attrserializer"><p>Assigns a serializer to a given attribute.</p>
+
+<p>A _serializer is:
+* an object that defines both a  <code class="plain">decode</code>  and a  <code class="plain">encode</code>  method
+* a function that when called returns an object that matches the above description.
+* a string that represents an injectable that matches any of the above descriptions.</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_name – {string} – </code>
+<p>Attribute name</p></li>
+<li><code class="plain">_serializer – {string|object|function} – </code>
+<p>The serializer</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="attrVolatile">attrVolatile(_name, _isVolatile)</h3>
+<div class="attrvolatile"><p>Volatile attributes are reset after being rendered.</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_name – {string} – </code>
+<p>Attribute name</p></li>
+<li><code class="plain">_isVolatile – {[type]} – </code>
+<p>Default/Reset value</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="attribute">attribute(_name, _description)</h3>
+<div class="attribute"><p>Sets an attribute properties.</p>
+
+<p>This method uses the attribute modifiers mapping to call proper
+modifiers on the argument.</p>
+
+<p>For example, using the following description on the createdAt attribute</p>
+
+<p>{ decode: 'date', param; 'YY-mm-dd' }</p>
+
+<p>Is the same as calling</p>
+
+<p>builder.attrDecoder('createdAt', 'date', 'YY-mm-dd')</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_name – {string} – </code>
+<p>Attribute name</p></li>
+<li><code class="plain">_description – {object} – </code>
+<p>Description object</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="classDefine">classDefine(_name, _fun)</h3>
+<div class="classdefine"><p>Registers a class method</p>
+
+<p>It is posible to override an existing method using define,
+if overriden, the old method can be called using  <code class="plain">this.$super</code> 
+inside de new method.</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_name – {string} – </code>
+<p>Method name</p></li>
+<li><code class="plain">_fun – {function} – </code>
+<p>Function to define</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="define">define(_name, _fun)</h3>
+<div class="define"><p>Registers an instance method</p>
+
+<p>Usage:
+   builder.define(function(_super) {
+     return $fetch()
+   });</p>
+
+<p>It is posible to override an existing method using define,
+if overriden, the old method can be called using  <code class="plain">this.$super</code> 
+inside de new method.</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_name – {string} – </code>
+<p>Method name</p></li>
+<li><code class="plain">_fun – {function} – </code>
+<p>Function to define</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="describe">describe(_description)</h3>
+<div class="describe"><p>Parses a description object, calls the proper builder method depending
+on each property description type.</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_description – {object} – </code>
+<p>The description object</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="disableRenaming">disableRenaming()</h3>
+<div class="disablerenaming"><p>Disables renaming alltogether</p><h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="extend">extend(_name, _fun, _mapping)</h3>
+<div class="extend"><p>Extends the builder DSL</p>
+
+<p>Adds a function to de builder and alternatively maps the function to an
+attribute definition keyword that can be later used when calling
+ <code class="plain">define</code>  or  <code class="plain">attribute</code> .</p>
+
+<p>Mapping works as following:</p>
+
+<p>// Given the following call
+   builder.extend('testAttr', function(_attr, _test, _param1, param2) {
+     // wharever..
+   }, ['test', 'testP1', 'testP2']);</p>
+
+<p>// A call to
+   builder.attribute('chapter', { test: 'hello', testP1: 'world' });</p>
+
+<p>// Its equivalent to
+   builder.testAttr('chapter', 'hello', 'world');</p>
+
+<p>The method can also be passed an object with various methods to be added.</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_name – {string|object} – </code>
+<p>function name or object to merge</p></li>
+<li><code class="plain">_fun – {function} – </code>
+<p>function</p></li>
+<li><code class="plain">_mapping – {array} – </code>
+<p>function mapping definition</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="hasMany">hasMany(_name, _model, _url)</h3>
+<div class="hasmany"><p>Registers a model hasMany relation</p>
+
+<p>The  <code class="plain">_model</code>  attribute supports both a string (using injector) o
+a direct restmod Model type reference.</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_name – {string} – </code>
+<p>Attribute name</p></li>
+<li><code class="plain">_model – {string|object} – </code>
+<p>Other model</p></li>
+<li><code class="plain">_url – {string} – </code>
+<p>Partial url</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="hasOne">hasOne(_name, _model, _url)</h3>
+<div class="hasone"><p>Registers a model hasOne relation</p>
+
+<p>The  <code class="plain">_model</code>  attribute supports both a string (using injector) o
+a direct restmod Model type reference.</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_name – {string} – </code>
+<p>Attribute name</p></li>
+<li><code class="plain">_model – {string|object} – </code>
+<p>Other model</p></li>
+<li><code class="plain">_url – {string} – </code>
+<p>Partial url</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="on">on(_hook, _do)</h3>
+<div class="on"><p>Adds an event hook</p>
+
+<p>Hooks are used to extend or modify the model behavior, and are not
+designed to be used as an event listening system.</p>
+
+<p>The given function is executed in the hook's context, different hooks
+make different parameters available to callbacks.</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_hook – {string} – </code>
+<p>The hook name, refer to restmod docs for builtin hooks.</p></li>
+<li><code class="plain">_do – {function} – </code>
+<p>function to be executed</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="setNameDecoder">setNameDecoder(_value)</h3>
+<div class="setnamedecoder"><p>Changes the way restmod renames attributes every time a server resource is decoded.</p>
+
+<p>This is intended to be used as a way of keeping property naming style consistent accross
+languajes. By default, property naming in js should use camelcase and property naming
+in JSON api should use snake case with underscores.</p>
+
+<p>If  <code class="plain">false</code>  is given, then renaming is disabled</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_value – {function|false} – </code>
+<p>decoding function</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="setNameEncoder">setNameEncoder(_value)</h3>
+<div class="setnameencoder"><p>Changes the way restmod renames attributes every time a local resource is encoded to be sent.</p>
+
+<p>This is intended to be used as a way of keeping property naming style consistent accross
+languajes. By default, property naming in js should use camelcase and property naming
+in JSON api should use snake case with underscores.</p>
+
+<p>If  <code class="plain">false</code>  is given, then renaming is disabled</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_value – {function|false} – </code>
+<p>encoding function</p></li>
+</ul>
+<h4 id="Returns">Returns</h4>
+<div class="returns"><code class="plain">{object}</code>
+– <p>self</p></div>
+</div>
+</li>
+<li><h3 id="setUrlBuilderFactory">setUrlBuilderFactory(_factory)</h3>
+<div class="seturlbuilderfactory"><p>Change the default url builder.</p>
+
+<p>The provided factory will be called to provide an url builder
+for  implement a  <code class="plain">get</code>  method that receives the resource baseUrl
+and returns an url builder.</p>
+
+<p>TODO: describe url builder interface</p><h4 id="Parameters">Parameters</h4>
+<ul class="parameters"><li><code class="plain">_factory – {function} – </code>
+<p>Url builder factory function.</p></li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
