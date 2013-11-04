@@ -1,1 +1,0 @@
-<?php $configs= json_decode('{}', true); ?>

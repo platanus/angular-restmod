@@ -1,1 +1,0 @@
-<?php $controllerList = json_decode('{}'); ?>

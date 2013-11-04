@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>$restmod Index</title>
+	<title>$restmod Class: $restmodProvider</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -29,19 +29,7 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="constants.html">constants</a>
-						</li>
-						
-						<li>
-							<a href="plugins.html">plugins</a>
-						</li>
-						
-						<li>
-							<a href="providers.html">providers</a>
-						</li>
-						
-						<li>
-							<a href="services.html">services</a>
+							<a href="angular.html">angular</a>
 						</li>
 						
 
@@ -55,15 +43,11 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="constants.SyncMask.html">SyncMask</a>
+							<a href="$restmodProvider.html">$restmodProvider</a>
 						</li>
 						
 						<li>
-							<a href="constants.Utils.html">Utils</a>
-						</li>
-						
-						<li>
-							<a href="Model.html">Model</a>
+							<a href="angular.Model.html">Model</a>
 						</li>
 						
 						<li>
@@ -75,11 +59,11 @@
 						</li>
 						
 						<li>
-							<a href="providers.$restmodProvider.html">$restmodProvider</a>
+							<a href="RestUrlBuilder.html">RestUrlBuilder</a>
 						</li>
 						
 						<li>
-							<a href="RestUrlBuilder.html">RestUrlBuilder</a>
+							<a href="Utils.html">Utils</a>
 						</li>
 						
 
@@ -93,7 +77,7 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="plugins.DirtyModel.html">DirtyModel</a>
+							<a href="DirtyModel.html">DirtyModel</a>
 						</li>
 						
 
@@ -139,36 +123,262 @@
 					
 
 
-	
-	<span class="page-title">Index</span>
-	
-	
+	<h1 class="page-title">Class: $restmodProvider</h1>
+<section>
 
+<header>
+    <h2>
+    $restmodProvider
+    </h2>
+    
+</header>
 
+<article>
+    <div class="container-overview">
+    
 
+    
+        
+<dt>
+    <h4 class="name" id="$restmodProvider"><span class="type-signature"></span>new $restmodProvider<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>The $restmodProvider exposes $restmod configuration methods</p>
+    </div>
+    
 
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
 
+    
 
+    
 
+    
 
+    
 
+    
 
+    
 
+    
 
-	
-	
+    
 
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 36
+    </li></ul></dd>
+    
 
+    
 
+    
 
+    
+</dl>
 
-    <section>
-        <article><h1>Angular Restmod</h1>
-<p>This is a temporary documentation page, i'm waiting for docular to provide non-root support and client side routing.</p></article>
-    </section>
+    
+    
 
+    
 
+    
+    
+    
+    
+    
+    
+    
+</dd>
 
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<dt>
+    <h4 class="name" id="$restmod"><span class="type-signature">&lt;static> </span>$restmod<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>The model factory service is used to generate mode types using a rich building DSL provided
+by the ModelBuilder.</p>
+<p>For more information about model generation see a Model</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 69
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="pushModelBase"><span class="type-signature">&lt;static> </span>pushModelBase<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Adds mixins to the base model chain.</p>
+<p>Non abstract models should NOT be added to this chain.</p>
+<p>Base model chain is by default empty, all mixins added to the chain are
+prepended to every generated model.</p>
+<p>Usage:</p>
+<p><code>`javascript
+$provider.pushModelBase('ChangeModel', 'LazyRelations', 'ThrottledModel')</code></p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 65
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        </dl>
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 
@@ -181,7 +391,7 @@
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0</a>
-		on Mon Nov 04 2013 12:18:59 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Sun Nov 03 2013 21:08:32 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
