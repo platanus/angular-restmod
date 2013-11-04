@@ -1,0 +1,19 @@
+{
+	"templates": {
+	    "systemName"      : "$restmod",
+	    "footer"          : "",
+	    "copyright"       : "",
+	    "navType"         : "vertical",
+	    "theme"           : "spacelab",
+	    "linenums"        : true,
+	    "collapseSymbols" : false,
+	    "inverseNav"      : false
+	},
+	"plugins": ["plugins/markdown"],
+	"markdown": {
+		"parser": "gfm"
+	},
+	"opts": {
+		"template": "node_modules/grunt-jsdoc/node_modules/ink-docstrap/template",
+	}
+}

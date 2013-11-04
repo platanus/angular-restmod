@@ -1,3 +1,10 @@
+/**
+ * @mixin DirtyModel
+ * @memberof plugins
+ *
+ * @description Adds the `$dirty` method to a model`s instances.
+ */
+
 'use strict';
 
 angular.module('plRestmod').factory('DirtyModel', ['$restmod', function($restmod) {
@@ -9,7 +16,10 @@ angular.module('plRestmod').factory('DirtyModel', ['$restmod', function($restmod
       })
       .attrIgnored('$original', true) // make special property ignored
       /**
-       * Retrieves the model changes
+       * @method $dirty
+       * @memberof plugins.DirtyModel#
+       *
+       * @description Retrieves the model changes
        *
        * Property changes are determined using the strict equality operator.
        *
@@ -20,7 +30,7 @@ angular.module('plRestmod').factory('DirtyModel', ['$restmod', function($restmod
        *
        * Called without arguments, this method will return a list of changed property names.
        *
-       * @param  {string} _prop Property to query
+       * @param {string} _prop Property to query
        * @return {boolean|array} Property state or array of changed properties
        */
       .define('$dirty', function(_prop) {

@@ -1,8 +1,19 @@
 'use strict';
 
+/**
+ * @class Utils
+ * @memberOf constants
+ *
+ * @description Various utilities used across
+ * the library
+ *
+ * This utilities are available as the `Utils` constant when restmod is included.
+ */
 var Utils = {
   /**
-   * Transforms a string to it's camelcase representation
+   * @memberof constants.Utils
+   *
+   * @description Transforms a string to it's camelcase representation
    *
    * TODO: handle diacritics
    *
@@ -16,7 +27,9 @@ var Utils = {
     });
   },
   /**
-   * Transforms a string to it's snakecase representation
+   * @memberof constants.Utils
+   *
+   * @description Transforms a string to it's snakecase representation
    *
    * TODO: handle diacritics
    *
@@ -31,7 +44,9 @@ var Utils = {
     });
   },
   /**
-   * Chains to filtering functions together
+   * @memberof constants.Utils
+   *
+   * @description Chains to filtering functions together
    *
    * @param  {function} _first original function
    * @param  {function} _fun   function to call on the original function result
@@ -44,7 +59,9 @@ var Utils = {
     };
   },
   /**
-   * Override a function, making overriden function available as this.$super
+   * @memberof constants.Utils
+   *
+   * @description Override a function, making overriden function available as this.$super
    *
    * @param  {function} _super Original function
    * @param  {function} _fun   New function
@@ -64,7 +81,9 @@ var Utils = {
     };
   },
   /**
-   * Extend an object using `Utils.override` instead of just replacing the functions.
+   * @memberof constants.Utils
+   *
+   * @description Extend an object using `Utils.override` instead of just replacing the functions.
    *
    * @param  {object} _target Object to be extended
    * @param  {object} _other  Source object

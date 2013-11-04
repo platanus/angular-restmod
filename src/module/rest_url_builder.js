@@ -1,9 +1,12 @@
 'use strict';
 
-/**
- * Simple RESTful URL Builder implementation.
- */
 
+/**
+ * @method restUrlBuilderFactory
+ * @memberOf constants
+ *
+ * @description This will no longer be provided as a constant.
+ */
 angular.module('plRestmod')
   .constant('restUrlBuilderFactory', (function() {
 
@@ -21,6 +24,26 @@ angular.module('plRestmod')
       _options = _options || {};
       var primary = _options.primary || 'id';
 
+      /**
+       * @class RestUrlBuilder
+       *
+       * @description The default url builder implementation
+       *
+       * Instances of RestUrlBuilder are generated using the restUrlBuilderFactory.
+       * The restUrlBuilderFactory is provided as constant and is actually a factory factory.
+       *
+       * Factory usage:
+       *
+       * ```javascript
+       * return $restmod(function() {
+       *   var builderFactory = restUrlBuilderFactory({ options }); // restUrlBuilderFactory injection not shown.
+       *   this.setUrlBuilderFactory(builderFactory);
+       *   // or using the provided helper.
+       *   this.setRestUrlOptions({ options });
+       * });
+       * ```
+       *
+       */
       return function(_resUrl) {
 
         if(_options.baseUrl) _resUrl = joinUrl(_options.baseUrl, _resUrl);
@@ -39,13 +62,30 @@ angular.module('plRestmod')
 
         return {
           /**
-           * called by collection whenever implicit key is used
+           * @method
+           * @memberOf RestUrlBuilder#
+           *
+           * @description Called to provide a resource's primary key given a resource.
+           *
+           * IDEA: replace this by something like extractKey?
            */
-          inferKey: function(/* _context */) {
+          inferKey: function(/* _res */) {
             return primary;
           },
           /**
-           * Called by resource to resolve the resource's url
+           * @method
+           * @memberOf RestUrlBuilder#
+           *
+           * @description Called to provide a resource's url.
+           *
+           * The resource url is used to fetch resource contents and to provide
+           * a base url for children.
+           *
+           * IDEA: merge resourceUrl and collectionUrl code?
+           *
+           * @param  {Model} _res target resource
+           * @param  {mixed} _opt options passed to the $url() function.
+           * @return {string} The resource url, null if anonymous
            */
           resourceUrl: function(_res, _opt) {
             var partial = _res.$partial, pk;
@@ -68,10 +108,17 @@ angular.module('plRestmod')
             return prepareUrl(partial || null, _opt);
           },
           /**
-           * Called by collections when an url is needed
+           * @method
+           * @memberOf RestUrlBuilder#
            *
-           * @param  {[type]} _col [description]
-           * @return {[type]}      [description]
+           * @description Called to provide a collection's url.
+           *
+           * The collection url is used to fetch collection contents and to provide
+           * a base url for children.
+           *
+           * @param  {Collection} _col target collection
+           * @param  {mixed} _opt options passed to the $url() function.
+           * @return {string} The collection url, null if anonymous
            */
           collectionUrl: function(_col, _opt) {
             if(_col.$context) {
@@ -85,19 +132,41 @@ angular.module('plRestmod')
             }
           },
           /**
-           * called by an unbound resource whenever save is called
+           * @method
+           * @memberOf RestUrlBuilder#
+           *
+           * @description Called to provide an url for resource creation.
+           *
+           * @param {Model} _res target resource
+           * @return {string} url
            */
           createUrl: function(_res) {
             return _res.$context ? _res.$context.$url() : prepareUrl(_resUrl);
           },
           /**
-           * called by a bound resource whenever save is called
+           * @method
+           * @memberOf RestUrlBuilder#
+           *
+           * @description Called to provide an url for resource update.
+           *
+           * Returns the resource url by default.
+           *
+           * @param {Model} _res target resource
+           * @return {string} url
            */
           updateUrl: function(_res) {
             return this.resourceUrl(_res);
           },
           /**
-           * called by a bound resource whenever destroy is called
+           * @method
+           * @memberOf RestUrlBuilder#
+           *
+           * @description Called to provide an url for resource destruction.
+           *
+           * Returns the resource url by default.
+           *
+           * @param {Model} _res target resource
+           * @return {string} url
            */
           destroyUrl: function(_res) {
             return this.resourceUrl(_res);
@@ -109,8 +178,13 @@ angular.module('plRestmod')
   .config(['$restmodProvider', function($restmodProvider) {
     $restmodProvider.pushModelBase(['$injector', function($injector) {
       /**
-       * The setRestUrlOptions extensions allows to easily setup a rest url builder factory
+       * @method setRestUrlOption
+       * @memberof ModelBuilder#
+       *
+       * @description The setRestUrlOptions extensions allows to easily setup a rest url builder factory
        * for a given model chain.
+       *
+       * This is only available if the restUrlBuilderFactory is included.
        *
        * TODO: improve inheritance support.
        *

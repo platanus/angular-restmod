@@ -83,6 +83,22 @@ module.exports = function(grunt) {
         autoWatch: true
       }
     },
+    jsdoc : {
+        dist : {
+          src: ['src/*.js', 'src/**/*.js', 'docs/index.md'],
+          options: {
+            tutorials: 'docs/guides',
+            destination: '.docs',
+            configure: 'jsdoc.json'
+          }
+        }
+    },
+    'gh-pages': {
+      options: {
+        base: '.docs'
+      },
+      src: ['**']
+    },
     changelog: {
       options: {
         dest: 'CHANGELOG.md'
@@ -95,6 +111,8 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-bower-task');
   grunt.loadNpmTasks('grunt-karma');
+  grunt.loadNpmTasks('grunt-jsdoc'); // use jsdocs for now, until docular is ready
+  grunt.loadNpmTasks('grunt-gh-pages');
   grunt.loadNpmTasks('grunt-conventional-changelog');
 
   // Default task
@@ -102,6 +120,9 @@ module.exports = function(grunt) {
 
   // Build task
   grunt.registerTask('build', ['bower', 'karma:build', 'concat', 'uglify']);
+
+  // Publish task
+  grunt.registerTask('pub', ['jsdoc', 'gh-pages']);
 
   // Test task
   grunt.registerTask('test', ['karma:build']);
