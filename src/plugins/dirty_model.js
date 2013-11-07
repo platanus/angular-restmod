@@ -1,6 +1,5 @@
 /**
  * @mixin DirtyModel
- * @memberof plugins
  *
  * @description Adds the `$dirty` method to a model`s instances.
  */
@@ -17,7 +16,7 @@ angular.module('plRestmod').factory('DirtyModel', ['$restmod', function($restmod
       .attrIgnored('$original', true) // make special property ignored
       /**
        * @method $dirty
-       * @memberof plugins.DirtyModel#
+       * @memberof DirtyModel#
        *
        * @description Retrieves the model changes
        *

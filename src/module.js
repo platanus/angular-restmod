@@ -16,10 +16,4 @@
  * @description Angular services provided by the library.
  */
 
-/**
- * @namespace plugins
- *
- * @description Optional plugins that enhance model capabilities.
- */
-
 angular.module('plRestmod', ['ng']);
