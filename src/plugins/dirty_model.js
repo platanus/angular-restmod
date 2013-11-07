@@ -9,7 +9,7 @@
 
 angular.module('plRestmod').factory('DirtyModel', ['$restmod', function($restmod) {
 
-  return $restmod.abstract(function() {
+  return $restmod.mixin(function() {
     this.afterFeed(function(_original) {
         // store original information in a model's special property
         this.$original = _original;

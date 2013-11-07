@@ -16,7 +16,7 @@ describe('Restmod builder:', function() {
   describe('disableRenaming', function() {
 
     beforeEach(function() {
-      Bike = $restmod('/api/bikes', function() {
+      Bike = $restmod.model('/api/bikes', function() {
         this.disableRenaming();
       });
     });
@@ -32,7 +32,7 @@ describe('Restmod builder:', function() {
   describe('setNameDecoder', function() {
 
     beforeEach(function() {
-      Bike = $restmod('/api/bikes', function() {
+      Bike = $restmod.model('/api/bikes', function() {
         this.setNameDecoder(function(_name) { return '_' + _name; });
       });
     });
@@ -48,7 +48,7 @@ describe('Restmod builder:', function() {
   describe('setNameEncoder', function() {
 
     beforeEach(function() {
-      Bike = $restmod('/api/bikes', function() {
+      Bike = $restmod.model('/api/bikes', function() {
         this.setNameDecoder(function(_name) { return _name.substr(1); });
       });
     });
@@ -69,7 +69,7 @@ describe('Restmod builder:', function() {
   //     // generate a dummy base  module
   //     beforeEach(module(function($provide) {
   //       $provide.factory('Base', function($restmod) {
-  //         return $restmod(null, {
+  //         return $restmod.model(null, {
   //           coverSize: { init: 20 },
   //           getPages: function() {
   //             return this.pages || 0;
@@ -79,20 +79,20 @@ describe('Restmod builder:', function() {
   //     }));
 
   //     it('should inherit properties', inject(function($restmod, Base) {
-  //       var book = $restmod('api/books', Base).$build();
+  //       var book = $restmod.model('api/books', Base).$build();
   //       expect(book.getPages).toBeDefined();
-  //       var otherBook = $restmod('api/books').$build();
+  //       var otherBook = $restmod.model('api/books').$build();
   //       expect(otherBook.getPages).not.toBeDefined();
   //     }));
 
   //     it('should support overriding properties', inject(function($restmod, Base) {
-  //       var book = $restmod('api/books', Base, { coverSize: { init: 30 } }).$build();
+  //       var book = $restmod.model('api/books', Base, { coverSize: { init: 30 } }).$build();
   //       expect(book.getPages).toBeDefined();
   //       expect(book.coverSize).toEqual(30);
   //     }));
 
   //     it('should support injector resolving', inject(function($restmod) {
-  //       var book = $restmod('api/books', 'Base').$build();
+  //       var book = $restmod.model('api/books', 'Base').$build();
   //       expect(book.getPages).toBeDefined();
   //     }));
 

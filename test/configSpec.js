@@ -13,7 +13,7 @@ describe('Restmod builder:', function() {
     }));
 
     it('should modify the mixin chain of every model', inject(function($restmod) {
-      var bike = $restmod('/api/bikes').$build({ brand: 'Merida' });
+      var bike = $restmod.model('/api/bikes').$build({ brand: 'Merida' });
       expect(bike.createdAt).toBeDefined();
     }));
   });

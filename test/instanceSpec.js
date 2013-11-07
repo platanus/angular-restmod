@@ -9,7 +9,7 @@ describe('Restmod model behavior modifiers:', function() {
   // generate a dummy module
   beforeEach(module(function($provide) {
     $provide.factory('Book', function($restmod) {
-      return $restmod('/api/books', {
+      return $restmod.model('/api/books', {
         createdAt: {
           init: function() { return new Date(); },
           decode: function(_v) { return new Date(); },
@@ -22,11 +22,11 @@ describe('Restmod model behavior modifiers:', function() {
     });
 
     $provide.factory('Chapter', function($restmod) {
-      return $restmod('/api/chapters');
+      return $restmod.model('/api/chapters');
     });
 
     $provide.factory('Page', function($restmod) {
-      return $restmod(null);
+      return $restmod.model(null);
     });
   }));
 

@@ -9,7 +9,7 @@ describe('Restmod model collection:', function() {
   // generate a dummy module
   beforeEach(module(function($provide) {
     $provide.factory('Book', function($restmod) {
-      return $restmod('/api/books');
+      return $restmod.model('/api/books');
     });
   }));
 
