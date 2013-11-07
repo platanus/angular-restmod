@@ -61,14 +61,14 @@ var Utils = {
   /**
    * @memberof constants.Utils
    *
-   * @description Override a function, making overriden function available as this.$super
+   * @description Override a property value, making overriden function available as this.$super
    *
-   * @param  {function} _super Original function
-   * @param  {function} _fun   New function
-   * @return {mixed}        Value returned by new function
+   * @param  {function} _super Original value
+   * @param  {mixed} _fun New property value
+   * @return {mixed} Value returned by new function
    */
   override: function(_super, _fun) {
-    if(!_super) return _fun;
+    if(!_super || typeof _fun !== 'function') return _fun;
 
     return function() {
       var oldSuper = this.$super;
