@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.4.0 - 2013-10-25
+ * @version v0.5.0 - 2013-11-08
  * @link https://github.com/angular-platanus/angular-restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -8,16 +8,25 @@
 
 (function(angular, undefined) {
 'use strict';
+/**
+ * @mixin DirtyModel
+ *
+ * @description Adds the `$dirty` method to a model`s instances.
+ */
+
 angular.module('plRestmod').factory('DirtyModel', ['$restmod', function($restmod) {
 
-  return $restmod.abstract(function() {
+  return $restmod.mixin(function() {
     this.afterFeed(function(_original) {
         // store original information in a model's special property
         this.$original = _original;
       })
       .attrIgnored('$original', true) // make special property ignored
       /**
-       * Retrieves the model changes
+       * @method $dirty
+       * @memberof DirtyModel#
+       *
+       * @description Retrieves the model changes
        *
        * Property changes are determined using the strict equality operator.
        *
@@ -28,7 +37,7 @@ angular.module('plRestmod').factory('DirtyModel', ['$restmod', function($restmod
        *
        * Called without arguments, this method will return a list of changed property names.
        *
-       * @param  {string} _prop Property to query
+       * @param {string} _prop Property to query
        * @return {boolean|array} Property state or array of changed properties
        */
       .define('$dirty', function(_prop) {
