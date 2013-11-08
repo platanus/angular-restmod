@@ -649,7 +649,7 @@ angular.module('plRestmod').provider('$restmod', function() {
             ignore: ['attrIgnored'],
             decode: ['attrDecoder', 'param', 'chain'],
             encode: ['attrEncoder', 'param', 'chain'],
-            type: ['attrSerializer'],
+            serialize: ['attrSerializer'],
             hasMany: ['hasMany', 'alias'],
             hasOne: ['hasOne', 'alias']
           }, urlBuilderFactory;
@@ -683,7 +683,7 @@ angular.module('plRestmod').provider('$restmod', function() {
            * * `ignore` maps to {@link ModelBuilder#attrIgnored}
            * * `decode` maps to {@link ModelBuilder#attrDecoder}
            * * `encode` maps to {@link ModelBuilder#attrEncoder}
-           * * `type` maps to {@link ModelBuilder#attrSerializer}
+           * * `serialize` maps to {@link ModelBuilder#attrSerializer}
            * * `hasMany` maps to {@link ModelBuilder#hasMany}
            * * `hasOne` maps to {@link ModelBuilder#hasOne}
            *
