@@ -23,6 +23,8 @@ describe('Restmod model class:', function() {
     $httpBackend.when('POST', '/api/books').respond(200, { id: 1 });
   }));
 
+  // TODO: move $search, $build and $create to the collectionSpec
+
   describe('$search', function() {
 
     it('should retrieve a collection of items of same type', function() {
@@ -76,6 +78,29 @@ describe('Restmod model class:', function() {
       expect(book.$url()).toEqual(null);
       $httpBackend.flush();
       expect(book.$url()).toEqual('/api/books/1');
+    });
+
+  });
+
+  describe('$decode', function() {
+
+    it('should rename all snake case attributes by default', function() {
+      var book = Book.$build();
+      book.$decode({ snake_case: true });
+      expect(book.snake_case).toBeUndefined();
+      expect(book.snakeCase).toBeDefined();
+    });
+
+  });
+
+  describe('$encode', function() {
+
+    it('should rename all camel case attributes by default', function() {
+      var book = Book.$build({ camelCase: true }),
+          encoded = book.$encode();
+
+      expect(encoded.camelCase).toBeUndefined();
+      expect(encoded.camel_case).toBeDefined();
     });
 
   });

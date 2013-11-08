@@ -106,7 +106,9 @@ angular.module('plRestmod').provider('$restmod', function() {
               decoders = {},
               encoders = {},
               callbacks = {},
-              urlBuilder, nameEncoder, nameDecoder;
+              nameDecoder = Utils.camelcase,
+              nameEncoder = Utils.snakecase,
+              urlBuilder;
 
           // runs all callbacks associated with a given hook.
           function callback(_hook, _ctx /*, args */) {
