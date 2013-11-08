@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.5.3 - 2013-11-08
+ * @version v0.5.4 - 2013-11-08
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -1420,24 +1420,19 @@ angular.module('plRestmod')
            * @return {string} The resource url, null if anonymous
            */
           resourceUrl: function(_res, _opt) {
-            var partial = _res.$partial, pk;
+            var partial = _res.$partial,
+                pk = _res[primary];
 
-            if(!partial) {
-              // if no partial is provided, attempt to use pk with base url
-              pk = _res[primary];
-              if(pk === null || pk === undefined) return null;
-              if(_resUrl) return prepareUrl(joinUrl(_resUrl, pk), _opt); // this preceeds context
-            }
+            // TODO: prefer object 'url' property before anything
+            // prefer baseUrl + pk => $context + partial => $context + pk => partial
+            // TODO: not sure about these priorities, pk is before partial just to
+            // have the same logic for fetch and update...
 
-            if(_res.$context) {
-              // if a context is provided attemp to use it with partial or pk
-              var base = _res.$context.$url({ extension: false });
-              if(!base) return null;
-              return prepareUrl(joinUrl(base, partial || pk), _opt);
-            }
-
-            // finally return partial if given, if not return null.
-            return prepareUrl(partial || null, _opt);
+            if(pk != null && _resUrl) return prepareUrl(joinUrl(_resUrl, pk), _opt);
+            if(partial != null && _res.$context) return prepareUrl(joinUrl(_res.$context, partial), _opt);
+            if(pk != null && _res.$context) return prepareUrl(joinUrl(_res.$context, pk), _opt);
+            if(partial != null) return prepareUrl(partial);
+            return null;
           },
           /**
            * @method
