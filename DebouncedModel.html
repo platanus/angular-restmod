@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>$restmod Class: Utils</title>
+	<title>$restmod Mixin: DebouncedModel</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -143,14 +143,12 @@
 					
 
 
-	<h1 class="page-title">Class: Utils</h1>
+	<h1 class="page-title">Mixin: DebouncedModel</h1>
 <section>
 
 <header>
     <h2>
-        <span class="ancestors"><a href="constants.html">constants</a>.</span>
-    
-    Utils
+    DebouncedModel
     </h2>
     
 </header>
@@ -161,28 +159,23 @@
 
     
         
-<dt>
-    <h4 class="name" id="Utils"><span class="type-signature"></span>new Utils<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Various utilities used across
-the library</p>
-<p>This utilities are available as the <code>Utils</code> constant when restmod is included.</p>
-    </div>
-    
+            <div class="description"><p>Adds debouncing to <code>$save</code> operations so rapid consecutive calls result in only one server request.</p>
+<p>Usage:</p>
+<p>First add mixin to a model's mixin chain</p>
+<pre><code class="lang-javascript">var Bike = $restmod.model('api/bikes', 'DebouncedModel'),
+    bike = Bike.build({ id: 1, brand: 'Yeti' });</code></pre>
+<p>Then use <code>$save</code> as always</p>
+<pre><code class="lang-javascript">// The following code will just generate 1 request
+bike.$save();
+bike.$save();
+bike.$save();</code></pre>
+<p>Or with options</p>
+<pre><code class="lang-javascript">bike.$save({ timeout: 0, adjourn: false });
+// same as
+bike.$saveNow();</code></pre></div>
+        
 
-    
-    
-    
-    
-    
-    
-    
+        
 <dl class="details">
     
 
@@ -205,7 +198,7 @@ the library</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/utils.js, line 3
+        plugins/debounced.js, line 1
     </li></ul></dd>
     
 
@@ -216,20 +209,8 @@ the library</p>
     
 </dl>
 
-    
-    
 
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
+        
     
     </div>
 
@@ -251,7 +232,7 @@ the library</p>
         <dl>
             
 <dt>
-    <h4 class="name" id="camelcase"><span class="type-signature">&lt;static> </span>camelcase<span class="signature">(_string)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    <h4 class="name" id="$save"><span class="type-signature">&lt;static> </span>$save<span class="signature">(_opt)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
     
     
 </dt>
@@ -259,8 +240,7 @@ the library</p>
     
     
     <div class="description">
-        <p>Transforms a string to it's camelcase representation</p>
-<p>TODO: handle diacritics</p>
+        <p>Debounced <code>$save</code> implementation</p>
     </div>
     
 
@@ -294,312 +274,7 @@ the library</p>
 
         <tr>
             
-                <td class="name"><code>_string</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Original string</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/utils.js, line 23
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>Camelcased string</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">string</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="chain"><span class="type-signature">&lt;static> </span>chain<span class="signature">(_first, _fun)</span><span class="type-signature"> &rarr; {mixed}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Chains to filtering functions together</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_first</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>original function</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_fun</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>function to call on the original function result</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/utils.js, line 55
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>value returned by the last function call</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">mixed</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="extendOverriden"><span class="type-signature">&lt;static> </span>extendOverriden<span class="signature">(_target, _other)</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Extend an object using <code>Utils.override</code> instead of just replacing the functions.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_target</code></td>
+                <td class="name"><code>_opt</code></td>
             
 
             <td class="type">
@@ -615,14 +290,228 @@ the library</p>
 
             
 
-            <td class="description last"><p>Object to be extended</p></td>
+            <td class="description last"><p>Same as <code>setDebounceOptions</code> options.</p></td>
         </tr>
 
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        plugins/debounced.js, line 72
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$saveNow"><span class="type-signature">&lt;static> </span>$saveNow<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Convenience method that will cancel any pending save and save inmediatelly.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        plugins/debounced.js, line 122
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setDebounceOptions"><span class="type-signature">&lt;static> </span>setDebounceOptions<span class="signature">(_opt)</span><span class="type-signature"> &rarr; {<a href="ModelBuilder.html">ModelBuilder</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>ModelBuilder extension that allows model debounce configuration.</p>
+<pre><code class="lang-javascript">$restmod.model(null, function() {
+  // Sets 1000ms timeout and no rescheduling for this and child models
+  this.setDebounceOptions({ timeout: 1000, adjourn: false });
+});</code></pre>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
 	
 
         <tr>
             
-                <td class="name"><code>_other</code></td>
+                <td class="name"><code>_opt</code></td>
             
 
             <td class="type">
@@ -638,7 +527,9 @@ the library</p>
 
             
 
-            <td class="description last"><p>Source object</p></td>
+            <td class="description last"><p>Debouncing options:
+<em> timeout: sets the debounce timeout, if 0 then debouncing is deactivated.
+</em> adjourn: if true, then save operation is rescheduled on every $save call.</p></td>
         </tr>
 
 	
@@ -670,148 +561,7 @@ the library</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/utils.js, line 91
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="override"><span class="type-signature">&lt;static> </span>override<span class="signature">(_super, _fun)</span><span class="type-signature"> &rarr; {mixed}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Override a property value, making overriden function available as this.$super</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_super</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Original value</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_fun</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">mixed</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>New property value</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/utils.js, line 70
+        plugins/debounced.js, line 47
     </li></ul></dd>
     
 
@@ -836,7 +586,7 @@ the library</p>
     
             
 <div class="param-desc">
-    <p>Value returned by new function</p>
+    <p>self</p>
 </div>
 
 
@@ -847,172 +597,7 @@ the library</p>
 	</dt>
 	<dd>
 		
-<span class="param-type">mixed</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="snakecase"><span class="type-signature">&lt;static> </span>snakecase<span class="signature">(_string, _sep)</span><span class="type-signature"> &rarr; {string}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Transforms a string to it's snakecase representation</p>
-<p>TODO: handle diacritics</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_string</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Original string</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_sep</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Case separator, defaults to '_'</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/utils.js, line 40
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>Camelcased string</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">string</span>
+<span class="param-type"><a href="ModelBuilder.html">ModelBuilder</a></span>
 
 
 	</dd>
@@ -1045,7 +630,7 @@ the library</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0</a>
-		on Fri Nov 08 2013 00:18:44 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Fri Nov 08 2013 00:18:45 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
