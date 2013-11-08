@@ -1,15 +1,15 @@
 {
   "name": "angular-restmod",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "authors": [
     "Ignacio Baixas <iobaixas@gmai.com>"
   ],
   "description": "API Bound Models for AngularJS",
   "license": "MIT",
-  "homepage": "https://github.com/angular-platanus/angular-restmod",
+  "homepage": "https://github.com/angular-platanus/restmod",
   "repository": {
     "type": "git",
-    "url": "git://github.com/angular-platanus/angular-restmod.git"
+    "url": "git://github.com/angular-platanus/restmod.git"
   },
   "main": "./dist/angular-restmod.min.js",
   "ignore": [
