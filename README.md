@@ -1,4 +1,4 @@
-Angular Restmod  [![Build Status](https://secure.travis-ci.org/angular-platanus/angular-restmod.png)](https://travis-ci.org/angular-platanus/angular-restmod)
+Angular Restmod  [![Build Status](https://secure.travis-ci.org/angular-platanus/restmod.png)](https://travis-ci.org/angular-platanus/restmod)
 ===============
 
 ### API Bound Models for AngularJS
