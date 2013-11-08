@@ -33,7 +33,8 @@ module.exports = function(grunt) {
             'src/module/restmod.js',
             'src/module/rest_url_builder.js'
           ],
-          'dist/plugins/dirty_model.js': 'src/plugins/dirty_model.js'
+          'dist/plugins/dirty_model.js': 'src/plugins/dirty_model.js',
+          'dist/plugins/debounced.js': 'src/plugins/debounced.js'
         }
       }
     },
@@ -44,7 +45,8 @@ module.exports = function(grunt) {
       dist: {
         files: {
           'dist/<%= pkg.name %>.min.js': 'dist/<%= pkg.name %>.js',
-          'dist/plugins/dirty_model.min.js': 'dist/plugins/dirty_model.js'
+          'dist/plugins/dirty_model.min.js': 'dist/plugins/dirty_model.js',
+          'dist/plugins/debounced.min.js': 'dist/plugins/debounced.js'
         }
       }
     },
