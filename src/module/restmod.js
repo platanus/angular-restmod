@@ -657,9 +657,39 @@ angular.module('plRestmod').provider('$restmod', function() {
           /**
            * @class ModelBuilder
            *
-           * @description Provides the DSL for the model generator.
+           * @description
            *
-           * TODO: link to model building overview
+           * Provides the DSL for model generation.
+           *
+           * ### About model descriptions
+           *
+           * This class is also responsible for parsing **model description objects** passed to
+           * the mixin chain.
+           *
+           * Example of description:
+           *
+           * ```javascript
+           * $restmod.model('', {
+           *   propWithDefault: { init: 20 },
+           *   propWithDecoder: { decode: 'date', chain: true },
+           *   relation: { hasMany: 'Other' },
+           * });
+           * ```
+           *
+           * The descriptions are processed by the `describe` method and mapped to builder attribute methods,
+           * the following built in property modifiers are provided (see each method docs for usage information):
+           *
+           * * `init` maps to {@link ModelBuilder#attrDefault}
+           * * `ignore` maps to {@link ModelBuilder#attrIgnored}
+           * * `decode` maps to {@link ModelBuilder#attrDecoder}
+           * * `encode` maps to {@link ModelBuilder#attrEncoder}
+           * * `type` maps to {@link ModelBuilder#attrSerializer}
+           * * `hasMany` maps to {@link ModelBuilder#hasMany}
+           * * `hasOne` maps to {@link ModelBuilder#hasOne}
+           *
+           * Mapping a *primitive* to a property is the same as using the `init` modifier.
+           * Mapping a *function* to a property calls {@link ModelBuilder#define} on the function.
+           *
            */
           var Builder = {
             setHttpOptions: function(_options) {
