@@ -168,8 +168,29 @@
     
     
     <div class="description">
-        <p>Provides the DSL for the model generator.</p>
-<p>TODO: link to model building overview</p>
+        <p>Provides the DSL for model generation.</p>
+<h3>About model descriptions</h3>
+<p>This class is also responsible for parsing <strong>model description objects</strong> passed to
+the mixin chain.</p>
+<p>Example of description:</p>
+<pre><code class="lang-javascript">$restmod.model('', {
+  propWithDefault: { init: 20 },
+  propWithDecoder: { decode: 'date', chain: true },
+  relation: { hasMany: 'Other' },
+});</code></pre>
+<p>The descriptions are processed by the <code>describe</code> method and mapped to builder attribute methods,
+the following built in property modifiers are provided (see each method docs for usage information):</p>
+<ul>
+<li><code>init</code> maps to <a href="ModelBuilder.html#attrDefault">ModelBuilder#attrDefault</a></li>
+<li><code>ignore</code> maps to <a href="ModelBuilder.html#attrIgnored">ModelBuilder#attrIgnored</a></li>
+<li><code>decode</code> maps to <a href="ModelBuilder.html#attrDecoder">ModelBuilder#attrDecoder</a></li>
+<li><code>encode</code> maps to <a href="ModelBuilder.html#attrEncoder">ModelBuilder#attrEncoder</a></li>
+<li><code>serialize</code> maps to <a href="ModelBuilder.html#attrSerializer">ModelBuilder#attrSerializer</a></li>
+<li><code>hasMany</code> maps to <a href="ModelBuilder.html#hasMany">ModelBuilder#hasMany</a></li>
+<li><code>hasOne</code> maps to <a href="ModelBuilder.html#hasOne">ModelBuilder#hasOne</a></li>
+</ul>
+<p>Mapping a <em>primitive</em> to a property is the same as using the <code>init</code> modifier.
+Mapping a <em>function</em> to a property calls <a href="ModelBuilder.html#define">ModelBuilder#define</a> on the function.</p>
     </div>
     
 
@@ -410,7 +431,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 917
+        module/restmod.js, line 947
     </li></ul></dd>
     
 
@@ -577,7 +598,7 @@ default value is required.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 847
+        module/restmod.js, line 877
     </li></ul></dd>
     
 
@@ -790,7 +811,7 @@ default value is required.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 939
+        module/restmod.js, line 969
     </li></ul></dd>
     
 
@@ -954,7 +975,7 @@ default value is required.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1103
+        module/restmod.js, line 1133
     </li></ul></dd>
     
 
@@ -1124,7 +1145,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 815
+        module/restmod.js, line 845
     </li></ul></dd>
     
 
@@ -1315,7 +1336,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 865
+        module/restmod.js, line 895
     </li></ul></dd>
     
 
@@ -1489,7 +1510,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 894
+        module/restmod.js, line 924
     </li></ul></dd>
     
 
@@ -1653,7 +1674,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1087
+        module/restmod.js, line 1117
     </li></ul></dd>
     
 
@@ -1820,7 +1841,7 @@ inside de new method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1034
+        module/restmod.js, line 1064
     </li></ul></dd>
     
 
@@ -1991,7 +2012,7 @@ inside de new method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1012
+        module/restmod.js, line 1042
     </li></ul></dd>
     
 
@@ -2133,7 +2154,7 @@ on each property description type.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 786
+        module/restmod.js, line 816
     </li></ul></dd>
     
 
@@ -2225,7 +2246,7 @@ on each property description type.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 732
+        module/restmod.js, line 762
     </li></ul></dd>
     
 
@@ -2428,7 +2449,7 @@ attribute definition keyword that can be later used when calling
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 767
+        module/restmod.js, line 797
     </li></ul></dd>
     
 
@@ -2620,7 +2641,7 @@ a direct restmod Model type reference.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 963
+        module/restmod.js, line 993
     </li></ul></dd>
     
 
@@ -2812,7 +2833,7 @@ a direct restmod Model type reference.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 985
+        module/restmod.js, line 1015
     </li></ul></dd>
     
 
@@ -2980,7 +3001,7 @@ make different parameters available to callbacks.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1058
+        module/restmod.js, line 1088
     </li></ul></dd>
     
 
@@ -3128,7 +3149,7 @@ in JSON api should use snake case with underscores.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 701
+        module/restmod.js, line 731
     </li></ul></dd>
     
 
@@ -3276,7 +3297,7 @@ in JSON api should use snake case with underscores.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 720
+        module/restmod.js, line 750
     </li></ul></dd>
     
 
@@ -3569,7 +3590,7 @@ and returns an url builder.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 682
+        module/restmod.js, line 712
     </li></ul></dd>
     
 
@@ -3615,7 +3636,7 @@ and returns an url builder.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0</a>
-		on Fri Nov 08 2013 00:18:45 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Fri Nov 08 2013 11:12:06 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
