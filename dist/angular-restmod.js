@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.5.4 - 2013-11-08
+ * @version v0.5.5 - 2013-11-08
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -1429,8 +1429,11 @@ angular.module('plRestmod')
             // have the same logic for fetch and update...
 
             if(pk != null && _resUrl) return prepareUrl(joinUrl(_resUrl, pk), _opt);
-            if(partial != null && _res.$context) return prepareUrl(joinUrl(_res.$context, partial), _opt);
-            if(pk != null && _res.$context) return prepareUrl(joinUrl(_res.$context, pk), _opt);
+            if(_res.$context) {
+              var ctxUrl = _res.$context.$url({ extension: false });
+              if(partial != null && _res.$context) return prepareUrl(joinUrl(ctxUrl, partial), _opt);
+              if(pk != null && _res.$context) return prepareUrl(joinUrl(ctxUrl, pk), _opt);
+            }
             if(partial != null) return prepareUrl(partial);
             return null;
           },
