@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.5.2 - 2013-11-08
+ * @version v0.5.3 - 2013-11-08
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -234,7 +234,9 @@ angular.module('plRestmod').provider('$restmod', function() {
               decoders = {},
               encoders = {},
               callbacks = {},
-              urlBuilder, nameEncoder, nameDecoder;
+              nameDecoder = Utils.camelcase,
+              nameEncoder = Utils.snakecase,
+              urlBuilder;
 
           // runs all callbacks associated with a given hook.
           function callback(_hook, _ctx /*, args */) {
@@ -804,8 +806,9 @@ angular.module('plRestmod').provider('$restmod', function() {
            * });
            * ```
            *
-           * The descriptions are processed by the `describe` method and mapped to builder attribute methods,
-           * the following built in property modifiers are provided (see each method docs for usage information):
+           * The descriptions are processed by the `describe` method and mapped to builder attribute methods.
+           *
+           * The following built in property modifiers are provided (see each method docs for usage information):
            *
            * * `init` maps to {@link ModelBuilder#attrDefault}
            * * `ignore` maps to {@link ModelBuilder#attrIgnored}
