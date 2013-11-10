@@ -952,7 +952,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             attrSerializer: function(_name, _serializer, _opt) {
               if(typeof _serializer === 'string') {
-                _serializer = $injector.get(Utils.camelcase(_serializer) + 'Serializer')
+                _serializer = $injector.get(Utils.camelcase(_serializer) + 'Serializer');
               }
 
               // TODO: if(!_serializer) throw $setupError
