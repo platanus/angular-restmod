@@ -1,3 +1,7 @@
+/*
+ *
+ */
+
 'use strict';
 
 /**
@@ -976,7 +980,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 _filter = function(_value) { return filter(_value, _filterParam); };
               }
 
-              decoders[_name] = _chain ? chain(decoders[_name], _filter) : _filter;
+              decoders[_name] = _chain ? Utils.chain(decoders[_name], _filter) : _filter;
               return this;
             },
 
@@ -998,7 +1002,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 _filter = function(_value) { return filter(_value, _filterParam); };
               }
 
-              encoders[_name] = _chain ? chain(encoders[_name], _filter) : _filter;
+              encoders[_name] = _chain ? Utils.chain(encoders[_name], _filter) : _filter;
               return this;
             },
 
