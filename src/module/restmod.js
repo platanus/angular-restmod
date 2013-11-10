@@ -96,11 +96,11 @@ angular.module('plRestmod').provider('$restmod', function() {
         model: function(_urlParams/* , _mix */) {
 
           var masks = {
-              $partial: SyncMask.ALL,
-              $context: SyncMask.ALL,
-              $promise: SyncMask.ALL,
-              $pending: SyncMask.ALL,
-              $error: SyncMask.ALL
+                $partial: SyncMask.ALL,
+                $context: SyncMask.ALL,
+                $promise: SyncMask.ALL,
+                $pending: SyncMask.ALL,
+                $error: SyncMask.ALL
               },
               defaults = [],
               decoders = {},
@@ -288,7 +288,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 }
               }
 
-              callback('after_feed', this, original, _raw);
+              callback('after-feed', this, original, _raw);
               return this;
             },
 
@@ -312,7 +312,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 }
               }
 
-              callback('before_render', this, raw);
+              callback('before-render', this, raw);
 
               return raw;
             },
@@ -329,12 +329,22 @@ angular.module('plRestmod').provider('$restmod', function() {
             $fetch: function() {
               // verify that instance has a bound url
               if(!this.$url()) throw Error('Cannot fetch an unbound resource');
-              return this.$send({ method: 'GET', url: this.$url(), feed: true }, function(_response) {
+
+              var request = { method: 'GET', url: this.$url() };
+
+              callback('before-fetch', this, request);
+              callback('before-request', this, request);
+              return this.$send(request, function(_response) {
+
+                callback('after-request', this, _response);
+
                 var data = _response.data;
                 if (!data || isArray(data)) {
                   throw Error('Expected object while feeding resource');
                 }
                 this.$decode(data);
+
+                callback('after-fetch', this, _response );
               });
             },
 
@@ -348,7 +358,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} this
              */
             $save: function() {
-              var url;
+              var url, request;
 
               if(this.$url()) {
                 // If bound, update
@@ -356,19 +366,20 @@ angular.module('plRestmod').provider('$restmod', function() {
                 url = urlBuilder.updateUrl(this);
                 if(!url) throw Error('Update is not supported by this resource');
 
-                callback('before_update', this);
-                callback('before_save', this);
-                return this.$send({ method: 'PUT', url: url, data: this.$encode(SyncMask.ENCODE_CREATE) }, function(_response) {
+                request = { method: 'PUT', url: url, data: this.$encode(SyncMask.ENCODE_UPDATE) };
 
-                  // IDEA: maybe this should be a method call (like $feedCreate), this would allow
-                  // a user to override the feed logic for each action... On the other hand, allowing
-                  // this breaks the extend-using-hooks convention.
+                callback('before-update', this, request);
+                callback('before-save', this, request);
+                callback('before-request', this, request);
+                return this.$send(request, function(_response) {
+
+                  callback('after-request', this, _response);
 
                   var data = _response.data;
                   if (data && !isArray(data)) this.$decode(data, SyncMask.DECODE_UPDATE);
 
-                  callback('after_update', this);
-                  callback('after_save', this);
+                  callback('after-update', this, _response);
+                  callback('after-save', this, _response);
                 });
               } else {
                 // If not bound create.
@@ -376,15 +387,20 @@ angular.module('plRestmod').provider('$restmod', function() {
                 url = urlBuilder.createUrl(this);
                 if(!url) throw Error('Create is not supported by this resource');
 
-                callback('before_save', this);
-                callback('before_create', this);
-                return this.$send({ method: 'POST', url: url, data: this.$encode(SyncMask.ENCODE_UPDATE) }, function(_response) {
+                request = { method: 'POST', url: url, data: this.$encode(SyncMask.ENCODE_CREATE) };
+
+                callback('before-save', this, request);
+                callback('before-create', this, request);
+                callback('before-request', this, request);
+                return this.$send(request, function(_response) {
+
+                  callback('after-request', this, _response);
 
                   var data = _response.data;
-                  if (data && !isArray(data)) this.$decode(data, SyncMask.DECODE_CREATE);
+                   if (data && !isArray(data)) this.$decode(data, SyncMask.DECODE_CREATE);
 
-                  callback('after_create', this);
-                  callback('after_save', this);
+                  callback('after-create', this, _response);
+                  callback('after-save', this, _response);
                 });
               }
             },
@@ -402,9 +418,11 @@ angular.module('plRestmod').provider('$restmod', function() {
               var url = urlBuilder.destroyUrl(this);
               if(!url) throw Error('Destroy is not supported by this resource');
 
-              callback('before_destroy', this);
-              return this.$send({ method: 'DELETE', url: url }, function() {
-                callback('after_destroy', this);
+              var request = { method: 'DELETE', url: url };
+
+              callback('before-destroy', this, request);
+              return this.$send(request, function(_response) {
+                callback('after-destroy', this, _response);
               });
             }
           };
@@ -617,10 +635,15 @@ angular.module('plRestmod').provider('$restmod', function() {
 
               if(!this.$isCollection) throw Error('$fetch is only supported by collections');
 
-              var params = _params ? extend({}, this.$params || {}, _params) : this.$params;
+              var params = _params ? extend({}, this.$params || {}, _params) : this.$params,
+                  request = { method: 'GET', url: this.$url(), params: params };
 
               // TODO: check that collection is bound.
-              send(this, { method: 'GET', url: this.$url(), params: params }, function(_response) {
+              callback('before-fetch-many', this, request);
+              callback('before-request', this, request);
+              send(this, request, function(_response) {
+
+                callback('after-request', this, _response);
 
                 var data = _response.data;
                 if(!data || !isArray(data)) {
@@ -630,8 +653,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 // reset and feed retrieved data.
                 this.$reset().$feed(data);
 
-                // execute callback
-                callback('after_collection_fetch', this, _response);
+                callback('after-fetch-many', this, _response);
               });
 
               return this;
@@ -678,8 +700,9 @@ angular.module('plRestmod').provider('$restmod', function() {
            * });
            * ```
            *
-           * The descriptions are processed by the `describe` method and mapped to builder attribute methods,
-           * the following built in property modifiers are provided (see each method docs for usage information):
+           * The descriptions are processed by the `describe` method and mapped to builder attribute methods.
+           *
+           * The following built in property modifiers are provided (see each method docs for usage information):
            *
            * * `init` maps to {@link ModelBuilder#attrDefault}
            * * `ignore` maps to {@link ModelBuilder#attrIgnored}
@@ -1094,16 +1117,18 @@ angular.module('plRestmod').provider('$restmod', function() {
               return this;
             },
 
-            beforeSave: function(_do) { return this.on('before_save', _do); },
-            beforeCreate: function(_do) { return this.on('before_create', _do); },
-            afterCreate: function(_do) { return this.on('after_create', _do); },
-            beforeUpdate: function(_do) { return this.on('before_update', _do); },
-            afterUpdate: function(_do) { return this.on('after_update', _do); },
-            afterSave: function(_do) { return this.on('after_save', _do); },
-            beforeDestroy: function(_do) { return this.on('before_destroy', _do); },
-            afterDestroy: function(_do) { return this.on('after_destroy', _do); },
-            afterFeed: function(_do) { return this.on('after_feed', _do); },
-            beforeRender: function(_do) { return this.on('before_render', _do); },
+            beforeRequest: function(_do) { return this.on('before-request', _do); },
+            afterRequest: function(_do) { return this.on('after-request', _do); },
+            beforeSave: function(_do) { return this.on('before-save', _do); },
+            beforeCreate: function(_do) { return this.on('before-create', _do); },
+            afterCreate: function(_do) { return this.on('after-create', _do); },
+            beforeUpdate: function(_do) { return this.on('before-update', _do); },
+            afterUpdate: function(_do) { return this.on('after-update', _do); },
+            afterSave: function(_do) { return this.on('after-save', _do); },
+            beforeDestroy: function(_do) { return this.on('before-destroy', _do); },
+            afterDestroy: function(_do) { return this.on('after-destroy', _do); },
+            afterFeed: function(_do) { return this.on('after-feed', _do); },
+            beforeRender: function(_do) { return this.on('before-render', _do); },
 
             /// Experimental modifiers
 
@@ -1134,7 +1159,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             attrExpression: function(_name, _expr) {
               var filter = $parse(_expr);
-              this.on('after_feed', function() {
+              this.on('after-feed', function() {
                 this[_name] = filter(this);
               });
             }

@@ -105,5 +105,42 @@ describe('Restmod model class:', function() {
 
   });
 
+  describe('$fetch', function() {
+
+    it('should call callbacks in proper order', inject(function($restmod) {
+      var calls = [],
+          Bike = $restmod.model('/api/books', function() {
+            this.on('before-fetch', function() { calls.push('bf'); })
+                .on('before-request', function() { calls.push('br'); })
+                .on('after-request', function() { calls.push('ar'); })
+                .on('after-fetch', function() { calls.push('af'); })
+          });
+
+      Bike.$build({ id: 1 }).$fetch();
+      $httpBackend.flush();
+      expect(calls).toEqual(['bf','br','ar','af']);
+    }));
+  });
+
+  describe('$save', function() {
+
+    it('should call callbacks in proper order', inject(function($restmod) {
+      var calls = [],
+          Bike = $restmod.model('/api/books', function() {
+            this.on('before-save', function() { calls.push('bs'); })
+                .on('before-create', function() { calls.push('bc'); })
+                .on('before-request', function() { calls.push('br'); })
+                .on('after-request', function() { calls.push('ar'); })
+                .on('after-create', function() { calls.push('ac'); })
+                .on('after-save', function() { calls.push('as'); });
+          });
+
+      Bike.$build({ camelCase: true }).$save();
+      $httpBackend.flush();
+      expect(calls).toEqual(['bs','bc','br','ar','ac','as']);
+    }));
+
+  });
+
 });
 
