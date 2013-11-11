@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.5.5 - 2013-11-08
+ * @version v0.6.0 - 2013-11-11
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -46,8 +46,20 @@ var bind = angular.bind,
 
 angular.module('plRestmod').factory('DebouncedModel', ['$restmod', '$timeout', '$q', function($restmod, $timeout, $q) {
 
+  // builds a new async save function bound to a given context and promise.
+  function buildAsyncSaveFun(_this, _oldSave, _promise) {
+    return function() {
+      _oldSave.call(_this).$then(
+        bind(_promise, _promise.resolve),
+        bind(_promise, _promise.reject)
+      );
+
+      _this.$dmStatus = null;
+    };
+  }
+
   return $restmod.mixin(function() {
-    this.attrIgnored('$dmPromise', true)
+    this.attrIgnored('$dmStatus', true)
 
         .define('$dmTimeout', 500)
         .define('$dmAdjourn', true)
@@ -83,13 +95,22 @@ angular.module('plRestmod').factory('DebouncedModel', ['$restmod', '$timeout', '
          *
          * @description Debounced `$save` implementation
          *
+         * IDEA: think of a way of separating the scheduling-rescheduling logic from
+         * the async save implementation, this way it can be used for other actions.
+         * Something like:
+         *
+         *    this.$debounce('$save', fun, timeout, adjourn);
+         *
+         * This would call fun with a promise in the model context.
+         *
          * @param {object} _opt Same as `setDebounceOptions` options.
          * @return {Model} self
          */
         .define('$save', function(_opt) {
 
           var timeout = this.$dmTimeout,
-              adjourn = this.$dmAdjourn;
+              adjourn = this.$dmAdjourn,
+              status = this.$dmStatus;
 
           // apply configuration overrides
           if(_opt !== undefined) {
@@ -99,31 +120,40 @@ angular.module('plRestmod').factory('DebouncedModel', ['$restmod', '$timeout', '
             }
           }
 
-          if(this.$dmPromise) {
-            if(!adjourn) return this; // if adjourn mode is deactivated, just wait for queued save operation to be executed.
-            $timeout.cancel(this.$dmPromise);
-            this.$dmPromise = null;
+          if(!status) {
+
+            // if timeout is set to 0, then just call save inmediatelly.
+            if(!timeout) return this.$super();
+
+            var deferred = $q.defer(),
+                asyncSave = buildAsyncSaveFun(this, this.$super, deferred);
+
+            this.$dmStatus = {
+              save: asyncSave,
+              promise: deferred.promise,
+              timeout: $timeout(asyncSave, timeout)
+            };
+
+            this.$promise = deferred.promise;
+
+          } else {
+
+            // reschedule only if adjourn hasnt been deactivated.
+            if(adjourn) {
+              $timeout.cancel(status.timeout);
+
+              // depending on timeout schedule or save inmediatelly.
+              if(timeout) {
+                status.timeout = $timeout(status.save, timeout);
+              } else {
+                status.save();
+              }
+            }
+
+            // keep the last promise.
+            this.$promise = status.promise;
           }
 
-          // If timeout is set to 0, then just call save.
-          if(!timeout) return this.$super();
-
-          var promise = $q.defer(),
-              $super = this.$super, // super is only available during the function execution, so it must be cached
-              self = this;
-
-          function asyncSave() {
-            $super.call(self).$then(
-              bind(promise, promise.resolve),
-              bind(promise, promise.reject)
-            );
-
-            self.$dmPromise = null;
-          }
-
-          this.$dmPromise = $timeout(asyncSave, timeout);
-          // TODO: if timeout.cancel is called, this promise is never resolved
-          this.$promise = promise; // update last promise prop.
           return this;
         })
 
