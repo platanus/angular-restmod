@@ -22,6 +22,19 @@ describe('Plugin: Debounced Model', function() {
       $timeout.flush();
       $httpBackend.flush();
     }));
+
+    it('should fulfill all promises related to consecutive requests', inject(function($timeout, $httpBackend, Bike) {
+      $httpBackend.when('PUT','/api/bikes/1').respond(200, '');
+
+      var bike = Bike.$build({ id: 1, brand: 'Trek' }), successCount = 0;
+      bike.$save().$then(function() { successCount++; });
+      bike.$save().$then(function() { successCount++; });
+      bike.$save().$then(function() { successCount++; });
+      $timeout.flush();
+      $httpBackend.flush();
+
+      expect(successCount).toEqual(3);
+    }));
   });
 
   describe('`$saveNow` function', function() {
