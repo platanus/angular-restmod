@@ -593,22 +593,6 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof ModelCollection#
              *
-             * @description Resets the collection's contents, marks collection as not $resolved
-             *
-             * This method is for use in collections only.
-             *
-             * @return {Collection} self
-             */
-            $reset: function() {
-              if(!this.$isCollection) throw new Error('$reset is only supported by collections');
-              this.$resolved = false;
-              this.length = 0;
-              return this;
-            },
-
-            /**
-             * @memberof ModelCollection#
-             *
              * @description Feeds raw collection data into the collection, marks collection as $resolved
              *
              * This method is for use in collections only.
@@ -618,6 +602,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             $feed: function(_raw) {
               if(!this.$isCollection) throw new Error('$feed is only supported by collections');
+              if(!this.$resolved) this.length = 0; // reset contents if not resolved.
               forEach(_raw, this.$buildRaw, this);
               this.$resolved = true;
               return this;
@@ -626,7 +611,23 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof ModelCollection#
              *
-             * @description Begin a server request to populate collection.
+             * @description Resets the collection's resolve status.
+             *
+             * This method is for use in collections only.
+             *
+             * @return {Collection} self
+             */
+            $reset: function() {
+              if(!this.$isCollection) throw new Error('$reset is only supported by collections');
+              this.$resolved = false;
+              return this;
+            },
+
+            /**
+             * @memberof ModelCollection#
+             *
+             * @description Begin a server request to populate collection. This method does not
+             * clear the collection contents, use `$refresh` to reset and fetch.
              *
              * This method is for use in collections only.
              *
@@ -655,15 +656,27 @@ angular.module('plRestmod').provider('$restmod', function() {
                 }
 
                 // reset and feed retrieved data.
-                this.$reset().$feed(data);
+                this.$feed(data);
 
                 callback('after-fetch-many', this, _response);
               });
 
               return this;
+            },
+
+            /**
+             * @memberof ModelCollection#
+             *
+             * @description Resets and fetches content.
+             *
+             * @param  {object} _params `$fetch` params
+             * @return {Collection} self
+             */
+            $refresh: function(_params) {
+              return this.$reset().$fetch(_params);
             }
 
-            // IDEA: $fetchMore, $push, $remove, etc
+            // IDEA: $clear, $push, $remove, etc
           };
 
           // Model customization phase:

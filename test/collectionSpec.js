@@ -42,21 +42,42 @@ describe('Restmod model collection:', function() {
       expect(query[0] instanceof Book).toBeTruthy();
     });
 
-    describe('when collection is resolved', function() {
+    it('should append new items if called again', function() {
+      query = query.$fetch();
+      $httpBackend.flush();
+      expect(query.$resolved).toBe(true);
+      expect(query.length).toEqual(2);
+      query.$fetch({ keywords: 'bikes' });
+      $httpBackend.flush();
+      expect(query.length).toEqual(3);
+    });
 
-      beforeEach(function() {
-        query = query.$fetch();
-        $httpBackend.flush();
-      });
+  });
 
-      it('should reset collection if called with different params', function() {
-        expect(query.$resolved).toBe(true);
-        expect(query.length).toEqual(2);
-        query.$fetch({ keywords: 'bikes' });
-        $httpBackend.flush();
-        expect(query.length).toEqual(1);
-      });
+  describe('$reset', function() {
 
+    it('should make the next call to $fetch clear old items', function() {
+      var query = Book.$collection({ keywords: 'pirate' });
+      query.$fetch();
+      $httpBackend.flush();
+      expect(query.length).toEqual(2);
+      query.$reset().$fetch({ keywords: 'bikes' });
+      $httpBackend.flush();
+      expect(query.length).toEqual(1);
+    });
+
+  });
+
+  describe('$refresh', function() {
+
+    it('should clear old items on resolve', function() {
+      var query = Book.$collection({ keywords: 'pirate' });
+      query.$fetch();
+      $httpBackend.flush();
+      expect(query.length).toEqual(2);
+      query.$refresh({ keywords: 'bikes' });
+      $httpBackend.flush();
+      expect(query.length).toEqual(1);
     });
 
   });
