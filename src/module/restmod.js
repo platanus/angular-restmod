@@ -70,7 +70,7 @@ angular.module('plRestmod').provider('$restmod', function() {
      *
      * ```javascript
      * $provider.pushModelBase('ChangeModel', 'LazyRelations', 'ThrottledModel')
-     * ``
+     * ```
      */
     pushModelBase: function(/* mixins */) {
       Array.prototype.push.apply(BASE_CHAIN, arguments);
@@ -255,7 +255,13 @@ angular.module('plRestmod').provider('$restmod', function() {
              *
              * @description Promise chaining method, keeps the model instance as the chain context.
              *
-             * Usage: col.$fetch().$then(function() { });
+             * Calls `$q.then` on the model's last promise.
+             *
+             * Usage:
+             *
+             * ```javascript
+             * col.$fetch().$then(function() { });
+             * ```
              *
              * @param {function} _success success callback
              * @param {function} _error error callback
@@ -264,6 +270,26 @@ angular.module('plRestmod').provider('$restmod', function() {
             $then: function(_success, _error) {
               this.$promise = this.$promise.then(_success, _error);
               return this;
+            },
+
+            /**
+             * @memberof Model#
+             *
+             * @description Promise chaining, keeps the model instance as the chain context.
+             *
+             * Calls ´$q.finally´ on the model's last promise (not really, in 1.2.0 it will).
+             *
+             * Usage:
+             *
+             * ```javascript
+             * col.$fetch().$finally(function() { });
+             * ```
+             *
+             * @param {function} _cb callback
+             * @return {Model} self
+             */
+            $finally: function(_cb) {
+              return this.$then(_cb, _cb);
             },
 
             /**
@@ -576,18 +602,42 @@ angular.module('plRestmod').provider('$restmod', function() {
              *
              * @description Promise chaining method, keeps the collection instance as the chain context.
              *
-             * This method is for use in collections only.
+             * Calls `$q.then` on the collection's last promise.
              *
-             * Usage: col.$fetch().$then(function() { });
+             * Usage:
+             *
+             * ```javascript
+             * col.$fetch().$then(function() { });
+             * ```
              *
              * @param {function} _success success callback
              * @param {function} _error error callback
-             * @return {Collection} self
+             * @return {ModelCollection} self
              */
             $then: function(_success, _error) {
               if(!this.$isCollection) throw new Error('$then is only supported by collections');
               this.$promise = this.$promise.then(_success, _error);
               return this;
+            },
+
+            /**
+             * @memberof ModelCollection#
+             *
+             * @description Promise chaining, keeps the collection instance as the chain context.
+             *
+             * Calls ´$q.finally´ on the collection's last promise (not really, in 1.2.0 it will)
+             *
+             * Usage:
+             *
+             * ```javascript
+             * col.$fetch().$finally(function() { });
+             * ```
+             *
+             * @param {function} _cb callback
+             * @return {ModelCollection} self
+             */
+            $finally: function(_cb) {
+              return this.$then(_cb, _cb);
             },
 
             /**
