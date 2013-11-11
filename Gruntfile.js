@@ -34,7 +34,8 @@ module.exports = function(grunt) {
             'src/module/rest_url_builder.js'
           ],
           'dist/plugins/debounced.js': 'src/plugins/debounced.js',
-          'dist/plugins/dirty.js': 'src/plugins/dirty.js'
+          'dist/plugins/dirty.js': 'src/plugins/dirty.js',
+          'dist/plugins/paged.js': 'src/plugins/paged.js'
         }
       }
     },
@@ -46,7 +47,8 @@ module.exports = function(grunt) {
         files: {
           'dist/<%= pkg.name %>.min.js': 'dist/<%= pkg.name %>.js',
           'dist/plugins/debounced.min.js': 'dist/plugins/debounced.js',
-          'dist/plugins/dirty.min.js': 'dist/plugins/dirty.js'
+          'dist/plugins/dirty.min.js': 'dist/plugins/dirty.js',
+          'dist/plugins/paged.min.js': 'dist/plugins/paged.js'
         }
       }
     },
