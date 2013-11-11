@@ -162,6 +162,57 @@ angular.module('plRestmod').provider('$restmod', function() {
             });
           }
 
+          // recursive decode function, used by $decode
+          function decode(_ctx, _target, _raw, _prefix, _mask) {
+
+            // TODO: does undefined & 1 evaluates to 0 in every browser?
+            var key, decodedName, decoder, value, result = {};
+            for(key in _raw) {
+              if(_raw.hasOwnProperty(key) && !((masks[_prefix + key] || 0) & _mask)) {
+                decodedName = nameDecoder ? nameDecoder(key) : key;
+                decoder = decoders[_prefix + decodedName];
+                value = _raw[key];
+                if(decoder) {
+                  value = decoder.call(_ctx, value);
+                  if(value === undefined) continue;
+                  result[decodedName] = _target[decodedName] = value;
+                } else if(!isObject(value)) { // IDEA: make this optional: "enable_nested_values"
+                  result[decodedName] = _target[decodedName] = value;
+                } else {
+                  result[decodedName] = decode(
+                    _ctx,
+                    _target[decodedName] = {},
+                    value,
+                    _prefix + decodedName + '.',
+                    _mask
+                  );
+                }
+              }
+            }
+
+            return result;
+          }
+
+          // recursive encode function, used by $encode
+          function encode(_ctx, _source, _prefix, _mask) {
+            var key, value, encodedName, encoder, raw = {};
+            for(key in _source) {
+              if(_source.hasOwnProperty(key) && !((masks[_prefix + key] || 0) & _mask)) {
+                value = _source[key];
+                encodedName = nameEncoder ? nameEncoder(key) : key;
+                encoder = encoders[_prefix + key];
+                if(encoder) {
+                  value = encoder.call(_ctx, value);
+                } else if(isObject(value)) { // IDEA: make this optional: "enable_nested_values"
+                  value = encode(_ctx, value, _prefix + key + '.');
+                }
+                raw[encodedName] = value;
+              }
+            }
+
+            return raw;
+          }
+
           /**
            * @class Model
            *
@@ -302,22 +353,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} this
              */
             $decode: function(_raw, _mask) {
-              if(!_mask) _mask = SyncMask.DECODE_USER;
-
-              // TODO: does undefined & 1 evaluates to 0 in every browser?
-              var key, decodedName, decoder, value, original = {};
-              for(key in _raw) {
-                if(_raw.hasOwnProperty(key) && !((masks[key] || 0) & _mask)) {
-                  decodedName = nameDecoder ? nameDecoder(key) : key;
-                  decoder = decoders[decodedName];
-                  value = decoder ? decoder.call(this, _raw[key]) : _raw[key];
-
-                  if(value !== undefined) {
-                    original[decodedName] = this[decodedName] = value;
-                  }
-                }
-              }
-
+              var original = decode(this, this, _raw, '', _mask || SyncMask.DECODE_USER);
               callback('after-feed', this, original, _raw);
               return this;
             },
@@ -331,19 +367,8 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} this
              */
             $encode: function(_mask) {
-              if(!_mask) _mask = SyncMask.ENCODE_USER;
-
-              var key, encodedName, encoder, raw = {};
-              for(key in this) {
-                if(this.hasOwnProperty(key) && !((masks[key] || 0) & _mask)) {
-                  encodedName = nameEncoder ? nameEncoder(key) : key;
-                  encoder = encoders[key];
-                  raw[encodedName] = encoder ? encoder.call(this, this[key]) : this[key];
-                }
-              }
-
+              var raw = encode(this, this, '', _mask || SyncMask.ENCODE_USER);
               callback('before-render', this, raw);
-
               return raw;
             },
 

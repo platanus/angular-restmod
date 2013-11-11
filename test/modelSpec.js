@@ -2,20 +2,14 @@
 
 describe('Restmod model class:', function() {
 
-  var $httpBackend, Book;
+  var $httpBackend, $restmod, Book;
 
   beforeEach(module('plRestmod'));
 
-  // generate a dummy module
-  beforeEach(module(function($provide) {
-    $provide.factory('Book', function($restmod) {
-      return $restmod.model('/api/books');
-    });
-  }));
-
   beforeEach(inject(function($injector) {
     $httpBackend = $injector.get('$httpBackend');
-    Book = $injector.get('Book');
+    $restmod = $injector.get('$restmod');
+    Book = $restmod.model('/api/books');
 
     // Initialize mock api
     $httpBackend.when('GET', '/api/books?minPages=100').respond([ {name: 'Los piratas del Caribe' }]);
@@ -85,10 +79,35 @@ describe('Restmod model class:', function() {
   describe('$decode', function() {
 
     it('should rename all snake case attributes by default', function() {
-      var book = Book.$build();
-      book.$decode({ snake_case: true });
-      expect(book.snake_case).toBeUndefined();
-      expect(book.snakeCase).toBeDefined();
+      var bike = $restmod.model(null).$build();
+      bike.$decode({ snake_case: true });
+      expect(bike.snake_case).toBeUndefined();
+      expect(bike.snakeCase).toBeDefined();
+    });
+
+    it('should rename nested values', function() {
+      var bike = $restmod.model(null).$build();
+      bike.$decode({ nested: { snake_case: true } });
+      expect(bike.nested.snake_case).toBeUndefined();
+      expect(bike.nested.snakeCase).toBeDefined();
+    });
+
+    it('should apply registered decoders', function() {
+      var bike = $restmod.model(null, function() {
+        this.attrDecoder('size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
+      }).$build();
+
+      bike.$decode({ size: 'S' });
+      expect(bike.size).toEqual('small');
+    });
+
+    it('should apply decoders to nested values', function() {
+      var bike = $restmod.model(null, function() {
+        this.attrDecoder('user.name', function(_name) { return 'Mr. ' + _name; });
+      }).$build();
+
+      bike.$decode({ user: { name: 'Petty' } });
+      expect(bike.user.name).toEqual('Mr. Petty');
     });
 
   });
@@ -101,6 +120,22 @@ describe('Restmod model class:', function() {
 
       expect(encoded.camelCase).toBeUndefined();
       expect(encoded.camel_case).toBeDefined();
+    });
+
+    it('should rename nested values', function() {
+      var bike = $restmod.model(null).$build({ user: { lastName: 'Peat' } }),
+          raw = bike.$encode();
+
+      expect(raw.user.lastName).toBeUndefined();
+      expect(raw.user.last_name).toBeDefined();
+    });
+
+    it('should apply registered encoders', function() {
+      var bike = $restmod.model(null, function() {
+        this.attrEncoder('size', function(_val) { return _val === 'small' ? 'S' : 'M'; });
+      }).$build({ size: 'small' });
+
+      expect(bike.$encode().size).toEqual('S');
     });
 
   });
