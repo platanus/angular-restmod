@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>$restmod Class: $restmod</title>
+	<title>$restmod Mixin: PagedModel</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -147,14 +147,12 @@
 					
 
 
-	<h1 class="page-title">Class: $restmod</h1>
+	<h1 class="page-title">Mixin: PagedModel</h1>
 <section>
 
 <header>
     <h2>
-        <span class="ancestors"><a href="services.html">services</a>.</span>
-    
-    $restmod
+    PagedModel
     </h2>
     
 </header>
@@ -165,26 +163,23 @@
 
     
         
-<dt>
-    <h4 class="name" id="$restmod"><span class="type-signature"></span>new $restmod<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>The restmod service provides the <code>model</code> and <code>mixin</code> factories.</p>
-    </div>
-    
+            <div class="description"><p>Extracts header paging information into the <code>$page</code> and <code>$pageCount</code> properties.</p>
+<p>Usage:</p>
+<p>Just add mixin to a model's mixin chain</p>
+<pre><code class="lang-javascript">var Bike = $restmod.model('api/bikes', 'PagedModel');</code></pre>
+<p>Then using fetch on a collection bound to a paged api should provide page information</p>
+<pre><code class="lang-javascript">Bike.$search().$then(function() {
+  console.log this.$page; // should print the current page number.
+  console.log this.$pageCount; // should print the request total page count.
+});</code></pre>
+<p>Paging information is extracted from the 'X-Page' and the 'X-Page-Total' headers, to use different headers just
+override the $pageHeader or the $pageCountHeader definition during model building.</p>
+<pre><code class="lang-javascript">$restmod.model('PagedModel', function() {
+ this.define('$pageHeader', 'X-My-Page-Header');
+})</code></pre></div>
+        
 
-    
-    
-    
-    
-    
-    
-    
+        
 <dl class="details">
     
 
@@ -207,7 +202,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 80
+        plugins/paged.js, line 1
     </li></ul></dd>
     
 
@@ -216,159 +211,12 @@
     
 
     
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
-<dt>
-    <h4 class="name" id="mixin"><span class="type-signature"></span>mixin<span class="signature">()</span><span class="type-signature"> &rarr; {object}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>The mixin factory</p>
-<p>A mixin is just a metadata container that can be included in a mixin chain.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1220
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>The abstract model</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">object</span>
-
-
-	</dd>
 </dl>
 
 
         
     
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="model"><span class="type-signature"></span>model<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>The model factory is used to generate mode types using a rich building DSL provided
-by the ModelBuilder.</p>
-<p>For more information about model generation see a Model</p>
     </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
 
     
 
@@ -382,39 +230,6 @@ by the ModelBuilder.</p>
 
     
 
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 89
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        </dl>
     
 
     

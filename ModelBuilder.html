@@ -100,6 +100,10 @@
 							<a href="DirtyModel.html">DirtyModel</a>
 						</li>
 						
+						<li>
+							<a href="PagedModel.html">PagedModel</a>
+						</li>
+						
 
 					</ul>
 				</li>
@@ -178,8 +182,8 @@ the mixin chain.</p>
   propWithDecoder: { decode: 'date', chain: true },
   relation: { hasMany: 'Other' },
 });</code></pre>
-<p>The descriptions are processed by the <code>describe</code> method and mapped to builder attribute methods,
-the following built in property modifiers are provided (see each method docs for usage information):</p>
+<p>The descriptions are processed by the <code>describe</code> method and mapped to builder attribute methods.</p>
+<p>The following built in property modifiers are provided (see each method docs for usage information):</p>
 <ul>
 <li><code>init</code> maps to <a href="ModelBuilder.html#attrDefault">ModelBuilder#attrDefault</a></li>
 <li><code>ignore</code> maps to <a href="ModelBuilder.html#attrIgnored">ModelBuilder#attrIgnored</a></li>
@@ -223,7 +227,7 @@ Mapping a <em>function</em> to a property calls <a href="ModelBuilder.html#defin
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 657
+        module/restmod.js, line 698
     </li></ul></dd>
     
 
@@ -431,7 +435,7 @@ Mapping a <em>function</em> to a property calls <a href="ModelBuilder.html#defin
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 947
+        module/restmod.js, line 989
     </li></ul></dd>
     
 
@@ -598,7 +602,7 @@ default value is required.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 877
+        module/restmod.js, line 919
     </li></ul></dd>
     
 
@@ -811,7 +815,7 @@ default value is required.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 969
+        module/restmod.js, line 1011
     </li></ul></dd>
     
 
@@ -975,7 +979,7 @@ default value is required.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1133
+        module/restmod.js, line 1177
     </li></ul></dd>
     
 
@@ -1145,7 +1149,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 845
+        module/restmod.js, line 887
     </li></ul></dd>
     
 
@@ -1336,7 +1340,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 895
+        module/restmod.js, line 937
     </li></ul></dd>
     
 
@@ -1510,7 +1514,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 924
+        module/restmod.js, line 966
     </li></ul></dd>
     
 
@@ -1674,7 +1678,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1117
+        module/restmod.js, line 1161
     </li></ul></dd>
     
 
@@ -1841,7 +1845,7 @@ inside de new method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1064
+        module/restmod.js, line 1106
     </li></ul></dd>
     
 
@@ -2012,7 +2016,7 @@ inside de new method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1042
+        module/restmod.js, line 1084
     </li></ul></dd>
     
 
@@ -2154,7 +2158,7 @@ on each property description type.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 816
+        module/restmod.js, line 858
     </li></ul></dd>
     
 
@@ -2246,7 +2250,7 @@ on each property description type.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 762
+        module/restmod.js, line 804
     </li></ul></dd>
     
 
@@ -2449,7 +2453,7 @@ attribute definition keyword that can be later used when calling
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 797
+        module/restmod.js, line 839
     </li></ul></dd>
     
 
@@ -2641,7 +2645,7 @@ a direct restmod Model type reference.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 993
+        module/restmod.js, line 1035
     </li></ul></dd>
     
 
@@ -2833,7 +2837,7 @@ a direct restmod Model type reference.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1015
+        module/restmod.js, line 1057
     </li></ul></dd>
     
 
@@ -3001,7 +3005,7 @@ make different parameters available to callbacks.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1088
+        module/restmod.js, line 1130
     </li></ul></dd>
     
 
@@ -3149,7 +3153,7 @@ in JSON api should use snake case with underscores.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 731
+        module/restmod.js, line 773
     </li></ul></dd>
     
 
@@ -3297,7 +3301,7 @@ in JSON api should use snake case with underscores.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 750
+        module/restmod.js, line 792
     </li></ul></dd>
     
 
@@ -3445,7 +3449,7 @@ for a given model chain.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/rest_url_builder.js, line 180
+        module/rest_url_builder.js, line 178
     </li></ul></dd>
     
 
@@ -3590,7 +3594,7 @@ and returns an url builder.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 712
+        module/restmod.js, line 754
     </li></ul></dd>
     
 
@@ -3636,7 +3640,7 @@ and returns an url builder.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0</a>
-		on Fri Nov 08 2013 11:12:06 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon Nov 11 2013 12:31:24 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

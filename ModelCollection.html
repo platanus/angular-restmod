@@ -100,6 +100,10 @@
 							<a href="DirtyModel.html">DirtyModel</a>
 						</li>
 						
+						<li>
+							<a href="PagedModel.html">PagedModel</a>
+						</li>
+						
 
 					</ul>
 				</li>
@@ -202,7 +206,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 410
+        module/restmod.js, line 434
     </li></ul></dd>
     
 
@@ -339,7 +343,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 441
+        module/restmod.js, line 465
     </li></ul></dd>
     
 
@@ -480,7 +484,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 463
+        module/restmod.js, line 487
     </li></ul></dd>
     
 
@@ -668,7 +672,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 514
+        module/restmod.js, line 538
     </li></ul></dd>
     
 
@@ -809,7 +813,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 475
+        module/restmod.js, line 499
     </li></ul></dd>
     
 
@@ -951,7 +955,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 595
+        module/restmod.js, line 603
     </li></ul></dd>
     
 
@@ -1010,7 +1014,8 @@ class is generated, the corresponding collection class is also generated.</p>
     
     
     <div class="description">
-        <p>Begin a server request to populate collection.</p>
+        <p>Begin a server request to populate collection. This method does not
+clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
 <p>This method is for use in collections only.</p>
 <p>TODO: support POST data queries (complex queries scenarios)</p>
     </div>
@@ -1094,7 +1099,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 614
+        module/restmod.js, line 639
     </li></ul></dd>
     
 
@@ -1236,7 +1241,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 489
+        module/restmod.js, line 513
     </li></ul></dd>
     
 
@@ -1287,6 +1292,147 @@ class is generated, the corresponding collection class is also generated.</p>
         
             
 <dt>
+    <h4 class="name" id="$refresh"><span class="type-signature"></span>$refresh<span class="signature">(_params)</span><span class="type-signature"> &rarr; {Collection}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Resets and fetches content.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p><code>$fetch</code> params</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 675
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Collection</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
     <h4 class="name" id="$reset"><span class="type-signature"></span>$reset<span class="signature">()</span><span class="type-signature"> &rarr; {Collection}</span></h4>
     
     
@@ -1295,7 +1441,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     
     <div class="description">
-        <p>Resets the collection's contents, marks collection as not $resolved</p>
+        <p>Resets the collection's resolve status.</p>
 <p>This method is for use in collections only.</p>
     </div>
     
@@ -1329,7 +1475,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 578
+        module/restmod.js, line 620
     </li></ul></dd>
     
 
@@ -1470,7 +1616,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 544
+        module/restmod.js, line 568
     </li></ul></dd>
     
 
@@ -1636,7 +1782,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 563
+        module/restmod.js, line 587
     </li></ul></dd>
     
 
@@ -1777,7 +1923,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 427
+        module/restmod.js, line 451
     </li></ul></dd>
     
 
@@ -1846,7 +1992,7 @@ class is generated, the corresponding collection class is also generated.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0</a>
-		on Fri Nov 08 2013 11:12:07 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Mon Nov 11 2013 12:31:25 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
