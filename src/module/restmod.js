@@ -1227,22 +1227,6 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof ModelBuilder#
              *
-             * @description Volatile attributes are reset after being rendered.
-             *
-             * @param {string}  _name Attribute name
-             * @param  {boolean} _isVolatile Default/Reset value
-             * @return {ModelBuilder} self
-             */
-            attrVolatile: function(_attr, _init) {
-              return this.attrDefault(_attr, _init).attrEncoder(_attr, function(_value) {
-                // Not sure about modifying object during encoding
-                this[_attr] = isFunction(_init) ? _init.call(this) : _init;
-                return _value;
-              }, null, true);
-            },
-            /**
-             * @memberof ModelBuilder#
-             *
              * @description Expression attributes are evaluated every time new data is fed to the model.
              *
              * @param {string}  _name Attribute name
