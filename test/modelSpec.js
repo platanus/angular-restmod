@@ -44,6 +44,7 @@ describe('Restmod model class:', function() {
       var book = Book.$build(1);
       expect(book.id).toEqual(1);
     });
+
   });
 
   describe('$create', function() {
@@ -92,6 +93,13 @@ describe('Restmod model class:', function() {
       expect(bike.nested.snakeCase).toBeDefined();
     });
 
+    it('should rename nested object arrays', function() {
+      var bike = $restmod.model(null).$build();
+      bike.$decode({ nested: [ { snake_case: true } ] });
+      expect(bike.nested[0].snake_case).toBeUndefined();
+      expect(bike.nested[0].snakeCase).toBeDefined();
+    });
+
     it('should apply registered decoders', function() {
       var bike = $restmod.model(null, function() {
         this.attrDecoder('size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
@@ -108,6 +116,15 @@ describe('Restmod model class:', function() {
 
       bike.$decode({ user: { name: 'Petty' } });
       expect(bike.user.name).toEqual('Mr. Petty');
+    });
+
+    it('should apply decoders to values in nested arrays', function() {
+      var bike = $restmod.model(null, function() {
+        this.attrDecoder('users.name', function(_name) { return 'Mr. ' + _name; });
+      }).$build();
+
+      bike.$decode({ users: [{ name: 'Petty' }] });
+      expect(bike.users[0].name).toEqual('Mr. Petty');
     });
 
   });
@@ -138,6 +155,24 @@ describe('Restmod model class:', function() {
       expect(bike.$encode().size).toEqual('S');
     });
 
+    it('should not encode objects with a toJSON implementation', function() {
+      var now = new Date(),
+          bike = $restmod.model(null).$build({ created: now }),
+          raw = bike.$encode();
+
+      expect(raw.created instanceof Date).toBeTruthy();
+    });
+
+    it('should ignore relations', function() {
+      var User = $restmod.model(null),
+          bike = $restmod
+            .model(null, { user: { hasOne: User } })
+            .$buildRaw({ user: { name: 'Petty' }, size: 'M'}),
+          raw = bike.$encode();
+
+      expect(raw.user).toBeUndefined();
+    });
+
   });
 
   describe('$fetch', function() {
@@ -148,7 +183,7 @@ describe('Restmod model class:', function() {
             this.on('before-fetch', function() { calls.push('bf'); })
                 .on('before-request', function() { calls.push('br'); })
                 .on('after-request', function() { calls.push('ar'); })
-                .on('after-fetch', function() { calls.push('af'); })
+                .on('after-fetch', function() { calls.push('af'); });
           });
 
       Bike.$build({ id: 1 }).$fetch();

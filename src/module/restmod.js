@@ -162,30 +162,34 @@ angular.module('plRestmod').provider('$restmod', function() {
             });
           }
 
-          // recursive decode function, used by $decode
-          function decode(_ctx, _target, _raw, _prefix, _mask) {
+          // recursive transformation function, used by $decode and $encode.
+          function transform(_data, _ctx, _prefix, _mask, _decode, _into) {
 
-            // TODO: does undefined & 1 evaluates to 0 in every browser?
-            var key, decodedName, decoder, value, result = {};
-            for(key in _raw) {
-              if(_raw.hasOwnProperty(key) && !((masks[_prefix + key] || 0) & _mask)) {
-                decodedName = nameDecoder ? nameDecoder(key) : key;
-                decoder = decoders[_prefix + decodedName];
-                value = _raw[key];
-                if(decoder) {
-                  value = decoder.call(_ctx, value);
-                  if(value === undefined) continue;
-                  result[decodedName] = _target[decodedName] = value;
-                } else if(!isObject(value)) { // IDEA: make this optional: "enable_nested_values"
-                  result[decodedName] = _target[decodedName] = value;
-                } else {
-                  result[decodedName] = decode(
-                    _ctx,
-                    _target[decodedName] = {},
-                    value,
-                    _prefix + decodedName + '.',
-                    _mask
-                  );
+            var key, decodedName, encodedName, fullName, filter, value, result = _into || {};
+
+            for(key in _data) {
+              if(_data.hasOwnProperty(key)) {
+
+                decodedName = (_decode && nameDecoder) ? nameDecoder(key) : key;
+                fullName = _prefix + decodedName;
+
+                // check if property is masked for this operation
+                if(!((masks[fullName] || 0) & _mask)) {
+
+                  value = _data[key];
+                  filter = _decode ? decoders[fullName] : encoders[fullName];
+
+                  if(filter) {
+                    value = filter.call(_ctx, value);
+                    if(value === undefined) continue; // ignore value if filter returns undefined
+                  } else if(typeof value === 'object' && value &&
+                    (_decode || typeof value.toJSON !== 'function')) {
+                    // IDEA: make extended decoding/encoding optional, could be a little taxxing for some apps
+                    value = transformExtended(value, _ctx, fullName, _mask, _decode);
+                  }
+
+                  encodedName = (!_decode && nameEncoder) ? nameEncoder(decodedName) : decodedName;
+                  result[encodedName] = value;
                 }
               }
             }
@@ -193,24 +197,29 @@ angular.module('plRestmod').provider('$restmod', function() {
             return result;
           }
 
-          // recursive encode function, used by $encode
-          function encode(_ctx, _source, _prefix, _mask) {
-            var key, value, encodedName, encoder, raw = {};
-            for(key in _source) {
-              if(_source.hasOwnProperty(key) && !((masks[_prefix + key] || 0) & _mask)) {
-                value = _source[key];
-                encodedName = nameEncoder ? nameEncoder(key) : key;
-                encoder = encoders[_prefix + key];
-                if(encoder) {
-                  value = encoder.call(_ctx, value);
-                } else if(isObject(value)) { // IDEA: make this optional: "enable_nested_values"
-                  value = encode(_ctx, value, _prefix + key + '.');
-                }
-                raw[encodedName] = value;
-              }
-            }
+          // extended part of transformation function, enables deep object transform.
+          function transformExtended(_data, _ctx, _prefix, _mask, _decode) {
+            if(isArray(_data))
+            {
+              var fullName = _prefix + '[]',
+                  filter = _decode ? decoders[fullName] : encoders[fullName],
+                  result = [], i, l, value;
 
-            return raw;
+              for(i = 0, l = _data.length; i < l; i++) {
+                value = _data[i];
+                if(filter) {
+                  value = filter.call(_ctx, value);
+                } else if(typeof value === 'object' && value &&
+                  (_decode || typeof value.toJSON !== 'function')) {
+                  value = transformExtended(value, _ctx, _prefix, _mask, _decode);
+                }
+                result.push(value);
+              }
+
+              return result;
+            } else {
+              return transform(_data, _ctx, _prefix + '.', _mask, _decode);
+            }
           }
 
           /**
@@ -349,12 +358,12 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @description Feed raw data to this instance.
              *
              * @param {object} _raw Raw data to be fed
-             * @param {string} _action Action that originated the fetch
+             * @param {string} _mask Action mask
              * @return {Model} this
              */
             $decode: function(_raw, _mask) {
-              var original = decode(this, this, _raw, '', _mask || SyncMask.DECODE_USER);
-              callback('after-feed', this, original, _raw);
+              transform(_raw, this, '', _mask || SyncMask.DECODE_USER, true, this);
+              callback('after-feed', this, _raw);
               return this;
             },
 
@@ -367,7 +376,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} this
              */
             $encode: function(_mask) {
-              var raw = encode(this, this, '', _mask || SyncMask.ENCODE_USER);
+              var raw = transform(this, this, '', _mask || SyncMask.ENCODE_USER, false);
               callback('before-render', this, raw);
               return raw;
             },
@@ -1113,7 +1122,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 return _model.$collection(null, _alias || Utils.snakecase(_name, '-'), this); // TODO: put snakecase transformation in URLBuilder
               }).attrDecoder(_name, function(_raw) {
                 this[_name].$feed(_raw);
-              });
+              }).attrIgnored(_name, SyncMask.ENCODE);
             },
 
             /**
@@ -1135,7 +1144,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 return new _model(null, _partial || Utils.snakecase(_name, '-'), this); // TODO: put snakecase transformation in URLBuilder
               }).attrDecoder(_name, function(_raw) {
                 this[_name].$decode(_raw);
-              });
+              }).attrIgnored(_name, SyncMask.ENCODE);
             },
 
             /**
