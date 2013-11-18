@@ -15,7 +15,7 @@ describe('Plugin: Dirty Model', function() {
 
   beforeEach(inject(function($httpBackend, Bike) {
     // generate a model instance with server loaded data:
-    $httpBackend.when('GET', '/api/bikes/1').respond(200, { model: 'Meta 2', brand: 'Commencal' });
+    $httpBackend.when('GET', '/api/bikes/1').respond(200, { model: 'Meta 2', brand_name: 'Commencal' });
     bike = Bike.$find(1);
     $httpBackend.flush();
   }));
@@ -29,11 +29,11 @@ describe('Plugin: Dirty Model', function() {
     });
 
     it('should list changed properties', function() {
-      bike.brand = 'Commencal Bikes';
-      expect(bike.$dirty()).toContain('brand');
+      bike.brandName = 'Commencal Bikes';
+      expect(bike.$dirty()).toContain('brandName');
       expect(bike.$dirty()).not.toContain('model');
       bike.model = 'Meta AM';
-      expect(bike.$dirty()).toContain('brand');
+      expect(bike.$dirty()).toContain('brandName');
       expect(bike.$dirty()).toContain('model');
     });
 
