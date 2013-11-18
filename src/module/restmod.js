@@ -13,6 +13,9 @@
 var SyncMask = {
   NONE: 0x00,
   ALL: 0xFFFF,
+  SYSTEM_ALL: 0x1FFFF,
+
+  SYSTEM: 0x10000,
 
   DECODE_CREATE: 0x0001,
   DECODE_UPDATE: 0x0002,
@@ -100,11 +103,11 @@ angular.module('plRestmod').provider('$restmod', function() {
         model: function(_urlParams/* , _mix */) {
 
           var masks = {
-                $partial: SyncMask.ALL,
-                $context: SyncMask.ALL,
-                $promise: SyncMask.ALL,
-                $pending: SyncMask.ALL,
-                $error: SyncMask.ALL
+                $partial: SyncMask.SYSTEM_ALL,
+                $context: SyncMask.SYSTEM_ALL,
+                $promise: SyncMask.SYSTEM_ALL,
+                $pending: SyncMask.SYSTEM_ALL,
+                $error: SyncMask.SYSTEM_ALL
               },
               defaults = [],
               decoders = {},
@@ -266,6 +269,10 @@ angular.module('plRestmod').provider('$restmod', function() {
             }
           };
 
+          // TODO: type reflection methods
+          // Model.$ignored
+          // Model.$relation
+
           Model.prototype = {
             /**
              * @memberof Model#
@@ -277,6 +284,30 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             $url: function(_opt) {
               return urlBuilder.resourceUrl(this, _opt);
+            },
+
+            /**
+             * @memberof Model#
+             *
+             * @description Iterates over the object properties
+             *
+             * @param {function} _fun Function to call for each
+             * @param {SyncMask} _mask Mask used to filter the returned properties, defaults to SyncMask.SYSTEM
+             * @return {Model} self
+             */
+            $each: function(_fun, _mask, _ctx) {
+              if(_mask === undefined) _mask = SyncMask.SYSTEM;
+
+              for(var key in this) {
+                if(this.hasOwnProperty(key)) {
+                  // Only iterate at base level for now
+                  if(!((masks[key] || 0) & _mask)) {
+                    _fun.call(_ctx || this[key], this[key], key);
+                  }
+                }
+              }
+
+              return this;
             },
 
             /**

@@ -77,6 +77,21 @@ describe('Restmod model class:', function() {
 
   });
 
+  describe('$each', function() {
+
+    it('should iterate over non system properties by default', function() {
+      var bike = $restmod.model(null).$build({ brand: 'Trek' }), props = [];
+      bike.$each(function(_val, _key) {
+        props.push(_key);
+      });
+
+      expect(props).toContain('brand');
+      expect(props).not.toContain('$pending');
+      expect(props).not.toContain('$context');
+    });
+
+  });
+
   describe('$decode', function() {
 
     it('should rename all snake case attributes by default', function() {
