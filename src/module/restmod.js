@@ -804,7 +804,8 @@ angular.module('plRestmod').provider('$restmod', function() {
           // Available mappings.
           var mappings = {
             init: ['attrDefault'],
-            ignore: ['attrIgnored'],
+            mask: ['attrMask'],
+            ignore: ['attrMask'],
             decode: ['attrDecoder', 'param', 'chain'],
             encode: ['attrEncoder', 'param', 'chain'],
             serialize: ['attrSerializer'],
@@ -839,7 +840,7 @@ angular.module('plRestmod').provider('$restmod', function() {
            * The following built in property modifiers are provided (see each method docs for usage information):
            *
            * * `init` maps to {@link ModelBuilder#attrDefault}
-           * * `ignore` maps to {@link ModelBuilder#attrIgnored}
+           * * `mask` and `ignore` maps to {@link ModelBuilder#attrMask}
            * * `decode` maps to {@link ModelBuilder#attrDecoder}
            * * `encode` maps to {@link ModelBuilder#attrEncoder}
            * * `serialize` maps to {@link ModelBuilder#attrSerializer}
@@ -1042,16 +1043,14 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof ModelBuilder#
              *
-             * @description Ignores/un-ignores an attribute.
-             *
-             * This method changes the attribute masmask
+             * @description Sets an attribute mask.
              *
              * @param {string} _attr Attribute name
-             * @param {boolean|integer} _mask Ignore mask.
+             * @param {boolean|integer} _mask Ignore mask or true to use SyncMask.ALL
              * @param {boolean} _reset If set to true, old mask is reset.
              * @return {ModelBuilder} self
              */
-            attrIgnored: function(_attr, _mask, _reset) {
+            attrMask: function(_attr, _mask, _reset) {
 
               if(_mask === true) {
                 masks[_attr] = SyncMask.ALL;
@@ -1155,7 +1154,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 return _model.$collection(null, _alias || Utils.snakecase(_name, '-'), this); // TODO: put snakecase transformation in URLBuilder
               }).attrDecoder(_name, function(_raw) {
                 this[_name].$feed(_raw);
-              }).attrIgnored(_name, SyncMask.ENCODE);
+              }).attrMask(_name, SyncMask.ENCODE);
             },
 
             /**
@@ -1177,7 +1176,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 return new _model(null, _partial || Utils.snakecase(_name, '-'), this); // TODO: put snakecase transformation in URLBuilder
               }).attrDecoder(_name, function(_raw) {
                 this[_name].$decode(_raw);
-              }).attrIgnored(_name, SyncMask.ENCODE);
+              }).attrMask(_name, SyncMask.ENCODE);
             },
 
             /**

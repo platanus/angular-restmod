@@ -9,7 +9,7 @@
 angular.module('plRestmod').factory('DirtyModel', ['$restmod', 'SyncMask', function($restmod, SyncMask) {
 
   return $restmod.mixin(function() {
-    this.attrIgnored('$cmStatus', SyncMask.SYSTEM_ALL) // make special property ignored and system like
+    this.attrMask('$cmStatus', SyncMask.SYSTEM_ALL) // make special property ignored and system like
         .on('after-feed', function(_original) {
           // store original information in a model's special property
           var original = this.$cmStatus = {};
