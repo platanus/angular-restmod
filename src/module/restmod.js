@@ -368,7 +368,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              *
              * @description Promise chaining, keeps the model instance as the chain context.
              *
-             * Calls ´$q.finally´ on the model's last promise (not really, in 1.2.0 it will).
+             * Calls ´$q.finally´ on the collection's last promise, updates last promise with finally result.
              *
              * Usage:
              *
@@ -380,7 +380,8 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} self
              */
             $finally: function(_cb) {
-              return this.$then(_cb, _cb);
+              this.$promise = this.$promise['finally'](_cb);
+              return this;
             },
 
             /**
@@ -690,7 +691,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              *
              * @description Promise chaining, keeps the collection instance as the chain context.
              *
-             * Calls ´$q.finally´ on the collection's last promise (not really, in 1.2.0 it will)
+             * Calls ´$q.finally´ on the collection's last promise, updates last promise with finally result.
              *
              * Usage:
              *
@@ -702,7 +703,8 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {ModelCollection} self
              */
             $finally: function(_cb) {
-              return this.$then(_cb, _cb);
+              this.$promise = this.$promise['finally'](_cb);
+              return this;
             },
 
             /**

@@ -77,6 +77,28 @@ describe('Restmod model class:', function() {
 
   });
 
+  describe('$finally', function() {
+    var spy;
+    beforeEach(function() {
+      spy = jasmine.createSpy();
+    });
+
+    it('should be called on success', function() {
+      $httpBackend.when('GET','/bikes/1').respond(200, {});
+      $restmod.model('/bikes').$find(1).$finally(spy);
+      $httpBackend.flush();
+      expect(spy).toHaveBeenCalledWith();
+    });
+
+    it('should be called on error', function() {
+      $httpBackend.when('GET','/bikes/1').respond(404);
+      $restmod.model('/bikes').$find(1).$finally(spy);
+      $httpBackend.flush();
+      expect(spy).toHaveBeenCalledWith();
+    });
+
+  });
+
   describe('$each', function() {
 
     it('should iterate over non system properties by default', function() {
