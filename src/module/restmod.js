@@ -107,6 +107,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 $context: SyncMask.SYSTEM_ALL,
                 $promise: SyncMask.SYSTEM_ALL,
                 $pending: SyncMask.SYSTEM_ALL,
+                $response: SyncMask.SYSTEM_ALL,
                 $error: SyncMask.SYSTEM_ALL
               },
               defaults = [],
@@ -140,7 +141,9 @@ angular.module('plRestmod').provider('$restmod', function() {
             // }
 
             _target.$pending = true;
+            _target.$response = null;
             _target.$error = false;
+
             _target.$promise = $http(_config).then(function(_response) {
 
               // IDEA: a response interceptor could add additional error states based on returned data,
@@ -149,6 +152,7 @@ angular.module('plRestmod').provider('$restmod', function() {
               // to trigger a promise queue error).
 
               _target.$pending = false;
+              _target.$response = _response;
 
               if(_success) _success.call(_target, _response);
 
@@ -157,6 +161,7 @@ angular.module('plRestmod').provider('$restmod', function() {
             }, function(_response) {
 
               _target.$pending = false;
+              _target.$response = _response;
               _target.$error = true;
 
               if(_error) _error.call(_target, _response);
