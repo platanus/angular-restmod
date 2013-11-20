@@ -357,7 +357,7 @@ go check the <a href="ModelCollection.html">ModelCollection</a> documentation.</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 165
+        module/restmod.js, line 232
     </li></ul></dd>
     
 
@@ -495,7 +495,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 233
+        module/restmod.js, line 328
     </li></ul></dd>
     
 
@@ -546,7 +546,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
         
             
 <dt>
-    <h4 class="name" id="$decode"><span class="type-signature"></span>$decode<span class="signature">(_raw, _action)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+    <h4 class="name" id="$decode"><span class="type-signature"></span>$decode<span class="signature">(_raw, _mask)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
     
     
 </dt>
@@ -611,7 +611,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
 
         <tr>
             
-                <td class="name"><code>_action</code></td>
+                <td class="name"><code>_mask</code></td>
             
 
             <td class="type">
@@ -627,7 +627,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
 
             
 
-            <td class="description last"><p>Action that originated the fetch</p></td>
+            <td class="description last"><p>Action mask</p></td>
         </tr>
 
 	
@@ -659,7 +659,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 305
+        module/restmod.js, line 400
     </li></ul></dd>
     
 
@@ -752,7 +752,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 448
+        module/restmod.js, line 512
     </li></ul></dd>
     
 
@@ -778,6 +778,170 @@ Hooks are registered using the ModelBuilder.on method.</p>
             
 <div class="param-desc">
     <p>this</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$each"><span class="type-signature"></span>$each<span class="signature">(_fun, _mask)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Iterates over the object properties</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_fun</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Function to call for each</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_mask</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">SyncMask</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Mask used to filter the returned properties, defaults to SyncMask.SYSTEM</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 302
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
 </div>
 
 
@@ -893,7 +1057,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 334
+        module/restmod.js, line 414
     </li></ul></dd>
     
 
@@ -986,7 +1150,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 360
+        module/restmod.js, line 429
     </li></ul></dd>
     
 
@@ -1046,7 +1210,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <div class="description">
         <p>Promise chaining, keeps the model instance as the chain context.</p>
-<p>Calls ´$q.finally´ on the model's last promise.</p>
+<p>Calls ´$q.finally´ on the collection's last promise, updates last promise with finally result.</p>
 <p>Usage:</p>
 <pre><code class="lang-javascript">col.$fetch().$finally(function() { });</code></pre>
     </div>
@@ -1130,7 +1294,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 291
+        module/restmod.js, line 386
     </li></ul></dd>
     
 
@@ -1223,7 +1387,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 391
+        module/restmod.js, line 459
     </li></ul></dd>
     
 
@@ -1410,7 +1574,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 248
+        module/restmod.js, line 343
     </li></ul></dd>
     
 
@@ -1577,7 +1741,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 270
+        module/restmod.js, line 365
     </li></ul></dd>
     
 
@@ -1718,7 +1882,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 218
+        module/restmod.js, line 289
     </li></ul></dd>
     
 
@@ -1787,7 +1951,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0</a>
-		on Mon Nov 11 2013 13:02:04 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Wed Nov 20 2013 11:02:00 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

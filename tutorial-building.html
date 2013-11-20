@@ -154,24 +154,35 @@
 
 <article>
     <p>Model building in restmod is done via the <code>$restmod</code> service.</p>
-<p>The service provides two methods: <code>model</code> is used to build new models and <code>mixin</code> to build mixins. More on <strong>mixins</strong> ahead.</p>
+<p>The service provides two methods: <code>model</code> is used to build new models and <code>mixin</code> to build mixins. More on <strong>mixins</strong> later.</p>
 <h2>Simple model building</h2>
 <p>Basic model building looks like this</p>
-<pre><code class="lang-javascript">// TODO</code></pre>
-<p>The first parameter to <code>model</code> is the factory name, this will be the name with which the model will be registered in the injector.</p>
-<p>The second parameter is the base url for the model, if null is given then the model is considered unbound.</p>
+<pre><code class="lang-javascript">var Model = $restmod.model('/model-base-url');</code></pre>
+<p>The first and only required parameter is the base url for the model, if null is given then the model is considered unbound.</p>
 <p>Unbound models can only be fetched/created/updated when bound to other models (via a relation).</p>
 <p>Refer to Model usage for information about how to use the generated model.</p>
-<h2>Advanced builder DSL</h2>
+<h2>Advanced model building</h2>
 <p>Restmod offers two ways of customizing a model's behaviour, both are used by passing the required parameters to the <code>model</code> function after the base url parameter.</p>
-<h3>The model definition object</h3>
-<p>It is posible to provide an object that configures the way model properties behave.</p>
-<pre><code class="lang-javascript">angular.restmod.model('Bike', 'api/bikes', {
-    created_at: { serialize: 'RailsDate' }, // set a serializer
-    views: { init: 0 }, // set a default value
-    parts: { hasMany: 'Part' } // set a relation with another model
+<h3>The builder DSL</h3>
+<p>If a function is given to <code>model</code>, then the function is called in the builder context (<code>this</code> points to the builder).</p>
+<pre><code class="lang-javascript">$restmod.model('/model-base-url', function() {
+    this.attrMask('createdBy', SyncMask.DECODE) // Set an attribute mask
+        .attrDefault('createdBy', 'This is read only') // Set an attribute default value
+        .beforeSave(function() { // Set a model hook
+            alert('model will be saved!')
+        });
 });</code></pre>
-<p>Property modifiers map directly to builder functions, so using</p>
+<p>Even though the preferred way of customizing a model is using the definition object, some builder methods like <code>beforeCreate</code>can only be accesed through the builder context.</p>
+<p>For more information about available builder functions check the ModelBuilder class documentation.</p>
+<h3>The model definition object</h3>
+<p>It is also posible to provide an plain object to the <code>model</code> method. This object will be treated as a model definition.</p>
+<p>A model assigns one or more modifiers to model instance properties.</p>
+<pre><code class="lang-javascript">$restmod.model('api/bikes', {
+    created_at: { serialize: 'RailsDate' }, // set a serializer
+    createdBy: { init: 'This is readonly', mask: SyncMask.DECODE }, // set a default value and a mask
+    parts: { hasMany: 'Part' } // set a relation with another model built by a factory called 'Part'
+});</code></pre>
+<p>Property modifiers map directly to builder DSL functions, so using</p>
 <pre><code class="lang-javascript">$restmod.model('', {
   prop: { init: 20 }
 });</code></pre>
@@ -182,20 +193,18 @@
 <p>For more information about available property modifiers check the <a href="ModelBuilder.html">ModelBuilder</a> class documentation.</p>
 <p>Some plugins also add additional modifiers.</p>
 <p>Property modifiers map directly to builder DSL methods, but not every builder method is available as a property behavior modifier. The model definition object only provides a subset of the available builder DSL methods.</p>
-<h3>The builder DSL</h3>
-<p>If a function is given to <code>model</code> instead of an object, then the function is called in the builder context.</p>
-<pre><code class="lang-javascript">// TODO</code></pre>
-<p>Even though the preferred way of customizing a model is using the definition object, some builder methods like <code>beforeCreate</code>can only be accesed through the builder context.</p>
-<p>For more information about available builder functions check the ModelBuilder class documentation.</p>
 <h2>The mixin chain</h2>
-<p>You are not restricted to use only one way of building, multiple object and function blocks can be passed to the <code>model</code> function and are processed sequentially by the model builder. This is called the mixin chain.</p>
+<p>You are not restricted to use only one building method, multiple object and function blocks can be passed to the <code>model</code> function and are processed sequentially by the model builder. This is called the mixin chain.</p>
 <p>In addition to definition objects and functions, the mixin chain also allows for model or mixin names, if a name is given, the model/mixin is looked up using the injector and its mixin chain is injected in the current chain.</p>
-<pre><code class="lang-javascript">// Example using multiple
-angular.restmod.model('MountainBike', 'api/bikes',
-'Vehicle'
+<pre><code class="lang-javascript">// Example using multiple mixins
+$restmod.model('api/bikes',
+'Vehicle', // inject Vehicle mixin chain first
+// Then a model definition object
 {
     brakes: { serialize: 'Brakes' },
-}, function() {
+},
+// Finally a model definition block
+function() {
     this.beforeCreate(function() {
 
     });
@@ -218,7 +227,7 @@ angular.restmod.model('MountainBike', 'api/bikes',
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0</a>
-		on Mon Nov 11 2013 13:02:05 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Wed Nov 20 2013 11:02:02 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

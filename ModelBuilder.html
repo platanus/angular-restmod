@@ -186,7 +186,7 @@ the mixin chain.</p>
 <p>The following built in property modifiers are provided (see each method docs for usage information):</p>
 <ul>
 <li><code>init</code> maps to <a href="ModelBuilder.html#attrDefault">ModelBuilder#attrDefault</a></li>
-<li><code>ignore</code> maps to <a href="ModelBuilder.html#attrIgnored">ModelBuilder#attrIgnored</a></li>
+<li><code>mask</code> and <code>ignore</code> maps to <a href="ModelBuilder.html#attrMask">ModelBuilder#attrMask</a></li>
 <li><code>decode</code> maps to <a href="ModelBuilder.html#attrDecoder">ModelBuilder#attrDecoder</a></li>
 <li><code>encode</code> maps to <a href="ModelBuilder.html#attrEncoder">ModelBuilder#attrEncoder</a></li>
 <li><code>serialize</code> maps to <a href="ModelBuilder.html#attrSerializer">ModelBuilder#attrSerializer</a></li>
@@ -227,7 +227,7 @@ Mapping a <em>function</em> to a property calls <a href="ModelBuilder.html#defin
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 751
+        module/restmod.js, line 812
     </li></ul></dd>
     
 
@@ -435,7 +435,7 @@ Mapping a <em>function</em> to a property calls <a href="ModelBuilder.html#defin
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1042
+        module/restmod.js, line 1101
     </li></ul></dd>
     
 
@@ -602,7 +602,7 @@ default value is required.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 972
+        module/restmod.js, line 1033
     </li></ul></dd>
     
 
@@ -815,7 +815,7 @@ default value is required.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1064
+        module/restmod.js, line 1123
     </li></ul></dd>
     
 
@@ -979,7 +979,7 @@ default value is required.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1230
+        module/restmod.js, line 1274
     </li></ul></dd>
     
 
@@ -1149,7 +1149,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 940
+        module/restmod.js, line 1001
     </li></ul></dd>
     
 
@@ -1200,7 +1200,7 @@ modifiers on the argument.</p>
         
             
 <dt>
-    <h4 class="name" id="attrIgnored"><span class="type-signature"></span>attrIgnored<span class="signature">(_attr, _mask, _reset)</span><span class="type-signature"> &rarr; {<a href="ModelBuilder.html">ModelBuilder</a>}</span></h4>
+    <h4 class="name" id="attrMask"><span class="type-signature"></span>attrMask<span class="signature">(_attr, _mask, _reset)</span><span class="type-signature"> &rarr; {<a href="ModelBuilder.html">ModelBuilder</a>}</span></h4>
     
     
 </dt>
@@ -1208,8 +1208,7 @@ modifiers on the argument.</p>
     
     
     <div class="description">
-        <p>Ignores/un-ignores an attribute.</p>
-<p>This method changes the attribute masmask</p>
+        <p>Sets an attribute mask.</p>
     </div>
     
 
@@ -1285,7 +1284,7 @@ modifiers on the argument.</p>
 
             
 
-            <td class="description last"><p>Ignore mask.</p></td>
+            <td class="description last"><p>Ignore mask or true to use SyncMask.ALL</p></td>
         </tr>
 
 	
@@ -1340,7 +1339,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 990
+        module/restmod.js, line 1049
     </li></ul></dd>
     
 
@@ -1514,171 +1513,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1019
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="ModelBuilder.html">ModelBuilder</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="attrVolatile"><span class="type-signature"></span>attrVolatile<span class="signature">(_name, _isVolatile)</span><span class="type-signature"> &rarr; {<a href="ModelBuilder.html">ModelBuilder</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Volatile attributes are reset after being rendered.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Attribute name</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_isVolatile</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Default/Reset value</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1214
+        module/restmod.js, line 1078
     </li></ul></dd>
     
 
@@ -1845,7 +1680,7 @@ inside de new method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1159
+        module/restmod.js, line 1218
     </li></ul></dd>
     
 
@@ -2016,7 +1851,7 @@ inside de new method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1137
+        module/restmod.js, line 1196
     </li></ul></dd>
     
 
@@ -2158,7 +1993,7 @@ on each property description type.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 911
+        module/restmod.js, line 972
     </li></ul></dd>
     
 
@@ -2250,7 +2085,7 @@ on each property description type.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 857
+        module/restmod.js, line 918
     </li></ul></dd>
     
 
@@ -2453,7 +2288,7 @@ attribute definition keyword that can be later used when calling
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 892
+        module/restmod.js, line 953
     </li></ul></dd>
     
 
@@ -2645,7 +2480,7 @@ a direct restmod Model type reference.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1088
+        module/restmod.js, line 1147
     </li></ul></dd>
     
 
@@ -2837,7 +2672,7 @@ a direct restmod Model type reference.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1110
+        module/restmod.js, line 1169
     </li></ul></dd>
     
 
@@ -3005,7 +2840,7 @@ make different parameters available to callbacks.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1183
+        module/restmod.js, line 1242
     </li></ul></dd>
     
 
@@ -3153,7 +2988,7 @@ in JSON api should use snake case with underscores.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 826
+        module/restmod.js, line 887
     </li></ul></dd>
     
 
@@ -3301,7 +3136,7 @@ in JSON api should use snake case with underscores.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 845
+        module/restmod.js, line 906
     </li></ul></dd>
     
 
@@ -3594,7 +3429,7 @@ and returns an url builder.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 807
+        module/restmod.js, line 868
     </li></ul></dd>
     
 
@@ -3640,7 +3475,7 @@ and returns an url builder.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0</a>
-		on Mon Nov 11 2013 13:02:04 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Wed Nov 20 2013 11:02:01 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
