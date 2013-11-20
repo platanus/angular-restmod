@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.7.0 - 2013-11-18
+ * @version v0.7.1 - 2013-11-19
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -59,7 +59,7 @@ angular.module('plRestmod').factory('DebouncedModel', ['$restmod', 'SyncMask', '
   }
 
   return $restmod.mixin(function() {
-    this.attrIgnored('$dmStatus', SyncMask.SYSTEM_ALL)
+    this.attrMask('$dmStatus', SyncMask.SYSTEM_ALL)
 
         .define('$dmTimeout', 500)
         .define('$dmAdjourn', true)
