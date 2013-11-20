@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.7.1 - 2013-11-19
+ * @version v0.8.0 - 2013-11-20
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -235,6 +235,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 $context: SyncMask.SYSTEM_ALL,
                 $promise: SyncMask.SYSTEM_ALL,
                 $pending: SyncMask.SYSTEM_ALL,
+                $response: SyncMask.SYSTEM_ALL,
                 $error: SyncMask.SYSTEM_ALL
               },
               defaults = [],
@@ -260,15 +261,12 @@ angular.module('plRestmod').provider('$restmod', function() {
           // common http behavior, used both in collections and model instances.
           function send(_target, _config, _success, _error) {
 
-            // IDEA: comm queuing, never allow two simultaneous requests.
-            // if(this.$pending) {
-            //  this.$promise.then(function() {
-            //    this.$send(_config, _success, _error);
-            //    });
-            // }
+            callback('before-request', _target, _config);
 
             _target.$pending = true;
+            _target.$response = null;
             _target.$error = false;
+
             _target.$promise = $http(_config).then(function(_response) {
 
               // IDEA: a response interceptor could add additional error states based on returned data,
@@ -277,6 +275,9 @@ angular.module('plRestmod').provider('$restmod', function() {
               // to trigger a promise queue error).
 
               _target.$pending = false;
+              _target.$response = _response;
+
+              callback('after-request', _target, _response);
 
               if(_success) _success.call(_target, _response);
 
@@ -285,7 +286,10 @@ angular.module('plRestmod').provider('$restmod', function() {
             }, function(_response) {
 
               _target.$pending = false;
+              _target.$response = _response;
               _target.$error = true;
+
+              callback('after-request-error', _target, _response);
 
               if(_error) _error.call(_target, _response);
 
@@ -557,10 +561,7 @@ angular.module('plRestmod').provider('$restmod', function() {
               var request = { method: 'GET', url: this.$url() };
 
               callback('before-fetch', this, request);
-              callback('before-request', this, request);
               return this.$send(request, function(_response) {
-
-                callback('after-request', this, _response);
 
                 var data = _response.data;
                 if (!data || isArray(data)) {
@@ -569,6 +570,8 @@ angular.module('plRestmod').provider('$restmod', function() {
                 this.$decode(data);
 
                 callback('after-fetch', this, _response );
+              }, function(_response) {
+                callback('after-fetch-error', this, _response );
               });
             },
 
@@ -594,16 +597,14 @@ angular.module('plRestmod').provider('$restmod', function() {
 
                 callback('before-update', this, request);
                 callback('before-save', this, request);
-                callback('before-request', this, request);
                 return this.$send(request, function(_response) {
-
-                  callback('after-request', this, _response);
-
                   var data = _response.data;
                   if (data && !isArray(data)) this.$decode(data, SyncMask.DECODE_UPDATE);
-
                   callback('after-update', this, _response);
                   callback('after-save', this, _response);
+                }, function(_response) {
+                  callback('after-update-error', this, _response);
+                  callback('after-save-error', this, _response);
                 });
               } else {
                 // If not bound create.
@@ -615,16 +616,14 @@ angular.module('plRestmod').provider('$restmod', function() {
 
                 callback('before-save', this, request);
                 callback('before-create', this, request);
-                callback('before-request', this, request);
                 return this.$send(request, function(_response) {
-
-                  callback('after-request', this, _response);
-
                   var data = _response.data;
                   if (data && !isArray(data)) this.$decode(data, SyncMask.DECODE_CREATE);
-
                   callback('after-create', this, _response);
                   callback('after-save', this, _response);
+                }, function(_response) {
+                  callback('after-create-error', this, _response);
+                  callback('after-save-error', this, _response);
                 });
               }
             },
@@ -647,6 +646,8 @@ angular.module('plRestmod').provider('$restmod', function() {
               callback('before-destroy', this, request);
               return this.$send(request, function(_response) {
                 callback('after-destroy', this, _response);
+              }, function(_response) {
+                callback('after-destroy-error', this, _response);
               });
             }
           };
@@ -890,20 +891,15 @@ angular.module('plRestmod').provider('$restmod', function() {
 
               // TODO: check that collection is bound.
               callback('before-fetch-many', this, request);
-              callback('before-request', this, request);
               send(this, request, function(_response) {
-
-                callback('after-request', this, _response);
-
                 var data = _response.data;
                 if(!data || !isArray(data)) {
                   throw new Error('Error in resource {0} configuration. Expected response to be array');
                 }
-
-                // reset and feed retrieved data.
-                this.$feed(data);
-
+                this.$feed(data); // feed retrieved data.
                 callback('after-fetch-many', this, _response);
+              }, function(_response) {
+                callback('after-fetch-many-error', this, _response);
               });
 
               return this;
@@ -1380,6 +1376,7 @@ angular.module('plRestmod').provider('$restmod', function() {
 
             beforeRequest: function(_do) { return this.on('before-request', _do); },
             afterRequest: function(_do) { return this.on('after-request', _do); },
+            afterRequestError: function(_do) { return this.on('after-request-error', _do); },
             beforeSave: function(_do) { return this.on('before-save', _do); },
             beforeCreate: function(_do) { return this.on('before-create', _do); },
             afterCreate: function(_do) { return this.on('after-create', _do); },
