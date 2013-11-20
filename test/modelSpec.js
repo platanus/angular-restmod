@@ -14,6 +14,7 @@ describe('Restmod model class:', function() {
     // Initialize mock api
     $httpBackend.when('GET', '/api/books?minPages=100').respond([ {name: 'Los piratas del Caribe' }]);
     $httpBackend.when('GET', '/api/books/1').respond(200, '{"id": 1, "chapters": [{"id": 2}]}');
+    $httpBackend.when('GET', '/api/books/2').respond(400, '{}');
     $httpBackend.when('POST', '/api/books').respond(200, { id: 1 });
   }));
 
@@ -227,6 +228,21 @@ describe('Restmod model class:', function() {
       $httpBackend.flush();
       expect(calls).toEqual(['bf','br','ar','af']);
     }));
+
+    it('should call error callbacks in proper order', inject(function($restmod) {
+      var calls = [],
+          Bike = $restmod.model('/api/books', function() {
+            this.on('before-fetch', function() { calls.push('bf'); })
+                .on('before-request', function() { calls.push('br'); })
+                .on('after-request-error', function() { calls.push('are'); })
+                .on('after-fetch-error', function() { calls.push('afe'); });
+          });
+
+      Bike.$build({ id: 2 }).$fetch();
+      $httpBackend.flush();
+      expect(calls).toEqual(['bf','br','are','afe']);
+    }));
+
   });
 
   describe('$save', function() {
