@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.8.0 - 2013-11-20
+ * @version v0.8.1 - 2013-12-09
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -26,7 +26,7 @@
  * @description Angular services provided by the library.
  */
 
-angular.module('plRestmod', ['ng']);
+angular.module('plRestmod', ['ng', 'platanus.inflector']);
 
 /**
  * @class Utils
@@ -38,39 +38,6 @@ angular.module('plRestmod', ['ng']);
  * This utilities are available as the `Utils` constant when restmod is included.
  */
 var Utils = {
-  /**
-   * @memberof constants.Utils
-   *
-   * @description Transforms a string to it's camelcase representation
-   *
-   * TODO: handle diacritics
-   *
-   * @param  {string} _string Original string
-   * @return {string} Camelcased string
-   */
-  camelcase: function(_string) {
-    if (typeof _string !== 'string') return _string;
-    return _string.replace(/_[\w\d]/g, function (match, index, string) {
-      return index === 0 ? match : string.charAt(index + 1).toUpperCase();
-    });
-  },
-  /**
-   * @memberof constants.Utils
-   *
-   * @description Transforms a string to it's snakecase representation
-   *
-   * TODO: handle diacritics
-   *
-   * @param  {string} _string Original string
-   * @param  {string} _sep Case separator, defaults to '_'
-   * @return {string} Camelcased string
-   */
-  snakecase: function(_string, _sep) {
-    if (typeof _string !== 'string') return _string;
-    return _string.replace(/[A-Z]/g, function (match, index) {
-      return index === 0 ? match : (_sep || '_') + match.toLowerCase();
-    });
-  },
   /**
    * @memberof constants.Utils
    *
@@ -214,7 +181,7 @@ angular.module('plRestmod').provider('$restmod', function() {
      *
      * @description The restmod service provides the `model` and `mixin` factories.
      */
-    $get: ['$http', '$q', '$injector', '$parse', '$filter', function($http, $q, $injector, $parse, $filter) {
+    $get: ['$http', '$q', '$injector', '$parse', '$filter', '$inflector', function($http, $q, $injector, $parse, $filter, $inflector) {
 
       return {
         /**
@@ -242,8 +209,8 @@ angular.module('plRestmod').provider('$restmod', function() {
               decoders = {},
               encoders = {},
               callbacks = {},
-              nameDecoder = Utils.camelcase,
-              nameEncoder = Utils.snakecase,
+              nameDecoder = $inflector.camelize,
+              nameEncoder = function(_v) { return $inflector.parameterize(_v, '_'); },
               urlBuilder;
 
           // runs all callbacks associated with a given hook.
@@ -1205,7 +1172,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             attrSerializer: function(_name, _serializer, _opt) {
               if(typeof _serializer === 'string') {
-                _serializer = $injector.get(Utils.camelcase(_serializer) + 'Serializer');
+                _serializer = $injector.get($inflector.camelize(_serializer, true) + 'Serializer');
               }
 
               // TODO: if(!_serializer) throw $setupError
@@ -1275,7 +1242,7 @@ angular.module('plRestmod').provider('$restmod', function() {
             hasMany: function(_name, _model, _alias) {
               return this.attrDefault(_name, function() {
                 if(typeof _model === 'string') _model = $injector.get(_model); // inject type (only the first time...)
-                return _model.$collection(null, _alias || Utils.snakecase(_name, '-'), this); // TODO: put snakecase transformation in URLBuilder
+                return _model.$collection(null, _alias || $inflector.parameterize(_name), this); // TODO: put snakecase transformation in URLBuilder
               }).attrDecoder(_name, function(_raw) {
                 this[_name].$feed(_raw);
               }).attrMask(_name, SyncMask.ENCODE);
@@ -1297,7 +1264,7 @@ angular.module('plRestmod').provider('$restmod', function() {
             hasOne: function(_name, _model, _partial) {
               return this.attrDefault(_name, function() {
                 if(typeof _model === 'string') _model = $injector.get(_model); // inject type (only the first time...)
-                return new _model(null, _partial || Utils.snakecase(_name, '-'), this); // TODO: put snakecase transformation in URLBuilder
+                return new _model(null, _partial || $inflector.parameterize(_name), this); // TODO: put snakecase transformation in URLBuilder
               }).attrDecoder(_name, function(_raw) {
                 this[_name].$decode(_raw);
               }).attrMask(_name, SyncMask.ENCODE);

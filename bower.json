@@ -1,6 +1,6 @@
 {
   "name": "angular-restmod",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "authors": [
     "Ignacio Baixas <iobaixas@gmai.com>"
   ],
@@ -21,6 +21,9 @@
     "src",
     ".travis.yml"
   ],
+  "dependencies": {
+    "angular-inflector": "*"
+  },
   "devDependencies": {
     "angular": "*",
     "angular-mocks": "*"

@@ -16,4 +16,4 @@
  * @description Angular services provided by the library.
  */
 
-angular.module('plRestmod', ['ng']);
+angular.module('plRestmod', ['ng', 'platanus.inflector']);
