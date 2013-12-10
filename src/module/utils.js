@@ -13,39 +13,6 @@ var Utils = {
   /**
    * @memberof constants.Utils
    *
-   * @description Transforms a string to it's camelcase representation
-   *
-   * TODO: handle diacritics
-   *
-   * @param  {string} _string Original string
-   * @return {string} Camelcased string
-   */
-  camelcase: function(_string) {
-    if (typeof _string !== 'string') return _string;
-    return _string.replace(/_[\w\d]/g, function (match, index, string) {
-      return index === 0 ? match : string.charAt(index + 1).toUpperCase();
-    });
-  },
-  /**
-   * @memberof constants.Utils
-   *
-   * @description Transforms a string to it's snakecase representation
-   *
-   * TODO: handle diacritics
-   *
-   * @param  {string} _string Original string
-   * @param  {string} _sep Case separator, defaults to '_'
-   * @return {string} Camelcased string
-   */
-  snakecase: function(_string, _sep) {
-    if (typeof _string !== 'string') return _string;
-    return _string.replace(/[A-Z]/g, function (match, index) {
-      return index === 0 ? match : (_sep || '_') + match.toLowerCase();
-    });
-  },
-  /**
-   * @memberof constants.Utils
-   *
    * @description Chains to filtering functions together
    *
    * @param  {function} _first original function
