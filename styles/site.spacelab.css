@@ -1,12 +1,12 @@
-@import url(http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700);
+@import url('//fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700');
 /*!
- * Bootstrap v2.3.1
+ * Bootstrap v2.3.2
  *
- * Copyright 2012 Twitter, Inc
+ * Copyright 2013 Twitter, Inc
  * Licensed under the Apache License v2.0
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Designed and built with all the love in the world @twitter by @mdo and @fat.
+ * Designed and built with all the love in the world by @mdo and @fat.
  */
 .clearfix {
   *zoom: 1;
@@ -2520,6 +2520,14 @@ table th[class*="span"],
 }
 .open > .dropdown-menu {
   display: block;
+}
+.dropdown-backdrop {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  z-index: 990;
 }
 .pull-right > .dropdown-menu {
   right: 0;
@@ -5254,6 +5262,34 @@ a.badge:focus {
 .affix {
   position: fixed;
 }
+.text-warning {
+  color: #d47500;
+}
+a.text-warning:hover,
+a.text-warning:focus {
+  color: #a15900;
+}
+.text-error {
+  color: #cd0200;
+}
+a.text-error:hover,
+a.text-error:focus {
+  color: #9a0200;
+}
+.text-info {
+  color: #3399f3;
+}
+a.text-info:hover,
+a.text-info:focus {
+  color: #0e80e5;
+}
+.text-success {
+  color: #3cb521;
+}
+a.text-success:hover,
+a.text-success:focus {
+  color: #2e8a19;
+}
 .navbar .brand {
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
   -webkit-transition: color ease-in-out 0.2s;
@@ -5424,6 +5460,10 @@ div.subnav-fixed {
   background-color: rgba(0, 0, 0, 0.1);
   border-bottom-color: rgba(255, 255, 255, 0.5);
 }
+[class^="icon-"],
+[class*=" icon-"] {
+  margin-top: 4px;
+}
 .table tbody tr.success > td,
 .table tbody tr.error > td,
 .table tbody tr.info > td {
@@ -5578,6 +5618,10 @@ div.subnav-fixed {
   font-weight: bold;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
 }
+.alert a {
+  color: #ffffff;
+  text-decoration: underline;
+}
 .label-important,
 .badge-important {
   background-color: #cd0200;
@@ -5731,4 +5775,20 @@ code {
   -moz-border-radius: 5px;
   border-radius: 5px;
   padding: 10px;
+}
+.sunlight-highlighted {
+  margin: 0;
+  line-height: auto;
+  word-break: normal;
+  word-wrap: normal;
+  white-space: pre;
+  background-color: transparent;
+  border: none;
+}
+.sunlight-line-number-margin {
+  border-radius: 0;
+  border-width: 0 1px 0 0;
+  font-size: 12px;
+  line-height: 15px;
+  padding: 12px 4px !important;
 }

@@ -206,7 +206,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 527
+        module/restmod.js, line 552
     </li></ul></dd>
     
 
@@ -343,7 +343,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 558
+        module/restmod.js, line 615
     </li></ul></dd>
     
 
@@ -484,7 +484,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 580
+        module/restmod.js, line 638
     </li></ul></dd>
     
 
@@ -521,6 +521,149 @@ class is generated, the corresponding collection class is also generated.</p>
 	<dd>
 		
 <span class="param-type"><a href="Model.html">Model</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$callback"><span class="type-signature"></span>$callback<span class="signature">(_hook)</span><span class="type-signature"> &rarr; {<a href="ModelCollection.html">ModelCollection</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Allows calling custom hooks, usefull when implementing custom actions.</p>
+<p>Passes through every additional arguments to registered hooks.
+Hooks are registered using the ModelBuilder.on method.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_hook</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>hook name</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 573
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="ModelCollection.html">ModelCollection</a></span>
 
 
 	</dd>
@@ -672,7 +815,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 631
+        module/restmod.js, line 689
     </li></ul></dd>
     
 
@@ -813,7 +956,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 592
+        module/restmod.js, line 650
     </li></ul></dd>
     
 
@@ -955,7 +1098,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 721
+        module/restmod.js, line 779
     </li></ul></dd>
     
 
@@ -1099,7 +1242,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 757
+        module/restmod.js, line 815
     </li></ul></dd>
     
 
@@ -1243,7 +1386,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 706
+        module/restmod.js, line 764
     </li></ul></dd>
     
 
@@ -1385,7 +1528,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 606
+        module/restmod.js, line 664
     </li></ul></dd>
     
 
@@ -1422,6 +1565,170 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
 	<dd>
 		
 <span class="param-type"><a href="Model.html">Model</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$on"><span class="type-signature"></span>$on<span class="signature">(_hook, _fun)</span><span class="type-signature"> &rarr; {<a href="ModelCollection.html">ModelCollection</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Registers instance hooks.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_hook</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Hook name</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_fun</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Callback</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 587
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="ModelCollection.html">ModelCollection</a></span>
 
 
 	</dd>
@@ -1526,7 +1833,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 788
+        module/restmod.js, line 846
     </li></ul></dd>
     
 
@@ -1619,7 +1926,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 738
+        module/restmod.js, line 796
     </li></ul></dd>
     
 
@@ -1760,7 +2067,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 661
+        module/restmod.js, line 719
     </li></ul></dd>
     
 
@@ -1927,7 +2234,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 684
+        module/restmod.js, line 742
     </li></ul></dd>
     
 
@@ -2068,7 +2375,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 544
+        module/restmod.js, line 601
     </li></ul></dd>
     
 
@@ -2137,7 +2444,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0</a>
-		on Wed Nov 20 2013 16:50:55 GMT-0300 (GMT-03:00) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Tue Dec 17 2013 19:30:35 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

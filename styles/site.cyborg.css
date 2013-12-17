@@ -1,12 +1,12 @@
-@import url(http://fonts.googleapis.com/css?family=Droid+Sans:400,700);
+@import url('//fonts.googleapis.com/css?family=Droid+Sans:400,700');
 /*!
- * Bootstrap v2.3.1
+ * Bootstrap v2.3.2
  *
- * Copyright 2012 Twitter, Inc
+ * Copyright 2013 Twitter, Inc
  * Licensed under the Apache License v2.0
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Designed and built with all the love in the world @twitter by @mdo and @fat.
+ * Designed and built with all the love in the world by @mdo and @fat.
  */
 .clearfix {
   *zoom: 1;
@@ -2520,6 +2520,14 @@ table th[class*="span"],
 }
 .open > .dropdown-menu {
   display: block;
+}
+.dropdown-backdrop {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  z-index: 990;
 }
 .pull-right > .dropdown-menu {
   right: 0;
@@ -5852,6 +5860,10 @@ label {
   background-color: #33b5e5;
   color: #ffffff;
 }
+.table tbody tr.warning td {
+  background-color: #ff8800;
+  color: #ffffff;
+}
 .dropdown-menu {
   -webkit-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
   -moz-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
@@ -5871,6 +5883,14 @@ label {
   text-shadow: none;
   border: none;
 }
+.alert h1,
+.alert h2,
+.alert h3,
+.alert h4,
+.alert h5,
+.alert h6 {
+  color: #eeeeee;
+}
 .label {
   color: #eeeeee;
 }
@@ -5889,7 +5909,8 @@ label {
 .label-important:hover {
   background-color: #990000;
 }
-.label-warning {
+.label-warning,
+.alert-warning {
   background-color: #cc6d00;
 }
 .label-warning:hover {
@@ -5908,6 +5929,14 @@ label {
 }
 .label-info:hover {
   background-color: #004d66;
+}
+.badge-inverse,
+.label-inverse,
+.alert-inverse {
+  background-color: #7a29a3;
+}
+.label-inverse:hover {
+  background-color: #5c1f7a;
 }
 .well,
 .hero-unit {
@@ -6101,4 +6130,20 @@ code {
   -moz-border-radius: 5px;
   border-radius: 5px;
   padding: 10px;
+}
+.sunlight-highlighted {
+  margin: 0;
+  line-height: auto;
+  word-break: normal;
+  word-wrap: normal;
+  white-space: pre;
+  background-color: transparent;
+  border: none;
+}
+.sunlight-line-number-margin {
+  border-radius: 0;
+  border-width: 0 1px 0 0;
+  font-size: 12px;
+  line-height: 15px;
+  padding: 12px 4px !important;
 }
