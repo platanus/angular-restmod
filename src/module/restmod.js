@@ -108,7 +108,8 @@ angular.module('plRestmod').provider('$restmod', function() {
                 $promise: SyncMask.SYSTEM_ALL,
                 $pending: SyncMask.SYSTEM_ALL,
                 $response: SyncMask.SYSTEM_ALL,
-                $error: SyncMask.SYSTEM_ALL
+                $error: SyncMask.SYSTEM_ALL,
+                $cb: SyncMask.SYSTEM_ALL
               },
               defaults = [],
               decoders = {},
@@ -120,11 +121,20 @@ angular.module('plRestmod').provider('$restmod', function() {
 
           // runs all callbacks associated with a given hook.
           function callback(_hook, _ctx /*, args */) {
-            var cbs = callbacks[_hook];
-            if(cbs) {
-              var i = 0, args = arraySlice.call(arguments, 2), cb;
-              while((cb = cbs[i++])) {
-                // execute callback
+            var cbs, i, args, cb;
+
+            // execute static callbacks
+            if(cbs = callbacks[_hook]) {
+              args = arraySlice.call(arguments, 2);
+              for(i = 0; cb = cbs[i]; i++) {
+                cb.apply(_ctx, args);
+              }
+            }
+
+            // execute instance callbacks
+            if(_ctx.$cb && (cbs = _ctx.$cb[_hook])) {
+              if(!args) args = arraySlice.call(arguments, 2);
+              for(i = 0; cb = cbs[i]; i++) {
                 cb.apply(_ctx, args);
               }
             }
@@ -326,7 +336,22 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} self
              */
             $callback: function(_hook /*, args */) {
-              callback(this, _hook, arraySlice.call(arguments, 1));
+              callback(_hook, this, arraySlice.call(arguments, 1));
+              return this;
+            },
+
+            /**
+             * @memberof Model#
+             *
+             * @description Registers instance hooks.
+             *
+             * @param {string} _hook Hook name
+             * @param {function} _fun Callback
+             * @return {Model} self
+             */
+            $on: function(_hook, _fun) {
+              var hooks = (this.$cb || (this.$cb = {}))[_hook] || (this.$cb[_hook] = []);
+              hooks.push(_fun);
               return this;
             },
 
@@ -533,6 +558,38 @@ angular.module('plRestmod').provider('$restmod', function() {
            * class is generated, the corresponding collection class is also generated.
            */
           var Collection = {
+
+            /**
+             * @memberof ModelCollection#
+             *
+             * @description Allows calling custom hooks, usefull when implementing custom actions.
+             *
+             * Passes through every additional arguments to registered hooks.
+             * Hooks are registered using the ModelBuilder.on method.
+             *
+             * @param {string} _hook hook name
+             * @return {ModelCollection} self
+             */
+            $callback: function(_hook /*, args */) {
+              callback(_hook, this, arraySlice.call(arguments, 1));
+              return this;
+            },
+
+            /**
+             * @memberof ModelCollection#
+             *
+             * @description Registers instance hooks.
+             *
+             * @param {string} _hook Hook name
+             * @param {function} _fun Callback
+             * @return {ModelCollection} self
+             */
+            $on: function(_hook, _fun) {
+              var hooks = (this.$cb || (this.$cb = {}))[_hook] || (this.$cb[_hook] = []);
+              hooks.push(_fun);
+              return this;
+            },
+
             /**
              * @memberof ModelCollection#
              *
@@ -1147,7 +1204,7 @@ angular.module('plRestmod').provider('$restmod', function() {
             hasMany: function(_name, _model, _alias) {
               return this.attrDefault(_name, function() {
                 if(typeof _model === 'string') _model = $injector.get(_model); // inject type (only the first time...)
-                return _model.$collection(null, _alias || $inflector.parameterize(_name), this); // TODO: put snakecase transformation in URLBuilder
+                return _model.$collection(null, _alias || $inflector.parameterize(_name), this);
               }).attrDecoder(_name, function(_raw) {
                 this[_name].$feed(_raw);
               }).attrMask(_name, SyncMask.ENCODE);

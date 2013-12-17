@@ -82,5 +82,21 @@ describe('Restmod model collection:', function() {
 
   });
 
+  describe('$on', function() {
+
+    it('should register a callback at collection level', inject(function($restmod) {
+      var Bike = $restmod.model('/api/books'),
+          coll = Bike.$collection(),
+          calls = [];
+
+      Bike.$on('poke', function() { calls.push('bs1'); });
+      Bike.$callback('poke');
+      coll.$callback('poke');
+
+      expect(calls).toEqual(['bs1']);
+    }));
+
+  });
+
 });
 

@@ -265,5 +265,21 @@ describe('Restmod model class:', function() {
 
   });
 
+  describe('$on', function() {
+
+    it('should register a callback at instance level', inject(function($restmod) {
+      var Bike = $restmod.model('/api/books'),
+          bike1 = Bike.$build({ }),
+          bike2 = Bike.$build({ }),
+          calls = [];
+
+      bike1.$on('poke', function() { calls.push('bs1'); });
+      bike1.$callback('poke');
+      bike2.$callback('poke');
+
+      expect(calls).toEqual(['bs1']);
+    }));
+
+  });
 });
 
