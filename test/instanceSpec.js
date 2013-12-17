@@ -16,7 +16,7 @@ describe('Restmod model behavior modifiers:', function() {
           encode: 'date'
         },
         pageCount: { init: 10 },
-        chapters: { hasMany: 'Chapter' },
+        chapters: { hasMany: 'Chapter', inverseOf: 'book' },
         pages: { hasMany: 'Page'}
       });
     });
@@ -82,6 +82,14 @@ describe('Restmod model behavior modifiers:', function() {
           $httpBackend.flush();
           expect(chapters.length).toEqual(2);
           expect(chapters[0] instanceof Chapter).toBeTruthy();
+        });
+
+        it('should use set the inverseOf property', function() {
+          var book = Book.$build({ id: 1 }),
+              chapters = book.chapters.$fetch();
+
+          $httpBackend.flush();
+          expect(chapters[0].book).toEqual(book);
         });
     });
 

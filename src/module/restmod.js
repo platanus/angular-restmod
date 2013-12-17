@@ -623,6 +623,7 @@ angular.module('plRestmod').provider('$restmod', function() {
 
               var obj = new Model(init, null, this);
               if(this.$isCollection) this.push(obj); // on collection, push new object
+              callback('after-build', this, obj);
               return obj;
             },
 
@@ -862,8 +863,8 @@ angular.module('plRestmod').provider('$restmod', function() {
             decode: ['attrDecoder', 'param', 'chain'],
             encode: ['attrEncoder', 'param', 'chain'],
             serialize: ['attrSerializer'],
-            hasMany: ['hasMany', 'alias'],
-            hasOne: ['hasOne', 'alias']
+            hasMany: ['hasMany', 'alias', 'inverseOf'],
+            hasOne: ['hasOne', 'alias', 'inverseOf']
           }, urlBuilderFactory;
 
           /**
@@ -1201,10 +1202,18 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @param {string} _url Partial url
              * @return {ModelBuilder} self
              */
-            hasMany: function(_name, _model, _alias) {
+            hasMany: function(_name, _model, _alias, _inverseOf) {
               return this.attrDefault(_name, function() {
                 if(typeof _model === 'string') _model = $injector.get(_model); // inject type (only the first time...)
-                return _model.$collection(null, _alias || $inflector.parameterize(_name), this);
+                var coll = _model.$collection(null, _alias || $inflector.parameterize(_name), this);
+                // set inverse property if required.
+                if(_inverseOf) {
+                  var self = this;
+                  coll.$on('after-build', function(_obj) {
+                    _obj[_inverseOf] = self;
+                  });
+                }
+                return coll;
               }).attrDecoder(_name, function(_raw) {
                 this[_name].$feed(_raw);
               }).attrMask(_name, SyncMask.ENCODE);
@@ -1223,10 +1232,14 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @param {string} _url Partial url
              * @return {ModelBuilder} self
              */
-            hasOne: function(_name, _model, _partial) {
+            hasOne: function(_name, _model, _partial, _inverseOf) {
               return this.attrDefault(_name, function() {
                 if(typeof _model === 'string') _model = $injector.get(_model); // inject type (only the first time...)
-                return new _model(null, _partial || $inflector.parameterize(_name), this); // TODO: put snakecase transformation in URLBuilder
+                var inst = new _model(null, _partial || $inflector.parameterize(_name), this);
+                if(_inverseOf) {
+                  inst[_inverseOf] = this;
+                }
+                return inst;
               }).attrDecoder(_name, function(_raw) {
                 this[_name].$decode(_raw);
               }).attrMask(_name, SyncMask.ENCODE);
