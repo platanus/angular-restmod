@@ -20,13 +20,18 @@ module.exports = function(config) {
         'src/module.js',
         'src/module/utils.js',
         'src/module/restmod.js',
-        'src/module/rest_url_builder.js',
         'src/plugins/*.js',
 
 		// tests
 		'test/**/*.js'
     ],
 
+    // karma plugins
+    plugins: [
+      'karma-jasmine',
+      'karma-chrome-launcher',
+      'karma-osx-reporter'
+    ],
 
     // list of files to exclude
     exclude: [
@@ -36,7 +41,7 @@ module.exports = function(config) {
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit'
-    reporters: ['progress'],
+    reporters: ['progress', 'osx'],
 
 
     // web server port

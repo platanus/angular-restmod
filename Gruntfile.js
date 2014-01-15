@@ -30,8 +30,7 @@ module.exports = function(grunt) {
           'dist/<%= pkg.name %>.js': [
             'src/module.js',
             'src/module/utils.js',
-            'src/module/restmod.js',
-            'src/module/rest_url_builder.js'
+            'src/module/restmod.js'
           ],
           'dist/plugins/debounced.js': 'src/plugins/debounced.js',
           'dist/plugins/dirty.js': 'src/plugins/dirty.js',
