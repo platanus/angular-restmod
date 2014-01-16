@@ -1,3 +1,10 @@
+# 0.10.1 (2014-01-16)
+
+## Features
+### Collection
+
+* adds $indexOf method and makes $remove actually remove something. (0175ae8)
+
 # 0.10.0 (2014-01-15)
 
 ## Features
