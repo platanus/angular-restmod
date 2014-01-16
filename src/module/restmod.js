@@ -705,7 +705,7 @@ angular.module('plRestmod').provider('$restmod', function() {
               var obj = this.$new(Model.inferKey(_init));
               angular.extend(obj, _init);
 
-              if(this.$isCollection) this.$push(obj);
+              if(this.$isCollection) this.$add(obj);
               return obj;
             },
 
@@ -721,7 +721,7 @@ angular.module('plRestmod').provider('$restmod', function() {
               var obj = this.$new(Model.inferKey(_raw));
               obj.$decode(_raw);
 
-              if(this.$isCollection) this.$push(obj);
+              if(this.$isCollection) this.$add(obj);
               return obj;
             },
 
@@ -922,28 +922,70 @@ angular.module('plRestmod').provider('$restmod', function() {
             },
 
             /**
-             * Method called by build and buildRaw to add a new item to the collection.
+             * @memberof ModelCollection#
              *
-             * Executes after-push hooks.
+             * @description Adds an item to the back of the collection. This method does not attempt to send changes
+             * to the server. To create a new item and add it use $create or $build.
              *
-             * @param  {[type]} _obj [description]
+             * Triggers after-add callbacks.
+             *
+             * @param {Model} _obj Item to be added
              * @return {[type]}      [description]
              */
-            $push: function(_obj) {
+            $add: function(_obj, _idx) {
+              // TODO: make sure object is f type Model?
               if(this.$isCollection) {
-                this.push(_obj); // on collection, push new object
-                callback('after-push', this, _obj);
+                if(typeof _idx !== 'undefined') {
+                  this.splice(_idx, 0, _obj);
+                } else {
+                  this.push(_obj);
+                }
+                callback('after-add', this, _obj);
               }
+              return this;
             },
 
+            /**
+             * @memberof ModelCollection#
+             *
+             * @description  Removes an item from the collection.
+             *
+             * This method does not send a DELETE request to the server, it just removes the
+             * item locally. To remove an item AND send a DELETE use the item's $destroy method.
+             *
+             * Triggers after-remove callbacks.
+             *
+             * @param {Model} _obj Item to be removed
+             * @return {[type]}      [description]
+             */
             $remove: function(_obj) {
-              if(this.$isCollection) {
-                // TODO: remove item from collection
+              var idx = this.$indexOf(_obj);
+              if(idx !== -1) {
+                this.splice(idx, 1);
                 callback('after-remove', this, _obj);
               }
-            }
+              return this;
+            },
 
-            // IDEA: $clear, $push, $remove, etc
+            /**
+             * @memberof ModelCollection#
+             *
+             * @description Finds the location of an object in the array.
+             *
+             * If a function is provided then the index of the first item for which the function returns true is returned.
+             *
+             * @param {Model|function} _obj Object to find
+             * @return {number} Object index or -1 if not found
+             */
+            $indexOf: function(_obj) {
+              var accept = typeof _obj === 'function' ? _obj : false;
+              if(this.$isCollection) {
+                for(var i = 0, l = this.length; i < l; i++) {
+                  if(accept ? accept(this[i]) : this[i] === _obj) return i;
+                }
+              }
+              return -1;
+            }
           };
 
           // Model customization phase:
@@ -1320,7 +1362,7 @@ angular.module('plRestmod').provider('$restmod', function() {
 
                 // set inverse property if required.
                 if(_inverseOf) {
-                  col.$on('after-push', function(_obj) {
+                  col.$on('after-add', function(_obj) {
                     _obj[_inverseOf] = self;
                   });
                 }

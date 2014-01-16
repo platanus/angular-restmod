@@ -2,117 +2,102 @@
 
 describe('Restmod model class:', function() {
 
-  var $httpBackend, $restmod, Book;
+  var $httpBackend, $restmod, Bike;
 
   beforeEach(module('plRestmod'));
 
   beforeEach(inject(function($injector) {
     $httpBackend = $injector.get('$httpBackend');
     $restmod = $injector.get('$restmod');
-    Book = $restmod.model('/api/books');
-
-    // Initialize mock api
-    $httpBackend.when('GET', '/api/books?minPages=100').respond([ {name: 'Los piratas del Caribe' }]);
-    $httpBackend.when('GET', '/api/books/1').respond(200, '{"id": 1, "chapters": [{"id": 2}]}');
-    $httpBackend.when('GET', '/api/books/2').respond(400, '{}');
-    $httpBackend.when('POST', '/api/books').respond(200, { id: 1 });
+    Bike = $restmod.model('/api/bikes');
   }));
 
-  // TODO: move $search, $build and $create to the collectionSpec
+  describe('$fetch', function() {
 
-  describe('$search', function() {
+    it('should call callbacks in proper order', function() {
+      var calls = [];
 
-    it('should retrieve a collection of items of same type', function() {
-      var books = Book.$search({ minPages: 100 });
-      expect(books.length).toEqual(0);
-      expect(books.$resolved).toBeFalsy();
+      Bike.$build({ id: 1 })
+          .$on('before-fetch', function() { calls.push('bf'); })
+          .$on('before-request', function() { calls.push('br'); })
+          .$on('after-request', function() { calls.push('ar'); })
+          .$on('after-fetch', function() { calls.push('af'); })
+          .$fetch();
+
+      $httpBackend.when('GET', '/api/bikes/1').respond(200, {});
       $httpBackend.flush();
-      expect(books.length).toEqual(1);
-      expect(books.$resolved).toBeTruthy();
-      expect(books[0] instanceof Book).toBeTruthy();
+
+      expect(calls).toEqual(['bf','br','ar','af']);
     });
 
+    it('should call error callbacks in proper order', function() {
+      var calls = [];
+
+      Bike.$build({ id: 1 })
+          .$on('before-fetch', function() { calls.push('bf'); })
+          .$on('before-request', function() { calls.push('br'); })
+          .$on('after-request-error', function() { calls.push('are'); })
+          .$on('after-fetch-error', function() { calls.push('afe'); })
+          .$fetch();
+
+      $httpBackend.when('GET', '/api/bikes/1').respond(400, {});
+      $httpBackend.flush();
+
+      expect(calls).toEqual(['bf','br','are','afe']);
+    });
   });
 
-  describe('$build', function() {
+  describe('$save', function() {
 
-    it('should return book with a name', function() {
-      var book = Book.$build({ name: 'Los piratas del Caribe' });
-      expect(book.name).toEqual('Los piratas del Caribe');
+    it('should call callbacks in proper order when creating', function() {
+      var calls = [];
+
+      Bike.$build()
+          .$on('before-save', function() { calls.push('bs'); })
+          .$on('before-create', function() { calls.push('bc'); })
+          .$on('before-request', function() { calls.push('br'); })
+          .$on('after-request', function() { calls.push('ar'); })
+          .$on('after-create', function() { calls.push('ac'); })
+          .$on('after-save', function() { calls.push('as'); })
+          .$save();
+
+      $httpBackend.when('POST', '/api/bikes').respond(200, {});
+      $httpBackend.flush();
+
+      expect(calls).toEqual(['bs','bc','br','ar','ac','as']);
     });
-
-    it('should infer the key when not used an explicit one', function(){
-      var book = Book.$build(1);
-      expect(book.$pk).toEqual(1);
-    });
-
   });
 
-  describe('$create', function() {
+  describe('$destroy', function() {
 
-    it('should return book with a name', function() {
-      $httpBackend.expectPOST('/api/books', {name: 'Los piratas del Caribe'});
-      Book.$create({name: 'Los piratas del Caribe'});
+    it('should call callbacks in proper order', function() {
+      var calls = [];
+
+      Bike.$build({ id: 1 })
+          .$on('before-destroy', function() { calls.push('bd'); })
+          .$on('before-request', function() { calls.push('br'); })
+          .$on('after-request', function() { calls.push('ar'); })
+          .$on('after-destroy', function() { calls.push('ad'); })
+          .$destroy();
+
+      $httpBackend.when('DELETE', '/api/bikes/1').respond(200, {});
       $httpBackend.flush();
+
+      expect(calls).toEqual(['bd','br','ar','ad']);
     });
 
-    it('should allow an empty response', function() {
-      $httpBackend.expectPOST('/api/books', {name: 'Los piratas del Caribe'}).respond(200, '');
-      Book.$create({name: 'Los piratas del Caribe'});
+    it('should remove item from collection if bound to colletion', function() {
+      var col = Bike.$collection(),
+          bike = col.$build({ id: 1 });
+
+      expect(col.length).toEqual(1);
+      bike.$destroy();
+
+      $httpBackend.when('DELETE', '/api/bikes/1').respond(200, {});
       $httpBackend.flush();
+
+      expect(col.length).toEqual(0);
     });
-
-    it('should assign an ID to the new resource', function() {
-      var book = Book.$create({name: 'Los piratas del Caribe'});
-      expect(book.id).toBeUndefined();
-      $httpBackend.flush();
-      expect(book.id).toEqual(1);
-    });
-
-    it('should bind to the new resource', function() {
-      var book = Book.$create({name: 'Los piratas del Caribe'});
-      expect(book.$url()).toEqual(null);
-      $httpBackend.flush();
-      expect(book.$url()).toEqual('/api/books/1');
-    });
-
-  });
-
-  describe('$finally', function() {
-    var spy;
-    beforeEach(function() {
-      spy = jasmine.createSpy();
-    });
-
-    it('should be called on success', function() {
-      $httpBackend.when('GET','/bikes/1').respond(200, {});
-      $restmod.model('/bikes').$find(1).$finally(spy);
-      $httpBackend.flush();
-      expect(spy).toHaveBeenCalledWith();
-    });
-
-    it('should be called on error', function() {
-      $httpBackend.when('GET','/bikes/1').respond(404);
-      $restmod.model('/bikes').$find(1).$finally(spy);
-      $httpBackend.flush();
-      expect(spy).toHaveBeenCalledWith();
-    });
-
-  });
-
-  describe('$each', function() {
-
-    it('should iterate over non system properties by default', function() {
-      var bike = $restmod.model(null).$build({ brand: 'Trek' }), props = [];
-      bike.$each(function(_val, _key) {
-        props.push(_key);
-      });
-
-      expect(props).toContain('brand');
-      expect(props).not.toContain('$pending');
-      expect(props).not.toContain('$context');
-    });
-
   });
 
   describe('$decode', function() {
@@ -164,14 +149,13 @@ describe('Restmod model class:', function() {
       bike.$decode({ users: [{ name: 'Petty' }] });
       expect(bike.users[0].name).toEqual('Mr. Petty');
     });
-
   });
 
   describe('$encode', function() {
 
     it('should rename all camel case attributes by default', function() {
-      var book = Book.$build({ camelCase: true }),
-          encoded = book.$encode();
+      var bike = Bike.$build({ camelCase: true }),
+          encoded = bike.$encode();
 
       expect(encoded.camelCase).toBeUndefined();
       expect(encoded.camel_case).toBeDefined();
@@ -210,76 +194,59 @@ describe('Restmod model class:', function() {
 
       expect(raw.user).toBeUndefined();
     });
-
   });
 
-  describe('$fetch', function() {
+  describe('$finally', function() {
 
-    it('should call callbacks in proper order', inject(function($restmod) {
-      var calls = [],
-          Bike = $restmod.model('/api/books', function() {
-            this.on('before-fetch', function() { calls.push('bf'); })
-                .on('before-request', function() { calls.push('br'); })
-                .on('after-request', function() { calls.push('ar'); })
-                .on('after-fetch', function() { calls.push('af'); });
-          });
+    it('should be called on success', function() {
+      var spy = jasmine.createSpy('callback');
 
-      Bike.$build({ id: 1 }).$fetch();
+      Bike.$find(1).$finally(spy);
+
+      $httpBackend.when('GET','/api/bikes/1').respond(200, {});
       $httpBackend.flush();
-      expect(calls).toEqual(['bf','br','ar','af']);
-    }));
+      expect(spy).toHaveBeenCalledWith();
+    });
 
-    it('should call error callbacks in proper order', inject(function($restmod) {
-      var calls = [],
-          Bike = $restmod.model('/api/books', function() {
-            this.on('before-fetch', function() { calls.push('bf'); })
-                .on('before-request', function() { calls.push('br'); })
-                .on('after-request-error', function() { calls.push('are'); })
-                .on('after-fetch-error', function() { calls.push('afe'); });
-          });
+    it('should be called on error', function() {
+      var spy = jasmine.createSpy('callback');
 
-      Bike.$build({ id: 2 }).$fetch();
+      Bike.$find(1).$finally(spy);
+
+      $httpBackend.when('GET','/api/bikes/1').respond(404);
       $httpBackend.flush();
-      expect(calls).toEqual(['bf','br','are','afe']);
-    }));
-
+      expect(spy).toHaveBeenCalledWith();
+    });
   });
 
-  describe('$save', function() {
+  describe('$each', function() {
 
-    it('should call callbacks in proper order', inject(function($restmod) {
-      var calls = [],
-          Bike = $restmod.model('/api/books', function() {
-            this.on('before-save', function() { calls.push('bs'); })
-                .on('before-create', function() { calls.push('bc'); })
-                .on('before-request', function() { calls.push('br'); })
-                .on('after-request', function() { calls.push('ar'); })
-                .on('after-create', function() { calls.push('ac'); })
-                .on('after-save', function() { calls.push('as'); });
-          });
+    it('should iterate over non system properties by default', function() {
+      var bike = Bike.$build({ brand: 'Trek' }), props = [];
+      bike.$each(function(_val, _key) {
+        props.push(_key);
+      });
 
-      Bike.$build({ camelCase: true }).$save();
-      $httpBackend.flush();
-      expect(calls).toEqual(['bs','bc','br','ar','ac','as']);
-    }));
-
+      expect(props).toContain('brand');
+      expect(props).not.toContain('$pending');
+      expect(props).not.toContain('$scope');
+    });
   });
 
   describe('$on', function() {
 
-    it('should register a callback at instance level', inject(function($restmod) {
-      var Bike = $restmod.model('/api/books'),
-          bike1 = Bike.$build({ }),
-          bike2 = Bike.$build({ }),
-          calls = [];
+    it('should register a callback at instance level', function() {
+      var bike1 = Bike.$build(),
+          bike2 = Bike.$build(),
+          spy = jasmine.createSpy('callback');
 
-      bike1.$on('poke', function() { calls.push('bs1'); });
-      bike1.$callback('poke');
+      bike1.$on('poke', spy);
       bike2.$callback('poke');
+      expect(spy).not.toHaveBeenCalled();
 
-      expect(calls).toEqual(['bs1']);
-    }));
-
+      bike1.$callback('poke');
+      expect(spy).toHaveBeenCalled();
+    });
   });
 });
 
