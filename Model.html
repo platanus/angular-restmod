@@ -75,10 +75,6 @@
 						</li>
 						
 						<li>
-							<a href="RestUrlBuilder.html">RestUrlBuilder</a>
-						</li>
-						
-						<li>
 							<a href="services.$restmod.html">$restmod</a>
 						</li>
 						
@@ -124,10 +120,6 @@
 						
 						<li>
 							<a href="tutorial-relations.html">Using Relations</a>
-						</li>
-						
-						<li>
-							<a href="tutorial-url_builder.html">Understanding URL Building</a>
 						</li>
 						
 
@@ -176,8 +168,8 @@
 <p>Inherits all static methods from <a href="ModelCollection.html">ModelCollection</a>.</p>
 <h4>About object creation</h4>
 <p>Direct construction of object instances using <code>new</code> is not recommended. A collection of
-static methods are available to generate new instances of an model, for more information
-go check the <a href="ModelCollection.html">ModelCollection</a> documentation.</p>
+static methods are available to generate new instances of a model, for more information
+read the <a href="ModelCollection.html">ModelCollection</a> documentation.</p>
     </div>
     
 
@@ -403,6 +395,172 @@ go check the <a href="ModelCollection.html">ModelCollection</a> documentation.</
         <dl>
             
 <dt>
+    <h4 class="name" id="$buildScope"><span class="type-signature"></span>$buildScope<span class="signature">(_for, _partial)</span><span class="type-signature"> &rarr; {Scope}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Default item child scope factory.</p>
+<p>By default, no create url is provided and the update/destroy url providers
+attempt to first use the unscoped resource url.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_for</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">mixed</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Scope target type, accepts any model class.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_partial</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Partial route.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 327
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>New scope.</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Scope</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
     <h4 class="name" id="$callback"><span class="type-signature"></span>$callback<span class="signature">(_hook)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
     
     
@@ -495,7 +653,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 338
+        module/restmod.js, line 403
     </li></ul></dd>
     
 
@@ -659,7 +817,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 425
+        module/restmod.js, line 490
     </li></ul></dd>
     
 
@@ -752,7 +910,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 537
+        module/restmod.js, line 596
     </li></ul></dd>
     
 
@@ -916,7 +1074,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 312
+        module/restmod.js, line 377
     </li></ul></dd>
     
 
@@ -1057,7 +1215,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 439
+        module/restmod.js, line 505
     </li></ul></dd>
     
 
@@ -1083,6 +1241,147 @@ Hooks are registered using the ModelBuilder.on method.</p>
             
 <div class="param-desc">
     <p>this</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$extend"><span class="type-signature"></span>$extend<span class="signature">(_other)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Copyies another object's properties.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_other</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Object to merge.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 359
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
 </div>
 
 
@@ -1150,7 +1449,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 454
+        module/restmod.js, line 520
     </li></ul></dd>
     
 
@@ -1294,7 +1593,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 411
+        module/restmod.js, line 476
     </li></ul></dd>
     
 
@@ -1458,7 +1757,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 352
+        module/restmod.js, line 417
     </li></ul></dd>
     
 
@@ -1551,7 +1850,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 484
+        module/restmod.js, line 550
     </li></ul></dd>
     
 
@@ -1738,7 +2037,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 368
+        module/restmod.js, line 433
     </li></ul></dd>
     
 
@@ -1905,7 +2204,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 390
+        module/restmod.js, line 455
     </li></ul></dd>
     
 
@@ -1956,7 +2255,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
         
             
 <dt>
-    <h4 class="name" id="$url"><span class="type-signature"></span>$url<span class="signature">(_opt)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    <h4 class="name" id="$url"><span class="type-signature"></span>$url<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
     
     
 </dt>
@@ -1965,6 +2264,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <div class="description">
         <p>Returns the url this object is bound to.</p>
+<p>This is the url used by fetch to retrieve the resource related data.</p>
     </div>
     
 
@@ -1972,55 +2272,6 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
     
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_opt</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Options to be passed to the url builder.</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
     
     
     
@@ -2046,7 +2297,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 299
+        module/restmod.js, line 311
     </li></ul></dd>
     
 
@@ -2115,7 +2366,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0</a>
-		on Tue Dec 17 2013 19:30:34 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Thu Jan 16 2014 11:27:44 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

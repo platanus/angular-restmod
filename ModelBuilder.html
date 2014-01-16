@@ -75,10 +75,6 @@
 						</li>
 						
 						<li>
-							<a href="RestUrlBuilder.html">RestUrlBuilder</a>
-						</li>
-						
-						<li>
 							<a href="services.$restmod.html">$restmod</a>
 						</li>
 						
@@ -124,10 +120,6 @@
 						
 						<li>
 							<a href="tutorial-relations.html">Using Relations</a>
-						</li>
-						
-						<li>
-							<a href="tutorial-url_builder.html">Understanding URL Building</a>
 						</li>
 						
 
@@ -190,8 +182,8 @@ the mixin chain.</p>
 <li><code>decode</code> maps to <a href="ModelBuilder.html#attrDecoder">ModelBuilder#attrDecoder</a></li>
 <li><code>encode</code> maps to <a href="ModelBuilder.html#attrEncoder">ModelBuilder#attrEncoder</a></li>
 <li><code>serialize</code> maps to <a href="ModelBuilder.html#attrSerializer">ModelBuilder#attrSerializer</a></li>
-<li><code>hasMany</code> maps to <a href="ModelBuilder.html#hasMany">ModelBuilder#hasMany</a></li>
-<li><code>hasOne</code> maps to <a href="ModelBuilder.html#hasOne">ModelBuilder#hasOne</a></li>
+<li><code>hasMany</code> maps to ModelBuilder#hasMany</li>
+<li><code>hasOne</code> maps to ModelBuilder#hasOne</li>
 </ul>
 <p>Mapping a <em>primitive</em> to a property is the same as using the <code>init</code> modifier.
 Mapping a <em>function</em> to a property calls <a href="ModelBuilder.html#define">ModelBuilder#define</a> on the function.</p>
@@ -227,7 +219,7 @@ Mapping a <em>function</em> to a property calls <a href="ModelBuilder.html#defin
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 870
+        module/restmod.js, line 1010
     </li></ul></dd>
     
 
@@ -271,6 +263,715 @@ Mapping a <em>function</em> to a property calls <a href="ModelBuilder.html#defin
         <h3 class="subsection-title">Methods</h3>
 
         <dl>
+            
+<dt>
+    <h4 class="name" id="attrAsCollection"><span class="type-signature"></span>attrAsCollection<span class="signature">(_name, _model, _url, _source, _inverseOf)</span><span class="type-signature"> &rarr; {<a href="ModelBuilder.html">ModelBuilder</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Registers a model <strong>resources</strong> relation</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Attribute name</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_model</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Other model, supports a model name or a direct reference.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Partial url</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_source</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Inline resource alias (optional)</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_inverseOf</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Inverse property name (optional)</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 1342
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="ModelBuilder.html">ModelBuilder</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="attrAsReference"><span class="type-signature"></span>attrAsReference<span class="signature">(_name, _model, _inline, _key, _prefetch)</span><span class="type-signature"> &rarr; {<a href="ModelBuilder.html">ModelBuilder</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Registers a model <strong>reference</strong> relation.</p>
+<p>A reference relation</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Attribute name</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_model</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Other model, supports a model name or a direct reference.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_inline</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>If true, model data is expected to be inlined in parent response.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>reference id property name (optional, defaults to _attr + 'Id')</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_prefetch</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>if set to true, $fetch will be automatically called on relation object load.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 1434
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="ModelBuilder.html">ModelBuilder</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="attrAsResource"><span class="type-signature"></span>attrAsResource<span class="signature">(_name, _model, _url, _source, _inverseOf)</span><span class="type-signature"> &rarr; {<a href="ModelBuilder.html">ModelBuilder</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Registers a model <strong>resource</strong> relation</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Attribute name</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_model</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Other model, supports a model name or a direct reference.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Partial url (optional)</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_source</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Inline resource alias (optional)</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_inverseOf</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Inverse property name (optional)</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 1389
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="ModelBuilder.html">ModelBuilder</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
             
 <dt>
     <h4 class="name" id="attrDecoder"><span class="type-signature"></span>attrDecoder<span class="signature">(_name, _filter, _filterParam, _chain)</span><span class="type-signature"> &rarr; {<a href="ModelBuilder.html">ModelBuilder</a>}</span></h4>
@@ -435,7 +1136,7 @@ Mapping a <em>function</em> to a property calls <a href="ModelBuilder.html#defin
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1159
+        module/restmod.js, line 1297
     </li></ul></dd>
     
 
@@ -602,7 +1303,7 @@ default value is required.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1091
+        module/restmod.js, line 1229
     </li></ul></dd>
     
 
@@ -815,7 +1516,7 @@ default value is required.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1181
+        module/restmod.js, line 1319
     </li></ul></dd>
     
 
@@ -979,7 +1680,7 @@ default value is required.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1344
+        module/restmod.js, line 1564
     </li></ul></dd>
     
 
@@ -1149,7 +1850,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1059
+        module/restmod.js, line 1197
     </li></ul></dd>
     
 
@@ -1339,7 +2040,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1107
+        module/restmod.js, line 1245
     </li></ul></dd>
     
 
@@ -1513,7 +2214,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1136
+        module/restmod.js, line 1274
     </li></ul></dd>
     
 
@@ -1680,7 +2381,7 @@ inside de new method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1288
+        module/restmod.js, line 1508
     </li></ul></dd>
     
 
@@ -1851,7 +2552,7 @@ inside de new method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1266
+        module/restmod.js, line 1486
     </li></ul></dd>
     
 
@@ -1993,7 +2694,7 @@ on each property description type.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1030
+        module/restmod.js, line 1168
     </li></ul></dd>
     
 
@@ -2085,7 +2786,7 @@ on each property description type.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 976
+        module/restmod.js, line 1113
     </li></ul></dd>
     
 
@@ -2288,391 +2989,7 @@ attribute definition keyword that can be later used when calling
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1011
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="ModelBuilder.html">ModelBuilder</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="hasMany"><span class="type-signature"></span>hasMany<span class="signature">(_name, _model, _url)</span><span class="type-signature"> &rarr; {<a href="ModelBuilder.html">ModelBuilder</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Registers a model hasMany relation</p>
-<p>The <code>_model</code> attribute supports both a string (using injector) o
-a direct restmod Model type reference.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Attribute name</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_model</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-|
-
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Other model</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_url</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Partial url</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1205
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="ModelBuilder.html">ModelBuilder</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="hasOne"><span class="type-signature"></span>hasOne<span class="signature">(_name, _model, _url)</span><span class="type-signature"> &rarr; {<a href="ModelBuilder.html">ModelBuilder</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Registers a model hasOne relation</p>
-<p>The <code>_model</code> attribute supports both a string (using injector) o
-a direct restmod Model type reference.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Attribute name</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_model</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-|
-
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Other model</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_url</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Partial url</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1235
+        module/restmod.js, line 1148
     </li></ul></dd>
     
 
@@ -2840,7 +3157,149 @@ make different parameters available to callbacks.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 1312
+        module/restmod.js, line 1532
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="ModelBuilder.html">ModelBuilder</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="setKeyProvider"><span class="type-signature"></span>setKeyProvider<span class="signature">(the)</span><span class="type-signature"> &rarr; {<a href="ModelBuilder.html">ModelBuilder</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Sets the private key provider for this model instances.</p>
+<p>Private keys are passed to scope's $url methods to generate the instance url.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>the</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>new provider, receives an object and returns the key.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 1101
     </li></ul></dd>
     
 
@@ -2988,7 +3447,7 @@ in JSON api should use snake case with underscores.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 945
+        module/restmod.js, line 1067
     </li></ul></dd>
     
 
@@ -3136,7 +3595,7 @@ in JSON api should use snake case with underscores.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 964
+        module/restmod.js, line 1086
     </li></ul></dd>
     
 
@@ -3180,276 +3639,6 @@ in JSON api should use snake case with underscores.</p>
 
 
         
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="setRestUrlOption"><span class="type-signature"></span>setRestUrlOption<span class="signature">(_options)</span><span class="type-signature"> &rarr; {<a href="ModelBuilder.html">ModelBuilder</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>The setRestUrlOptions extensions allows to easily setup a rest url builder factory
-for a given model chain.</p>
-<p>This is only available if the restUrlBuilderFactory is included.</p>
-<p>TODO: improve inheritance support.</p>
-<p>Available <code>options</code> are:
-<em> primary: the selected primary key, defaults to 'id'.
-</em> baseUrl: the api base url, this will be prepended to every url path.
-* extension: a extension to append to every generated url.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Options</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/rest_url_builder.js, line 178
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="ModelBuilder.html">ModelBuilder</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="setUrlBuilderFactory"><span class="type-signature"></span>setUrlBuilderFactory<span class="signature">(_factory)</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Change the default url builder.</p>
-<p>The provided factory will be called to provide an url builder
-for  implement a <code>get</code> method that receives the resource baseUrl
-and returns an url builder.</p>
-<p>TODO: describe url builder interface</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_factory</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Url builder factory function.</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 926
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
     
     
 </dd>
@@ -3475,7 +3664,7 @@ and returns an url builder.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0</a>
-		on Tue Dec 17 2013 19:30:34 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Thu Jan 16 2014 11:27:44 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

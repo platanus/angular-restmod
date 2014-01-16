@@ -75,10 +75,6 @@
 						</li>
 						
 						<li>
-							<a href="RestUrlBuilder.html">RestUrlBuilder</a>
-						</li>
-						
-						<li>
 							<a href="services.$restmod.html">$restmod</a>
 						</li>
 						
@@ -124,10 +120,6 @@
 						
 						<li>
 							<a href="tutorial-relations.html">Using Relations</a>
-						</li>
-						
-						<li>
-							<a href="tutorial-url_builder.html">Understanding URL Building</a>
 						</li>
 						
 
@@ -206,7 +198,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 552
+        module/restmod.js, line 615
     </li></ul></dd>
     
 
@@ -250,6 +242,149 @@ class is generated, the corresponding collection class is also generated.</p>
         <h3 class="subsection-title">Methods</h3>
 
         <dl>
+            
+<dt>
+    <h4 class="name" id="$add"><span class="type-signature"></span>$add<span class="signature">(_obj)</span><span class="type-signature"> &rarr; {Collection}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Adds an item to the back of the collection. This method does not attempt to send changes
+to the server. To create a new item and add it use $create or $build.</p>
+<p>Triggers after-add callbacks.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_obj</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Item to be added</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 935
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Collection</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
             
 <dt>
     <h4 class="name" id="$build"><span class="type-signature"></span>$build<span class="signature">(_init)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
@@ -343,7 +478,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 615
+        module/restmod.js, line 704
     </li></ul></dd>
     
 
@@ -484,7 +619,7 @@ class is generated, the corresponding collection class is also generated.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 638
+        module/restmod.js, line 720
     </li></ul></dd>
     
 
@@ -627,7 +762,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 573
+        module/restmod.js, line 662
     </li></ul></dd>
     
 
@@ -815,7 +950,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 689
+        module/restmod.js, line 766
     </li></ul></dd>
     
 
@@ -956,7 +1091,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 650
+        module/restmod.js, line 750
     </li></ul></dd>
     
 
@@ -1098,7 +1233,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 779
+        module/restmod.js, line 853
     </li></ul></dd>
     
 
@@ -1242,7 +1377,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 815
+        module/restmod.js, line 889
     </li></ul></dd>
     
 
@@ -1386,7 +1521,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 764
+        module/restmod.js, line 838
     </li></ul></dd>
     
 
@@ -1528,7 +1663,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 664
+        module/restmod.js, line 738
     </li></ul></dd>
     
 
@@ -1554,6 +1689,292 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
             
 <div class="param-desc">
     <p>model instance</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$indexOf"><span class="type-signature"></span>$indexOf<span class="signature">(_obj)</span><span class="type-signature"> &rarr; {number}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Finds the location of an object in the array.</p>
+<p>If a function is provided then the index of the first item for which the function returns true is returned.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_obj</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Model.html">Model</a></span>
+|
+
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Object to find</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 980
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>Object index or -1 if not found</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">number</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$new"><span class="type-signature"></span>$new<span class="signature">(_pk)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Creates a new model instance bound to this context.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_pk</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">mixed</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>object private key</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 690
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>New model instance</p>
 </div>
 
 
@@ -1692,7 +2113,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 587
+        module/restmod.js, line 676
     </li></ul></dd>
     
 
@@ -1833,7 +2254,151 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 846
+        module/restmod.js, line 920
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Collection</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$remove"><span class="type-signature"></span>$remove<span class="signature">(_obj)</span><span class="type-signature"> &rarr; {Collection}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Removes an item from the collection.</p>
+<p>This method does not send a DELETE request to the server, it just removes the
+item locally. To remove an item AND send a DELETE use the item's $destroy method.</p>
+<p>Triggers after-remove callbacks.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_obj</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Item to be removed</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 961
     </li></ul></dd>
     
 
@@ -1926,7 +2491,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 796
+        module/restmod.js, line 870
     </li></ul></dd>
     
 
@@ -2067,7 +2632,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 719
+        module/restmod.js, line 793
     </li></ul></dd>
     
 
@@ -2234,7 +2799,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 742
+        module/restmod.js, line 816
     </li></ul></dd>
     
 
@@ -2285,7 +2850,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
         
             
 <dt>
-    <h4 class="name" id="$url"><span class="type-signature"></span>$url<span class="signature">(_opt)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    <h4 class="name" id="$url"><span class="type-signature"></span>$url<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
     
     
 </dt>
@@ -2293,7 +2858,99 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     
     <div class="description">
-        <p>Returns the url this collection is bound to.</p>
+        <p>Gets this collection url without query string.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/restmod.js, line 634
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>The collection url.</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">string</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$urlFor"><span class="type-signature"></span>$urlFor<span class="signature">(_for)</span><span class="type-signature"> &rarr; {string|null}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Part of the scope interface, provides urls for collection's items.</p>
     </div>
     
 
@@ -2327,13 +2984,13 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
 
         <tr>
             
-                <td class="name"><code>_opt</code></td>
+                <td class="name"><code>_for</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type"><a href="Model.html">Model</a></span>
 
 
             
@@ -2343,7 +3000,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
 
             
 
-            <td class="description last"><p>Options to be passed to the url builder.</p></td>
+            <td class="description last"><p>Item to provide the url to.</p></td>
         </tr>
 
 	
@@ -2375,7 +3032,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 601
+        module/restmod.js, line 646
     </li></ul></dd>
     
 
@@ -2400,7 +3057,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
             
 <div class="param-desc">
-    <p>bound url.</p>
+    <p>The url or nill if item does not meet the url requirements.</p>
 </div>
 
 
@@ -2412,6 +3069,9 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
 	<dd>
 		
 <span class="param-type">string</span>
+|
+
+<span class="param-type">null</span>
 
 
 	</dd>
@@ -2444,7 +3104,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0</a>
-		on Tue Dec 17 2013 19:30:35 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Thu Jan 16 2014 11:27:44 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
