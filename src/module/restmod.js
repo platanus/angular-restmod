@@ -1,7 +1,3 @@
-/*
- *
- */
-
 'use strict';
 
 /**
@@ -100,11 +96,10 @@ angular.module('plRestmod').provider('$restmod', function() {
          *
          * For more information about model generation see {@link Building a Model}
          */
-        model: function(_urlParams/* , _mix */) {
+        model: function(_baseUrl/* , _mix */) {
 
           var masks = {
-                $partial: SyncMask.SYSTEM_ALL,
-                $context: SyncMask.SYSTEM_ALL,
+                $scope: SyncMask.SYSTEM_ALL,
                 $promise: SyncMask.SYSTEM_ALL,
                 $pending: SyncMask.SYSTEM_ALL,
                 $response: SyncMask.SYSTEM_ALL,
@@ -116,17 +111,16 @@ angular.module('plRestmod').provider('$restmod', function() {
               encoders = {},
               callbacks = {},
               nameDecoder = $inflector.camelize,
-              nameEncoder = function(_v) { return $inflector.parameterize(_v, '_'); },
-              urlBuilder;
+              nameEncoder = function(_v) { return $inflector.parameterize(_v, '_'); };
 
           // runs all callbacks associated with a given hook.
           function callback(_hook, _ctx /*, args */) {
             var cbs, i, args, cb;
 
             // execute static callbacks
-            if(cbs = callbacks[_hook]) {
+            if(!!(cbs = callbacks[_hook])) {
               args = arraySlice.call(arguments, 2);
-              for(i = 0; cb = cbs[i]; i++) {
+              for(i = 0; !!(cb = cbs[i]); i++) {
                 cb.apply(_ctx, args);
               }
             }
@@ -134,7 +128,7 @@ angular.module('plRestmod').provider('$restmod', function() {
             // execute instance callbacks
             if(_ctx.$cb && (cbs = _ctx.$cb[_hook])) {
               if(!args) args = arraySlice.call(arguments, 2);
-              for(i = 0; cb = cbs[i]; i++) {
+              for(i = 0; !!(cb = cbs[i]); i++) {
                 cb.apply(_ctx, args);
               }
             }
@@ -239,6 +233,12 @@ angular.module('plRestmod').provider('$restmod', function() {
             }
           }
 
+          // spacial url joining func used by default routing implementation.
+          function joinUrl(_head, _tail) {
+            if(!_head || !_tail) return null;
+            return (_head+'').replace(/\/$/, '') + '/' + (_tail+'').replace(/(\/$|^\/)/g, '');
+          }
+
           /**
            * @class Model
            *
@@ -257,14 +257,14 @@ angular.module('plRestmod').provider('$restmod', function() {
            * #### About object creation
            *
            * Direct construction of object instances using `new` is not recommended. A collection of
-           * static methods are available to generate new instances of an model, for more information
-           * go check the {@link ModelCollection} documentation.
+           * static methods are available to generate new instances of a model, for more information
+           * read the {@link ModelCollection} documentation.
            */
-          var Model = function(_init, _url, _context) {
+          var Model = function(_scope, _pk) {
 
+            this.$scope = _scope;
+            this.$pk = _pk;
             this.$pending = false;
-            this.$partial = _url;
-            this.$context = _context;
 
             var tmp;
 
@@ -272,16 +272,27 @@ angular.module('plRestmod').provider('$restmod', function() {
             for(var i = 0; (tmp = defaults[i]); i++) {
               this[tmp[0]] = (typeof tmp[1] === 'function') ? tmp[1].apply(this) : tmp[1];
             }
+          };
 
-            if(_init) {
-              // copy initial values (if given)
-              for(tmp in _init) {
-                if (_init.hasOwnProperty(tmp)) {
-                  this[tmp] = _init[tmp];
-                }
-              }
+          // Model default behavior:
+
+          Model.inferKey = function(_data) {
+            if(typeof _data === 'object') {
+              if(typeof _data.id === 'undefined') return null;
+              return _data.id;
+            } else {
+              return _data;
             }
           };
+
+          /** Runtime modifiers */
+
+          // sets an attribute mask at runtime
+          Model.setMask = function(_attr, _mask) {
+            masks[_attr] = _mask;
+          };
+
+          // TODO: add urlPrefix option
 
           // TODO: type reflection methods
           // Model.$ignored
@@ -293,11 +304,65 @@ angular.module('plRestmod').provider('$restmod', function() {
              *
              * @description Returns the url this object is bound to.
              *
-             * @param {object} _opt Options to be passed to the url builder.
+             * This is the url used by fetch to retrieve the resource related data.
+             *
              * @return {string} bound url.
              */
-            $url: function(_opt) {
-              return urlBuilder.resourceUrl(this, _opt);
+            $url: function() {
+              return this.$scope.$urlFor(this);
+            },
+
+            /**
+             * @memberof Model#
+             *
+             * @description Default item child scope factory.
+             *
+             * By default, no create url is provided and the update/destroy url providers
+             * attempt to first use the unscoped resource url.
+             *
+             * @param  {restmod model class} _for Scope target type.
+             * @param  {string} _partial Partial route.
+             * @return {Scope} New scope.
+             */
+            $buildScope: function(_for, _partial) {
+              if(_for.$buildOwnScope) {
+                // TODO
+              } else {
+                var self = this;
+                return {
+                  $urlFor: function() {
+                    return joinUrl(self.$url(true), _partial);
+                  },
+                  $createUrlFor: function() {
+                    // create is not posible in nested members
+                    return null;
+                  },
+                  $updateUrlFor: function(_item) {
+                    // prefer unscoped but fallback to scoped during an update
+                    return _for.$urlFor(_item) || this.$urlFor();
+                  },
+                  $destroyUrlFor: function(_item) {
+                    return _for.$baseUrl ? _for.$urlFor(_item) : this.$urlFor();
+                  }
+                };
+              }
+            },
+
+            /**
+             * @memberof Model#
+             *
+             * @description Copyies another object's properties.
+             *
+             * @param {object} _other Object to merge.
+             * @return {Model} self
+             */
+            $extend: function(_other) {
+              for(var tmp in _other) {
+                if (_other.hasOwnProperty(tmp)) {
+                  this[tmp] = _other[tmp];
+                }
+              }
+              return this;
             },
 
             /**
@@ -424,6 +489,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             $decode: function(_raw, _mask) {
               transform(_raw, this, '', _mask || SyncMask.DECODE_USER, true, this);
+              if(!this.$pk) this.$pk = Model.inferKey(_raw); // TODO: improve this, warn if key changes
               callback('after-feed', this, _raw);
               return this;
             },
@@ -453,9 +519,9 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             $fetch: function() {
               // verify that instance has a bound url
-              if(!this.$url()) throw new Error('Cannot fetch an unbound resource');
-
-              var request = { method: 'GET', url: this.$url() };
+              var url = this.$url();
+              if(!url) throw new Error('Cannot fetch an unbound resource');
+              var request = { method: 'GET', url: url };
 
               callback('before-fetch', this, request);
               return this.$send(request, function(_response) {
@@ -482,16 +548,12 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} this
              */
             $save: function() {
-              var url, request;
+              var url = this.$scope.$updateUrlFor ? this.$scope.$updateUrlFor(this) : this.$url(),
+                  request;
 
-              if(this.$url()) {
+              if(url) {
                 // If bound, update
-
-                url = urlBuilder.updateUrl(this);
-                if(!url) throw new Error('Update is not supported by this resource');
-
                 request = { method: 'PUT', url: url, data: this.$encode(SyncMask.ENCODE_UPDATE) };
-
                 callback('before-update', this, request);
                 callback('before-save', this, request);
                 return this.$send(request, function(_response) {
@@ -505,12 +567,9 @@ angular.module('plRestmod').provider('$restmod', function() {
                 });
               } else {
                 // If not bound create.
-
-                url = urlBuilder.createUrl(this);
+                url = this.$scope.$createUrlFor ? this.$scope.$createUrlFor(this) : this.$scope.$url();
                 if(!url) throw new Error('Create is not supported by this resource');
-
                 request = { method: 'POST', url: url, data: this.$encode(SyncMask.ENCODE_CREATE) };
-
                 callback('before-save', this, request);
                 callback('before-create', this, request);
                 return this.$send(request, function(_response) {
@@ -535,13 +594,17 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} this
              */
             $destroy: function() {
-              var url = urlBuilder.destroyUrl(this);
-              if(!url) throw new Error('Destroy is not supported by this resource');
-
+              var url = this.$scope.$destroyUrlFor ? this.$scope.$destroyUrlFor(this) : this.$url();
+              if(!url) throw new Error('Cannot destroy an unbound resource');
               var request = { method: 'DELETE', url: url };
-
               callback('before-destroy', this, request);
               return this.$send(request, function(_response) {
+
+                // call scope callback
+                if(this.$scope.$remove) {
+                  this.$scope.$remove(this);
+                }
+
                 callback('after-destroy', this, _response);
               }, function(_response) {
                 callback('after-destroy-error', this, _response);
@@ -558,6 +621,32 @@ angular.module('plRestmod').provider('$restmod', function() {
            * class is generated, the corresponding collection class is also generated.
            */
           var Collection = {
+
+            $baseUrl: _baseUrl,
+
+            /**
+             * @memberof ModelCollection#
+             *
+             * @description Gets this collection url without query string.
+             *
+             * @return {string} The collection url.
+             */
+            $url: function() {
+              return this.$scope ? this.$scope.$urlFor(this) : this.$baseUrl;
+            },
+
+            /**
+             * @memberof ModelCollection#
+             *
+             * @description Part of the scope interface, provides urls for collection's items.
+             *
+             * @param {Model} _for Item to provide the url to.
+             * @return {string|null} The url or nill if item does not meet the url requirements.
+             */
+            $urlFor: function(_for) {
+              // force items unscoping if model is not anonymous (maybe make this optional)
+              return joinUrl(this.$baseUrl ? this.$baseUrl : this.$url(), _for.$pk);
+            },
 
             /**
              * @memberof ModelCollection#
@@ -593,13 +682,13 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof ModelCollection#
              *
-             * @description Returns the url this collection is bound to.
+             * @description Creates a new model instance bound to this context.
              *
-             * @param {object} _opt Options to be passed to the url builder.
-             * @return {string} bound url.
+             * @param {mixed} _pk object private key
+             * @return {Model} New model instance
              */
-            $url: function(_opt) {
-              return urlBuilder.collectionUrl(this, _opt);
+            $new: function(_pk) {
+              return new Model(this, _pk);
             },
 
             /**
@@ -613,17 +702,10 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} model instance
              */
             $build: function(_init) {
-              var init, keyName;
-              if(!isObject(_init)) {
-                init = {};
-                keyName = urlBuilder.inferKey(this);
-                if(!keyName) throw new Error('Cannot infer key, use explicit mode');
-                init[keyName] = _init;
-              } else init = _init;
+              var obj = this.$new(Model.inferKey(_init));
+              angular.extend(obj, _init);
 
-              var obj = new Model(init, null, this);
-              if(this.$isCollection) this.push(obj); // on collection, push new object
-              callback('after-build', this, obj);
+              if(this.$isCollection) this.$push(obj);
               return obj;
             },
 
@@ -636,7 +718,25 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} model instance
              */
             $buildRaw: function(_raw) {
-              return this.$build(null).$decode(_raw);
+              var obj = this.$new(Model.inferKey(_raw));
+              obj.$decode(_raw);
+
+              if(this.$isCollection) this.$push(obj);
+              return obj;
+            },
+
+            /**
+             * @memberof ModelCollection#
+             *
+             * @description Attempts to resolve a resource using provided data
+             *
+             * If `_init` is not an object, then its treated as a primary key.
+             *
+             * @param  {object} _init Data to provide
+             * @return {Model} model instance
+             */
+            $find: function(_init) {
+              return this.$new(Model.inferKey(_init)).$fetch();
             },
 
             /**
@@ -654,29 +754,6 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof ModelCollection#
              *
-             * @description Attempts to resolve a resource using provided data
-             *
-             * If `_init` is not an object, then its treated as a primary key.
-             *
-             * @param  {object} _init Data to provide
-             * @return {Model} model instance
-             */
-            $find: function(_init) {
-              var init, keyName;
-              if(!isObject(_init)) {
-                init = {};
-                keyName = urlBuilder.inferKey(this);
-                if(!keyName) throw new Error('Cannot infer key, use explicit mode');
-                init[keyName] = _init;
-              } else init = _init;
-
-              // dont use $build, find does not push into current collection.
-              return (new Model(init, null, this)).$fetch();
-            },
-
-            /**
-             * @memberof ModelCollection#
-             *
              * @description Builds a new Model collection
              *
              * Collections are bound to an api resource.
@@ -686,9 +763,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @param  {object} _context Collection context override
              * @return {Collection} Model Collection
              */
-            $collection: function(_params, _url, _context) {
-
-              _params = this.$params ? extend({}, this.$params, _params) : _params;
+            $collection: function(_params, _scope) {
 
               var col = [];
 
@@ -698,10 +773,9 @@ angular.module('plRestmod').provider('$restmod', function() {
                 if(this.hasOwnProperty(key)) col[key] = this[key];
               }
 
-              col.$partial = _url || this.$partial;
-              col.$context = _context || this.$context;
               col.$isCollection = true;
-              col.$params = _params;
+              col.$scope = _scope || this.$scope;
+              col.$params = this.$params ? extend({}, this.$params, _params) : _params;
               col.$pending = false;
               col.$resolved = false;
 
@@ -845,6 +919,28 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             $refresh: function(_params) {
               return this.$reset().$fetch(_params);
+            },
+
+            /**
+             * Method called by build and buildRaw to add a new item to the collection.
+             *
+             * Executes after-push hooks.
+             *
+             * @param  {[type]} _obj [description]
+             * @return {[type]}      [description]
+             */
+            $push: function(_obj) {
+              if(this.$isCollection) {
+                this.push(_obj); // on collection, push new object
+                callback('after-push', this, _obj);
+              }
+            },
+
+            $remove: function(_obj) {
+              if(this.$isCollection) {
+                // TODO: remove item from collection
+                callback('after-remove', this, _obj);
+              }
             }
 
             // IDEA: $clear, $push, $remove, etc
@@ -863,9 +959,11 @@ angular.module('plRestmod').provider('$restmod', function() {
             decode: ['attrDecoder', 'param', 'chain'],
             encode: ['attrEncoder', 'param', 'chain'],
             serialize: ['attrSerializer'],
-            hasMany: ['hasMany', 'alias', 'inverseOf'],
-            hasOne: ['hasOne', 'alias', 'inverseOf']
-          }, urlBuilderFactory;
+            // relations
+            hasMany: ['attrAsCollection', 'path', 'source', 'inverseOf'],
+            hasOne: ['attrAsResource', 'path', 'source', 'inverseOf'],
+            belongsTo: ['attrAsReference', 'inline', 'key', 'source', 'prefetch']
+          };
 
           /**
            * @class ModelBuilder
@@ -913,24 +1011,6 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof ModelBuilder#
              *
-             * @description Change the default url builder.
-             *
-             * The provided factory will be called to provide an url builder
-             * for  implement a `get` method that receives the resource baseUrl
-             * and returns an url builder.
-             *
-             * TODO: describe url builder interface
-             *
-             * @param {function} _factory Url builder factory function.
-             */
-            setUrlBuilderFactory: function(_factory) {
-              urlBuilderFactory = _factory;
-              return this;
-            },
-
-            /**
-             * @memberof ModelBuilder#
-             *
              * @description Changes the way restmod renames attributes every time a server resource is decoded.
              *
              * This is intended to be used as a way of keeping property naming style consistent accross
@@ -963,6 +1043,21 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             setNameEncoder: function(_encoder) {
               nameEncoder = _encoder;
+              return this;
+            },
+
+            /**
+             * @memberof ModelBuilder#
+             *
+             * @description Sets the private key provider for this model instances.
+             *
+             * Private keys are passed to scope's $url methods to generate the instance url.
+             *
+             * @param {function} the new provider, receives an object and returns the key.
+             * @return {ModelBuilder} self
+             */
+            setKeyProvider: function(_provider) {
+              Model.inferKey = _provider;
               return this;
             },
 
@@ -1018,6 +1113,7 @@ angular.module('plRestmod').provider('$restmod', function() {
               } else Utils.extendOverriden(this, _name);
               return this;
             },
+
             /**
              * @memberof ModelBuilder#
              *
@@ -1192,57 +1288,139 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof ModelBuilder#
              *
-             * @description Registers a model hasMany relation
-             *
-             * The `_model` attribute supports both a string (using injector) o
-             * a direct restmod Model type reference.
+             * @description Registers a model **resources** relation
              *
              * @param {string}  _name Attribute name
-             * @param {string|object} _model Other model
+             * @param {string|object} _model Other model, supports a model name or a direct reference.
              * @param {string} _url Partial url
+             * @param {string} _source Inline resource alias (optional)
+             * @param {string} _inverseOf Inverse property name (optional)
              * @return {ModelBuilder} self
              */
-            hasMany: function(_name, _model, _alias, _inverseOf) {
-              return this.attrDefault(_name, function() {
-                if(typeof _model === 'string') _model = $injector.get(_model); // inject type (only the first time...)
-                var coll = _model.$collection(null, _alias || $inflector.parameterize(_name), this);
+            attrAsCollection: function(_attr, _model, _url, _source, _inverseOf) {
+              return this.attrDefault(_attr, function() {
+
+                if(typeof _model === 'string') {
+                  _model = $injector.get(_model);
+
+                  if(_inverseOf) {
+                    _model.setMask(_inverseOf, SyncMask.ENCODE);
+                  }
+                }
+
+                var self = this,
+                    scope = this.$buildScope(_model, _url || $inflector.parameterize(_attr)),
+                    col = _model.$collection(null, scope);
+
+                // TODO: provide a way to modify scope behavior just for this relation,
+                // since relation item scope IS the collection, then the collection should
+                // be extended to provide a modified scope. For this an additional _extensions
+                // parameters could be added to collection, then these 'extensions' are inherited
+                // by child collections, the other alternative is to enable full property inheritance ...
+
                 // set inverse property if required.
                 if(_inverseOf) {
-                  var self = this;
-                  coll.$on('after-build', function(_obj) {
+                  col.$on('after-push', function(_obj) {
                     _obj[_inverseOf] = self;
                   });
                 }
-                return coll;
-              }).attrDecoder(_name, function(_raw) {
-                this[_name].$feed(_raw);
-              }).attrMask(_name, SyncMask.ENCODE);
+
+                return col;
+              // simple support for inline data, TODO: maybe deprecate this.
+              }).attrDecoder(_source || _url || _attr, function(_raw) {
+                this[_attr].$feed(_raw);
+              }).attrMask(_attr, SyncMask.ENCODE);
             },
 
             /**
              * @memberof ModelBuilder#
              *
-             * @description Registers a model hasOne relation
-             *
-             * The `_model` attribute supports both a string (using injector) o
-             * a direct restmod Model type reference.
+             * @description Registers a model **resource** relation
              *
              * @param {string}  _name Attribute name
-             * @param {string|object} _model Other model
-             * @param {string} _url Partial url
+             * @param {string|object} _model Other model, supports a model name or a direct reference.
+             * @param {string} _url Partial url (optional)
+             * @param {string} _source Inline resource alias (optional)
+             * @param {string} _inverseOf Inverse property name (optional)
              * @return {ModelBuilder} self
              */
-            hasOne: function(_name, _model, _partial, _inverseOf) {
-              return this.attrDefault(_name, function() {
-                if(typeof _model === 'string') _model = $injector.get(_model); // inject type (only the first time...)
-                var inst = new _model(null, _partial || $inflector.parameterize(_name), this);
-                if(_inverseOf) {
-                  inst[_inverseOf] = this;
-                }
-                return inst;
-              }).attrDecoder(_name, function(_raw) {
-                this[_name].$decode(_raw);
-              }).attrMask(_name, SyncMask.ENCODE);
+            attrAsResource: function(_attr, _model, _url, _source, _inverseOf) {
+
+              return this
+                .attrDefault(_attr, function() {
+
+                  if(typeof _model === 'string') {
+                    _model = $injector.get(_model);
+
+                    if(_inverseOf) {
+                      _model.setMask(_inverseOf, SyncMask.ENCODE);
+                    }
+                  }
+
+                  var scope = this.$buildScope(_model, _url || $inflector.parameterize(_attr)),
+                      inst = new _model(scope);
+
+                  // TODO: provide a way to modify scope behavior just for this relation
+
+                  if(_inverseOf) {
+                    inst[_inverseOf] = this;
+                  }
+
+                  return inst;
+                })
+                // simple support for inline data, TODO: maybe deprecate this.
+                .attrDecoder(_source || _url || _attr, function(_raw) {
+                  this[_attr].$decode(_raw);
+                })
+                .attrMask(_attr, SyncMask.ENCODE);
+            },
+
+            /**
+             * @memberof ModelBuilder#
+             *
+             * @description Registers a model **reference** relation.
+             *
+             * A reference relation
+             *
+             * @param {string}  _name Attribute name
+             * @param {string|object} _model Other model, supports a model name or a direct reference.
+             * @param {bool} _inline If true, model data is expected to be inlined in parent response.
+             * @param {string} _key reference id property name (optional, defaults to _attr + 'Id')
+             * @param {bool} _prefetch if set to true, $fetch will be automatically called on relation object load.
+             * @return {ModelBuilder} self
+             */
+            attrAsReference: function(_attr, _model, _inline, _key, _source, _prefetch) {
+
+              var watch = _inline ? (_source || _attr) : (_key || (_attr + 'Id'));
+              this
+                .attrDefault(_attr, null)
+                .attrMask(_attr, SyncMask.ENCODE)
+                .attrDecoder(watch , function(_raw) {
+
+                  // load model
+                  if(typeof _model === 'string') {
+                    _model = $injector.get(_model);
+                  }
+
+                  // only reload object if id changes
+                  if(_inline)
+                  {
+                    if(!this[_attr] || this[_attr].$pk !== _model.inferKey(_raw)) {
+                      this[_attr] = _model.$buildRaw(_raw);
+                    } else {
+                      this[_attr].$decode(_raw);
+                    }
+                  }
+                  else
+                  {
+                    if(!this[_attr] || this[_attr].$pk !== _raw) {
+                      this[_attr] = _model.$build(_raw);
+                      if(_prefetch) {
+                        this[_attr].$fetch();
+                      }
+                    }
+                  }
+                });
             },
 
             /**
@@ -1370,13 +1548,6 @@ angular.module('plRestmod').provider('$restmod', function() {
 
           loadMixinChain(BASE_CHAIN);
           loadMixinChain(Model.$chain = arraySlice.call(arguments, 1));
-
-          /*
-           * Mixin post-processing phase
-           */
-
-          // by default use the restUrlBuilder
-          urlBuilder = (urlBuilderFactory || $injector.get('restUrlBuilderFactory')())(_urlParams);
 
           // TODO postprocessing of collection prototype.
           extend(Model, Collection);

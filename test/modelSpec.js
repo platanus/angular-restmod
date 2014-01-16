@@ -43,7 +43,7 @@ describe('Restmod model class:', function() {
 
     it('should infer the key when not used an explicit one', function(){
       var book = Book.$build(1);
-      expect(book.id).toEqual(1);
+      expect(book.$pk).toEqual(1);
     });
 
   });
