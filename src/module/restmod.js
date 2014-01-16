@@ -320,8 +320,8 @@ angular.module('plRestmod').provider('$restmod', function() {
              * By default, no create url is provided and the update/destroy url providers
              * attempt to first use the unscoped resource url.
              *
-             * @param  {restmod model class} _for Scope target type.
-             * @param  {string} _partial Partial route.
+             * @param {mixed} _for Scope target type, accepts any model class.
+             * @param {string} _partial Partial route.
              * @return {Scope} New scope.
              */
             $buildScope: function(_for, _partial) {
@@ -930,7 +930,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * Triggers after-add callbacks.
              *
              * @param {Model} _obj Item to be added
-             * @return {[type]}      [description]
+             * @return {Collection} self
              */
             $add: function(_obj, _idx) {
               // TODO: make sure object is f type Model?
@@ -956,7 +956,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * Triggers after-remove callbacks.
              *
              * @param {Model} _obj Item to be removed
-             * @return {[type]}      [description]
+             * @return {Collection} self
              */
             $remove: function(_obj) {
               var idx = this.$indexOf(_obj);
