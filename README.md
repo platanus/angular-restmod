@@ -3,7 +3,7 @@ Angular Restmod  [![Build Status](https://api.travis-ci.org/platanus/angular-res
 
 ## Overview
 
-WHOAMI???!
+Rails inspired REST-API ORM for Angular
 
 ## Getting Started
 
