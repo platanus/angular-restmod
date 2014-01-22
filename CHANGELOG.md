@@ -1,3 +1,9 @@
+# 0.11.0 (2014-01-22)
+
+## Breaking Changes
+
+* removes build hook shorcut methods (`afterCreate`, `afterFeed`, etc ...). Use `on('hook-name', function() {})` instead.
+
 # 0.10.2 (2014-01-22)
 
 ## Features

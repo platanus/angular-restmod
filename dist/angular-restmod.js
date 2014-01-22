@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.10.2 - 2014-01-22
+ * @version v0.11.0 - 2014-01-22
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -1666,20 +1666,6 @@ angular.module('plRestmod').provider('$restmod', function() {
               cbs.push(_do);
               return this;
             },
-
-            beforeRequest: function(_do) { return this.on('before-request', _do); },
-            afterRequest: function(_do) { return this.on('after-request', _do); },
-            afterRequestError: function(_do) { return this.on('after-request-error', _do); },
-            beforeSave: function(_do) { return this.on('before-save', _do); },
-            beforeCreate: function(_do) { return this.on('before-create', _do); },
-            afterCreate: function(_do) { return this.on('after-create', _do); },
-            beforeUpdate: function(_do) { return this.on('before-update', _do); },
-            afterUpdate: function(_do) { return this.on('after-update', _do); },
-            afterSave: function(_do) { return this.on('after-save', _do); },
-            beforeDestroy: function(_do) { return this.on('before-destroy', _do); },
-            afterDestroy: function(_do) { return this.on('after-destroy', _do); },
-            afterFeed: function(_do) { return this.on('after-feed', _do); },
-            beforeRender: function(_do) { return this.on('before-render', _do); },
 
             /// Experimental modifiers
 
