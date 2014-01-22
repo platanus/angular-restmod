@@ -261,7 +261,7 @@ angular.module('plRestmod').provider('$restmod', function() {
            * static methods are available to generate new instances of a model, for more information
            * read the {@link ModelCollection} documentation.
            */
-          function Model(_scope, _pk) {
+          function Model(_scope, _pk, _init) {
 
             this.$scope = _scope;
             this.$pk = _pk;
@@ -311,11 +311,19 @@ angular.module('plRestmod').provider('$restmod', function() {
             }
           };
 
-          /** Runtime modifiers */
+          /** Runtime modifiers - private api for now */
 
           // sets an attribute mask at runtime
-          Model.setMask = function(_attr, _mask) {
+          Model.$$setMask = function(_attr, _mask) {
             masks[_attr] = _mask;
+          };
+
+          // registers a new global hook
+          Model.$$registerHook = function(_hook, _fun) {
+            var cbs = callbacks[_hook];
+            if(!cbs) cbs = callbacks[_hook] = [];
+            cbs.push(_fun);
+            return this;
           };
 
           // TODO: add urlPrefix option
@@ -1382,7 +1390,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                   _model = $injector.get(_model);
 
                   if(_inverseOf) {
-                    _model.setMask(_inverseOf, SyncMask.ENCODE);
+                    _model.$$setMask(_inverseOf, SyncMask.ENCODE);
                   }
                 }
 
@@ -1390,7 +1398,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                     scope = this.$buildScope(_model, _url || $inflector.parameterize(_attr)),
                     col = _model.$collection(null, scope);
 
-                // TODO: provide a way to modify scope behavior just for this relation,
+                // TODO: there should be a way to modify scope behavior just for this relation,
                 // since relation item scope IS the collection, then the collection should
                 // be extended to provide a modified scope. For this an additional _extensions
                 // parameters could be added to collection, then these 'extensions' are inherited
@@ -1431,7 +1439,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                     _model = $injector.get(_model);
 
                     if(_inverseOf) {
-                      _model.setMask(_inverseOf, SyncMask.ENCODE);
+                      _model.$$setMask(_inverseOf, SyncMask.ENCODE);
                     }
                   }
 
@@ -1566,9 +1574,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {ModelBuilder} self
              */
             on: function(_hook, _do) {
-              var cbs = callbacks[_hook];
-              if(!cbs) cbs = callbacks[_hook] = [];
-              cbs.push(_do);
+              Model.$$registerHook(_hook, _do);
               return this;
             },
 
