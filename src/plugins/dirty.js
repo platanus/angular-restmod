@@ -51,6 +51,37 @@ angular.module('plRestmod').factory('DirtyModel', ['$restmod', 'SyncMask', funct
             }
             return changes;
           }
+        })
+        /**
+         * @method $restore
+         * @memberof DirtyModel#
+         *
+         * @description Restores the model's last fetched values.
+         *
+         * Usage:
+         *
+         * ```javascript
+         * bike = Bike.$create({ brand: 'Trek' });
+         * // later on...
+         * bike.brand = 'Giant';
+         * bike.$restore();
+         *
+         * console.log(bike.brand); // outputs 'Trek'
+         * ```
+         *
+         * @param {string} _prop If provided, only _prop is restored
+         * @return {Model} self
+         */
+        .define('$restore', function(_prop) {
+          var original = this.$cmStatus;
+          if(_prop) {
+            this[_prop] = original[_prop];
+          } else {
+            for(var key in original) {
+              if(original.hasOwnProperty(key)) this[key] = original[key];
+            }
+          }
+          return this;
         });
   });
 }]);

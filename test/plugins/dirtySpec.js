@@ -39,4 +39,23 @@ describe('Plugin: Dirty Model', function() {
 
   });
 
+  describe('$restore', function() {
+
+    it('should restore a single property value', function() {
+      bike.model = 'Trance';
+      bike.brandName = 'Trek';
+      bike.$restore('model');
+      expect(bike.model).toEqual('Meta 2');
+      expect(bike.brandName).toEqual('Trek');
+    });
+
+    it('should restore all properties values', function() {
+      bike.model = 'Trance';
+      bike.brandName = 'Trek';
+      bike.$restore();
+      expect(bike.model).toEqual('Meta 2');
+      expect(bike.brandName).toEqual('Commencal');
+    });
+
+  });
 });
