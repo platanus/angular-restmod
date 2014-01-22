@@ -12,6 +12,14 @@ describe('Restmod model class:', function() {
     Bike = $restmod.model('/api/bikes');
   }));
 
+  describe('$single', function() {
+
+    it('should create a resource bound to a given url', function() {
+      var bike = Bike.$single('/user/bike');
+      expect(bike.$url()).toEqual('/user/bike');
+    });
+  });
+
   describe('$fetch', function() {
 
     it('should call callbacks in proper order', function() {

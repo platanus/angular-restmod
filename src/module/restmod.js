@@ -84,7 +84,7 @@ angular.module('plRestmod').provider('$restmod', function() {
      */
     $get: ['$http', '$q', '$injector', '$parse', '$filter', '$inflector', function($http, $q, $injector, $parse, $filter, $inflector) {
 
-      return {
+      var restmod = {
         /**
          * @function model
          * @memberOf services.$restmod#
@@ -99,6 +99,7 @@ angular.module('plRestmod').provider('$restmod', function() {
         model: function(_baseUrl/* , _mix */) {
 
           var masks = {
+                $type: SyncMask.SYSTEM_ALL,
                 $scope: SyncMask.SYSTEM_ALL,
                 $promise: SyncMask.SYSTEM_ALL,
                 $pending: SyncMask.SYSTEM_ALL,
@@ -260,11 +261,12 @@ angular.module('plRestmod').provider('$restmod', function() {
            * static methods are available to generate new instances of a model, for more information
            * read the {@link ModelCollection} documentation.
            */
-          var Model = function(_scope, _pk) {
+          function Model(_scope, _pk) {
 
             this.$scope = _scope;
             this.$pk = _pk;
             this.$pending = false;
+            this.$type = Model;
 
             var tmp;
 
@@ -272,9 +274,33 @@ angular.module('plRestmod').provider('$restmod', function() {
             for(var i = 0; (tmp = defaults[i]); i++) {
               this[tmp[0]] = (typeof tmp[1] === 'function') ? tmp[1].apply(this) : tmp[1];
             }
-          };
+          }
 
           // Model default behavior:
+
+          /**
+           * @memberof Model
+           *
+           * @description Returns a resource bound to a given url, with no parent scope.
+           *
+           * This can be used to create singleton resources:
+           *
+           * ```javascript
+           * module('BikeShop', []).factory('Status', function($restmod) {
+           *   return $restmod.model(null).$single('/api/status');
+           * };)
+           * ```
+           *
+           * @param {string} _url Url to bound resource to.
+           * @return {Model} new resource instance.
+           */
+          Model.$single = function(_url) {
+            return new Model({
+              $urlFor: function() {
+                return _url;
+              }
+            }, '');
+          };
 
           Model.inferKey = function(_data) {
             if(typeof _data === 'object') {
@@ -567,7 +593,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 });
               } else {
                 // If not bound create.
-                url = this.$scope.$createUrlFor ? this.$scope.$createUrlFor(this) : this.$scope.$url();
+                url = (this.$scope.$createUrlFor && this.$scope.$createUrlFor(this)) || (this.$scope.$url && this.$scope.$url());
                 if(!url) throw new Error('Create is not supported by this resource');
                 request = { method: 'POST', url: url, data: this.$encode(SyncMask.ENCODE_CREATE) };
                 callback('before-save', this, request);
@@ -1611,8 +1637,24 @@ angular.module('plRestmod').provider('$restmod', function() {
          */
         mixin: function(/* mixins */) {
           return { $isAbstract: true, $chain: arraySlice.call(arguments, 0) };
+        },
+
+        /**
+         * @method singleton
+         * @memberOf services.$restmod#
+         *
+         * Shorcut method used to create singleton resources. see {@link Model@$single}.
+         *
+         * @param {string} _url Resource url,
+         * @param {mixed} _mixins Mixin chain.
+         * @return {object} New resource instance.
+         */
+        singleton: function(_url/*, _mixins*/) {
+          return restmod.model.apply(this, arguments).$single(_url);
         }
       };
+
+      return restmod;
     }]
   };
 })
