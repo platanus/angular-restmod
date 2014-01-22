@@ -12,6 +12,16 @@ describe('Restmod model class:', function() {
     Bike = $restmod.model('/api/bikes');
   }));
 
+  describe('constructor', function() {
+
+    it('should fire the after-init hook', function() {
+      var spy = jasmine.createSpy('hook');
+      Bike.$$registerHook('after-init', spy);
+      (new Bike());
+      expect(spy).toHaveBeenCalled();
+    });
+  });
+
   describe('$single', function() {
 
     it('should create a resource bound to a given url', function() {

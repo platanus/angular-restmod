@@ -274,6 +274,9 @@ angular.module('plRestmod').provider('$restmod', function() {
             for(var i = 0; (tmp = defaults[i]); i++) {
               this[tmp[0]] = (typeof tmp[1] === 'function') ? tmp[1].apply(this) : tmp[1];
             }
+
+            // after initialization hook
+            callback('after-init', this);
           }
 
           // Model default behavior:
