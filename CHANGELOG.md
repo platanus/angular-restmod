@@ -1,3 +1,10 @@
+# 0.11.1 (2014-01-22)
+
+## Features
+### Model
+
+* adds the after-init hook. (f761fec)
+
 # 0.11.0 (2014-01-22)
 
 ## Breaking Changes
