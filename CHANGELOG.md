@@ -1,3 +1,14 @@
+# 0.10.2 (2014-01-22)
+
+## Features
+### DirtyModel
+
+* Adds $restore method (652620e)
+
+### Builder
+
+* adds ability to define class methods and hooks in the object definition using special prefixes. (7c26ed5)
+
 # 0.10.1 (2014-01-16)
 
 ## Features
