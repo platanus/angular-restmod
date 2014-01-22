@@ -1193,9 +1193,19 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             describe: function(_description) {
               forEach(_description, function(_desc, _attr) {
-                if(isObject(_desc)) this.attribute(_attr, _desc);
-                else if(isFunction(_desc)) this.define(_attr, _desc);
-                else this.attrDefault(_attr, _desc);
+                switch(_attr[0]) {
+                case '@':
+                  this.classDefine(_attr.substring(1), _desc);
+                  break;
+                case '~':
+                  _attr = $inflector.parameterize(_attr.substring(1));
+                  this.on(_attr, _desc);
+                  break;
+                default:
+                  if(isObject(_desc)) this.attribute(_attr, _desc);
+                  else if(isFunction(_desc)) this.define(_attr, _desc);
+                  else this.attrDefault(_attr, _desc);
+                }
               }, this);
               return this;
             },
