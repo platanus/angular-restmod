@@ -60,45 +60,32 @@ describe('Restmod builder:', function() {
     });
   });
 
-  // describe('when building', function() {
+  // Object definition spec
 
-  //   // TODO: test just the model builder, pass fake specs and test that are properly modified
+  describe('OD prefix: @', function() {
+    it('should register a new class ', function() {
+      var Bike = $restmod.model(null, {
+        '@classMethod': function() {
+          return 'teapot';
+        }
+      });
 
-  //   describe('using a base class', function() {
+      expect(Bike.classMethod()).toEqual('teapot');
+    });
+  });
 
-  //     // generate a dummy base  module
-  //     beforeEach(module(function($provide) {
-  //       $provide.factory('Base', function($restmod) {
-  //         return $restmod.model(null, {
-  //           coverSize: { init: 20 },
-  //           getPages: function() {
-  //             return this.pages || 0;
-  //           }
-  //         });
-  //       });
-  //     }));
+  describe('OD prefix: ~', function() {
+    it('should register a new hook callback ', function() {
+      var Bike = $restmod.model(null, {
+        '~afterFeed': function() {
+          this.teapot = true;
+        }
+      });
 
-  //     it('should inherit properties', inject(function($restmod, Base) {
-  //       var book = $restmod.model('api/books', Base).$build();
-  //       expect(book.getPages).toBeDefined();
-  //       var otherBook = $restmod.model('api/books').$build();
-  //       expect(otherBook.getPages).not.toBeDefined();
-  //     }));
-
-  //     it('should support overriding properties', inject(function($restmod, Base) {
-  //       var book = $restmod.model('api/books', Base, { coverSize: { init: 30 } }).$build();
-  //       expect(book.getPages).toBeDefined();
-  //       expect(book.coverSize).toEqual(30);
-  //     }));
-
-  //     it('should support injector resolving', inject(function($restmod) {
-  //       var book = $restmod.model('api/books', 'Base').$build();
-  //       expect(book.getPages).toBeDefined();
-  //     }));
-
-  //   });
-
-  // });
+      var bike = Bike.$build().$decode({});
+      expect(bike.teapot).toBeTruthy();
+    });
+  });
 
 });
 
