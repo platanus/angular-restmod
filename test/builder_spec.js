@@ -13,6 +13,24 @@ describe('Restmod builder:', function() {
     $httpBackend.when('GET', '/api/bikes/1').respond(200, { 'dropper_seat': true });
   }));
 
+  describe('setUrlPrefix', function() {
+
+    beforeEach(function() {
+      Bike = $restmod.model('/bikes', function() {
+        this.setUrlPrefix('/api');
+      });
+    });
+
+    it('should change the url prefix for model base url', function() {
+      expect(Bike.$baseUrl()).toEqual('/api/bikes');
+    });
+
+    it('should change the url prefix for objects generated using $single', function() {
+      var bike = Bike.$single('my-bike');
+      expect(bike.$url()).toEqual('/api/my-bike');
+    });
+  });
+
   describe('disableRenaming', function() {
 
     beforeEach(function() {

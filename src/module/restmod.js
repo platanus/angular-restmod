@@ -107,6 +107,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 $error: SyncMask.SYSTEM_ALL,
                 $cb: SyncMask.SYSTEM_ALL
               },
+              urlPrefix = null,
               defaults = [],
               decoders = {},
               encoders = {},
@@ -300,12 +301,38 @@ angular.module('plRestmod').provider('$restmod', function() {
           Model.$single = function(_url) {
             return new Model({
               $urlFor: function() {
-                return _url;
+                return urlPrefix ? joinUrl(urlPrefix, _url) : _url;
               }
             }, '');
           };
 
-          Model.inferKey = function(_data) {
+          /**
+           * @memberof Model
+           *
+           * @description Returns the model base url.
+           *
+           * This method should not be overriden directly.
+           *
+           * @return {string} base url for this model, null if model us anonymous.
+           */
+          Model.$baseUrl = function() {
+            // TODO: urlPrefix could be a function that allows base url transformation...
+            return urlPrefix ? joinUrl(urlPrefix, _baseUrl) : _baseUrl;
+          };
+
+          /**
+           * Returns a model's object private key from model decoded data.
+           *
+           * @description The private key is the passed to the $urlFor function to obtain an object's url.
+           *
+           * By default, this method looks for the id property.
+           *
+           * This method should not be overriden directly.
+           *
+           * @param {object} _data Raw object data
+           * @return {mixed} object private key
+           */
+          Model.$inferKey = function(_data) {
             if(typeof _data === 'object') {
               if(typeof _data.id === 'undefined') return null;
               return _data.id;
@@ -375,11 +402,12 @@ angular.module('plRestmod').provider('$restmod', function() {
                     return null;
                   },
                   $updateUrlFor: function(_item) {
-                    // prefer unscoped but fallback to scoped during an update
+                    // prefer unscoped but fallback to scoped
                     return _for.$urlFor(_item) || this.$urlFor();
                   },
                   $destroyUrlFor: function(_item) {
-                    return _for.$baseUrl ? _for.$urlFor(_item) : this.$urlFor();
+                    // prefer unscoped but fallback to scoped
+                    return _for.$baseUrl() ? _for.$urlFor(_item) : this.$urlFor();
                   }
                 };
               }
@@ -526,7 +554,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             $decode: function(_raw, _mask) {
               transform(_raw, this, '', _mask || SyncMask.DECODE_USER, true, this);
-              if(!this.$pk) this.$pk = Model.inferKey(_raw); // TODO: improve this, warn if key changes
+              if(!this.$pk) this.$pk = Model.$inferKey(_raw); // TODO: improve this, warn if key changes
               callback('after-feed', this, _raw);
               return this;
             },
@@ -659,8 +687,6 @@ angular.module('plRestmod').provider('$restmod', function() {
            */
           var Collection = {
 
-            $baseUrl: _baseUrl,
-
             /**
              * @memberof ModelCollection#
              *
@@ -669,7 +695,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {string} The collection url.
              */
             $url: function() {
-              return this.$scope ? this.$scope.$urlFor(this) : this.$baseUrl;
+              return this.$scope ? this.$scope.$urlFor(this) : Model.$baseUrl();
             },
 
             /**
@@ -682,7 +708,8 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             $urlFor: function(_for) {
               // force items unscoping if model is not anonymous (maybe make this optional)
-              return joinUrl(this.$baseUrl ? this.$baseUrl : this.$url(), _for.$pk);
+              var baseUrl = Model.$baseUrl();
+              return joinUrl(baseUrl ? baseUrl : this.$url(), _for.$pk);
             },
 
             /**
@@ -739,7 +766,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} model instance
              */
             $build: function(_init) {
-              var obj = this.$new(Model.inferKey(_init));
+              var obj = this.$new(Model.$inferKey(_init));
               angular.extend(obj, _init);
 
               if(this.$isCollection) this.$add(obj);
@@ -755,7 +782,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} model instance
              */
             $buildRaw: function(_raw) {
-              var obj = this.$new(Model.inferKey(_raw));
+              var obj = this.$new(Model.$inferKey(_raw));
               obj.$decode(_raw);
 
               if(this.$isCollection) this.$add(obj);
@@ -773,7 +800,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} model instance
              */
             $find: function(_init) {
-              return this.$new(Model.inferKey(_init)).$fetch();
+              return this.$new(Model.$inferKey(_init)).$fetch();
             },
 
             /**
@@ -1083,8 +1110,38 @@ angular.module('plRestmod').provider('$restmod', function() {
            *
            */
           var Builder = {
+
             setHttpOptions: function(_options) {
               // TODO.
+            },
+
+            /**
+             * @memberof ModelBuilder#
+             *
+             * @description Sets an url prefix to be added to every url generated by the model.
+             *
+             * This applies even to objects generated by the `$single` method.
+             *
+             * This method is intended to be used in a base model mixin so everymodel that extends from it
+             * gets the same url prefix.
+             *
+             * Usage:
+             *
+             * ```javascript
+             * var BaseModel = $restmod.mixin(function() {
+             *   this.setUrlPrefix('/api');
+             * })
+             *
+             * var bike = $restmod.model('/bikes', BaseModel).$build({ id: 1 });
+             * console.log(bike.$url()) // outputs '/api/bikes/1'
+             * ```
+             *
+             * @param {string} _prefix url portion
+             * @return {ModelBuilder} self
+             */
+            setUrlPrefix: function(_prefix) {
+              urlPrefix = _prefix;
+              return this;
             },
 
             /**
@@ -1136,7 +1193,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {ModelBuilder} self
              */
             setKeyProvider: function(_provider) {
-              Model.inferKey = _provider;
+              Model.$inferKey = _provider;
               return this;
             },
 
@@ -1494,7 +1551,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                   // only reload object if id changes
                   if(_inline)
                   {
-                    if(!this[_attr] || this[_attr].$pk !== _model.inferKey(_raw)) {
+                    if(!this[_attr] || this[_attr].$pk !== _model.$inferKey(_raw)) {
                       this[_attr] = _model.$buildRaw(_raw);
                     } else {
                       this[_attr].$decode(_raw);

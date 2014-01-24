@@ -12,7 +12,7 @@ describe('Restmod model class:', function() {
   describe('model', function() {
     it('should create a resource', function() {
       var Bike = $restmod.model('/user/bike', {}, {});
-      expect(Bike.$baseUrl).toEqual('/user/bike');
+      expect(Bike.$baseUrl()).toEqual('/user/bike');
       expect(Bike.$chain.length).toEqual(2);
     });
   });
