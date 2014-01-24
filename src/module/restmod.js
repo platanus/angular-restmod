@@ -373,7 +373,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {string} bound url.
              */
             $url: function() {
-              return this.$scope.$urlFor(this);
+              return this.$scope.$urlFor(this.$pk);
             },
 
             /**
@@ -394,20 +394,20 @@ angular.module('plRestmod').provider('$restmod', function() {
               } else {
                 var self = this;
                 return {
-                  $urlFor: function() {
+                  $urlFor: function(/* _pk */) { // pk is not considered in scoped resources
                     return joinUrl(self.$url(true), _partial);
                   },
                   $createUrlFor: function() {
                     // create is not posible in nested members
                     return null;
                   },
-                  $updateUrlFor: function(_item) {
+                  $updateUrlFor: function(_pk) {
                     // prefer unscoped but fallback to scoped
-                    return _for.$urlFor(_item) || this.$urlFor();
+                    return _for.$urlFor(_pk) || this.$urlFor();
                   },
-                  $destroyUrlFor: function(_item) {
+                  $destroyUrlFor: function(_pk) {
                     // prefer unscoped but fallback to scoped
-                    return _for.$baseUrl() ? _for.$urlFor(_item) : this.$urlFor();
+                    return _for.$baseUrl() ? _for.$urlFor(_pk) : this.$urlFor();
                   }
                 };
               }
@@ -613,7 +613,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} this
              */
             $save: function() {
-              var url = this.$scope.$updateUrlFor ? this.$scope.$updateUrlFor(this) : this.$url(),
+              var url = this.$scope.$updateUrlFor ? this.$scope.$updateUrlFor(this.$pk) : this.$url(),
                   request;
 
               if(url) {
@@ -632,7 +632,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 });
               } else {
                 // If not bound create.
-                url = (this.$scope.$createUrlFor && this.$scope.$createUrlFor(this)) || (this.$scope.$url && this.$scope.$url());
+                url = (this.$scope.$createUrlFor && this.$scope.$createUrlFor(this.$pk)) || (this.$scope.$url && this.$scope.$url());
                 if(!url) throw new Error('Create is not supported by this resource');
                 request = { method: 'POST', url: url, data: this.$encode(SyncMask.ENCODE_CREATE) };
                 callback('before-save', this, request);
@@ -659,7 +659,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} this
              */
             $destroy: function() {
-              var url = this.$scope.$destroyUrlFor ? this.$scope.$destroyUrlFor(this) : this.$url();
+              var url = this.$scope.$destroyUrlFor ? this.$scope.$destroyUrlFor(this.$pk) : this.$url();
               if(!url) throw new Error('Cannot destroy an unbound resource');
               var request = { method: 'DELETE', url: url };
               callback('before-destroy', this, request);
@@ -695,7 +695,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {string} The collection url.
              */
             $url: function() {
-              return this.$scope ? this.$scope.$urlFor(this) : Model.$baseUrl();
+              return this.$scope ? this.$scope.$urlFor() : Model.$baseUrl();
             },
 
             /**
@@ -703,13 +703,13 @@ angular.module('plRestmod').provider('$restmod', function() {
              *
              * @description Part of the scope interface, provides urls for collection's items.
              *
-             * @param {Model} _for Item to provide the url to.
+             * @param {Model} _pk Item key to provide the url to.
              * @return {string|null} The url or nill if item does not meet the url requirements.
              */
-            $urlFor: function(_for) {
+            $urlFor: function(_pk) {
               // force items unscoping if model is not anonymous (maybe make this optional)
               var baseUrl = Model.$baseUrl();
-              return joinUrl(baseUrl ? baseUrl : this.$url(), _for.$pk);
+              return joinUrl(baseUrl ? baseUrl : this.$url(), _pk);
             },
 
             /**
