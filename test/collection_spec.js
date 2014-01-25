@@ -95,17 +95,17 @@ describe('Restmod collection:', function() {
   });
 
   describe('$build', function() {
-
     it('should initialize model with given object properties', function() {
       var bike = Bike.$build({ model: 'Teocali' });
       expect(bike.model).toEqual('Teocali');
     });
+  });
 
-    it('should infer the key when not used an explicit one', function(){
-      var bike = Bike.$build(1);
-      expect(bike.$pk).toEqual(1);
+  describe('$new', function() {
+    it('should initialize model with given primary key', function() {
+      var bike = Bike.$new(20);
+      expect(bike.$pk).toEqual(20);
     });
-
   });
 
   describe('$create', function() {

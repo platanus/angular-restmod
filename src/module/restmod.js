@@ -108,6 +108,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 $cb: SyncMask.SYSTEM_ALL
               },
               urlPrefix = null,
+              primaryKey = 'id',
               defaults = [],
               decoders = {},
               encoders = {},
@@ -321,24 +322,22 @@ angular.module('plRestmod').provider('$restmod', function() {
           };
 
           /**
-           * Returns a model's object private key from model decoded data.
+           * @memberof Model
            *
-           * @description The private key is the passed to the $urlFor function to obtain an object's url.
+           * @description Returns a model's object private key from model decoded data.
+           * If data is not an object, then it is considered to be the primary key value.
            *
-           * By default, this method looks for the id property.
+           * The private key is the passed to the $urlFor function to obtain an object's url.
            *
-           * This method should not be overriden directly.
+           * This method should not be overriden directly, use the {@link ModelBuilder#setPrimaryKey}
+           * method to change the primary key.
            *
-           * @param {object} _data Raw object data
+           * @param {object} _data decoded object data (or pk)
            * @return {mixed} object private key
            */
           Model.$inferKey = function(_data) {
-            if(typeof _data === 'object') {
-              if(typeof _data.id === 'undefined') return null;
-              return _data.id;
-            } else {
-              return _data;
-            }
+            if(!_data || typeof _data[primaryKey] === 'undefined') return null;
+            return _data[primaryKey];
           };
 
           /** Runtime modifiers - private api for now */
@@ -554,7 +553,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             $decode: function(_raw, _mask) {
               transform(_raw, this, '', _mask || SyncMask.DECODE_USER, true, this);
-              if(!this.$pk) this.$pk = Model.$inferKey(_raw); // TODO: improve this, warn if key changes
+              if(!this.$pk) this.$pk = Model.$inferKey(this); // TODO: improve this, warn if key changes
               callback('after-feed', this, _raw);
               return this;
             },
@@ -746,13 +745,30 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof ModelCollection#
              *
-             * @description Creates a new model instance bound to this context.
+             * @description Loads a new model instance bound to this context and a given pk.
+             *
+             * ATENTION: this method does not adds the new object to the collection, it is intended to be a base
+             * building method that can be overriden to provide special caching logics.
+             *
+             * @param {mixed} _pk object private key
+             * @return {Model} New model instance
+             */
+            $load: function(_pk) {
+              return new Model(this, _pk);
+            },
+
+            /**
+             * @memberof ModelCollection#
+             *
+             * @description Builds a new instance of this model, sets its primary key.
              *
              * @param {mixed} _pk object private key
              * @return {Model} New model instance
              */
             $new: function(_pk) {
-              return new Model(this, _pk);
+              var obj = this.$load(_pk);
+              if(this.$isCollection) this.$add(obj);
+              return obj;
             },
 
             /**
@@ -760,13 +776,11 @@ angular.module('plRestmod').provider('$restmod', function() {
              *
              * @description Builds a new instance of this model
              *
-             * If `_init` is not an object, then its treated as a primary key.
-             *
              * @param  {object} _init Initial values
              * @return {Model} model instance
              */
             $build: function(_init) {
-              var obj = this.$new(Model.$inferKey(_init));
+              var obj = this.$load(Model.$inferKey(_init));
               angular.extend(obj, _init);
 
               if(this.$isCollection) this.$add(obj);
@@ -782,7 +796,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} model instance
              */
             $buildRaw: function(_raw) {
-              var obj = this.$new(Model.$inferKey(_raw));
+              var obj = this.$load(Model.$inferKey(_raw)); // TODO: using infer key on raw...
               obj.$decode(_raw);
 
               if(this.$isCollection) this.$add(obj);
@@ -792,15 +806,13 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof ModelCollection#
              *
-             * @description Attempts to resolve a resource using provided data
+             * @description Attempts to resolve a resource using provided private key.
              *
-             * If `_init` is not an object, then its treated as a primary key.
-             *
-             * @param  {object} _init Data to provide
+             * @param {mixed} _pk Private key
              * @return {Model} model instance
              */
-            $find: function(_init) {
-              return this.$new(Model.$inferKey(_init)).$fetch();
+            $find: function(_pk) {
+              return this.$load(_pk).$fetch();
             },
 
             /**
@@ -1147,6 +1159,21 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof ModelBuilder#
              *
+             * @description Changes the model's primary key.
+             *
+             * Primary keys are passed to scope's url methods to generate urls. The default primary key is 'id'.
+             *
+             * @param {string|function} _key New primary key.
+             * @return {ModelBuilder} self
+             */
+            setPrimaryKey: function(_key) {
+              primaryKey = _key;
+              return this;
+            },
+
+            /**
+             * @memberof ModelBuilder#
+             *
              * @description Changes the way restmod renames attributes every time a server resource is decoded.
              *
              * This is intended to be used as a way of keeping property naming style consistent accross
@@ -1179,21 +1206,6 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             setNameEncoder: function(_encoder) {
               nameEncoder = _encoder;
-              return this;
-            },
-
-            /**
-             * @memberof ModelBuilder#
-             *
-             * @description Sets the private key provider for this model instances.
-             *
-             * Private keys are passed to scope's $url methods to generate the instance url.
-             *
-             * @param {function} the new provider, receives an object and returns the key.
-             * @return {ModelBuilder} self
-             */
-            setKeyProvider: function(_provider) {
-              Model.$inferKey = _provider;
               return this;
             },
 
@@ -1551,7 +1563,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                   // only reload object if id changes
                   if(_inline)
                   {
-                    if(!this[_attr] || this[_attr].$pk !== _model.$inferKey(_raw)) {
+                    if(!this[_attr] || this[_attr].$pk !== _model.$inferKey(_raw)) { // TODO: using infer key on raw...
                       this[_attr] = _model.$buildRaw(_raw);
                     } else {
                       this[_attr].$decode(_raw);
@@ -1560,7 +1572,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                   else
                   {
                     if(!this[_attr] || this[_attr].$pk !== _raw) {
-                      this[_attr] = _model.$build(_raw);
+                      this[_attr] = _model.$load(_raw); // use $new instead of $build
                       if(_prefetch) {
                         this[_attr].$fetch();
                       }

@@ -31,6 +31,19 @@ describe('Restmod builder:', function() {
     });
   });
 
+  describe('setPrimaryKey', function() {
+    beforeEach(function() {
+      Bike = $restmod.model('/bikes', function() {
+        this.setPrimaryKey('myId');
+      });
+    });
+
+    it('should change the property used to resolve an objects primary key', function() {
+      var bike = Bike.$build({ myId: 'key' });
+      expect(bike.$pk).toEqual('key');
+    });
+  });
+
   describe('disableRenaming', function() {
 
     beforeEach(function() {
