@@ -1,3 +1,16 @@
+# 0.12.0 (2014-01-24)
+
+## Features
+### ModelBuilder
+
+* adds the setUrlPrefix builder method. (1cce503)
+
+* adds setPrimaryKey function. (59bc815)
+
+## Breaking Changes
+
+* $build, it no longer allows a private key to be passed directly, for that use $new or $build({ id: X })
+
 # 0.11.1 (2014-01-22)
 
 ## Features
