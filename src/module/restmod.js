@@ -1273,7 +1273,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             describe: function(_description) {
               forEach(_description, function(_desc, _attr) {
-                switch(_attr[0]) {
+                switch(_attr.charAt(0)) {
                 case '@':
                   this.classDefine(_attr.substring(1), _desc);
                   break;
