@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.12.0 - 2014-01-24
+ * @version v0.12.1 - 2014-02-05
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -1368,7 +1368,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             describe: function(_description) {
               forEach(_description, function(_desc, _attr) {
-                switch(_attr[0]) {
+                switch(_attr.charAt(0)) {
                 case '@':
                   this.classDefine(_attr.substring(1), _desc);
                   break;
