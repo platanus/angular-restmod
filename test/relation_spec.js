@@ -81,6 +81,11 @@ describe('Restmod model relation:', function() {
       expect(bike.activity.length).toEqual(2);
     });
 
+    it('should reset collection content if new inline content is fed', function() {
+      var bike = Bike.$build({ id: 1 }).$decode({ rides: [{ id: 1 }, { id: 2 }] });
+      bike.$decode({ rides: [{ id: 3 }] });
+      expect(bike.activity.length).toEqual(1);
+    });
   });
 
   describe('hasOne', function() {

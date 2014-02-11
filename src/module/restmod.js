@@ -1504,7 +1504,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 return col;
               // simple support for inline data, TODO: maybe deprecate this.
               }).attrDecoder(_source || _url || _attr, function(_raw) {
-                this[_attr].$feed(_raw);
+                this[_attr].$reset().$feed(_raw);
               }).attrMask(_attr, SyncMask.ENCODE);
             },
 
