@@ -88,47 +88,52 @@ describe('Restmod model relation:', function() {
     beforeEach(function() {
       Bike = $restmod.model('/api/bikes', {
         owner: { hasOne: 'User' },
+        activity: { hasMany: 'BikeRide' },
         serialNo: { hasOne: 'SerialNo', path: 'serial', inverseOf: 'bike' }
       });
     });
 
     it('should use parameterized attribute name if no path option is provided', function() {
-      expect(Bike.$build({ id: 1 }).owner.$url()).toEqual('/api/bikes/1/owner');
+      expect(Bike.$build({ id: 1 }).activity.$url()).toEqual('/api/bikes/1/activity');
     });
 
     it('should use url provided in path option', function() {
       expect(Bike.$build({ id: 1 }).serialNo.$url()).toEqual('/api/bikes/1/serial');
     });
 
-    it('should not use nested url for update/delete if child resource is identified and not anonymous', function() {
+    it('should generate a child resource that uses the canonical url if not anonymous', function() {
+      var bike = Bike.$build({ id: 1 }).$decode({ owner: { id: 'XX' } });
+      expect(bike.owner.$url()).toEqual('/api/users/XX');
+    });
+
+    it('should not use nested url for update/delete if child resource is not anonymous', function() {
       var bike = Bike.$build({ id: 1 }).$decode({ owner: { id: 'XX' } });
 
       bike.owner.$fetch();
       bike.owner.$save();
       bike.owner.$destroy();
 
-      $httpBackend.when('GET', '/api/bikes/1/owner').respond(200, '{}'); // nested
-      $httpBackend.when('PUT', '/api/users/XX').respond(200, '{}'); // not nested
-      $httpBackend.when('DELETE', '/api/users/XX').respond(200, '{}'); // not nested
+      $httpBackend.expectGET('/api/bikes/1/owner').respond(200, '{}'); // nested
+      $httpBackend.expectPUT('/api/users/XX').respond(200, '{}'); // not nested
+      $httpBackend.expectDELETE('/api/users/XX').respond(200, '{}'); // not nested
       $httpBackend.flush();
     });
 
+    it('should generate a child resource that uses the nested url if anonymous', function() {
+      var bike = Bike.$build({ id: 1 }).$decode({ serial: { id: 'XX' } });
+      expect(bike.serialNo.$url()).toEqual('/api/bikes/1/serial');
+    });
+
     it('should use nested url if resource anonymous', function() {
-      var bike = Bike.$build({ id: 1 }).$decode({ serial: { id: "XX" } });
+      var bike = Bike.$build({ id: 1 }).$decode({ serial: { id: 'XX' } });
 
       bike.serialNo.$fetch();
       bike.serialNo.$save();
       bike.serialNo.$destroy();
 
-      $httpBackend.when('GET', '/api/bikes/1/serial').respond(200, '{}');
+      $httpBackend.expectGET('/api/bikes/1/serial').respond(200, '{}');
       $httpBackend.when('PUT', '/api/bikes/1/serial').respond(200, '{}');
       $httpBackend.when('DELETE', '/api/bikes/1/serial').respond(200, '{}');
-      $httpBackend.flush();
-    });
-
-    it('should PUT to the nested url when saving a non identified resource', function() {
-      Bike.$build({ id: 1 }).owner.$save();
-      $httpBackend.when('PUT', '/api/bikes/1/owner').respond(200, '{}');
       $httpBackend.flush();
     });
 

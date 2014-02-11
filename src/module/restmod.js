@@ -310,6 +310,19 @@ angular.module('plRestmod').provider('$restmod', function() {
           /**
            * @memberof Model
            *
+           * @description Returns true if model is anonymous.
+           *
+           * An anonymous model can only be used as a nested resource (using relations)
+           *
+           * @return {boolean} true if model is anonymous.
+           */
+          Model.$anonymous = function() {
+            return !_baseUrl;
+          };
+
+          /**
+           * @memberof Model
+           *
            * @description Returns the model base url.
            *
            * This method should not be overriden directly.
@@ -393,20 +406,25 @@ angular.module('plRestmod').provider('$restmod', function() {
               } else {
                 var self = this;
                 return {
-                  $urlFor: function(/* _pk */) { // pk is not considered in scoped resources
-                    return joinUrl(self.$url(true), _partial);
+                  $collectionUrl: function() {
+                    // collection url is always nested
+                    return joinUrl(self.$url(), _partial);
+                  },
+                  $urlFor: function(_pk) {
+                    // resource url is nested only for anonymous resources
+                    if(_for.$anonymous()) {
+                      return this.$fetchUrlFor();
+                    } else {
+                      return _for.$urlFor(_pk);
+                    }
+                  },
+                  $fetchUrlFor: function(/* _pk */) {
+                    // fetch url is nested
+                    return joinUrl(self.$url(), _partial);
                   },
                   $createUrlFor: function() {
                     // create is not posible in nested members
                     return null;
-                  },
-                  $updateUrlFor: function(_pk) {
-                    // prefer unscoped but fallback to scoped
-                    return _for.$urlFor(_pk) || this.$urlFor();
-                  },
-                  $destroyUrlFor: function(_pk) {
-                    // prefer unscoped but fallback to scoped
-                    return _for.$baseUrl() ? _for.$urlFor(_pk) : this.$urlFor();
                   }
                 };
               }
@@ -583,7 +601,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             $fetch: function() {
               // verify that instance has a bound url
-              var url = this.$url();
+              var url = this.$scope.$fetchUrlFor ? this.$scope.$fetchUrlFor(this.$pk) : this.$url();
               if(!url) throw new Error('Cannot fetch an unbound resource');
               var request = { method: 'GET', url: url };
 
@@ -631,7 +649,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 });
               } else {
                 // If not bound create.
-                url = (this.$scope.$createUrlFor && this.$scope.$createUrlFor(this.$pk)) || (this.$scope.$url && this.$scope.$url());
+                url = this.$scope.$createUrlFor ? this.$scope.$createUrlFor(this.$pk) : (this.$scope.$url && this.$scope.$url());
                 if(!url) throw new Error('Create is not supported by this resource');
                 request = { method: 'POST', url: url, data: this.$encode(SyncMask.ENCODE_CREATE) };
                 callback('before-save', this, request);
@@ -694,7 +712,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {string} The collection url.
              */
             $url: function() {
-              return this.$scope ? this.$scope.$urlFor() : Model.$baseUrl();
+              return this.$scope ? this.$scope.$collectionUrl() : Model.$baseUrl();
             },
 
             /**
@@ -706,7 +724,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {string|null} The url or nill if item does not meet the url requirements.
              */
             $urlFor: function(_pk) {
-              // force items unscoping if model is not anonymous (maybe make this optional)
+              // force item unscoping if model is not anonymous (maybe make this optional)
               var baseUrl = Model.$baseUrl();
               return joinUrl(baseUrl ? baseUrl : this.$url(), _pk);
             },
