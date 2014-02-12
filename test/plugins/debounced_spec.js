@@ -35,6 +35,46 @@ describe('Plugin: Debounced Model', function() {
 
       expect(successCount).toEqual(3);
     }));
+
+    it('should leave the $promise property in a valid state', inject(function($timeout, $httpBackend, Bike) {
+
+      $httpBackend.when('PUT','/api/bikes/1').respond(200, '');
+      var bike = Bike.$build({ id: 1, brand: 'Trek' }), spy = jasmine.createSpy();
+
+      bike.$save().$then(function() {
+        return 'hello';
+      });
+
+      $timeout.flush();
+      $httpBackend.flush();
+
+      $timeout(function() {
+        bike.$then(spy);
+      });
+
+      $timeout.flush();
+      expect(spy).toHaveBeenCalledWith('hello');
+    }));
+
+    it('should leave the $promise property in a valid state', inject(function($timeout, $httpBackend, $q, Bike) {
+
+      $httpBackend.when('PUT','/api/bikes/1').respond(400, '');
+      var bike = Bike.$build({ id: 1, brand: 'Trek' }), spy = jasmine.createSpy();
+
+      bike.$save().$then(null, function() {
+        return $q.reject('hello');
+      });
+
+      $timeout.flush();
+      $httpBackend.flush();
+
+      $timeout(function() {
+        bike.$then(null, spy);
+      });
+
+      $timeout.flush();
+      expect(spy).toHaveBeenCalledWith('hello');
+    }));
   });
 
   describe('`$saveNow` function', function() {

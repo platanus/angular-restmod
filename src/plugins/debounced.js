@@ -33,17 +33,28 @@
 
 'use strict';
 
-var bind = angular.bind,
-    isObject = angular.isObject;
+var isObject = angular.isObject;
 
 angular.module('plRestmod').factory('DebouncedModel', ['$restmod', 'SyncMask', '$timeout', '$q', function($restmod, SyncMask, $timeout, $q) {
 
   // builds a new async save function bound to a given context and promise.
-  function buildAsyncSaveFun(_this, _oldSave, _promise) {
+  function buildAsyncSaveFun(_this, _oldSave, _promise, _oldPromise) {
     return function() {
-      _oldSave.call(_this).$then(
-        bind(_promise, _promise.resolve),
-        bind(_promise, _promise.reject)
+
+      // swap promises so save behaves like it has been called during the original call.
+      var currentPromise = _this.$promise;
+      _this.$promise = _oldPromise;
+
+      // when save resolves, the timeout promise is resolved and the last resource promise returned
+      // so it behaves
+      _oldSave.call(_this).$promise.then(
+        function(_data) {
+          _promise.resolve(_data);
+          _this.$promise = currentPromise;
+        }, function(_reason) {
+          _promise.reject(_reason);
+          _this.$promise = currentPromise;
+        }
       );
 
       _this.$dmStatus = null;
@@ -118,7 +129,7 @@ angular.module('plRestmod').factory('DebouncedModel', ['$restmod', 'SyncMask', '
             if(!timeout) return this.$super();
 
             var deferred = $q.defer(),
-                asyncSave = buildAsyncSaveFun(this, this.$super, deferred);
+                asyncSave = buildAsyncSaveFun(this, this.$super, deferred, this.$promise);
 
             this.$dmStatus = {
               save: asyncSave,
