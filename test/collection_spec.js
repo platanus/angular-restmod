@@ -43,9 +43,7 @@ describe('Restmod collection:', function() {
     describe('$fetch', function() {
 
       it('should retrieve a collection of items of same type', function() {
-        expect(query.$pending).toBe(false);
         query.$fetch();
-        expect(query.$pending).toBe(true);
         expect(query.length).toEqual(0);
         expect(query.$resolved).toBe(false);
         $httpBackend.flush();
@@ -90,6 +88,12 @@ describe('Restmod collection:', function() {
         expect(query.length).toEqual(1);
       });
 
+      it('should clear old items on resolve when called consecutivelly', function() {
+        query.$refresh({ brand: 'giant' });
+        query.$refresh({ brand: 'giant' });
+        $httpBackend.flush();
+        expect(query.length).toEqual(1);
+      });
     });
 
   });

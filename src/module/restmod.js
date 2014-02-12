@@ -104,7 +104,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 $promise: SyncMask.SYSTEM_ALL,
                 $pending: SyncMask.SYSTEM_ALL,
                 $response: SyncMask.SYSTEM_ALL,
-                $error: SyncMask.SYSTEM_ALL,
+                $status: SyncMask.SYSTEM_ALL,
                 $cb: SyncMask.SYSTEM_ALL
               },
               urlPrefix = null,
@@ -140,40 +140,83 @@ angular.module('plRestmod').provider('$restmod', function() {
           // common http behavior, used both in collections and model instances.
           function send(_target, _config, _success, _error) {
 
-            callback('before-request', _target, _config);
+            _target.$pending = (_target.$pending || []);
+            _target.$pending.push(_config);
 
-            _target.$pending = true;
-            _target.$response = null;
-            _target.$error = false;
+            function performRequest() {
 
-            _target.$promise = $http(_config).then(function(_response) {
+              // if request was canceled, then just return a resolved promise
+              if(_config.canceled) {
+                _target.$status = 'canceled';
+                return $q.resolve(_target);
+              }
 
-              // IDEA: a response interceptor could add additional error states based on returned data,
-              // this could allow for additional error state behaviours (for example, an interceptor
-              // could watch for rails validation errors and store them in the model, then return false
-              // to trigger a promise queue error).
+              _target.$response = null;
+              _target.$error = false;
 
-              _target.$pending = false;
-              _target.$response = _response;
+              callback('before-request', _target, _config);
 
-              callback('after-request', _target, _response);
+              return $http(_config).then(function(_response) {
 
-              if(_success) _success.call(_target, _response);
+                // IDEA: a response interceptor could add additional error states based on returned data,
+                // this could allow for additional error state behaviours (for example, an interceptor
+                // could watch for rails validation errors and store them in the model, then return false
+                // to trigger a promise queue error).
 
-              return _target;
+                // if request was canceled, ignore post request actions.
+                if(_config.canceled) {
+                  _target.$status = 'canceled';
+                  return _target;
+                }
 
-            }, function(_response) {
+                _target.$pending.splice(_target.$pending.indexOf(_config), 1);
+                if(_target.$pending.length === 0) _target.$pending = null; // reset pending so it can be used as boolean
+                _target.$status = 'ok';
+                _target.$response = _response;
 
-              _target.$pending = false;
-              _target.$response = _response;
-              _target.$error = true;
+                callback('after-request', _target, _response);
+                if(_success) _success.call(_target, _response);
 
-              callback('after-request-error', _target, _response);
+                return _target;
 
-              if(_error) _error.call(_target, _response);
+              }, function(_response) {
 
-              return $q.reject(_target);
-            });
+                // if request was canceled, ignore error handling
+                if(_config.canceled) {
+                  _target.$status = 'canceled';
+                  return _target;
+                }
+
+                _target.$pending.splice(_target.$pending.indexOf(_config), 1);
+                if(_target.$pending.length === 0) _target.$pending = null; // reset pending so it can be used as boolean
+                _target.$status = 'error';
+                _target.$response = _response;
+
+                callback('after-request-error', _target, _response);
+                if(_error) _error.call(_target, _response);
+                return $q.reject(_target);
+              });
+            }
+
+            // chain requests, do not allow parallel request per resource.
+            // TODO: allow various request modes: parallel, serial, just one (discard), etc
+            if(_target.$promise) {
+              _target.$promise = _target.$promise.then(performRequest, performRequest);
+            } else {
+              _target.$promise = performRequest();
+            }
+          }
+
+          function cancel(_target) {
+            // cancel every pending request.
+            if(_target.$pending) {
+              forEach(_target.$pending, function(_config) {
+                _config.canceled = true;
+              });
+            }
+
+            // reset request
+            _target.$promise = null;
           }
 
           // recursive transformation function, used by $decode and $encode.
@@ -267,7 +310,6 @@ angular.module('plRestmod').provider('$restmod', function() {
 
             this.$scope = _scope;
             this.$pk = _pk;
-            this.$pending = false;
             this.$type = Model;
 
             var tmp;
@@ -870,7 +912,6 @@ angular.module('plRestmod').provider('$restmod', function() {
               col.$isCollection = true;
               col.$scope = _scope || this.$scope;
               col.$params = this.$params ? extend({}, this.$params, _params) : _params;
-              col.$pending = false;
               col.$resolved = false;
 
               return col;
@@ -963,6 +1004,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             $reset: function() {
               if(!this.$isCollection) throw new Error('$reset is only supported by collections');
+              cancel(this); // cancel pending requests.
               this.$resolved = false;
               return this;
             },
