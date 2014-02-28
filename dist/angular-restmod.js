@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.12.1 - 2014-02-05
+ * @version v0.12.2 - 2014-02-27
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -199,7 +199,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 $promise: SyncMask.SYSTEM_ALL,
                 $pending: SyncMask.SYSTEM_ALL,
                 $response: SyncMask.SYSTEM_ALL,
-                $error: SyncMask.SYSTEM_ALL,
+                $status: SyncMask.SYSTEM_ALL,
                 $cb: SyncMask.SYSTEM_ALL
               },
               urlPrefix = null,
@@ -235,40 +235,83 @@ angular.module('plRestmod').provider('$restmod', function() {
           // common http behavior, used both in collections and model instances.
           function send(_target, _config, _success, _error) {
 
-            callback('before-request', _target, _config);
+            _target.$pending = (_target.$pending || []);
+            _target.$pending.push(_config);
 
-            _target.$pending = true;
-            _target.$response = null;
-            _target.$error = false;
+            function performRequest() {
 
-            _target.$promise = $http(_config).then(function(_response) {
+              // if request was canceled, then just return a resolved promise
+              if(_config.canceled) {
+                _target.$status = 'canceled';
+                return $q.resolve(_target);
+              }
 
-              // IDEA: a response interceptor could add additional error states based on returned data,
-              // this could allow for additional error state behaviours (for example, an interceptor
-              // could watch for rails validation errors and store them in the model, then return false
-              // to trigger a promise queue error).
+              _target.$response = null;
+              _target.$error = false;
 
-              _target.$pending = false;
-              _target.$response = _response;
+              callback('before-request', _target, _config);
 
-              callback('after-request', _target, _response);
+              return $http(_config).then(function(_response) {
 
-              if(_success) _success.call(_target, _response);
+                // IDEA: a response interceptor could add additional error states based on returned data,
+                // this could allow for additional error state behaviours (for example, an interceptor
+                // could watch for rails validation errors and store them in the model, then return false
+                // to trigger a promise queue error).
 
-              return _target;
+                // if request was canceled, ignore post request actions.
+                if(_config.canceled) {
+                  _target.$status = 'canceled';
+                  return _target;
+                }
 
-            }, function(_response) {
+                _target.$pending.splice(_target.$pending.indexOf(_config), 1);
+                if(_target.$pending.length === 0) _target.$pending = null; // reset pending so it can be used as boolean
+                _target.$status = 'ok';
+                _target.$response = _response;
 
-              _target.$pending = false;
-              _target.$response = _response;
-              _target.$error = true;
+                callback('after-request', _target, _response);
+                if(_success) _success.call(_target, _response);
 
-              callback('after-request-error', _target, _response);
+                return _target;
 
-              if(_error) _error.call(_target, _response);
+              }, function(_response) {
 
-              return $q.reject(_target);
-            });
+                // if request was canceled, ignore error handling
+                if(_config.canceled) {
+                  _target.$status = 'canceled';
+                  return _target;
+                }
+
+                _target.$pending.splice(_target.$pending.indexOf(_config), 1);
+                if(_target.$pending.length === 0) _target.$pending = null; // reset pending so it can be used as boolean
+                _target.$status = 'error';
+                _target.$response = _response;
+
+                callback('after-request-error', _target, _response);
+                if(_error) _error.call(_target, _response);
+                return $q.reject(_target);
+              });
+            }
+
+            // chain requests, do not allow parallel request per resource.
+            // TODO: allow various request modes: parallel, serial, just one (discard), etc
+            if(_target.$promise) {
+              _target.$promise = _target.$promise.then(performRequest, performRequest);
+            } else {
+              _target.$promise = performRequest();
+            }
+          }
+
+          function cancel(_target) {
+            // cancel every pending request.
+            if(_target.$pending) {
+              forEach(_target.$pending, function(_config) {
+                _config.canceled = true;
+              });
+            }
+
+            // reset request
+            _target.$promise = null;
           }
 
           // recursive transformation function, used by $decode and $encode.
@@ -277,7 +320,7 @@ angular.module('plRestmod').provider('$restmod', function() {
             var key, decodedName, encodedName, fullName, filter, value, result = _into || {};
 
             for(key in _data) {
-              if(_data.hasOwnProperty(key)) {
+              if(_data.hasOwnProperty(key) && !(!_decode && key[0] === '$' && key[1] === '$')) {
 
                 decodedName = (_decode && nameDecoder) ? nameDecoder(key) : key;
                 fullName = _prefix + decodedName;
@@ -362,7 +405,6 @@ angular.module('plRestmod').provider('$restmod', function() {
 
             this.$scope = _scope;
             this.$pk = _pk;
-            this.$pending = false;
             this.$type = Model;
 
             var tmp;
@@ -400,6 +442,19 @@ angular.module('plRestmod').provider('$restmod', function() {
                 return urlPrefix ? joinUrl(urlPrefix, _url) : _url;
               }
             }, '');
+          };
+
+          /**
+           * @memberof Model
+           *
+           * @description Returns true if model is anonymous.
+           *
+           * An anonymous model can only be used as a nested resource (using relations)
+           *
+           * @return {boolean} true if model is anonymous.
+           */
+          Model.$anonymous = function() {
+            return !_baseUrl;
           };
 
           /**
@@ -488,20 +543,25 @@ angular.module('plRestmod').provider('$restmod', function() {
               } else {
                 var self = this;
                 return {
-                  $urlFor: function(/* _pk */) { // pk is not considered in scoped resources
-                    return joinUrl(self.$url(true), _partial);
+                  $collectionUrl: function() {
+                    // collection url is always nested
+                    return joinUrl(self.$url(), _partial);
+                  },
+                  $urlFor: function(_pk) {
+                    // resource url is nested only for anonymous resources
+                    if(_for.$anonymous()) {
+                      return this.$fetchUrlFor();
+                    } else {
+                      return _for.$urlFor(_pk);
+                    }
+                  },
+                  $fetchUrlFor: function(/* _pk */) {
+                    // fetch url is nested
+                    return joinUrl(self.$url(), _partial);
                   },
                   $createUrlFor: function() {
                     // create is not posible in nested members
                     return null;
-                  },
-                  $updateUrlFor: function(_pk) {
-                    // prefer unscoped but fallback to scoped
-                    return _for.$urlFor(_pk) || this.$urlFor();
-                  },
-                  $destroyUrlFor: function(_pk) {
-                    // prefer unscoped but fallback to scoped
-                    return _for.$baseUrl() ? _for.$urlFor(_pk) : this.$urlFor();
                   }
                 };
               }
@@ -678,7 +738,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             $fetch: function() {
               // verify that instance has a bound url
-              var url = this.$url();
+              var url = this.$scope.$fetchUrlFor ? this.$scope.$fetchUrlFor(this.$pk) : this.$url();
               if(!url) throw new Error('Cannot fetch an unbound resource');
               var request = { method: 'GET', url: url };
 
@@ -726,7 +786,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 });
               } else {
                 // If not bound create.
-                url = (this.$scope.$createUrlFor && this.$scope.$createUrlFor(this.$pk)) || (this.$scope.$url && this.$scope.$url());
+                url = this.$scope.$createUrlFor ? this.$scope.$createUrlFor(this.$pk) : (this.$scope.$url && this.$scope.$url());
                 if(!url) throw new Error('Create is not supported by this resource');
                 request = { method: 'POST', url: url, data: this.$encode(SyncMask.ENCODE_CREATE) };
                 callback('before-save', this, request);
@@ -789,7 +849,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {string} The collection url.
              */
             $url: function() {
-              return this.$scope ? this.$scope.$urlFor() : Model.$baseUrl();
+              return this.$scope ? this.$scope.$collectionUrl() : Model.$baseUrl();
             },
 
             /**
@@ -801,7 +861,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {string|null} The url or nill if item does not meet the url requirements.
              */
             $urlFor: function(_pk) {
-              // force items unscoping if model is not anonymous (maybe make this optional)
+              // force item unscoping if model is not anonymous (maybe make this optional)
               var baseUrl = Model.$baseUrl();
               return joinUrl(baseUrl ? baseUrl : this.$url(), _pk);
             },
@@ -947,7 +1007,6 @@ angular.module('plRestmod').provider('$restmod', function() {
               col.$isCollection = true;
               col.$scope = _scope || this.$scope;
               col.$params = this.$params ? extend({}, this.$params, _params) : _params;
-              col.$pending = false;
               col.$resolved = false;
 
               return col;
@@ -1040,6 +1099,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             $reset: function() {
               if(!this.$isCollection) throw new Error('$reset is only supported by collections');
+              cancel(this); // cancel pending requests.
               this.$resolved = false;
               return this;
             },
@@ -1581,7 +1641,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 return col;
               // simple support for inline data, TODO: maybe deprecate this.
               }).attrDecoder(_source || _url || _attr, function(_raw) {
-                this[_attr].$feed(_raw);
+                this[_attr].$reset().$feed(_raw);
               }).attrMask(_attr, SyncMask.ENCODE);
             },
 
