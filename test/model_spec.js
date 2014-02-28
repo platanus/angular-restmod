@@ -212,6 +212,14 @@ describe('Restmod model class:', function() {
 
       expect(raw.user).toBeUndefined();
     });
+
+    it('should ignore angular private properties (prefixed with $$)', function() {
+      var bike = $restmod.model(null).$build({ brand: 'Commencal', $$hashKey: '00F' }),
+          raw = bike.$encode();
+
+      expect(raw.brand).toBeDefined();
+      expect(raw.$$hashKey).toBeUndefined();
+    });
   });
 
   describe('$finally', function() {

@@ -225,7 +225,7 @@ angular.module('plRestmod').provider('$restmod', function() {
             var key, decodedName, encodedName, fullName, filter, value, result = _into || {};
 
             for(key in _data) {
-              if(_data.hasOwnProperty(key)) {
+              if(_data.hasOwnProperty(key) && !(!_decode && key[0] === '$' && key[1] === '$')) {
 
                 decodedName = (_decode && nameDecoder) ? nameDecoder(key) : key;
                 fullName = _prefix + decodedName;
