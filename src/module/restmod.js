@@ -98,15 +98,7 @@ angular.module('plRestmod').provider('$restmod', function() {
          */
         model: function(_baseUrl/* , _mix */) {
 
-          var masks = {
-                $type: SyncMask.SYSTEM_ALL,
-                $scope: SyncMask.SYSTEM_ALL,
-                $promise: SyncMask.SYSTEM_ALL,
-                $pending: SyncMask.SYSTEM_ALL,
-                $response: SyncMask.SYSTEM_ALL,
-                $status: SyncMask.SYSTEM_ALL,
-                $cb: SyncMask.SYSTEM_ALL
-              },
+          var masks = {},
               urlPrefix = null,
               primaryKey = 'id',
               defaults = [],
@@ -225,7 +217,7 @@ angular.module('plRestmod').provider('$restmod', function() {
             var key, decodedName, encodedName, fullName, filter, value, result = _into || {};
 
             for(key in _data) {
-              if(_data.hasOwnProperty(key) && !(!_decode && key[0] === '$' && key[1] === '$')) {
+              if(_data.hasOwnProperty(key) && key[0] !== '$') {
 
                 decodedName = (_decode && nameDecoder) ? nameDecoder(key) : key;
                 fullName = _prefix + decodedName;
@@ -502,7 +494,7 @@ angular.module('plRestmod').provider('$restmod', function() {
               if(_mask === undefined) _mask = SyncMask.SYSTEM;
 
               for(var key in this) {
-                if(this.hasOwnProperty(key)) {
+                if(this.hasOwnProperty(key) && key[0] !== '$') {
                   // Only iterate at base level for now
                   if(!((masks[key] || 0) & _mask)) {
                     _fun.call(_ctx || this[key], this[key], key);

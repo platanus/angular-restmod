@@ -62,9 +62,7 @@ angular.module('plRestmod').factory('DebouncedModel', ['$restmod', 'SyncMask', '
   }
 
   return $restmod.mixin(function() {
-    this.attrMask('$dmStatus', SyncMask.SYSTEM_ALL)
-
-        .define('$dmTimeout', 500)
+    this.define('$dmTimeout', 500)
         .define('$dmAdjourn', true)
 
         /**
