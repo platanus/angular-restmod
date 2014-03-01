@@ -484,21 +484,15 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof Model#
              *
-             * @description Iterates over the object properties
+             * @description Iterates over the object non-private properties
              *
              * @param {function} _fun Function to call for each
-             * @param {SyncMask} _mask Mask used to filter the returned properties, defaults to SyncMask.SYSTEM
              * @return {Model} self
              */
-            $each: function(_fun, _mask, _ctx) {
-              if(_mask === undefined) _mask = SyncMask.SYSTEM;
-
+            $each: function(_fun, _ctx) {
               for(var key in this) {
                 if(this.hasOwnProperty(key) && key[0] !== '$') {
-                  // Only iterate at base level for now
-                  if(!((masks[key] || 0) & _mask)) {
-                    _fun.call(_ctx || this[key], this[key], key);
-                  }
+                  _fun.call(_ctx || this[key], this[key], key);
                 }
               }
 

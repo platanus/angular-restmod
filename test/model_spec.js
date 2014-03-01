@@ -247,7 +247,7 @@ describe('Restmod model class:', function() {
 
   describe('$each', function() {
 
-    it('should iterate over non system properties by default', function() {
+    it('should iterate only over public properties', function() {
       var bike = Bike.$build({ brand: 'Trek' }), props = [];
       bike.$each(function(_val, _key) {
         props.push(_key);
