@@ -141,6 +141,21 @@ describe('Restmod model class:', function() {
       expect(bike.nested[0].snakeCase).toBeDefined();
     });
 
+    it('should skip masked properties', function() {
+      var bike = $restmod.model(null, {
+        imMasked: { ignore: 'R' },
+        imMaskedToo: { ignore: true },
+        imNotMasked: { ignore: 'U' }
+      }).$build();
+
+      bike.$decode({ imMasked: true, imMaskedToo: true, imNotMasked: true, imNotMaskedEither: true });
+
+      expect(bike.imMasked).toBeUndefined();
+      expect(bike.imMaskedToo).toBeUndefined();
+      expect(bike.imNotMasked).toBeDefined();
+      expect(bike.imNotMaskedEither).toBeDefined();
+    });
+
     it('should apply registered decoders', function() {
       var bike = $restmod.model(null, function() {
         this.attrDecoder('size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
@@ -185,6 +200,25 @@ describe('Restmod model class:', function() {
 
       expect(raw.user.lastName).toBeUndefined();
       expect(raw.user.last_name).toBeDefined();
+    });
+
+    it('should skip masked properties', function() {
+      var bike = $restmod.model(null, {
+        imMasked: { ignore: 'C' },
+        imMaskedToo: { ignore: true },
+        imNotMasked: { ignore: 'R' }
+      }).$build();
+
+      angular.extend(bike, { imMasked: true, imMaskedToo: true, imNotMasked: true, imNotMaskedEither: true });
+      var raw = bike.$encode('C');
+      expect(raw.im_masked).toBeUndefined();
+      expect(raw.im_masked_too).toBeUndefined();
+      expect(raw.im_not_masked).toBeDefined();
+      expect(raw.im_not_masked_either).toBeDefined();
+
+      var raw = bike.$encode('U');
+      expect(raw.im_masked).toBeDefined(); // not this time!
+      expect(raw.im_masked_too).toBeUndefined();
     });
 
     it('should apply registered encoders', function() {
