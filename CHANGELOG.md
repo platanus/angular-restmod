@@ -1,3 +1,13 @@
+# 0.13.0 (2014-03-14)
+
+## Breaking Changes
+
+* replaces SyncMask by string mask. Use `attr: { ignore: 'CRU' }` in an attribute definition to specify if it should be considered when **C**reating, **U**pdating or **R**eading (d6b39e2)
+* makes properties that start with **$** private. Private properties are not consideren when encoding/decoding an object (2549845)
+
+* makes $each method skip private properties (9d36bdd)
+
+
 # 0.12.0 (2014-01-24)
 
 ## Features

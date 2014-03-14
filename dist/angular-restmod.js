@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.12.2 - 2014-02-27
+ * @version v0.13.0 - 2014-03-14
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -95,39 +95,7 @@ var Utils = {
 // make this available as a restmod constant
 angular.module('plRestmod').constant('Utils', Utils);
 
-/**
- * @class SyncMask
- * @memberOf constants
- *
- * @description The object property synchronization mask.
- */
-var SyncMask = {
-  NONE: 0x00,
-  ALL: 0xFFFF,
-  SYSTEM_ALL: 0x1FFFF,
-
-  SYSTEM: 0x10000,
-
-  DECODE_CREATE: 0x0001,
-  DECODE_UPDATE: 0x0002,
-  DECODE_USER: 0x0004,
-  DECODE_SAVE: 0x0003,
-
-  ENCODE_CREATE: 0x0100,
-  ENCODE_UPDATE: 0x0200,
-  ENCODE_USER: 0x0400,
-  ENCODE_SAVE: 0x0300,
-
-  // Compound masks
-  DECODE: 0x00FF,
-  ENCODE: 0xFF00,
-  CREATE: 0x0101,
-  UPDATE: 0x0202,
-  USER: 0x0404,
-  SAVE: 0x0303
-};
-
-// Cache some angular stuff
+// Preload some angular stuff
 var bind = angular.bind,
     forEach = angular.forEach,
     extend = angular.extend,
@@ -135,6 +103,13 @@ var bind = angular.bind,
     isArray = angular.isArray,
     isFunction = angular.isFunction,
     arraySlice = Array.prototype.slice;
+
+// Constants
+var CREATE_MASK = 'C',
+    UPDATE_MASK = 'U',
+    READ_MASK = 'R',
+    WRITE_MASK = 'CU',
+    FULL_MASK = 'CRU';
 
 /**
  * @class $restmodProvider
@@ -193,15 +168,7 @@ angular.module('plRestmod').provider('$restmod', function() {
          */
         model: function(_baseUrl/* , _mix */) {
 
-          var masks = {
-                $type: SyncMask.SYSTEM_ALL,
-                $scope: SyncMask.SYSTEM_ALL,
-                $promise: SyncMask.SYSTEM_ALL,
-                $pending: SyncMask.SYSTEM_ALL,
-                $response: SyncMask.SYSTEM_ALL,
-                $status: SyncMask.SYSTEM_ALL,
-                $cb: SyncMask.SYSTEM_ALL
-              },
+          var masks = {},
               urlPrefix = null,
               primaryKey = 'id',
               defaults = [],
@@ -317,32 +284,34 @@ angular.module('plRestmod').provider('$restmod', function() {
           // recursive transformation function, used by $decode and $encode.
           function transform(_data, _ctx, _prefix, _mask, _decode, _into) {
 
-            var key, decodedName, encodedName, fullName, filter, value, result = _into || {};
+            var key, decodedName, encodedName, fullName, mask, filter, value, result = _into || {};
 
             for(key in _data) {
-              if(_data.hasOwnProperty(key) && !(!_decode && key[0] === '$' && key[1] === '$')) {
+              if(_data.hasOwnProperty(key) && key[0] !== '$') {
 
                 decodedName = (_decode && nameDecoder) ? nameDecoder(key) : key;
                 fullName = _prefix + decodedName;
 
-                // check if property is masked for this operation
-                if(!((masks[fullName] || 0) & _mask)) {
-
-                  value = _data[key];
-                  filter = _decode ? decoders[fullName] : encoders[fullName];
-
-                  if(filter) {
-                    value = filter.call(_ctx, value);
-                    if(value === undefined) continue; // ignore value if filter returns undefined
-                  } else if(typeof value === 'object' && value &&
-                    (_decode || typeof value.toJSON !== 'function')) {
-                    // IDEA: make extended decoding/encoding optional, could be a little taxxing for some apps
-                    value = transformExtended(value, _ctx, fullName, _mask, _decode);
-                  }
-
-                  encodedName = (!_decode && nameEncoder) ? nameEncoder(decodedName) : decodedName;
-                  result[encodedName] = value;
+                // skip property if masked for this operation
+                mask = masks[fullName];
+                if(mask && mask.indexOf(_mask) !== -1) {
+                  continue;
                 }
+
+                value = _data[key];
+                filter = _decode ? decoders[fullName] : encoders[fullName];
+
+                if(filter) {
+                  value = filter.call(_ctx, value);
+                  if(value === undefined) continue; // ignore value if filter returns undefined
+                } else if(typeof value === 'object' && value &&
+                  (_decode || typeof value.toJSON !== 'function')) {
+                  // IDEA: make extended decoding/encoding optional, could be a little taxing for some apps
+                  value = transformExtended(value, _ctx, fullName, _mask, _decode);
+                }
+
+                encodedName = (!_decode && nameEncoder) ? nameEncoder(decodedName) : decodedName;
+                result[encodedName] = value;
               }
             }
 
@@ -494,7 +463,11 @@ angular.module('plRestmod').provider('$restmod', function() {
 
           // sets an attribute mask at runtime
           Model.$$setMask = function(_attr, _mask) {
-            masks[_attr] = _mask;
+            if(!_mask) {
+              delete masks[_attr];
+            } else {
+              masks[_attr] = _mask === true ? FULL_MASK : _mask;
+            }
           };
 
           // registers a new global hook
@@ -587,21 +560,15 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof Model#
              *
-             * @description Iterates over the object properties
+             * @description Iterates over the object non-private properties
              *
              * @param {function} _fun Function to call for each
-             * @param {SyncMask} _mask Mask used to filter the returned properties, defaults to SyncMask.SYSTEM
              * @return {Model} self
              */
-            $each: function(_fun, _mask, _ctx) {
-              if(_mask === undefined) _mask = SyncMask.SYSTEM;
-
+            $each: function(_fun, _ctx) {
               for(var key in this) {
-                if(this.hasOwnProperty(key)) {
-                  // Only iterate at base level for now
-                  if(!((masks[key] || 0) & _mask)) {
-                    _fun.call(_ctx || this[key], this[key], key);
-                  }
+                if(this.hasOwnProperty(key) && key[0] !== '$') {
+                  _fun.call(_ctx || this[key], this[key], key);
                 }
               }
 
@@ -703,11 +670,10 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @description Feed raw data to this instance.
              *
              * @param {object} _raw Raw data to be fed
-             * @param {string} _mask Action mask
              * @return {Model} this
              */
             $decode: function(_raw, _mask) {
-              transform(_raw, this, '', _mask || SyncMask.DECODE_USER, true, this);
+              transform(_raw, this, '', _mask || READ_MASK, true, this);
               if(!this.$pk) this.$pk = Model.$inferKey(this); // TODO: improve this, warn if key changes
               callback('after-feed', this, _raw);
               return this;
@@ -722,7 +688,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} this
              */
             $encode: function(_mask) {
-              var raw = transform(this, this, '', _mask || SyncMask.ENCODE_USER, false);
+              var raw = transform(this, this, '', _mask || CREATE_MASK, false);
               callback('before-render', this, raw);
               return raw;
             },
@@ -772,12 +738,12 @@ angular.module('plRestmod').provider('$restmod', function() {
 
               if(url) {
                 // If bound, update
-                request = { method: 'PUT', url: url, data: this.$encode(SyncMask.ENCODE_UPDATE) };
+                request = { method: 'PUT', url: url, data: this.$encode(CREATE_MASK) };
                 callback('before-update', this, request);
                 callback('before-save', this, request);
                 return this.$send(request, function(_response) {
                   var data = _response.data;
-                  if (data && !isArray(data)) this.$decode(data, SyncMask.DECODE_UPDATE);
+                  if (data && !isArray(data)) this.$decode(data);
                   callback('after-update', this, _response);
                   callback('after-save', this, _response);
                 }, function(_response) {
@@ -788,12 +754,12 @@ angular.module('plRestmod').provider('$restmod', function() {
                 // If not bound create.
                 url = this.$scope.$createUrlFor ? this.$scope.$createUrlFor(this.$pk) : (this.$scope.$url && this.$scope.$url());
                 if(!url) throw new Error('Create is not supported by this resource');
-                request = { method: 'POST', url: url, data: this.$encode(SyncMask.ENCODE_CREATE) };
+                request = { method: 'POST', url: url, data: this.$encode(UPDATE_MASK) };
                 callback('before-save', this, request);
                 callback('before-create', this, request);
                 return this.$send(request, function(_response) {
                   var data = _response.data;
-                  if (data && !isArray(data)) this.$decode(data, SyncMask.DECODE_CREATE);
+                  if (data && !isArray(data)) this.$decode(data);
                   callback('after-create', this, _response);
                   callback('after-save', this, _response);
                 }, function(_response) {
@@ -1508,23 +1474,28 @@ angular.module('plRestmod').provider('$restmod', function() {
              *
              * @description Sets an attribute mask.
              *
+             * An attribute mask prevents the attribute to be loaded from or sent to the server on certain operations.
+             *
+             * The attribute mask is a string composed by:
+             * * C: To prevent attribute from being sent on create
+             * * R: To prevent attribute from being loaded from server
+             * * U: To prevent attribute from being sent on update
+             *
+             * For example, the following will prevent an attribute to be send on create or update:
+             *
+             * ```javascript
+             * builder.attrMask('readOnly', 'CU');
+             * ```
+             *
+             * If a true boolean value is passed as mask, then 'CRU' will be used
+             * If a false boolean valus is passed as mask, then mask will be removed
+             *
              * @param {string} _attr Attribute name
-             * @param {boolean|integer} _mask Ignore mask or true to use SyncMask.ALL
-             * @param {boolean} _reset If set to true, old mask is reset.
+             * @param {boolean|string} _mask Attribute mask
              * @return {ModelBuilder} self
              */
-            attrMask: function(_attr, _mask, _reset) {
-
-              if(_mask === true) {
-                masks[_attr] = SyncMask.ALL;
-              } else if(_mask === false) {
-                delete masks[_attr];
-              } else if(_reset) {
-                masks[_attr] = _mask;
-              } else {
-                masks[_attr] |= _mask;
-              }
-
+            attrMask: function(_attr, _mask) {
+              Model.$$setMask(_attr, _mask);
               return this;
             },
 
@@ -1617,7 +1588,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                   _model = $injector.get(_model);
 
                   if(_inverseOf) {
-                    _model.$$setMask(_inverseOf, SyncMask.ENCODE);
+                    _model.$$setMask(_inverseOf, WRITE_MASK);
                   }
                 }
 
@@ -1642,7 +1613,7 @@ angular.module('plRestmod').provider('$restmod', function() {
               // simple support for inline data, TODO: maybe deprecate this.
               }).attrDecoder(_source || _url || _attr, function(_raw) {
                 this[_attr].$reset().$feed(_raw);
-              }).attrMask(_attr, SyncMask.ENCODE);
+              }).attrMask(_attr, WRITE_MASK);
             },
 
             /**
@@ -1666,7 +1637,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                     _model = $injector.get(_model);
 
                     if(_inverseOf) {
-                      _model.$$setMask(_inverseOf, SyncMask.ENCODE);
+                      _model.$$setMask(_inverseOf, WRITE_MASK);
                     }
                   }
 
@@ -1685,7 +1656,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                 .attrDecoder(_source || _url || _attr, function(_raw) {
                   this[_attr].$decode(_raw);
                 })
-                .attrMask(_attr, SyncMask.ENCODE);
+                .attrMask(_attr, WRITE_MASK);
             },
 
             /**
@@ -1707,7 +1678,7 @@ angular.module('plRestmod').provider('$restmod', function() {
               var watch = _inline ? (_source || _attr) : (_key || (_attr + 'Id'));
               this
                 .attrDefault(_attr, null)
-                .attrMask(_attr, SyncMask.ENCODE)
+                .attrMask(_attr, WRITE_MASK)
                 .attrDecoder(watch , function(_raw) {
 
                   // load model
@@ -1892,8 +1863,6 @@ angular.module('plRestmod').provider('$restmod', function() {
 }])
 .factory('mixin', ['$restmod', function($restmod) {
   return $restmod.mixin;
-}])
-// make SyncMask available as constant
-.constant('SyncMask', SyncMask);
+}]);
 
 })(angular);

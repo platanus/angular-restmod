@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.12.2 - 2014-02-27
+ * @version v0.13.0 - 2014-03-14
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -43,7 +43,7 @@
 
 var isObject = angular.isObject;
 
-angular.module('plRestmod').factory('DebouncedModel', ['$restmod', 'SyncMask', '$timeout', '$q', function($restmod, SyncMask, $timeout, $q) {
+angular.module('plRestmod').factory('DebouncedModel', ['$restmod', '$timeout', '$q', function($restmod, $timeout, $q) {
 
   // builds a new async save function bound to a given context and promise.
   function buildAsyncSaveFun(_this, _oldSave, _promise, _oldPromise) {
@@ -70,9 +70,7 @@ angular.module('plRestmod').factory('DebouncedModel', ['$restmod', 'SyncMask', '
   }
 
   return $restmod.mixin(function() {
-    this.attrMask('$dmStatus', SyncMask.SYSTEM_ALL)
-
-        .define('$dmTimeout', 500)
+    this.define('$dmTimeout', 500)
         .define('$dmAdjourn', true)
 
         /**
