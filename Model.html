@@ -51,10 +51,6 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="constants.SyncMask.html">SyncMask</a>
-						</li>
-						
-						<li>
 							<a href="constants.Utils.html">Utils</a>
 						</li>
 						
@@ -181,11 +177,11 @@ read the <a href="ModelCollection.html">ModelCollection</a> documentation.</p>
     
     
 <dl class="details">
-    
+	
 
-        <h5 class="subsection-title">Properties:</h5>
+	<h5 class="subsection-title">Properties:</h5>
 
-        <dl>
+	<dl>
 
 <table class="props table table-striped">
     <thead>
@@ -328,36 +324,33 @@ read the <a href="ModelCollection.html">ModelCollection</a> documentation.</p>
 </table>
 </dl>
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 242
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -393,6 +386,470 @@ read the <a href="ModelCollection.html">ModelCollection</a> documentation.</p>
         <h3 class="subsection-title">Methods</h3>
 
         <dl>
+            
+<dt>
+    <h4 class="name" id="$anonymous"><span class="type-signature">&lt;static> </span>$anonymous<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Returns true if model is anonymous.</p>
+<p>An anonymous model can only be used as a nested resource (using relations)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>true if model is anonymous.</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">boolean</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$baseUrl"><span class="type-signature">&lt;static> </span>$baseUrl<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Returns the model base url.</p>
+<p>This method should not be overriden directly.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>base url for this model, null if model us anonymous.</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">string</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$inferKey"><span class="type-signature">&lt;static> </span>$inferKey<span class="signature">(_data)</span><span class="type-signature"> &rarr; {mixed}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Returns a model's object private key from model raw data.
+If data is not an object, then it is considered to be the primary key value.</p>
+<p>The private key is the passed to the $urlFor function to obtain an object's url.</p>
+<p>This method should not be overriden directly, use the <a href="ModelBuilder.html#setPrimaryKey">ModelBuilder#setPrimaryKey</a>
+method to change the primary key.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>decoded object data (or pk)</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>object private key</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">mixed</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$single"><span class="type-signature">&lt;static> </span>$single<span class="signature">(_url)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Returns a resource bound to a given url, with no parent scope.</p>
+<p>This can be used to create singleton resources:</p>
+<pre><code class="lang-javascript">module('BikeShop', []).factory('Status', function($restmod) {
+  return $restmod.model(null).$single('/api/status');
+};)</code></pre>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Url to bound resource to.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>new resource instance.</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
             
 <dt>
     <h4 class="name" id="$buildScope"><span class="type-signature"></span>$buildScope<span class="signature">(_for, _partial)</span><span class="type-signature"> &rarr; {Scope}</span></h4>
@@ -489,36 +946,33 @@ attempt to first use the unscoped resource url.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 327
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -632,36 +1086,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 403
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -704,7 +1155,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
         
             
 <dt>
-    <h4 class="name" id="$decode"><span class="type-signature"></span>$decode<span class="signature">(_raw, _mask)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+    <h4 class="name" id="$decode"><span class="type-signature"></span>$decode<span class="signature">(_raw)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
     
     
 </dt>
@@ -766,29 +1217,6 @@ Hooks are registered using the ModelBuilder.on method.</p>
         </tr>
 
 	
-
-        <tr>
-            
-                <td class="name"><code>_mask</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Action mask</p></td>
-        </tr>
-
-	
 	</tbody>
 </table>
 
@@ -796,36 +1224,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 490
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -889,36 +1314,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 596
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -961,7 +1383,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
         
             
 <dt>
-    <h4 class="name" id="$each"><span class="type-signature"></span>$each<span class="signature">(_fun, _mask)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+    <h4 class="name" id="$each"><span class="type-signature"></span>$each<span class="signature">(_fun)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
     
     
 </dt>
@@ -969,7 +1391,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
     <div class="description">
-        <p>Iterates over the object properties</p>
+        <p>Iterates over the object non-private properties</p>
     </div>
     
 
@@ -1023,29 +1445,6 @@ Hooks are registered using the ModelBuilder.on method.</p>
         </tr>
 
 	
-
-        <tr>
-            
-                <td class="name"><code>_mask</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">SyncMask</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Mask used to filter the returned properties, defaults to SyncMask.SYSTEM</p></td>
-        </tr>
-
-	
 	</tbody>
 </table>
 
@@ -1053,36 +1452,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 377
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -1194,36 +1590,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 505
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -1274,7 +1667,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
     <div class="description">
-        <p>Copyies another object's properties.</p>
+        <p>Copyies another object's non-private properties.</p>
     </div>
     
 
@@ -1335,36 +1728,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 359
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -1428,36 +1818,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 520
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -1572,36 +1959,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 476
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -1619,6 +2003,145 @@ Hooks are registered using the ModelBuilder.on method.</p>
             
 <div class="param-desc">
     <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$moveTo"><span class="type-signature"></span>$moveTo<span class="signature">(_to)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Changes the location of the object in the bound collection.</p>
+<p>If object hasn't been revealed, then this method will change the index where object will be revealed at.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_to</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">integer</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>New object position (index)</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>this</p>
 </div>
 
 
@@ -1736,36 +2259,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 417
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -1808,6 +2328,147 @@ Hooks are registered using the ModelBuilder.on method.</p>
         
             
 <dt>
+    <h4 class="name" id="$reveal"><span class="type-signature"></span>$reveal<span class="signature">(_show)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Reveal in collection</p>
+<p>If instance is bound to a collection and it hasnt been revealed (because it's new and hasn't been saved),
+then calling this method without parameters will force the object to be added to the collection.</p>
+<p>If this method is called with <strong>_show</strong> set to <code>false</code>, then the object wont be revealed by a save operation.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_show</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Whether to reveal inmediatelly or prevent automatic reveal.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>this</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="Model.html">Model</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
     <h4 class="name" id="$save"><span class="type-signature"></span>$save<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
     
     
@@ -1817,6 +2478,7 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     <div class="description">
         <p>Begin a server request to create/update resource.</p>
+<p>If resource is new and it belongs to a collection and it hasnt been revealed, then it will be revealed.</p>
 <p>The request's promise is provided as the $promise property.</p>
     </div>
     
@@ -1829,36 +2491,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 550
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -2016,36 +2675,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 433
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -2183,36 +2839,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 455
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -2276,36 +2929,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 311
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -2365,8 +3015,8 @@ Hooks are registered using the ModelBuilder.on method.</p>
 					
 					
 		<span class="jsdoc-message">
-		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0</a>
-		on Thu Jan 16 2014 11:27:44 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
+		on 2014-05-19T17:09:15-04:00 using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
@@ -2392,11 +3042,14 @@ Hooks are registered using the ModelBuilder.on method.</p>
 	<script src="scripts/toc.js"></script>
 
 
-	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
+	<script>  Sunlight.highlightAll({lineNumbers: true,  showMenu: true, enableDoclinks: true}); </script>
 
 	<script>
 		$( function () {
 			$( "#toc" ).toc( {
+			    anchorName  : function(i, heading, prefix) {
+					return $(heading).attr("id") || ( prefix + i );
+				},
 				selectors   : "h1,h2,h3,h4",
 				showAndHide : false,
 				scrollTo    : 60

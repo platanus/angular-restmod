@@ -51,10 +51,6 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="constants.SyncMask.html">SyncMask</a>
-						</li>
-						
-						<li>
 							<a href="constants.Utils.html">Utils</a>
 						</li>
 						
@@ -177,36 +173,33 @@ class is generated, the corresponding collection class is also generated.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 615
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -315,36 +308,33 @@ to the server. To create a new item and add it use $create or $build.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 935
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -395,8 +385,8 @@ to the server. To create a new item and add it use $create or $build.</p>
     
     
     <div class="description">
-        <p>Builds a new instance of this model</p>
-<p>If <code>_init</code> is not an object, then its treated as a primary key.</p>
+        <p>Builds a new instance of this model, does not assign a pk to the created object.</p>
+<p>ATTENTION: item will not show in collection until <code>$save</code> is called. To reveal item before than call <code>$reveal</code>.</p>
     </div>
     
 
@@ -457,36 +447,33 @@ to the server. To create a new item and add it use $create or $build.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 704
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -537,7 +524,8 @@ to the server. To create a new item and add it use $create or $build.</p>
     
     
     <div class="description">
-        <p>Builds a new instance of this model using undecoded data</p>
+        <p>Builds a new instance of this model using undecoded data.</p>
+<p>ATTENTION: does not automatically reveal item in collection, chain a call to $reveal to do so.</p>
     </div>
     
 
@@ -598,36 +586,33 @@ to the server. To create a new item and add it use $create or $build.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 720
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -741,36 +726,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 662
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -929,36 +911,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 766
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -1070,36 +1049,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 750
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -1212,36 +1188,33 @@ Hooks are registered using the ModelBuilder.on method.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 853
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -1356,36 +1329,33 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 889
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -1500,36 +1470,33 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 838
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -1572,7 +1539,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
         
             
 <dt>
-    <h4 class="name" id="$find"><span class="type-signature"></span>$find<span class="signature">(_init)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
+    <h4 class="name" id="$find"><span class="type-signature"></span>$find<span class="signature">(_pk)</span><span class="type-signature"> &rarr; {<a href="Model.html">Model</a>}</span></h4>
     
     
 </dt>
@@ -1580,8 +1547,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     
     <div class="description">
-        <p>Attempts to resolve a resource using provided data</p>
-<p>If <code>_init</code> is not an object, then its treated as a primary key.</p>
+        <p>Attempts to resolve a resource using provided private key.</p>
     </div>
     
 
@@ -1615,13 +1581,13 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
 
         <tr>
             
-                <td class="name"><code>_init</code></td>
+                <td class="name"><code>_pk</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">mixed</span>
 
 
             
@@ -1631,7 +1597,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
 
             
 
-            <td class="description last"><p>Data to provide</p></td>
+            <td class="description last"><p>Private key</p></td>
         </tr>
 
 	
@@ -1642,36 +1608,33 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 738
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -1787,36 +1750,33 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 980
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -1867,7 +1827,7 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     
     <div class="description">
-        <p>Creates a new model instance bound to this context.</p>
+        <p>Builds a new instance of this model, bound to this instance scope, sets its primary key.</p>
     </div>
     
 
@@ -1928,36 +1888,33 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 690
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -2092,36 +2049,33 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 676
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -2233,36 +2187,33 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 920
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -2377,36 +2328,33 @@ item locally. To remove an item AND send a DELETE use the item's $destroy method
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 961
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -2470,36 +2418,33 @@ item locally. To remove an item AND send a DELETE use the item's $destroy method
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 870
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -2611,36 +2556,33 @@ item locally. To remove an item AND send a DELETE use the item's $destroy method
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 793
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -2778,36 +2720,33 @@ item locally. To remove an item AND send a DELETE use the item's $destroy method
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 816
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -2870,36 +2809,33 @@ item locally. To remove an item AND send a DELETE use the item's $destroy method
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 634
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -2942,7 +2878,7 @@ item locally. To remove an item AND send a DELETE use the item's $destroy method
         
             
 <dt>
-    <h4 class="name" id="$urlFor"><span class="type-signature"></span>$urlFor<span class="signature">(_for)</span><span class="type-signature"> &rarr; {string|null}</span></h4>
+    <h4 class="name" id="$urlFor"><span class="type-signature"></span>$urlFor<span class="signature">(_pk)</span><span class="type-signature"> &rarr; {string|null}</span></h4>
     
     
 </dt>
@@ -2984,7 +2920,7 @@ item locally. To remove an item AND send a DELETE use the item's $destroy method
 
         <tr>
             
-                <td class="name"><code>_for</code></td>
+                <td class="name"><code>_pk</code></td>
             
 
             <td class="type">
@@ -3000,7 +2936,7 @@ item locally. To remove an item AND send a DELETE use the item's $destroy method
 
             
 
-            <td class="description last"><p>Item to provide the url to.</p></td>
+            <td class="description last"><p>Item key to provide the url to.</p></td>
         </tr>
 
 	
@@ -3011,36 +2947,33 @@ item locally. To remove an item AND send a DELETE use the item's $destroy method
     
     
 <dl class="details">
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
+	
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/restmod.js, line 646
-    </li></ul></dd>
-    
 
-    
 
-    
+	
 
-    
+	
+
+	
+
+	
 </dl>
 
     
@@ -3103,8 +3036,8 @@ item locally. To remove an item AND send a DELETE use the item's $destroy method
 					
 					
 		<span class="jsdoc-message">
-		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0</a>
-		on Thu Jan 16 2014 11:27:44 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
+		on 2014-05-19T17:09:15-04:00 using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
@@ -3130,11 +3063,14 @@ item locally. To remove an item AND send a DELETE use the item's $destroy method
 	<script src="scripts/toc.js"></script>
 
 
-	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
+	<script>  Sunlight.highlightAll({lineNumbers: true,  showMenu: true, enableDoclinks: true}); </script>
 
 	<script>
 		$( function () {
 			$( "#toc" ).toc( {
+			    anchorName  : function(i, heading, prefix) {
+					return $(heading).attr("id") || ( prefix + i );
+				},
 				selectors   : "h1,h2,h3,h4",
 				showAndHide : false,
 				scrollTo    : 60
