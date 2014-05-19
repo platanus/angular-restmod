@@ -4,7 +4,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "karma-osx-reporter": "*",
     "grunt-cli": ">= 0.1.7",
     "grunt-contrib-concat": "*",
     "grunt-contrib-jshint": "*",
@@ -12,11 +11,9 @@
     "grunt-bower": "*",
     "grunt-bower-task": "*",
     "grunt-karma": "latest",
+    "karma-osx-reporter": "*",
     "grunt-conventional-changelog": "0.0.12",
     "grunt-gh-pages": "~0.8.1",
     "grunt-jsdoc": "~0.4.1"
-  },
-  "scripts": {
-     "test": "./node_modules/.bin/karma start --single-run --browsers PhantomJS"
   }
 }
