@@ -14,6 +14,13 @@
     "karma-osx-reporter": "*",
     "grunt-conventional-changelog": "0.0.12",
     "grunt-gh-pages": "~0.8.1",
-    "grunt-jsdoc": "~0.4.1"
+    "grunt-jsdoc": "~0.4.1",
+    "karma-cli": "*",
+    "karma-jasmine": "*",
+    "karma-chrome-launcher": "*",
+    "karma-firefox-launcher": "*"
+  },
+  "scripts": {
+     "test": "./node_modules/.bin/karma start --single-run --browsers Firefox"
   }
 }
