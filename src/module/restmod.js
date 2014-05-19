@@ -448,14 +448,14 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof Model#
              *
-             * @description Copyies another object's properties.
+             * @description Copyies another object's non-private properties.
              *
              * @param {object} _other Object to merge.
              * @return {Model} self
              */
             $extend: function(_other) {
               for(var tmp in _other) {
-                if (_other.hasOwnProperty(tmp)) {
+                if (_other.hasOwnProperty(tmp) && tmp[0] !== '$') {
                   this[tmp] = _other[tmp];
                 }
               }

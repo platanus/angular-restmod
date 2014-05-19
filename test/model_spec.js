@@ -293,6 +293,16 @@ describe('Restmod model class:', function() {
     });
   });
 
+  describe('$extend', function() {
+
+    it('should copy other item\'s non private properties', function() {
+      var bike = Bike.$new().$extend({ brand: 'Trek', $show: true });
+      expect(bike.brand).toBeDefined();
+      expect(bike.$show).not.toBeDefined();
+    });
+
+  });
+
   describe('$each', function() {
 
     it('should iterate only over public properties', function() {
