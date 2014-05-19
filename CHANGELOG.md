@@ -1,3 +1,24 @@
+# 0.14.0 (2014-05-19)
+
+## Features
+
+### Model
+
+* Adds the `$reveal` method, this methods allows to display before a call to $save succeds.
+
+* Adds the `$moveTo` method, this method is used to change the item position in parent collection even before it is revealed.
+
+## Breaking Changes
+
+* changes the way creation of object in collection work. (7803c90)
+
+* makes `$inferKey` only be called for raw data. (58a2378)
+
+* changes $extend to only copy non-private properties. (5172aa9)
+
+* makes $build use $extend. (c00ea92)
+
+
 # 0.13.0 (2014-03-14)
 
 ## Breaking Changes
