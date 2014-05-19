@@ -7,6 +7,3 @@ before_script:
   - sh -e /etc/init.d/xvfb start
   - npm install -g karma bower
   - bower install
-
-script:
-  - karma start --no-auto-watch --single-run --reporters dots --browsers Firefox
