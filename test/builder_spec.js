@@ -34,12 +34,12 @@ describe('Restmod builder:', function() {
   describe('setPrimaryKey', function() {
     beforeEach(function() {
       Bike = $restmod.model('/bikes', function() {
-        this.setPrimaryKey('myId');
+        this.setPrimaryKey('my_id');
       });
     });
 
     it('should change the property used to resolve an objects primary key', function() {
-      var bike = Bike.$buildRaw({ myId: 'key' });
+      var bike = Bike.$buildRaw({ my_id: 'key' });
       expect(bike.$pk).toEqual('key');
     });
   });

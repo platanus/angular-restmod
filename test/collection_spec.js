@@ -110,6 +110,11 @@ describe('Restmod collection:', function() {
       expect(bike.model).toEqual('Teocali');
     });
 
+    it('should not infer $pk', function() {
+      var bike = Bike.$build({ id: 5, model: 'Teocali' });
+      expect(bike.$pk).not.toBeDefined();
+    });
+
     it('should not add resource to collection by default', function() {
       query.$build({ model: 'Teocali' });
       expect(query.length).toEqual(0);
