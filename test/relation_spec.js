@@ -41,21 +41,21 @@ describe('Restmod model relation:', function() {
     });
 
     it('should use the parameterized attribute name if no url is provided', function() {
-      expect(Bike.$build({ id: 1 }).allParts.$url()).toEqual('/api/bikes/1/all-parts');
+      expect(Bike.$new(1).allParts.$url()).toEqual('/api/bikes/1/all-parts');
     });
 
     it('should use url provided in path option', function() {
-      expect(Bike.$build({ id: 1 }).activity.$url()).toEqual('/api/bikes/1/rides');
+      expect(Bike.$new(1).activity.$url()).toEqual('/api/bikes/1/rides');
     });
 
     it('should set the inverse property of each child if required', function() {
-      var bike = Bike.$build({ id: 1 }).$decode({ rides: [{ id: 1 }, { id: 2 }] });
+      var bike = Bike.$new(1).$decode({ rides: [{ id: 1 }, { id: 2 }] });
       expect(bike.activity[0].bike).toEqual(bike);
       expect(bike.activity[1].bike).toEqual(bike);
     });
 
     it('should use nested url only for create if resource is not anonynous', function() {
-      var part = Bike.$build({ id: 1 }).allParts.$buildRaw({ id: 'HW101' });
+      var part = Bike.$new(1).allParts.$buildRaw({ id: 'HW101' });
 
       part.$fetch();
       part.$save();
@@ -66,7 +66,7 @@ describe('Restmod model relation:', function() {
     });
 
     it('should use nested url if resource anonymous', function() {
-      var ride = Bike.$build({ id: 1 }).activity.$buildRaw({ id: 20 });
+      var ride = Bike.$new(1).activity.$buildRaw({ id: 20 });
 
       ride.$fetch();
       ride.$save();
@@ -77,12 +77,12 @@ describe('Restmod model relation:', function() {
     });
 
     it('should load inline content into relation if available and use path as source', function() {
-      var bike = Bike.$build({ id: 1 }).$decode({ rides: [{ id: 1 }, { id: 2 }] });
+      var bike = Bike.$new(1).$decode({ rides: [{ id: 1 }, { id: 2 }] });
       expect(bike.activity.length).toEqual(2);
     });
 
     it('should reset collection content if new inline content is fed', function() {
-      var bike = Bike.$build({ id: 1 }).$decode({ rides: [{ id: 1 }, { id: 2 }] });
+      var bike = Bike.$new(1).$decode({ rides: [{ id: 1 }, { id: 2 }] });
       bike.$decode({ rides: [{ id: 3 }] });
       expect(bike.activity.length).toEqual(1);
     });
@@ -99,20 +99,20 @@ describe('Restmod model relation:', function() {
     });
 
     it('should use parameterized attribute name if no path option is provided', function() {
-      expect(Bike.$build({ id: 1 }).activity.$url()).toEqual('/api/bikes/1/activity');
+      expect(Bike.$new(1).activity.$url()).toEqual('/api/bikes/1/activity');
     });
 
     it('should use url provided in path option', function() {
-      expect(Bike.$build({ id: 1 }).serialNo.$url()).toEqual('/api/bikes/1/serial');
+      expect(Bike.$new(1).serialNo.$url()).toEqual('/api/bikes/1/serial');
     });
 
     it('should generate a child resource that uses the canonical url if not anonymous', function() {
-      var bike = Bike.$build({ id: 1 }).$decode({ owner: { id: 'XX' } });
+      var bike = Bike.$new(1).$decode({ owner: { id: 'XX' } });
       expect(bike.owner.$url()).toEqual('/api/users/XX');
     });
 
     it('should not use nested url for update/delete if child resource is not anonymous', function() {
-      var bike = Bike.$build({ id: 1 }).$decode({ owner: { id: 'XX' } });
+      var bike = Bike.$new(1).$decode({ owner: { id: 'XX' } });
 
       bike.owner.$fetch();
       bike.owner.$save();
@@ -125,12 +125,12 @@ describe('Restmod model relation:', function() {
     });
 
     it('should generate a child resource that uses the nested url if anonymous', function() {
-      var bike = Bike.$build({ id: 1 }).$decode({ serial: { id: 'XX' } });
+      var bike = Bike.$new(1).$decode({ serial: { id: 'XX' } });
       expect(bike.serialNo.$url()).toEqual('/api/bikes/1/serial');
     });
 
     it('should use nested url if resource anonymous', function() {
-      var bike = Bike.$build({ id: 1 }).$decode({ serial: { id: 'XX' } });
+      var bike = Bike.$new(1).$decode({ serial: { id: 'XX' } });
 
       bike.serialNo.$fetch();
       bike.serialNo.$save();
@@ -144,12 +144,12 @@ describe('Restmod model relation:', function() {
 
     it('should not be able to destroy when resource is anonymous', function() {
       expect(function() {
-        Bike.$build({ id: 1 }).owner.$destroy();
+        Bike.$new(1).owner.$destroy();
       }).toThrow();
     });
 
     it('should load inline content into relation if available and use path as source', function() {
-      var bike = Bike.$build({ id: 1 }).$decode({ serial: { value: 'SERIAL' } });
+      var bike = Bike.$new(1).$decode({ serial: { value: 'SERIAL' } });
       expect(bike.serialNo.value).toEqual('SERIAL');
     });
   });
@@ -164,25 +164,25 @@ describe('Restmod model relation:', function() {
     });
 
     it('should load resource after fetching id', function() {
-      var bike = Bike.$build({ id: 1 });
+      var bike = Bike.$new(1);
       expect(bike.frame).toBeNull();
       bike.$decode({ frameId: 'XX' });
       expect(bike.frame.$pk).toEqual('XX');
     });
 
     it('should load resource using id specified in key', function() {
-      var bike = Bike.$build({ id: 1 });
+      var bike = Bike.$new(1);
       bike.$decode({ ownerId: 'XX' });
       expect(bike.user.$pk).toEqual('XX');
     });
 
     it('should behave as an independent resource', function() {
-      var bike = Bike.$build({ id: 1 }).$decode({ frameId: 'XX' });
+      var bike = Bike.$new(1).$decode({ frameId: 'XX' });
       expect(bike.frame.$url()).toEqual('/api/parts/XX');
     });
 
     it('should reload resource only if id changes', function() {
-      var bike = Bike.$build({ id: 1 }).$decode({ frameId: 'XX' }),
+      var bike = Bike.$new(1).$decode({ frameId: 'XX' }),
           original = bike.frame;
 
       bike.$decode({ frameId: 'XX' });
@@ -203,7 +203,7 @@ describe('Restmod model relation:', function() {
     });
 
     it('should load resource after fetching id', function() {
-      var bike = Bike.$build({ id: 1 });
+      var bike = Bike.$new(1);
       expect(bike.frame).toBeNull();
       bike.$decode({ frame: { name: 'XX' } });
       expect(bike.frame.name).toEqual('XX');

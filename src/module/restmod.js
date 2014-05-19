@@ -633,6 +633,8 @@ angular.module('plRestmod').provider('$restmod', function() {
              *
              * @description Begin a server request to create/update resource.
              *
+             * If resource is new and it belongs to a collection and it hasnt been revealed, then it will be revealed.
+             *
              * The request's promise is provided as the $promise property.
              *
              * @return {Model} this
@@ -665,6 +667,12 @@ angular.module('plRestmod').provider('$restmod', function() {
                 return this.$send(request, function(_response) {
                   var data = _response.data;
                   if (data && !isArray(data)) this.$decode(data);
+
+                  // reveal item (if not yet positioned)
+                  if(this.$scope.$isCollection && this.$position === undefined && !this.$preventReveal) {
+                    this.$scope.$add(this, this.$revealAt);
+                  }
+
                   callback('after-create', this, _response);
                   callback('after-save', this, _response);
                 }, function(_response) {
@@ -699,6 +707,50 @@ angular.module('plRestmod').provider('$restmod', function() {
               }, function(_response) {
                 callback('after-destroy-error', this, _response);
               });
+            },
+
+            // Collection related methods.
+
+            /**
+             * @memberof Model#
+             *
+             * @description Changes the location of the object in the bound collection.
+             *
+             * If object hasn't been revealed, then this method will change the index where object will be revealed at.
+             *
+             * @param  {integer} _to New object position (index)
+             * @return {Model} this
+             */
+            $moveTo: function(_to) {
+              if(this.$position !== undefined) {
+                // TODO: move item to given index.
+                // TODO: callback
+              } else {
+                this.$revealAt = _to;
+              }
+              return this;
+            },
+
+            /**
+             * @memberof Model#
+             *
+             * @description Reveal in collection
+             *
+             * If instance is bound to a collection and it hasnt been revealed (because it's new and hasn't been saved),
+             * then calling this method without parameters will force the object to be added to the collection.
+             *
+             * If this method is called with **_show** set to `false`, then the object wont be revealed by a save operation.
+             *
+             * @param  {boolean} _show Whether to reveal inmediatelly or prevent automatic reveal.
+             * @return {Model} this
+             */
+            $reveal: function(_show) {
+              if(_show === undefined || _show) {
+                this.$scope.$add(this, this.$revealAt);
+              } else {
+                this.$preventReveal = true;
+              }
+              return this;
             }
           };
 
@@ -771,61 +823,44 @@ angular.module('plRestmod').provider('$restmod', function() {
             /**
              * @memberof ModelCollection#
              *
-             * @description Loads a new model instance bound to this context and a given pk.
-             *
-             * ATENTION: this method does not adds the new object to the collection, it is intended to be a base
-             * building method that can be overriden to provide special caching logics.
+             * @description Builds a new instance of this model, bound to this instance scope, sets its primary key.
              *
              * @param {mixed} _pk object private key
              * @return {Model} New model instance
              */
-            $load: function(_pk) {
+            $new: function(_pk) {
               return new Model(this, _pk);
             },
 
             /**
              * @memberof ModelCollection#
              *
-             * @description Builds a new instance of this model, sets its primary key.
+             * @description Builds a new instance of this model, does not assing a pk to the created object.
              *
-             * @param {mixed} _pk object private key
-             * @return {Model} New model instance
-             */
-            $new: function(_pk) {
-              var obj = this.$load(_pk);
-              if(this.$isCollection) this.$add(obj);
-              return obj;
-            },
-
-            /**
-             * @memberof ModelCollection#
-             *
-             * @description Builds a new instance of this model
+             * ATTENTION: item will not show in collection until `$save` is called. To reveal item before than call `$reveal`.
              *
              * @param  {object} _init Initial values
              * @return {Model} model instance
              */
             $build: function(_init) {
-              var obj = this.$load(Model.$inferKey(_init));
+              var obj = this.$new(Model.$inferKey(_init));
               angular.extend(obj, _init);
-
-              if(this.$isCollection) this.$add(obj);
               return obj;
             },
 
             /**
              * @memberof ModelCollection#
              *
-             * @description Builds a new instance of this model using undecoded data
+             * @description Builds a new instance of this model using undecoded data.
+             *
+             * ATTENTION: does not automatically reveal item in collection, chain a call to $reveal to do so.
              *
              * @param  {object} _raw Undecoded data
              * @return {Model} model instance
              */
             $buildRaw: function(_raw) {
-              var obj = this.$load(Model.$inferKey(_raw)); // TODO: using infer key on raw...
+              var obj = this.$new(Model.$inferKey(_raw)); // TODO: using infer key on raw...
               obj.$decode(_raw);
-
-              if(this.$isCollection) this.$add(obj);
               return obj;
             },
 
@@ -838,7 +873,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} model instance
              */
             $find: function(_pk) {
-              return this.$load(_pk).$fetch();
+              return this.$new(_pk).$fetch();
             },
 
             /**
@@ -954,7 +989,9 @@ angular.module('plRestmod').provider('$restmod', function() {
             $feed: function(_raw) {
               if(!this.$isCollection) throw new Error('$feed is only supported by collections');
               if(!this.$resolved) this.length = 0; // reset contents if not resolved.
-              forEach(_raw, this.$buildRaw, this);
+              for(var i = 0, l = _raw.length; i < l; i++) {
+                this.$buildRaw(_raw[i]).$reveal(); // build and disclose every item.
+              }
               this.$resolved = true;
               return this;
             },
@@ -1036,12 +1073,13 @@ angular.module('plRestmod').provider('$restmod', function() {
              */
             $add: function(_obj, _idx) {
               // TODO: make sure object is f type Model?
-              if(this.$isCollection) {
-                if(typeof _idx !== 'undefined') {
+              if(this.$isCollection && _obj.$position === undefined) {
+                if(_idx !== undefined) {
                   this.splice(_idx, 0, _obj);
                 } else {
                   this.push(_obj);
                 }
+                _obj.$position = true; // use true for now, keeping position updated can be expensive
                 callback('after-add', this, _obj);
               }
               return this;
@@ -1064,6 +1102,7 @@ angular.module('plRestmod').provider('$restmod', function() {
               var idx = this.$indexOf(_obj);
               if(idx !== -1) {
                 this.splice(idx, 1);
+                _obj.$position = undefined;
                 callback('after-remove', this, _obj);
               }
               return this;
@@ -1603,7 +1642,7 @@ angular.module('plRestmod').provider('$restmod', function() {
                   else
                   {
                     if(!this[_attr] || this[_attr].$pk !== _raw) {
-                      this[_attr] = _model.$load(_raw); // use $new instead of $build
+                      this[_attr] = _model.$new(_raw); // use $new instead of $build
                       if(_prefetch) {
                         this[_attr].$fetch();
                       }

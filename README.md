@@ -81,7 +81,21 @@ Or use `$create`
 var newBike = Bike.$create({ brand: 'Comencal', model: 'Meta' });
 ```
 
-Finally, to destroy an object just call `$destroy`.
+If called on a collection, `$build` and `$create` will return a collection-bound object that will be added when saved successfully.
+
+```javascript
+var newBike = bikes.$create({ brand: 'Comencal', model: 'Meta' });
+// after server returns 'bikes' will contain 'newBike'.
+```
+
+To show a non saved object on the bound collection use `$reveal`
+
+```javascript
+var newBike = bikes.$create({ brand: 'Comencal', model: 'Meta' }).$reveal();
+// 'newBike' is inmediatelly available at 'bikes'
+```
+
+Finally, to destroy an object just call `$destroy`. Destroying an object bound to a collection will remove it from the collection.
 
 ```javascript
 bike.$destroy();
@@ -125,7 +139,7 @@ var Bike = $restmod.model('api/bikes', {
 	parts: { hasMany: Part } // use 'Part' string if using factories.
 });
 
-var bike = Bike.$build(1); // no request are made to the server here.
+var bike = Bike.$new(1); // no request are made to the server here.
 var parts = bike.parts.$fetch(); // sends GET /api/bikes/1/parts
 // later on, after parts is resolved.
 parts[0].$fetch(); // updates part at index 0 context, this will GET /api/parts/X

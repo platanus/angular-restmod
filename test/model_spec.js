@@ -2,7 +2,7 @@
 
 describe('Restmod model class:', function() {
 
-  var $httpBackend, $restmod, Bike;
+  var $httpBackend, $restmod, Bike, query;
 
   beforeEach(module('plRestmod'));
 
@@ -10,6 +10,7 @@ describe('Restmod model class:', function() {
     $httpBackend = $injector.get('$httpBackend');
     $restmod = $injector.get('$restmod');
     Bike = $restmod.model('/api/bikes');
+    query = Bike.$collection();
   }));
 
   describe('constructor', function() {
@@ -35,7 +36,7 @@ describe('Restmod model class:', function() {
     it('should call callbacks in proper order', function() {
       var calls = [];
 
-      Bike.$build({ id: 1 })
+      Bike.$new(1)
           .$on('before-fetch', function() { calls.push('bf'); })
           .$on('before-request', function() { calls.push('br'); })
           .$on('after-request', function() { calls.push('ar'); })
@@ -51,7 +52,7 @@ describe('Restmod model class:', function() {
     it('should call error callbacks in proper order', function() {
       var calls = [];
 
-      Bike.$build({ id: 1 })
+      Bike.$new(1)
           .$on('before-fetch', function() { calls.push('bf'); })
           .$on('before-request', function() { calls.push('br'); })
           .$on('after-request-error', function() { calls.push('are'); })
@@ -84,6 +85,19 @@ describe('Restmod model class:', function() {
 
       expect(calls).toEqual(['bs','bc','br','ar','ac','as']);
     });
+
+    it('should add unrevealed item to its parent collection', function() {
+
+      var bike = query.$build();
+      expect(query.length).toEqual(0);
+      bike.$save();
+
+      $httpBackend.when('POST', '/api/bikes').respond(200, {});
+      $httpBackend.flush();
+
+      expect(query.length).toEqual(1);
+    });
+
   });
 
   describe('$destroy', function() {
@@ -91,7 +105,7 @@ describe('Restmod model class:', function() {
     it('should call callbacks in proper order', function() {
       var calls = [];
 
-      Bike.$build({ id: 1 })
+      Bike.$new(1)
           .$on('before-destroy', function() { calls.push('bd'); })
           .$on('before-request', function() { calls.push('br'); })
           .$on('after-request', function() { calls.push('ar'); })
@@ -106,7 +120,7 @@ describe('Restmod model class:', function() {
 
     it('should remove item from collection if bound to colletion', function() {
       var col = Bike.$collection(),
-          bike = col.$build({ id: 1 });
+          bike = col.$buildRaw({ id: 1 }).$reveal();
 
       expect(col.length).toEqual(1);
       bike.$destroy();
@@ -307,6 +321,38 @@ describe('Restmod model class:', function() {
       bike1.$callback('poke');
       expect(spy).toHaveBeenCalled();
     });
+  });
+
+  describe('$reveal', function() {
+
+    it('should add unrevealed item to its parent collection', function() {
+      var bike = query.$build();
+      expect(query.length).toEqual(0);
+      bike.$reveal();
+      expect(query.length).toEqual(1);
+    });
+
+    it('should prevent objects to be added on $save success if called with false', function() {
+      query.$create({ brand: 'Trek' }).$reveal(false);
+
+      $httpBackend.when('POST', '/api/bikes').respond(200, {});
+      $httpBackend.flush();
+      expect(query.length).toEqual(0);
+    });
+
+  });
+
+  describe('$moveTo', function() {
+
+    it('should change the place where item is revelaed in a collection', function() {
+      query.$build().$reveal();
+      var bike = query.$build().$reveal();
+      expect(query[0]).not.toBe(bike);
+
+      var bike2 = query.$build().$moveTo(0).$reveal();
+      expect(query[0]).toBe(bike2);
+    });
+
   });
 });
 

@@ -39,7 +39,7 @@ describe('Restmod builder:', function() {
     });
 
     it('should change the property used to resolve an objects primary key', function() {
-      var bike = Bike.$build({ myId: 'key' });
+      var bike = Bike.$buildRaw({ myId: 'key' });
       expect(bike.$pk).toEqual('key');
     });
   });

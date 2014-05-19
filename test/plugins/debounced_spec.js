@@ -13,7 +13,7 @@ describe('Plugin: Debounced Model', function() {
 
   describe('`$save` function', function() {
     it('should generate only one request when called consecutivelly', inject(function($timeout, $httpBackend, Bike) {
-      var bike = Bike.$build({ id: 1, brand: 'Trek' });
+      var bike = Bike.$buildRaw({ id: 1, brand: 'Trek' });
       $httpBackend.expectPUT('/api/bikes/1', { id: 1, brand: 'Giant' }).respond(200, '');
       bike.$save();
       bike.$save();
@@ -26,7 +26,7 @@ describe('Plugin: Debounced Model', function() {
     it('should fulfill all promises related to consecutive requests', inject(function($timeout, $httpBackend, Bike) {
       $httpBackend.when('PUT','/api/bikes/1').respond(200, '');
 
-      var bike = Bike.$build({ id: 1, brand: 'Trek' }), successCount = 0;
+      var bike = Bike.$buildRaw({ id: 1, brand: 'Trek' }), successCount = 0;
       bike.$save().$then(function() { successCount++; });
       bike.$save().$then(function() { successCount++; });
       bike.$save().$then(function() { successCount++; });
@@ -39,7 +39,7 @@ describe('Plugin: Debounced Model', function() {
     it('should leave the $promise property in a valid state', inject(function($timeout, $httpBackend, Bike) {
 
       $httpBackend.when('PUT','/api/bikes/1').respond(200, '');
-      var bike = Bike.$build({ id: 1, brand: 'Trek' }), spy = jasmine.createSpy();
+      var bike = Bike.$buildRaw({ id: 1, brand: 'Trek' }), spy = jasmine.createSpy();
 
       bike.$save().$then(function() {
         return 'hello';
@@ -59,7 +59,7 @@ describe('Plugin: Debounced Model', function() {
     it('should leave the $promise property in a valid state', inject(function($timeout, $httpBackend, $q, Bike) {
 
       $httpBackend.when('PUT','/api/bikes/1').respond(400, '');
-      var bike = Bike.$build({ id: 1, brand: 'Trek' }), spy = jasmine.createSpy();
+      var bike = Bike.$buildRaw({ id: 1, brand: 'Trek' }), spy = jasmine.createSpy();
 
       bike.$save().$then(null, function() {
         return $q.reject('hello');
@@ -82,7 +82,7 @@ describe('Plugin: Debounced Model', function() {
       $httpBackend.expectPUT('/api/bikes/1', { id: 1, brand: 'Trek' }).respond(200, '');
       $httpBackend.expectPUT('/api/bikes/1', { id: 1, brand: 'Giant' }).respond(200, '');
 
-      var bike = Bike.$build({ id: 1, brand: 'Trek' });
+      var bike = Bike.$buildRaw({ id: 1, brand: 'Trek' });
       bike.$save();
       bike.$saveNow();
       bike.brand = 'Giant';

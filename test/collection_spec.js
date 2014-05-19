@@ -2,114 +2,119 @@
 
 describe('Restmod collection:', function() {
 
-  var $httpBackend, $restmod, Bike;
+  var $restmod, $httpBackend, Bike, query;
 
   beforeEach(module('plRestmod'));
 
   beforeEach(inject(function($injector) {
-    $httpBackend = $injector.get('$httpBackend');
     $restmod = $injector.get('$restmod');
+
     Bike = $restmod.model('/api/bikes');
+    query = Bike.$collection({ brand: 'trek' });
+
+    // mock api
+    $httpBackend = $injector.get('$httpBackend');
+    $httpBackend.when('GET', '/api/bikes?brand=trek').respond([ { model: 'Slash' }, { model: 'Remedy' } ]);
+    $httpBackend.when('GET', '/api/bikes?brand=giant').respond([ { model: 'Reign' } ]);
   }));
 
-  describe('', function() {
 
-    var query;
+  describe('$collection', function() {
+    // TODO.
+  });
 
-    beforeEach(function() {
-      query = Bike.$collection({ brand: 'trek' });
-      $httpBackend.when('GET', '/api/bikes?brand=trek').respond([ { model: 'Slash' }, { model: 'Remedy' } ]);
-      $httpBackend.when('GET', '/api/bikes?brand=giant').respond([ { model: 'Reign' } ]);
+  describe('$search', function() {
+
+    it('should retrieve a collection of items of same type', function() {
+      var bikes = query.$search({ brand: 'giant' });
+      expect(bikes.length).toEqual(0);
+      expect(bikes.$resolved).toBeFalsy();
+      $httpBackend.flush();
+      expect(bikes.length).toEqual(1);
+      expect(bikes.$resolved).toBeTruthy();
+      expect(bikes[0] instanceof Bike).toBeTruthy();
     });
 
-    describe('$collection', function() {
-      // TODO.
+  });
+
+  describe('$fetch', function() {
+
+    it('should retrieve a collection of items of same type', function() {
+      query.$fetch();
+      expect(query.length).toEqual(0);
+      expect(query.$resolved).toBe(false);
+      $httpBackend.flush();
+      expect(query.length).toEqual(2);
+      expect(query.$resolved).toBe(true);
+      expect(query[0] instanceof Bike).toBeTruthy();
     });
 
-    describe('$search', function() {
-
-      it('should retrieve a collection of items of same type', function() {
-        var bikes = query.$search({ brand: 'giant' });
-        expect(bikes.length).toEqual(0);
-        expect(bikes.$resolved).toBeFalsy();
-        $httpBackend.flush();
-        expect(bikes.length).toEqual(1);
-        expect(bikes.$resolved).toBeTruthy();
-        expect(bikes[0] instanceof Bike).toBeTruthy();
-      });
-
+    it('should append new items if called again', function() {
+      query = query.$fetch();
+      $httpBackend.flush();
+      expect(query.$resolved).toBe(true);
+      expect(query.length).toEqual(2);
+      query.$fetch({ brand: 'giant' });
+      $httpBackend.flush();
+      expect(query.length).toEqual(3);
     });
 
-    describe('$fetch', function() {
+  });
 
-      it('should retrieve a collection of items of same type', function() {
-        query.$fetch();
-        expect(query.length).toEqual(0);
-        expect(query.$resolved).toBe(false);
-        $httpBackend.flush();
-        expect(query.length).toEqual(2);
-        expect(query.$resolved).toBe(true);
-        expect(query[0] instanceof Bike).toBeTruthy();
-      });
+  describe('$reset', function() {
 
-      it('should append new items if called again', function() {
-        query = query.$fetch();
-        $httpBackend.flush();
-        expect(query.$resolved).toBe(true);
-        expect(query.length).toEqual(2);
-        query.$fetch({ brand: 'giant' });
-        $httpBackend.flush();
-        expect(query.length).toEqual(3);
-      });
-
+    it('should make the next call to $fetch clear old items', function() {
+      query.$fetch();
+      $httpBackend.flush();
+      expect(query.length).toEqual(2);
+      query.$reset().$fetch({ brand: 'giant' });
+      $httpBackend.flush();
+      expect(query.length).toEqual(1);
     });
 
-    describe('$reset', function() {
+  });
 
-      it('should make the next call to $fetch clear old items', function() {
-        query.$fetch();
-        $httpBackend.flush();
-        expect(query.length).toEqual(2);
-        query.$reset().$fetch({ brand: 'giant' });
-        $httpBackend.flush();
-        expect(query.length).toEqual(1);
-      });
+  describe('$refresh', function() {
 
+    it('should clear old items on resolve', function() {
+      query.$fetch();
+      $httpBackend.flush();
+      expect(query.length).toEqual(2);
+      query.$refresh({ brand: 'giant' });
+      $httpBackend.flush();
+      expect(query.length).toEqual(1);
     });
 
-    describe('$refresh', function() {
+    it('should clear old items on resolve when called consecutivelly', function() {
+      query.$refresh({ brand: 'giant' });
+      query.$refresh({ brand: 'giant' });
+      $httpBackend.flush();
+      expect(query.length).toEqual(1);
+    });
 
-      it('should clear old items on resolve', function() {
-        query.$fetch();
-        $httpBackend.flush();
-        expect(query.length).toEqual(2);
-        query.$refresh({ brand: 'giant' });
-        $httpBackend.flush();
-        expect(query.length).toEqual(1);
-      });
+  });
 
-      it('should clear old items on resolve when called consecutivelly', function() {
-        query.$refresh({ brand: 'giant' });
-        query.$refresh({ brand: 'giant' });
-        $httpBackend.flush();
-        expect(query.length).toEqual(1);
-      });
+  describe('$new', function() {
+
+    it('should initialize model with given primary key', function() {
+      var bike = Bike.$new(20);
+      expect(bike.$pk).toEqual(20);
     });
 
   });
 
   describe('$build', function() {
+
     it('should initialize model with given object properties', function() {
       var bike = Bike.$build({ model: 'Teocali' });
       expect(bike.model).toEqual('Teocali');
     });
-  });
 
-  describe('$new', function() {
-    it('should initialize model with given primary key', function() {
-      var bike = Bike.$new(20);
-      expect(bike.$pk).toEqual(20);
+    it('should not add resource to collection by default', function() {
+      query.$build({ model: 'Teocali' });
+      expect(query.length).toEqual(0);
     });
+
   });
 
   describe('$create', function() {
@@ -142,6 +147,15 @@ describe('Restmod collection:', function() {
       $httpBackend.expectPOST('/api/bikes', { model: 'Teocali' }).respond(200, '{ "id": 1 }');
       $httpBackend.flush();
       expect(bike.$url()).toEqual('/api/bikes/1');
+    });
+
+    it('should add resource to collection after success', function() {
+      var bike = query.$create({ model: 'Teocali' });
+
+      expect(query.length).toEqual(0);
+      $httpBackend.expectPOST('/api/bikes', { model: 'Teocali' }).respond(200, '{ "id": 1 }');
+      $httpBackend.flush();
+      expect(query.length).toEqual(1);
     });
 
   });
