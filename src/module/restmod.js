@@ -843,9 +843,7 @@ angular.module('plRestmod').provider('$restmod', function() {
              * @return {Model} model instance
              */
             $build: function(_init) {
-              var obj = this.$new();
-              angular.extend(obj, _init);
-              return obj;
+              return this.$new().$extend(_init);
             },
 
             /**
