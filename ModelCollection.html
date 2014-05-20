@@ -51,6 +51,10 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
+							<a href="CommonApi.html">CommonApi</a>
+						</li>
+						
+						<li>
 							<a href="constants.Utils.html">Utils</a>
 						</li>
 						
@@ -655,146 +659,6 @@ to the server. To create a new item and add it use $create or $build.</p>
         
             
 <dt>
-    <h4 class="name" id="$callback"><span class="type-signature"></span>$callback<span class="signature">(_hook)</span><span class="type-signature"> &rarr; {<a href="ModelCollection.html">ModelCollection</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Allows calling custom hooks, usefull when implementing custom actions.</p>
-<p>Passes through every additional arguments to registered hooks.
-Hooks are registered using the ModelBuilder.on method.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_hook</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>hook name</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="ModelCollection.html">ModelCollection</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
     <h4 class="name" id="$collection"><span class="type-signature"></span>$collection<span class="signature">(_params, _url, _context)</span><span class="type-signature"> &rarr; {Collection}</span></h4>
     
     
@@ -1268,7 +1132,6 @@ Hooks are registered using the ModelBuilder.on method.</p>
         <p>Begin a server request to populate collection. This method does not
 clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
 <p>This method is for use in collections only.</p>
-<p>TODO: support POST data queries (complex queries scenarios)</p>
     </div>
     
 
@@ -1309,6 +1172,9 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
             
                 
 <span class="param-type">object</span>
+|
+
+<span class="param-type">function</span>
 
 
             
@@ -1318,7 +1184,8 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
 
             
 
-            <td class="description last"><p>Additional request parameters, these parameters are not stored in collection.</p></td>
+            <td class="description last"><p>Additional request parameters, not stored in collection,
+if a function is given, then it will be called with the request object to allow requet customization.</p></td>
         </tr>
 
 	
@@ -1384,147 +1251,6 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
 	<dd>
 		
 <span class="param-type">Collection</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="$finally"><span class="type-signature"></span>$finally<span class="signature">(_cb)</span><span class="type-signature"> &rarr; {<a href="ModelCollection.html">ModelCollection</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Promise chaining, keeps the collection instance as the chain context.</p>
-<p>Calls ´$q.finally´ on the collection's last promise, updates last promise with finally result.</p>
-<p>Usage:</p>
-<pre><code class="lang-javascript">col.$fetch().$finally(function() { });</code></pre>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_cb</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>callback</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="ModelCollection.html">ModelCollection</a></span>
 
 
 	</dd>
@@ -1943,167 +1669,6 @@ clear the collection contents, use <code>$refresh</code> to reset and fetch.</p>
 	<dd>
 		
 <span class="param-type"><a href="Model.html">Model</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="$on"><span class="type-signature"></span>$on<span class="signature">(_hook, _fun)</span><span class="type-signature"> &rarr; {<a href="ModelCollection.html">ModelCollection</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Registers instance hooks.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_hook</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Hook name</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_fun</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Callback</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="ModelCollection.html">ModelCollection</a></span>
 
 
 	</dd>
@@ -2625,170 +2190,6 @@ item locally. To remove an item AND send a DELETE use the item's $destroy method
         
             
 <dt>
-    <h4 class="name" id="$then"><span class="type-signature"></span>$then<span class="signature">(_success, _error)</span><span class="type-signature"> &rarr; {<a href="ModelCollection.html">ModelCollection</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Promise chaining method, keeps the collection instance as the chain context.</p>
-<p>Calls <code>$q.then</code> on the collection's last promise.</p>
-<p>Usage:</p>
-<pre><code class="lang-javascript">col.$fetch().$then(function() { });</code></pre>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_success</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>success callback</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_error</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>error callback</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="ModelCollection.html">ModelCollection</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
     <h4 class="name" id="$url"><span class="type-signature"></span>$url<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
     
     
@@ -3037,7 +2438,7 @@ item locally. To remove an item AND send a DELETE use the item's $destroy method
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on 2014-05-19T17:09:15-04:00 using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on 2014-05-20T18:42:31-04:00 using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
