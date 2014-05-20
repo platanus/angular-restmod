@@ -748,14 +748,15 @@ angular.module('plRestmod').provider('$restmod', function() {
              *
              * The request's promise is provided as the $promise property.
              *
+             * @param {object} _params Optional list of params to be passed to object request.
              * @return {Model} this
              */
-            $fetch: function() {
+            $fetch: function(_params) {
               // verify that instance has a bound url
               var url = this.$scope.$fetchUrlFor ? this.$scope.$fetchUrlFor(this.$pk) : this.$url();
               if(!url) throw new Error('Cannot fetch an unbound resource');
 
-              var request = { method: 'GET', url: url };
+              var request = { method: 'GET', url: url, params: _params };
 
               this.$dispatch('before-fetch', [request]);
               return this.$send(request, function(_response) {
