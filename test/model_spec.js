@@ -17,7 +17,7 @@ describe('Restmod model class:', function() {
 
     it('should fire the after-init hook', function() {
       var spy = jasmine.createSpy('hook');
-      Bike.$$registerHook('after-init', spy);
+      Bike.$on('after-init', spy);
       (new Bike());
       expect(spy).toHaveBeenCalled();
     });
@@ -270,29 +270,6 @@ describe('Restmod model class:', function() {
     });
   });
 
-  describe('$finally', function() {
-
-    it('should be called on success', function() {
-      var spy = jasmine.createSpy('callback');
-
-      Bike.$find(1).$finally(spy);
-
-      $httpBackend.when('GET','/api/bikes/1').respond(200, {});
-      $httpBackend.flush();
-      expect(spy).toHaveBeenCalledWith();
-    });
-
-    it('should be called on error', function() {
-      var spy = jasmine.createSpy('callback');
-
-      Bike.$find(1).$finally(spy);
-
-      $httpBackend.when('GET','/api/bikes/1').respond(404);
-      $httpBackend.flush();
-      expect(spy).toHaveBeenCalledWith();
-    });
-  });
-
   describe('$extend', function() {
 
     it('should copy other item\'s non private properties', function() {
@@ -314,22 +291,6 @@ describe('Restmod model class:', function() {
       expect(props).toContain('brand');
       expect(props).not.toContain('$pending');
       expect(props).not.toContain('$scope');
-    });
-  });
-
-  describe('$on', function() {
-
-    it('should register a callback at instance level', function() {
-      var bike1 = Bike.$build(),
-          bike2 = Bike.$build(),
-          spy = jasmine.createSpy('callback');
-
-      bike1.$on('poke', spy);
-      bike2.$callback('poke');
-      expect(spy).not.toHaveBeenCalled();
-
-      bike1.$callback('poke');
-      expect(spy).toHaveBeenCalled();
     });
   });
 

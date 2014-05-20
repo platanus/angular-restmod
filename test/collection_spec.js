@@ -165,22 +165,6 @@ describe('Restmod collection:', function() {
 
   });
 
-  describe('$on', function() {
-
-    it('should register a callback at collection level', function() {
-      var col = Bike.$collection(),
-          spy = jasmine.createSpy('callback');
-
-      col.$on('poke', spy);
-      Bike.$callback('poke');
-      expect(spy).not.toHaveBeenCalled();
-
-      col.$callback('poke');
-      expect(spy).toHaveBeenCalled();
-    });
-
-  });
-
   describe('$add', function() {
 
     it('should add a new object to the back of the array and trigger after-add', function() {
