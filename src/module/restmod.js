@@ -109,8 +109,8 @@ angular.module('plRestmod').provider('$restmod', function() {
          * });
          * ```
          *
-         * @param  {[type]} _hook Hook name
-         * @return {[type]}       [description]
+         * @param  {string} _hook Hook name
+         * @return {CommonApi} self
          */
         $dispatch: function(_hook, _args, _ctx) {
           var cbs, i, cb;
@@ -133,6 +133,8 @@ angular.module('plRestmod').provider('$restmod', function() {
           if(this.$scope && this.$scope.$dispatch) {
             this.$scope.$dispatch.call(this.$scope, _hook, _args, _ctx);
           }
+
+          return this;
         },
 
         /**
@@ -217,6 +219,7 @@ angular.module('plRestmod').provider('$restmod', function() {
          *
          * Usage:
          *
+         * ```javascript
          * $restmod.mixin({
          *   $saveAndTrack: function() {
          *     var dsp = this.$dispatcher(), // capture the current dispatcher function.
@@ -231,6 +234,7 @@ angular.module('plRestmod').provider('$restmod', function() {
          *     });
          *   }
          * })
+         * ```
          *
          * @return {function} Dispatcher evaluator
          */
