@@ -10,6 +10,7 @@ describe('Restmod model class:', function() {
     $httpBackend = $injector.get('$httpBackend');
     $restmod = $injector.get('$restmod');
     Bike = $restmod.model('/api/bikes');
+    debugger;
     query = Bike.$collection();
   }));
 

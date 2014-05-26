@@ -9,7 +9,8 @@
  *
  * This utilities are available as the `Utils` constant when restmod is included.
  */
-var Utils = {
+RMModule.constant('RMUtils', {
+
   /**
    * @memberof constants.Utils
    *
@@ -61,8 +62,43 @@ var Utils = {
         _target[key] = Utils.override(_target[key], _other[key]);
       }
     }
-  }
-};
+  },
+  /**
+   * @memberof constants.Utils
+   *
+   * @description Generates a new array type, handles platform specifics.
+   *
+   * Based on the awesome blog post of Dean Edwards: http://dean.edwards.name/weblog/2006/11/hooray/
+   *
+   * @return {object} Independent array type.
+   */
+  buildArrayType: function() {
 
-// make this available as a restmod constant
-angular.module('plRestmod').constant('Utils', Utils);
+    var arrayType, ieMode = true;
+
+    if(ieMode)
+    {
+      // create an <iframe>.
+      var iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+
+      // write a script into the <iframe> and steal its Array object.
+      frames[frames.length - 1].document.write('<script>parent.RestmodArray = Array;<\/script>');
+
+      // take the array object and move it to local context.
+      arrayType = window.RestmodArray;
+      delete window.RestmodArray;
+
+      // remove iframe (need to test this a little more)
+      document.body.removeChild(iframe);
+
+    } else {
+      arrayType = function() {  }; // a constructor cant be provided
+      arrayType.prototype = [];
+    }
+
+    return arrayType;
+  }
+
+});

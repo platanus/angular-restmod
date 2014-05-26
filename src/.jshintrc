@@ -19,6 +19,19 @@
   "trailing": true,
   "smarttabs": true,
   "globals": {
-    "angular": false
+    "angular": false,
+    "extend": false,
+    "bind": false,
+    "forEach": false,
+    "isArray": false,
+    "isObject": false,
+    "isFunction": false,
+    "Utils": false,
+    "joinUrl": false,
+    "CREATE_MASK": false,
+    "UPDATE_MASK": false,
+    "READ_MASK": false,
+    "WRITE_MASK": false,
+    "FULL_MASK": false
   }
 }

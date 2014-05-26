@@ -18,8 +18,7 @@ module.exports = function(config) {
 
 		// our app
         'src/module.js',
-        'src/module/utils.js',
-        'src/module/restmod.js',
+        'src/module/*.js',
         'src/plugins/*.js',
 
 		// tests
