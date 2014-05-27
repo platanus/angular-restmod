@@ -4,7 +4,7 @@
 	    "footer"          : "",
 	    "copyright"       : "",
 	    "navType"         : "vertical",
-	    "theme"           : "spacelab",
+	    "theme"           : "cerulean",
 	    "linenums"        : true,
 	    "collapseSymbols" : false,
 	    "inverseNav"      : false

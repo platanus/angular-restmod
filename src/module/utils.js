@@ -2,7 +2,6 @@
 
 /**
  * @class Utils
- * @memberOf constants
  *
  * @description Various utilities used across
  * the library
@@ -12,7 +11,7 @@
 RMModule.constant('RMUtils', {
 
   /**
-   * @memberof constants.Utils
+   * @memberof Utils
    *
    * @description Chains to filtering functions together
    *
@@ -27,7 +26,7 @@ RMModule.constant('RMUtils', {
     };
   },
   /**
-   * @memberof constants.Utils
+   * @memberof Utils
    *
    * @description Override a property value, making overriden function available as this.$super
    *
@@ -49,7 +48,7 @@ RMModule.constant('RMUtils', {
     };
   },
   /**
-   * @memberof constants.Utils
+   * @memberof Utils
    *
    * @description Extend an object using `Utils.override` instead of just replacing the functions.
    *
@@ -64,7 +63,7 @@ RMModule.constant('RMUtils', {
     }
   },
   /**
-   * @memberof constants.Utils
+   * @memberof Utils
    *
    * @description Generates a new array type, handles platform specifics.
    *

@@ -17,7 +17,7 @@ RMModule.factory('RMScopeApi', [function() {
      * @description Builds a new instance of this model, bound to this instance scope, sets its primary key.
      *
      * @param {mixed} _pk object private key
-     * @return {Model} New model instance
+     * @return {RecordApi} New model instance
      */
     $new: function(_pk) {
       return new (this.$type)(this, _pk);
@@ -31,7 +31,7 @@ RMModule.factory('RMScopeApi', [function() {
      * ATTENTION: item will not show in collection until `$save` is called. To reveal item before than call `$reveal`.
      *
      * @param  {object} _init Initial values
-     * @return {Model} model instance
+     * @return {RecordApi} model instance
      */
     $build: function(_init) {
       return this.$new().$extend(_init);
@@ -45,7 +45,7 @@ RMModule.factory('RMScopeApi', [function() {
      * ATTENTION: does not automatically reveal item in collection, chain a call to $reveal to do so.
      *
      * @param  {object} _raw Undecoded data
-     * @return {Model} model instance
+     * @return {RecordApi} model instance
      */
     $buildRaw: function(_raw) {
       var obj = this.$new(this.$type.$inferKey(_raw));
@@ -59,7 +59,7 @@ RMModule.factory('RMScopeApi', [function() {
      * @description Attempts to resolve a resource using provided private key.
      *
      * @param {mixed} _pk Private key
-     * @return {Model} model instance
+     * @return {RecordApi} model instance
      */
     $find: function(_pk) {
       return this.$new(_pk).$fetch();
@@ -71,7 +71,7 @@ RMModule.factory('RMScopeApi', [function() {
      * @description Builds and saves a new instance of this model
      *
      * @param  {object} _attr Data to be saved
-     * @return {Model} model instance
+     * @return {RecordApi} model instance
      */
     $create: function(_attr) {
       return this.$build(_attr).$save();
@@ -83,7 +83,7 @@ RMModule.factory('RMScopeApi', [function() {
      * @description Generates a new collection bound to this context and url and calls $fetch on it.
      *
      * @param {object} _params Collection parameters
-     * @return {Collection} Model collection
+     * @return {CollectionApi} Model collection
      */
     $search: function(_params) {
       return this.$collection(_params).$fetch();

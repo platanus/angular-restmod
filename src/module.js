@@ -1,23 +1,5 @@
 'use strict';
 
-/**
- * @namespace constants
- *
- * @description Constants and utilities exposed by the library.
- */
-
-/**
- * @namespace providers
- *
- * @description Angular providers provided by the library.
- */
-
-/**
- * @namespace services
- *
- * @description Angular services provided by the library.
- */
-
 // Simple url joining.
 function joinUrl(_head, _tail) {
   if(!_head || !_tail) return null;
@@ -43,7 +25,6 @@ var CREATE_MASK = 'C',
 
 /**
  * @class $restmodProvider
- * @memberOf providers
  *
  * @description
  *
@@ -55,7 +36,7 @@ RMModule.provider('$restmod', [function() {
 
   return {
     /**
-     * @memberof providers.$restmodProvider
+     * @memberof $restmodProvider
      *
      * @description
      * Adds mixins to the base model chain.
@@ -77,10 +58,11 @@ RMModule.provider('$restmod', [function() {
     },
 
     /**
-     * @class $restmod
-     * @memberOf services
+     * @module $restmod
      *
-     * @description The restmod service provides the `model` and `mixin` factories.
+     * @description
+     *
+     * The restmod service provides the `model` and `mixin` factories.
      */
     $get: ['RMModelFactory', 'RMBuilder', function(factory, Builder) {
 
@@ -88,8 +70,7 @@ RMModule.provider('$restmod', [function() {
 
       var restmod = {
         /**
-         * @function model
-         * @memberOf services.$restmod#
+         * @memberOf $restmod#
          *
          * @description
          *
@@ -112,8 +93,7 @@ RMModule.provider('$restmod', [function() {
         },
 
         /**
-         * @method mixin
-         * @memberOf services.$restmod#
+         * @memberOf $restmod#
          *
          * @description
          *
@@ -128,10 +108,11 @@ RMModule.provider('$restmod', [function() {
         },
 
         /**
-         * @method singleton
-         * @memberOf services.$restmod#
+         * @memberOf $restmod#
          *
-         * Shorcut method used to create singleton resources. see {@link Model@$single}.
+         * @description
+         *
+         * Shorcut method used to create singleton resources. see {@link StaticApi@$single}.
          *
          * @param {string} _url Resource url,
          * @param {mixed} _mixins Mixin chain.

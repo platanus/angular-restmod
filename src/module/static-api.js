@@ -3,7 +3,7 @@
 RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', 'RMUtils', function($inflector, ScopeApi, CommonApi, RecordApi, CollectionApi, Utils) {
 
   /**
-   * @class FixedApi
+   * @class StaticApi
    * @extends ScopeApi
    * @extends CommonApi
    *
@@ -11,11 +11,7 @@ RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMR
    *
    * The $restmod type API, every generated $restmod model type exposes this API.
    *
-   * @property {string} $partial The model partial url, relative to the context.
-   * @property {ModelCollection|Model} $context The model context (parent).
-   * @property {promise} $promise The last request promise, returns the model.
-   * @property {boolean} $pending The last request status.
-   * @property {string} $error The last request error, if any.
+   * @property {object} $type Reference to the type itself, for compatibility with the {@link ScopeApi}
    *
    * #### About object creation
    *
@@ -26,7 +22,7 @@ RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMR
   return extend({
 
     /**
-     * @memberof FixedApi#
+     * @memberof StaticApi#
      *
      * @description
      *
@@ -68,15 +64,17 @@ RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMR
     },
 
     /**
-     * @memberof FixedApi#
+     * @memberof StaticApi#
      *
-     * @description Builds a new collection of Model
+     * @description
+     *
+     * Builds a new collection of records
      *
      * Collections are bound to an api resource.
      *
      * @param  {object} _params  Additional query string parameters
      * @param  {object} _scope Collection scope
-     * @return {Collection} Model Collection
+     * @return {CollectionApi} New collection
      */
     $collection: function(_params, _scope) {
 
@@ -88,7 +86,7 @@ RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMR
     },
 
     /**
-     * @memberof FixedApi#
+     * @memberof StaticApi#
      *
      * @description Returns a resource bound to a given url, with no parent scope.
      *
@@ -113,7 +111,7 @@ RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMR
     },
 
     /**
-     * @memberof FixedApi#
+     * @memberof StaticApi#
      *
      * @description Returns true if model is anonymous.
      *
@@ -126,7 +124,7 @@ RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMR
     },
 
     /**
-     * @memberof FixedApi#
+     * @memberof StaticApi#
      *
      * @description Returns a model's object private key from model raw data.
      * If data is not an object, then it is considered to be the primary key value.
@@ -145,7 +143,7 @@ RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMR
     },
 
     /**
-     * @memberof FixedApi#
+     * @memberof StaticApi#
      *
      * @description Returns the model base url.
      *
@@ -156,7 +154,7 @@ RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMR
     },
 
     /**
-     * @memberof FixedApi#
+     * @memberof StaticApi#
      *
      * @description Part of the scope interface, provides urls for collection's items.
      *

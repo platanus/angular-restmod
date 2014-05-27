@@ -74,6 +74,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
    * @description
    *
    * Provides record synchronization and manipulation methods. This is the base API for every restmod record.
+   *
    */
 	return extend({
 
@@ -126,7 +127,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
      *
      * @param {mixed} _for Scope target type, accepts any model class.
      * @param {string} _partial Partial route.
-     * @return {Scope} New scope.
+     * @return {ScopeInterface} New scope.
      */
     $buildScope: function(_for, _partial) {
       if(_for.$buildOwnScope) {
@@ -164,7 +165,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
      * @description Copyies another object's non-private properties.
      *
      * @param {object} _other Object to merge.
-     * @return {Model} self
+     * @return {RecordApi} self
      */
     $extend: function(_other) {
       for(var tmp in _other) {
@@ -181,7 +182,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
      * @description Iterates over the object non-private properties
      *
      * @param {function} _fun Function to call for each
-     * @return {Model} self
+     * @return {RecordApi} self
      */
     $each: function(_fun, _ctx) {
       for(var key in this) {
@@ -199,7 +200,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
      * @description Feed raw data to this instance.
      *
      * @param {object} _raw Raw data to be fed
-     * @return {Model} this
+     * @return {RecordApi} this
      */
     $decode: function(_raw, _mask) {
       transform.call(this.$type, _raw, this, '', _mask || READ_MASK, true, this);
@@ -214,7 +215,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
      * @description Generate data to be sent to the server when creating/updating the resource.
      *
      * @param {string} _action Action that originated the render
-     * @return {Model} this
+     * @return {RecordApi} this
      */
     $encode: function(_mask) {
       var raw = transform.call(this.$type, this, this, '', _mask || CREATE_MASK, false);
@@ -230,7 +231,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
      * The request's promise is provided as the $promise property.
      *
      * @param {object} _params Optional list of params to be passed to object request.
-     * @return {Model} this
+     * @return {RecordApi} this
      */
     $fetch: function(_params) {
       // verify that instance has a bound url
@@ -264,7 +265,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
      *
      * The request's promise is provided as the $promise property.
      *
-     * @return {Model} this
+     * @return {RecordApi} this
      */
     $save: function() {
 
@@ -316,7 +317,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
      *
      * The request's promise is provided as the $promise property.
      *
-     * @return {Model} this
+     * @return {RecordApi} this
      */
     $destroy: function() {
       var url = this.$scope.$destroyUrlFor ? this.$scope.$destroyUrlFor(this.$pk) : this.$url();
@@ -347,7 +348,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
      * If object hasn't been revealed, then this method will change the index where object will be revealed at.
      *
      * @param  {integer} _to New object position (index)
-     * @return {Model} this
+     * @return {RecordApi} this
      */
     $moveTo: function(_to) {
       if(this.$position !== undefined) {
@@ -370,7 +371,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
      * If this method is called with **_show** set to `false`, then the object wont be revealed by a save operation.
      *
      * @param  {boolean} _show Whether to reveal inmediatelly or prevent automatic reveal.
-     * @return {Model} this
+     * @return {RecordApi} this
      */
     $reveal: function(_show) {
       if(_show === undefined || _show) {
