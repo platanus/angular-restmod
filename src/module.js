@@ -1,30 +1,10 @@
 'use strict';
 
-// Simple url joining.
-function joinUrl(_head, _tail) {
-  if(!_head || !_tail) return null;
-  return (_head+'').replace(/\/$/, '') + '/' + (_tail+'').replace(/(\/$|^\/)/g, '');
-}
-
 // Preload some angular stuff
-var RMModule = angular.module('plRestmod', ['ng', 'platanus.inflector']),
-    bind = angular.bind,
-    forEach = angular.forEach,
-    extend = angular.extend,
-    noop = angular.noop,
-    isObject = angular.isObject,
-    isArray = angular.isArray,
-    isFunction = angular.isFunction;
-
-// Constants
-var CREATE_MASK = 'C',
-    UPDATE_MASK = 'U',
-    READ_MASK = 'R',
-    WRITE_MASK = 'CU',
-    FULL_MASK = 'CRU';
+var RMModule = angular.module('plRestmod', ['ng', 'platanus.inflector']);
 
 /**
- * @class $restmodProvider
+ * @module $restmodProvider
  *
  * @description
  *
@@ -36,12 +16,13 @@ RMModule.provider('$restmod', [function() {
 
   return {
     /**
-     * @memberof $restmodProvider
+     * @memberof $restmodProvider#
      *
      * @description
-     * Adds mixins to the base model chain.
      *
-     * Non abstract models should NOT be added to this chain.
+     * Adds base mixins for every generated model.
+     *
+     * **ATTENTION** Model names should NOT be added to this chain.
      *
      * Base model chain is by default empty, all mixins added to the chain are
      * prepended to every generated model.
@@ -52,7 +33,7 @@ RMModule.provider('$restmod', [function() {
      * $provider.pushModelBase('ChangeModel', 'LazyRelations', 'ThrottledModel')
      * ```
      */
-    pushModelBase: function(/* mixins */) {
+    pushModelBase: function(/* _mix_names */) {
       Array.prototype.push.apply(BASE_CHAIN, arguments);
       return this;
     },
@@ -62,7 +43,7 @@ RMModule.provider('$restmod', [function() {
      *
      * @description
      *
-     * The restmod service provides the `model` and `mixin` factories.
+     * The restmod service provides factory methods for the different restmod consumables.
      */
     $get: ['RMModelFactory', 'RMBuilder', function(factory, Builder) {
 
@@ -74,10 +55,60 @@ RMModule.provider('$restmod', [function() {
          *
          * @description
          *
-         * The model factory is used to generate mode types using a rich building DSL provided
-         * by the {@link restmod.class:ModelBuilder ModelBuilder}.
+         * The model factory is used to generate new $restmod model types. It's recommended to put models inside factories,
+         * this is usefull later when defining relations and inheritance, since the angular $injector is used by
+         * these features. It's also the angular way of doing things.
          *
-         * For more information about model generation see {@link Building a Model}
+         * A simple model can be built like this:
+         *
+         * ```javascript
+         * angular.module('bike-app').factory('Bike', function($restmod) {
+         *   return $restmod.model('/bikes');
+         * });
+         *```
+         *
+         * The `_url` parameter is the resource url the generated model will be bound to, if `null` is given then
+         * the model is *anonymous* and can only be used in another model context.
+         *
+         * The model also accepts one or more definition providers as one or more arguments after the _url parameter,
+         * posible definition providers are:
+         *
+         * * A definition object (more on this at the {@link BuilderApi}):
+         *
+         * ```javascript
+         * $restmod.model('/bikes', {
+         *   viewed: { init: false },
+         *   parts: { hasMany: 'Part' },
+         *   '~afterCreate': function() {
+         *     alert('Bike created!!');
+         *   }
+         * });
+         *```
+         *
+         * * A definition function (more on this at the {@link BuilderApi}):
+         *
+         * ```javascript
+         * $restmod.model('/bikes', function() {
+         *   this.attrDefault('viewed', false);
+         *   this.attrMask('id', 'CU');
+         * });
+         *```
+         *
+         * * A mixin (generated using the mixin method) or model factory name:
+         *
+         * ```javascript
+         * $restmod.model('/bikes', 'BaseModel', 'PagedModel');
+         *```
+         *
+         * * A mixin (generated using the mixin method) or model object:
+         *
+         * ```javascript
+         * $restmod.model('/bikes', BaseModel, PagedModel);
+         * ```
+         *
+         * @param {string} _url Resource url.
+         * @param {mixed} _mix One or more mixins, description objects or description blocks.
+         * @return {StaticApi} The new model.
          */
         model: function(_baseUrl/* , _mix */) {
 
@@ -97,13 +128,17 @@ RMModule.provider('$restmod', [function() {
          *
          * @description
          *
-         * The mixin factory
+         * The mixin factory is used to pack model behaviors without the overload of generating a new
+         * model. The mixin can then be passed as argument to a call to {@link $restmod#model#model}
+         * to extend the model capabilities.
          *
-         * A mixin is just a metadata container that can be included in a mixin chain.
+         * A mixin can also be passed to the {@link $restmodProvider#pushModelBase} method to provide
+         * a base behavior for all generated models.
          *
-         * @return {object} The abstract model
+         * @param {mixed} _mix One or more mixins, description objects or description blocks.
+         * @return {object} The mixin
          */
-        mixin: function(/* mixins */) {
+        mixin: function(/* _mix */) {
           return { $isAbstract: true, $chain: arraySlice.call(arguments, 0) };
         },
 
@@ -112,13 +147,17 @@ RMModule.provider('$restmod', [function() {
          *
          * @description
          *
-         * Shorcut method used to create singleton resources. see {@link StaticApi@$single}.
+         * Shorcut method used to create singleton resources.
+         *
+         * Same as calling `$restmod.model(null).$single(_url)`
+         *
+         * Check the {@link StaticApi#$single} documentation for more information.
          *
          * @param {string} _url Resource url,
-         * @param {mixed} _mixins Mixin chain.
-         * @return {object} New resource instance.
+         * @param {mixed} _mix Mixin chain.
+         * @return {RecordApi} New resource instance.
          */
-        singleton: function(_url/*, _mixins*/) {
+        singleton: function(_url/*, _mix */) {
           return restmod.model.apply(this, arguments).$single(_url);
         }
       };

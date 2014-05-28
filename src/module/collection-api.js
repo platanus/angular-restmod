@@ -1,6 +1,8 @@
 'use strict';
 
-RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', function(ScopeApi, CommonApi) {
+RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', 'RMUtils', function(ScopeApi, CommonApi, Utils) {
+
+  var extend = angular.extend;
 
   return extend({
 
@@ -43,7 +45,7 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', function(Scope
     $urlFor: function(_pk) {
       // force item unscoping if model is not anonymous (maybe make this optional)
       var baseUrl = this.$type.$url();
-      return joinUrl(baseUrl ? baseUrl : this.$url(), _pk);
+      return Utils.joinUrl(baseUrl ? baseUrl : this.$url(), _pk);
     },
 
     /**
@@ -121,7 +123,7 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', function(Scope
       this.$dispatch('before-fetch-many', [request]);
       this.$send(request, function(_response) {
         var data = _response.data;
-        if(!data || !isArray(data)) {
+        if(!data || !angular.isArray(data)) {
           throw new Error('Error in resource {0} configuration. Expected response to be array');
         }
         this.$feed(data); // feed retrieved data.

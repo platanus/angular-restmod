@@ -4,42 +4,134 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
 
   // TODO: add urlPrefix option
 
+  var forEach = angular.forEach,
+      bind = angular.bind,
+      isObject = angular.isObject,
+      isArray = angular.isArray,
+      isFunction = angular.isFunction;
+
   /**
    * @class BuilderApi
    *
    * @description
    *
-   * Provides the DSL for model generation.
+   * Provides the DSL for model generation, it supports to modes of model definitions:
    *
-   * ### About model descriptions
+   * ## Definition object
    *
-   * This class is also responsible for parsing **model description objects** passed to
-   * the mixin chain.
+   * This is the preferred way of describing a model behavior.
    *
-   * Example of description:
+   * A model description object looks like this:
    *
    * ```javascript
    * $restmod.model('', {
+   *
+   *   // ATTRIBUTE MODIFIERS
+   *
    *   propWithDefault: { init: 20 },
    *   propWithDecoder: { decode: 'date', chain: true },
-   *   relation: { hasMany: 'Other' },
+   *
+   *   // RELATIONS
+   *
+   *   hasManyRelation: { hasMany: 'Other' },
+   *   hasOneRelation: { hasOne: 'Other' }
+   *
+   *   // METHODS
+   *
+   *   '@classMethod': function() {
+   *   },
+   *
+   *   instanceMethod: function() {
+   *   },
+   *
+   *   // HOOKS
+   *
+   *   '~afterCreate': function() {
+   *   }
    * });
    * ```
    *
-   * The descriptions are processed by the `describe` method and mapped to builder attribute methods.
+   * With the exception of properties starting with a special character (**@** or **~**),
+   * each property in the definition object asigns a behavior to the same named property
+   * in a model's record.
    *
-   * The following built in property modifiers are provided (see each method docs for usage information):
+   * To modify a property behavior assign an object with the desired modifiers to a
+   * definition property with the same name. Builtin modifiers are:
    *
-   * * `init` maps to {@link BuilderApi#attrDefault}
-   * * `mask` and `ignore` maps to {@link BuilderApi#attrMask}
-   * * `decode` maps to {@link BuilderApi#attrDecoder}
-   * * `encode` maps to {@link BuilderApi#attrEncoder}
-   * * `serialize` maps to {@link BuilderApi#attrSerializer}
-   * * `hasMany` maps to {@link BuilderApi#hasMany}
-   * * `hasOne` maps to {@link BuilderApi#hasOne}
+   * The following built in property modifiers are provided (see each mapped-method docs for usage information):
    *
-   * Mapping a *primitive* to a property is the same as using the `init` modifier.
-   * Mapping a *function* to a property calls {@link BuilderApi#define} on the function.
+   * * `init` sets an attribute default value, see {@link BuilderApi#attrDefault}
+   * * `mask` and `ignore` sets an attribute mask, see {@link BuilderApi#attrMask}
+   * * `decode` sets how an attribute is decoded after being fetch, maps to {@link BuilderApi#attrDecoder}
+   * * `encode` sets how an attribute is encoded before being sent, maps to {@link BuilderApi#attrEncoder}
+   * * `serialize` sets the encoder and decoder beaviour for an attribute, maps to {@link BuilderApi#attrSerializer}
+   * * `hasMany` sets a one to many hierarchical relation under the attribute name, maps to {@link BuilderApi#attrAsCollection}
+   * * `hasOne` sets a one to one hierarchical relation under the attribute name, maps to {@link BuilderApi#attrAsResource}
+   * * `belongsTo` sets a one to one reference relation under the attribute name, maps to {@link BuilderApi#attrAsReference}
+   *
+   * To add/override methods from the record api, a function can be passed to one of the
+   * description properties:
+   *
+   * ```javascript
+   * var Model = $restmod.model('/', {
+   *   sayHello: function() { alert('hello!'); }
+   * })
+   *
+   * // then say hello is available for use at model records
+   * Model.$new().sayHello();
+   * ```
+   *
+   * If other kind of value (different from object or function) is passed to a definition property,
+   * then it is considered to be a default value. (same as calling {@link BuilderApi#define} at a definition function)
+   *
+   * ```javascript
+   * var Model = $restmod.model('/', {
+   *   im20: 20 // same as { init: 20 }
+   * })
+   *
+   * // then say hello is available for use at model records
+   * Model.$new().im20; // 20
+   * ```
+   *
+   * To add static/collection methods to the Model, prefix the definition property name with **@**
+   * (same as calling {@link BuilderApi#classDefine} at a definition function).
+   *
+   * ```javascript
+   * var Model = $restmod.model('/', {
+   *   '@sayHello': function() { alert('hello!'); }
+   * })
+   *
+   * // then say hello is available for use at model type and collection.
+   * Model.sayHello();
+   * Model.$collection().sayHello();
+   * ```
+   *
+   * To add hooks to the Model lifecycle events, prefix the definition property name with **~** and make sure the
+   * property name matches the event name (same as calling {@link BuilderApi#on} at a definition function).
+   *
+   * ```javascript
+   * var Model = $restmod.model('/', {
+   *   '~afterInit': function() { alert('hello!'); }
+   * })
+   *
+   * // the after-init hook is called after every record initialization.
+   * Model.$new(); // alerts 'hello!';
+   * ```
+   *
+   * ## Definition function
+   *
+   * The definition function gives complete access to the model builder api, every model builder function described
+   * in this page can be called from the definition function by referencing *this*.
+   *
+   * ```javascript
+   * $restmod.model('', function() {
+   *   this.attrDefault('propWithDefault', 20)
+   *       .attrAsCollection('hasManyRelation', 'ModelName')
+   *       .on('after-create', function() {
+   *         // do something after create.
+   *       });
+   * });
+   * ```
    *
    */
   function BuilderDSL(_targetModel) {
@@ -406,7 +498,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
           _model = $injector.get(_model);
 
           if(_inverseOf) {
-            _model.$$setMask(_inverseOf, WRITE_MASK);
+            _model.$$setMask(_inverseOf, Utils.WRITE_MASK);
           }
         }
 
@@ -431,7 +523,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
       // simple support for inline data, TODO: maybe deprecate this.
       }).attrDecoder(_source || _url || _attr, function(_raw) {
         this[_attr].$reset().$feed(_raw);
-      }).attrMask(_attr, WRITE_MASK);
+      }).attrMask(_attr, Utils.WRITE_MASK);
     },
 
     /**
@@ -455,7 +547,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
             _model = $injector.get(_model);
 
             if(_inverseOf) {
-              _model.$$setMask(_inverseOf, WRITE_MASK);
+              _model.$$setMask(_inverseOf, Utils.WRITE_MASK);
             }
           }
 
@@ -474,7 +566,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
         .attrDecoder(_source || _url || _attr, function(_raw) {
           this[_attr].$decode(_raw);
         })
-        .attrMask(_attr, WRITE_MASK);
+        .attrMask(_attr, Utils.WRITE_MASK);
     },
 
     /**
@@ -496,7 +588,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
       var watch = _inline ? (_source || _attr) : (_key || (_attr + 'Id'));
       this
         .attrDefault(_attr, null)
-        .attrMask(_attr, WRITE_MASK)
+        .attrMask(_attr, Utils.WRITE_MASK)
         .attrDecoder(watch , function(_raw) {
 
           // load model

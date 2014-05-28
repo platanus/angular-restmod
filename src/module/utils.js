@@ -10,6 +10,24 @@
  */
 RMModule.constant('RMUtils', {
 
+  // Ignore Masks
+  CREATE_MASK: 'C',
+  UPDATE_MASK: 'U',
+  READ_MASK: 'R',
+  WRITE_MASK: 'CU',
+  FULL_MASK: 'CRU',
+
+  /**
+   * @memberof Utils
+   *
+   * @description Simple url joining.
+   *
+   */
+  joinUrl: function(_head, _tail) {
+    if(!_head || !_tail) return null;
+    return (_head+'').replace(/\/$/, '') + '/' + (_tail+'').replace(/(\/$|^\/)/g, '');
+  },
+
   /**
    * @memberof Utils
    *
@@ -58,7 +76,7 @@ RMModule.constant('RMUtils', {
   extendOverriden: function(_target, _other) {
     for(var key in _other) {
       if(_other.hasOwnProperty(key)) {
-        _target[key] = Utils.override(_target[key], _other[key]);
+        _target[key] = this.override(_target[key], _other[key]);
       }
     }
   },

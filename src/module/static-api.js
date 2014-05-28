@@ -2,6 +2,8 @@
 
 RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', 'RMUtils', function($inflector, ScopeApi, CommonApi, RecordApi, CollectionApi, Utils) {
 
+  var extend = angular.extend;
+
   /**
    * @class StaticApi
    * @extends ScopeApi
@@ -59,7 +61,7 @@ RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMR
       if(!_mask) {
         delete this.$$masks[_attr];
       } else {
-        this.$$masks[_attr] = _mask === true ? FULL_MASK : _mask;
+        this.$$masks[_attr] = _mask === true ? Utils.FULL_MASK : _mask;
       }
     },
 
@@ -105,7 +107,7 @@ RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMR
       var Model = this;
       return new Model({
         $urlFor: function() {
-          return Model.$$urlPrefix ? joinUrl(Model.$$urlPrefix, _url) : _url;
+          return Model.$$urlPrefix ? Utils.joinUrl(Model.$$urlPrefix, _url) : _url;
         }
       }, '');
     },
@@ -150,7 +152,7 @@ RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMR
      * @return {string} The base url.
      */
     $url: function() {
-      return this.$$urlPrefix ? joinUrl(this.$$urlPrefix, this.$$baseUrl) : this.$$baseUrl;
+      return this.$$urlPrefix ? Utils.joinUrl(this.$$urlPrefix, this.$$baseUrl) : this.$$baseUrl;
     },
 
     /**
@@ -162,7 +164,7 @@ RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMR
      * @return {string|null} The url or nill if item does not meet the url requirements.
      */
     $urlFor: function(_pk) {
-      return joinUrl(this.$url(), _pk);
+      return Utils.joinUrl(this.$url(), _pk);
     }
 
   }, ScopeApi, CommonApi);

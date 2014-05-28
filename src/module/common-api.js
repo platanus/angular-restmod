@@ -349,7 +349,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
     $cancel: function() {
       // cancel every pending request.
       if(this.$pending) {
-        forEach(this.$pending, function(_config) {
+        angular.forEach(this.$pending, function(_config) {
           _config.canceled = true;
         });
       }

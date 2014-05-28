@@ -1,6 +1,5 @@
 'use strict';
 
-
 RMModule.factory('RMModelFactory', ['RMStaticApi', function(StaticApi) {
 
   return function(_baseUrl) {
@@ -10,7 +9,7 @@ RMModule.factory('RMModelFactory', ['RMStaticApi', function(StaticApi) {
       this.$initialize(_scope, _pk);
     }
 
-    extend(Model, StaticApi);
+    angular.extend(Model, StaticApi);
     Model.$initialize(_baseUrl);
 
     return Model;

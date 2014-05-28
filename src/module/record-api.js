@@ -1,6 +1,9 @@
 'use strict';
 
-RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
+RMModule.factory('RMRecordApi', ['RMCommonApi', 'RMUtils', function(CommonApi, Utils) {
+
+  var extend = angular.extend,
+      isArray = angular.isArray;
 
   // recursive transformation function, used by $decode and $encode.
   var transform = function (_data, _ctx, _prefix, _mask, _decode, _into) {
@@ -137,7 +140,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
         return {
           $url: function() {
             // collection url is always nested
-            return joinUrl(self.$url(), _partial);
+            return Utils.joinUrl(self.$url(), _partial);
           },
           $urlFor: function(_pk) {
             // resource url is nested only for anonymous resources
@@ -149,7 +152,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
           },
           $fetchUrlFor: function(/* _pk */) {
             // fetch url is nested
-            return joinUrl(self.$url(), _partial);
+            return Utils.joinUrl(self.$url(), _partial);
           },
           $createUrlFor: function() {
             // create is not posible in nested members
@@ -203,7 +206,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
      * @return {RecordApi} this
      */
     $decode: function(_raw, _mask) {
-      transform.call(this.$type, _raw, this, '', _mask || READ_MASK, true, this);
+      transform.call(this.$type, _raw, this, '', _mask || Utils.READ_MASK, true, this);
       if(!this.$pk) this.$pk = this.$type.$inferKey(_raw); // TODO: warn if key changes
       this.$dispatch('after-feed', [_raw]);
       return this;
@@ -218,7 +221,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
      * @return {RecordApi} this
      */
     $encode: function(_mask) {
-      var raw = transform.call(this.$type, this, this, '', _mask || CREATE_MASK, false);
+      var raw = transform.call(this.$type, this, this, '', _mask || Utils.CREATE_MASK, false);
       this.$dispatch('before-render', [raw]);
       return raw;
     },
@@ -273,7 +276,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
 
       if(url) {
         // If bound, update
-        request = { method: 'PUT', url: url, data: this.$encode(CREATE_MASK) };
+        request = { method: 'PUT', url: url, data: this.$encode(Utils.CREATE_MASK) };
         this.$dispatch('before-update', [request]);
         this.$dispatch('before-save', [request]);
         return this.$send(request, function(_response) {
@@ -289,7 +292,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', function(CommonApi) {
         // If not bound create.
         url = this.$scope.$createUrlFor ? this.$scope.$createUrlFor(this.$pk) : (this.$scope.$url && this.$scope.$url());
         if(!url) throw new Error('Create is not supported by this resource');
-        request = { method: 'POST', url: url, data: this.$encode(UPDATE_MASK) };
+        request = { method: 'POST', url: url, data: this.$encode(Utils.UPDATE_MASK) };
         this.$dispatch('before-save', [request]);
         this.$dispatch('before-create', [request]);
         return this.$send(request, function(_response) {
