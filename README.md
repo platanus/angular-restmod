@@ -1,17 +1,47 @@
 Angular Restmod  [![Build Status](https://api.travis-ci.org/platanus/angular-restmod.png)](https://travis-ci.org/angular-platanus/restmod)
 ===============
+Restmod creates objects that you can use from within Angular to interact with your RESTful API.
 
-## Overview
+Saving Bikes on your serverside database would be as easy as:
 
-Rails inspired REST-API ORM for Angular
+```javascript
+var Bike = $restmod.model('/bikes');
+var newBike = Bike.$build({ brand: 'Trek' });
+newBike.model = '5200';
+newBike.$save(); // bike is persisted
+```
+It also supports collections, relations, lifecycle hooks, attribute renaming and much more.
+
+## Why Restmod?
+Restmod brings Rails ActiveRecord's ease of use to the Angular Framework. It succesfuly combines Angular's encapsulated design with Active Record's opionated style. There are other alternatives available though:
+
+*$resource:* Might be enough for small projects, included as an Angular opt-in. It only provides a basic model type layer, with limited features.
+
+*Restangular:* very complete library, but does not propose a model layer.
+
+*angular-activerecord:* Nice alternative to $resource, still very limited in its functionality.
+
+*ModelCore:* Inspired in angular-activerecord, provides a more complete set of features but lacks testing.
+
 
 ## Getting Started
 
-**Optional** Use bower to retrieve package
+#### 1. Get the code
+
+You can use bower to retrieve the Restmod package
 
 ```
 bower install angular-restmod --save
 ```
+or get it straight from the repository
+
+```
+git clone git@github.com:platanus/angular-restmod.git
+```
+
+#### 2. Include it on your proyect
+
+Make sure the source file (dist/angular-restmod.min.js) is required in your code.
 
 Include angular module
 
@@ -21,7 +51,7 @@ angular.module('plRestmod')
 
 ## Basic usage
 
-A new model type can be created using the `$restmod.model` method, it is recommended to put each model on a separate factory. The first argument for `model` is the resource URL, if not given the resource is considered anonymous, more on this later.
+A new model type can be created using the `$restmod.model` method. We recommend you to put each model on a separate factory. The first argument for `model` is the resource URL, if not given the resource is considered anonymous, more on this later.
 
 ```javascript
 angular.module('MyModule').factory('Bike', function($restmod) {
