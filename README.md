@@ -13,7 +13,6 @@ Angular Restmod  [![Build Status](https://api.travis-ci.org/platanus/angular-res
 ===============
 Restmod creates objects that you can use from within Angular to interact with your RESTful API.
 
-
 Saving Bikes on your serverside database would be as easy as:
 
 ```javascript
@@ -23,34 +22,37 @@ newBike.model = '5200';
 newBike.$save(); // bike is persisted
 ```
 It also supports collections, relations, lifecycle hooks, attribute renaming and much more.
+Continue reading for a quick start or check the API Reference for more: http://platanus.github.io/angular-restmod
 
 ## Why Restmod?
 Restmod brings Rails ActiveRecord's ease of use to the Angular Framework. It succesfuly combines Angular's encapsulated design with Active Record's opionated style. There are other alternatives available though:
 
-*$resource:* Might be enough for small projects, included as an Angular opt-in. It only provides a basic model type layer, with limited features.
+**$resource:** Might be enough for small projects, included as an Angular opt-in. It only provides a basic model type layer, with limited features.
 
-*Restangular:* very complete library, but does not propose a model layer.
+**Restangular:** very complete library, but does not propose a model layer.
 
-*angular-activerecord:* Nice alternative to $resource, still very limited in its functionality.
+**angular-activerecord:** Nice alternative to $resource, still very limited in its functionality.
 
-*ModelCore:* Inspired in angular-activerecord, provides a more complete set of features but lacks testing.
+**ModelCore:** Inspired in angular-activerecord, provides a more complete set of features but lacks testing.
 
 ## Getting Started
 
 #### 1. Get the code
 
-You can use bower to retrieve the Restmod package
-
-```
-bower install angular-restmod --save
-```
-or get it straight from the repository
+You can get it straight from the repository
 
 ```
 git clone git@github.com:platanus/angular-restmod.git
 ```
 
-#### 2. Include it on your proyect
+but we recommend you to use bower to retrieve the Restmod package
+
+```
+bower install angular-restmod --save
+```
+
+
+#### 2. Include it on your project
 
 Make sure the source file (dist/angular-restmod.min.js) is required in your code.
 
@@ -273,16 +275,87 @@ var bike = Bike.$find(1);
 alert(bike.owner.name); // echoes 'Peat'
 ```
 
-# Serialization: Encoding and Decoding
+# Serialization, Encoding and Decoding
 
-# Hooks and Callbacks
+When you communicate with an API, some attribute types require special treatment (like a date, for instance)
 
-# Extending
+**Decode:** You can specify a way of decoding an attribute when it arrives from the server.
 
-# Plugins
+Let's say you have defined a filter like this:
 
-TODO....
+```javascript
+Angular.factory('DateParseFilter', function() {
+	return function(_value) {
+		date = new Date();
+		date.setTime(Date.parse(_value));
+		return date;
+	}
+})
+```
+
+then you use it as a standard decoder like this:
+
+```javascript
+var Bike = $restmod.model('/bikes', {
+	createdAt: {decode:'date_parse'}
+});
+```
+**Encode:** To specify a way of encoding an attribute before you send it back to the server:
+Just as with the previous example (decode), you use an Angular Filter. In this example we use the built in 'date' filter.
+
+```javascript
+var Bike = $restmod.model('/bikes', {
+	createdAt: {encode:'date', param:'yyyy-MM-dd'}
+});
+```
+
+on both **encode** and **decode** you can use an inline function instead of the filter's name. It is also possible to bundle an encoder and decoder together using a Serializer object.
+
+# Attribute masking
+
+Following the Angular conventions, attributes that start with a '$' symbol are considered private and never sent to the server. Furthermore, you can define a mask that allows you to specify a more advanced behaviour for other attributes:
+
+```javascript
+var Bike = $restmod.model('/bikes', {
+	createdAt: {mask:'CU'}, // won't send this attribute on Create or Update
+	viewCount: {mask:'R'}, // won't load this attribute on Read (fetch)
+	opened: {mask:true}, // will ignore this attribute in relation to the API
+});```
+
+# Hooks (callbacks)
+
+Just like you do with ActiveRecord, you can add triggers on certain steps of the object lifecycle
+
+```javascript
+var Bike = $restmod.model('/bikes', {
+	'~beforeSave': function() {
+		this.partCount = this.parts.length;
+	}
+});
+
+```
+Note that a hook can be defined for a type, a collection or a record. Also, hooks can also be defined for a given execution context using $decorate. Check Restmod advanced documentation here.
+
+# Mixins
+
+To ease up the definition of models, and keep thing DRY, Restmod provides you with mixin capabilities. For example, say you already defined a Vehicle model as a factory:
+
+```javascript
+Angular.factory('Vehicle', function() {
+	return $restmod.model('/vehicle', {
+	createdAt: {encode:'date', param:'yyyy-MM-dd'}
+	});
+})
+
+You can then define your Bike model that inherits from the Vehicle model, and also sets additional functionality.
+
+```javascript
+var Bike = $restmod.model('/bikes', 'Vehicle', {
+	pedal: function (){
+		alert('pedaling')
+	}
+});
+
+```
 
 API Refrence: http://platanus.github.io/angular-restmod
-
-Take a look at https://github.com/platanus/simple-restmod-demo for a VERY basic (and outdated) example.
