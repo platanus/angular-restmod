@@ -320,7 +320,8 @@ var Bike = $restmod.model('/bikes', {
 	createdAt: {mask:'CU'}, // won't send this attribute on Create or Update
 	viewCount: {mask:'R'}, // won't load this attribute on Read (fetch)
 	opened: {mask:true}, // will ignore this attribute in relation to the API
-});```
+});
+```
 
 # Hooks (callbacks)
 
@@ -346,6 +347,7 @@ Angular.factory('Vehicle', function() {
 	createdAt: {encode:'date', param:'yyyy-MM-dd'}
 	});
 })
+```
 
 You can then define your Bike model that inherits from the Vehicle model, and also sets additional functionality.
 
