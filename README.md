@@ -279,7 +279,8 @@ alert(bike.owner.name); // echoes 'Peat'
 
 When you communicate with an API, some attribute types require special treatment (like a date, for instance)
 
-**Decode:** You can specify a way of decoding an attribute when it arrives from the server.
+### Decode
+ You can specify a way of decoding an attribute when it arrives from the server.
 
 Let's say you have defined a filter like this:
 
@@ -300,7 +301,8 @@ var Bike = $restmod.model('/bikes', {
 	createdAt: {decode:'date_parse'}
 });
 ```
-**Encode:** To specify a way of encoding an attribute before you send it back to the server:
+### Encode
+ To specify a way of encoding an attribute before you send it back to the server:
 Just as with the previous example (decode), you use an Angular Filter. In this example we use the built in 'date' filter.
 
 ```javascript
@@ -309,7 +311,7 @@ var Bike = $restmod.model('/bikes', {
 });
 ```
 
-on both **encode** and **decode** you can use an inline function instead of the filter's name. It is also possible to bundle an encoder and decoder together using a Serializer object.
+On both **encode** and **decode** you can use an inline function instead of the filter's name. It is also possible to bundle an encoder and decoder together using a Serializer object, check the [API Reference](http://platanus.github.io/angular-restmod) for more.
 
 # Attribute masking
 
@@ -360,4 +362,4 @@ var Bike = $restmod.model('/bikes', 'Vehicle', {
 
 ```
 
-API Refrence: http://platanus.github.io/angular-restmod
+API Reference: http://platanus.github.io/angular-restmod
