@@ -1,6 +1,18 @@
+<!-- load: plRestmod -->
+<!-- provide: $provide -->
+<!-- inject: $httpBackend -->
+<!-- inject: $injector -->
+
+<!-- before:
+	$httpBackend.when('GET', '/bikes/1').respond({ model: 'Slash' })
+	$httpBackend.when('GET', '/bikes?brand=trek').respond([ { model: 'Slash' }, { model: 'Remedy' } ])
+
+	module = $provide;
+-->
 Angular Restmod  [![Build Status](https://api.travis-ci.org/platanus/angular-restmod.png)](https://travis-ci.org/angular-platanus/restmod)
 ===============
 Restmod creates objects that you can use from within Angular to interact with your RESTful API.
+
 
 Saving Bikes on your serverside database would be as easy as:
 
@@ -23,7 +35,6 @@ Restmod brings Rails ActiveRecord's ease of use to the Angular Framework. It suc
 
 *ModelCore:* Inspired in angular-activerecord, provides a more complete set of features but lacks testing.
 
-
 ## Getting Started
 
 #### 1. Get the code
@@ -45,42 +56,62 @@ Make sure the source file (dist/angular-restmod.min.js) is required in your code
 
 Include angular module
 
-```javascript
-angular.module('plRestmod')
+```js
+module = angular.module('MyApp', ['plRestmod'])
 ```
 
 ## Basic usage
 
 A new model type can be created using the `$restmod.model` method. We recommend you to put each model on a separate factory. The first argument for `model` is the resource URL, if not given the resource is considered anonymous, more on this later.
 
-```javascript
-angular.module('MyModule').factory('Bike', function($restmod) {
+```javascripts
+module.factory('Bike', function($restmod) {
 	return $restmod.model('/bikes');
 });
 ```
 
+<!-- before: Bike = $injector.get('Bike') -->
+<!-- it: expect(Bike).not.toBeNull() -->
+
 The generated model type provides basic CRUD operations to interact with the API:
+
+<!-- section: $find -->
 
 To retrieve an object by ID use `$find`, the returned object will be filled with the response data when the server response is received.
 
-```javascript
-var bike = Bike.$find('ID');
+```javascripts
+bike = Bike.$find(1);
 ```
+
+<!-- it: $httpBackend.flush(); expect(bike.model).toEqual('Slash') -->
+<!-- end -->
+
+
+<!-- section: $fetch -->
+<!-- before: bike = Bike.$new(1) -->
 
 To reload an object use `$fetch`. **WARNING:** This will overwrite modified properties.
 
-```javascript
+```javascripts
 bike.$fetch();
 ```
+
+<!-- it: $httpBackend.flush(); expect(bike.model).toEqual('Slash') -->
+<!-- end -->
+
+
+<!-- section: $collection and $search -->
 
 To retrieve an object collection `$collection` or `$search` can be used.
 
 ```javascript
-var bikes = Bike.$search({ keyword: 'enduro' });
+bikes = Bike.$search({ keyword: 'enduro' });
 // same as
-var bikes = Bike.$collection({ keyword: 'enduro' }); // server request not yet sent
+bikes = Bike.$collection({ keyword: 'enduro' }); // server request not yet sent
 bikes.$refresh();
 ```
+
+<!-- end -->
 
 To reload a collection use `$refresh`. To append more results use `$fetch`.
 
