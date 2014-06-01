@@ -78,6 +78,49 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', 'RMUtils', function(CommonApi, U
    *
    * Provides record synchronization and manipulation methods. This is the base API for every restmod record.
    *
+   * TODO: Talk about the object lifecycle.
+   *
+   * ### Object lifecycle hooks
+   *
+   * For `$fetch`:
+   *
+   * * before-fetch
+   * * before-request
+   * * after-request[-error]
+   * * after-feed (only called if no errors)
+   * * after-fetch[-error]
+   *
+   * For `$save` when creating:
+   *
+   * * before-render
+   * * before-save
+   * * before-create
+   * * before-request
+   * * after-request[-error]
+   * * after-feed (only called if no errors)
+   * * after-create[-error]
+   * * after-save[-error]
+   *
+   * For `$save` when updating:
+   *
+   * * before-render
+   * * before-save
+   * * before-update
+   * * before-request
+   * * after-request[-error]
+   * * after-feed (only called if no errors)
+   * * after-update[-error]
+   * * after-save[-error]
+   *
+   * For `$destroy`:
+   *
+   * * before-destroy
+   * * before-request
+   * * after-request[-error]
+   * * after-destroy[-error]
+   *
+   * @property {mixed} $pk The record primary key
+   * @property {object} $scope The collection scope (hierarchical scope, not angular scope)
    */
 	return extend({
 

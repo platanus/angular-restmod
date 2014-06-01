@@ -4,16 +4,44 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', 'RMUtils', fun
 
   var extend = angular.extend;
 
+  /**
+   * @class CollectionApi
+   *
+   * @extends ScopeApi
+   * @extends CommonApi
+   *
+   * @description
+   *
+   * A restmod collection is an extended array type bound REST resource route.
+   *
+   * Every time a new restmod model is created, an associated collection type is created too.
+   *
+   * TODO: talk about fetch/refresh behaviour, lifecycles, collection scopes, adding/removing
+   *
+   * For `$fetch` on a collection:
+   *
+   * * before-fetch-many
+   * * before-request
+   * * after-request[-error]
+   * * after-feed (only called if no errors)
+   * * after-fetch-many[-error]
+   *
+   * @property {boolean} $isCollection Helper flag to separate collections from the main type
+   * @property {object} $scope The collection scope (hierarchical scope, not angular scope)
+   * @property {object} $params The collection query parameters
+   * @property {boolean} $resolved The collection resolve status
+   *
+   */
   return extend({
 
     /**
-     * @memberof ModelCollection#
+     * @memberof CollectionApi#
      *
      * @description Called by record constructor on initialization.
      *
      * Note: Is better to add a hook to after-init than overriding this method.
      *
-     * @param {mixed} _scope The instance scope.
+     * @param {mixed} _scope The instance scope. (hierarchical scope, not angular scope)
      * @param {mixed} _params The collection parameters.
      */
     $initialize: function(_scope, _params) {
@@ -24,7 +52,7 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', 'RMUtils', fun
     },
 
     /**
-     * @memberof ModelCollection#
+     * @memberof CollectionApi#
      *
      * @description Gets this collection url without query string.
      *
@@ -35,11 +63,11 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', 'RMUtils', fun
     },
 
     /**
-     * @memberof ModelCollection#
+     * @memberof CollectionApi#
      *
      * @description Part of the scope interface, provides urls for collection's items.
      *
-     * @param {Model} _pk Item key to provide the url to.
+     * @param {RecordApi} _pk Item key to provide the url to.
      * @return {string|null} The url or nill if item does not meet the url requirements.
      */
     $urlFor: function(_pk) {
@@ -49,7 +77,7 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', 'RMUtils', fun
     },
 
     /**
-     * @memberof ModelCollection#
+     * @memberof CollectionApi#
      *
      * @description Builds a new collection using the current collection as base.
      *
@@ -59,7 +87,7 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', 'RMUtils', fun
      *
      * @param  {object} _params  Additional query string parameters
      * @param  {object} _scope Collection scope
-     * @return {Collection} Model Collection
+     * @return {CollectionApi} Model Collection
      */
     $collection: function(_params, _scope) {
       _params = this.$params ? extend({}, this.$params, _params) : _params;
@@ -67,14 +95,14 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', 'RMUtils', fun
     },
 
     /**
-     * @memberof ModelCollection#
+     * @memberof CollectionApi#
      *
      * @description Feeds raw collection data into the collection, marks collection as $resolved
      *
      * This method is for use in collections only.
      *
      * @param {array} _raw Data to add
-     * @return {Collection} self
+     * @return {CollectionApi} self
      */
     $feed: function(_raw) {
       if(!this.$resolved) this.length = 0; // reset contents if not resolved.
@@ -86,13 +114,13 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', 'RMUtils', fun
     },
 
     /**
-     * @memberof ModelCollection#
+     * @memberof CollectionApi#
      *
      * @description Resets the collection's resolve status.
      *
      * This method is for use in collections only.
      *
-     * @return {Collection} self
+     * @return {CollectionApi} self
      */
     $reset: function() {
       this.$cancel(); // cancel pending requests.
@@ -101,7 +129,7 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', 'RMUtils', fun
     },
 
     /**
-     * @memberof ModelCollection#
+     * @memberof CollectionApi#
      *
      * @description Begin a server request to populate collection. This method does not
      * clear the collection contents, use `$refresh` to reset and fetch.
@@ -110,7 +138,7 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', 'RMUtils', fun
      *
      * @param {object|function} _params Additional request parameters, not stored in collection,
      * if a function is given, then it will be called with the request object to allow requet customization.
-     * @return {Collection} self
+     * @return {CollectionApi} self
      */
     $fetch: function(_params) {
       var request = { method: 'GET', url: this.$url(), params: this.$params };
@@ -136,27 +164,27 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', 'RMUtils', fun
     },
 
     /**
-     * @memberof ModelCollection#
+     * @memberof CollectionApi#
      *
      * @description Resets and fetches content.
      *
      * @param  {object} _params `$fetch` params
-     * @return {Collection} self
+     * @return {CollectionApi} self
      */
     $refresh: function(_params) {
       return this.$reset().$fetch(_params);
     },
 
     /**
-     * @memberof ModelCollection#
+     * @memberof CollectionApi#
      *
      * @description Adds an item to the back of the collection. This method does not attempt to send changes
      * to the server. To create a new item and add it use $create or $build.
      *
      * Triggers after-add callbacks.
      *
-     * @param {Model} _obj Item to be added
-     * @return {Collection} self
+     * @param {RecordApi} _obj Item to be added
+     * @return {CollectionApi} self
      */
     $add: function(_obj, _idx) {
       // TODO: make sure object is f type Model?
@@ -173,7 +201,7 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', 'RMUtils', fun
     },
 
     /**
-     * @memberof ModelCollection#
+     * @memberof CollectionApi#
      *
      * @description  Removes an item from the collection.
      *
@@ -182,8 +210,8 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', 'RMUtils', fun
      *
      * Triggers after-remove callbacks.
      *
-     * @param {Model} _obj Item to be removed
-     * @return {Collection} self
+     * @param {RecordApi} _obj Item to be removed
+     * @return {CollectionApi} self
      */
     $remove: function(_obj) {
       var idx = this.$indexOf(_obj);
@@ -196,13 +224,13 @@ RMModule.factory('RMCollectionApi', ['RMScopeApi', 'RMCommonApi', 'RMUtils', fun
     },
 
     /**
-     * @memberof ModelCollection#
+     * @memberof CollectionApi#
      *
      * @description Finds the location of an object in the array.
      *
      * If a function is provided then the index of the first item for which the function returns true is returned.
      *
-     * @param {Model|function} _obj Object to find
+     * @param {RecordApi|function} _obj Object to find
      * @return {number} Object index or -1 if not found
      */
     $indexOf: function(_obj) {

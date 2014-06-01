@@ -8,6 +8,8 @@ RMModule.factory('RMScopeApi', [function() {
    * @description Common behaviour for record scopes.
    *
    * Record scopes are starting points for record operations (like base type or a collection)
+   *
+   * TODO: Talk about record building here
    */
   return {
 
@@ -31,7 +33,7 @@ RMModule.factory('RMScopeApi', [function() {
      * ATTENTION: item will not show in collection until `$save` is called. To reveal item before than call `$reveal`.
      *
      * @param  {object} _init Initial values
-     * @return {RecordApi} model instance
+     * @return {RecordApi} single record
      */
     $build: function(_init) {
       return this.$new().$extend(_init);
@@ -45,7 +47,7 @@ RMModule.factory('RMScopeApi', [function() {
      * ATTENTION: does not automatically reveal item in collection, chain a call to $reveal to do so.
      *
      * @param  {object} _raw Undecoded data
-     * @return {RecordApi} model instance
+     * @return {RecordApi} single record
      */
     $buildRaw: function(_raw) {
       var obj = this.$new(this.$type.$inferKey(_raw));
@@ -59,7 +61,7 @@ RMModule.factory('RMScopeApi', [function() {
      * @description Attempts to resolve a resource using provided private key.
      *
      * @param {mixed} _pk Private key
-     * @return {RecordApi} model instance
+     * @return {RecordApi} single record
      */
     $find: function(_pk) {
       return this.$new(_pk).$fetch();
@@ -71,7 +73,7 @@ RMModule.factory('RMScopeApi', [function() {
      * @description Builds and saves a new instance of this model
      *
      * @param  {object} _attr Data to be saved
-     * @return {RecordApi} model instance
+     * @return {RecordApi} single record
      */
     $create: function(_attr) {
       return this.$build(_attr).$save();
@@ -83,7 +85,7 @@ RMModule.factory('RMScopeApi', [function() {
      * @description Generates a new collection bound to this context and url and calls $fetch on it.
      *
      * @param {object} _params Collection parameters
-     * @return {CollectionApi} Model collection
+     * @return {CollectionApi} record collection
      */
     $search: function(_params) {
       return this.$collection(_params).$fetch();

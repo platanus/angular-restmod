@@ -4,7 +4,7 @@
 var RMModule = angular.module('plRestmod', ['ng', 'platanus.inflector']);
 
 /**
- * @module $restmodProvider
+ * @class $restmodProvider
  *
  * @description
  *
@@ -39,7 +39,7 @@ RMModule.provider('$restmod', [function() {
     },
 
     /**
-     * @module $restmod
+     * @class $restmod
      *
      * @description
      *
