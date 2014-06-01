@@ -35,9 +35,21 @@ RMModule.factory('RMStaticApi', ['$inflector', 'RMScopeApi', 'RMCommonApi', 'RMR
      * @param {mixed} _scope The instance scope.
      * @param {mixed} _params The collection parameters.
      */
-    $initialize: function(_baseUrl) {
+    $initialize: function(_config) {
+
+      this.$$baseUrl = null;
+      this.$$config = {};
+
+      if(_config) {
+        if(typeof _config === 'string') {
+          this.$$baseUrl = _config;
+        } else {
+          this.$$config = _config;
+          this.$$baseUrl = _config.url;
+        }
+      }
+
       this.$type = this;
-      this.$$baseUrl = _baseUrl;
       this.$$urlPrefix = null;
       this.$$primaryKey = 'id';
       this.$$masks = {};

@@ -2,7 +2,7 @@
 
 RMModule.factory('RMModelFactory', ['RMStaticApi', function(StaticApi) {
 
-  return function(_baseUrl) {
+  return function(_config) {
 
     function Model(_scope, _pk) {
       this.$type = Model;
@@ -10,7 +10,7 @@ RMModule.factory('RMModelFactory', ['RMStaticApi', function(StaticApi) {
     }
 
     angular.extend(Model, StaticApi);
-    Model.$initialize(_baseUrl);
+    Model.$initialize(_config);
 
     return Model;
 
