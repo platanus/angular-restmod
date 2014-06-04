@@ -19,10 +19,11 @@ RMModule.factory('RMScopeApi', [function() {
      * @description Builds a new instance of this model, bound to this instance scope, sets its primary key.
      *
      * @param {mixed} _pk object private key
+     * @param {object} _scope scope override (optional)
      * @return {RecordApi} New model instance
      */
-    $new: function(_pk) {
-      return new (this.$type)(this, _pk);
+    $new: function(_pk, _scope) {
+      return this.$$new(_pk, _scope);
     },
 
     /**
@@ -50,7 +51,7 @@ RMModule.factory('RMScopeApi', [function() {
      * @return {RecordApi} single record
      */
     $buildRaw: function(_raw) {
-      var obj = this.$new(this.$type.$inferKey(_raw));
+      var obj = this.$new(this.$$inferKey(_raw));
       obj.$decode(_raw);
       return obj;
     },
@@ -77,6 +78,23 @@ RMModule.factory('RMScopeApi', [function() {
      */
     $create: function(_attr) {
       return this.$build(_attr).$save();
+    },
+
+    /**
+     * @memberof ScopeApi#
+     *
+     * @description Builds a new collection bound to this scope.
+     *
+     * If scope is another collection then it will inherit its parameters
+     *
+     * Collections are bound to an api resource.
+     *
+     * @param  {object} _params  Additional query string parameters
+     * @param  {object} _scope  Scope override (optional)
+     * @return {CollectionApi} Model Collection
+     */
+    $collection: function(_params, _scope) {
+      return this.$$collection(_params, _scope);
     },
 
     /**

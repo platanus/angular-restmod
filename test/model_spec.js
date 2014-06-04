@@ -10,7 +10,6 @@ describe('Restmod model class:', function() {
     $httpBackend = $injector.get('$httpBackend');
     $restmod = $injector.get('$restmod');
     Bike = $restmod.model('/api/bikes');
-    debugger;
     query = Bike.$collection();
   }));
 
@@ -269,6 +268,53 @@ describe('Restmod model class:', function() {
       expect(raw.brand).toBeDefined();
       expect(raw.$$hashKey).toBeUndefined();
     });
+  });
+
+  describe('$unwrap', function() {
+
+    it('should call the packer unpack method if a packer is provided', function() {
+      var spy = jasmine.createSpy();
+      var bike = $restmod.model('/api/bikes', function() {
+        this.setPacker({
+          unpack: spy
+        });
+      }).$build();
+
+      var raw = {};
+      bike.$unwrap(raw);
+      expect(spy).toHaveBeenCalledWith(raw, bike);
+    });
+
+    it('should call $decode', function() {
+      var bike = Bike.$build();
+      bike.$decode = jasmine.createSpy();
+      bike.$unwrap({});
+      expect(bike.$decode).toHaveBeenCalled();
+    });
+
+  });
+
+  describe('$wrap', function() {
+
+    it('should call the packer pack method if a packer is provided', function() {
+      var spy = jasmine.createSpy();
+      var bike = $restmod.model('/api/bikes', function() {
+        this.setPacker({
+          pack: spy
+        });
+      }).$build();
+
+      bike.$wrap();
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('should call $decode', function() {
+      var bike = Bike.$build();
+      bike.$encode = jasmine.createSpy();
+      bike.$wrap();
+      expect(bike.$encode).toHaveBeenCalled();
+    });
+
   });
 
   describe('$extend', function() {

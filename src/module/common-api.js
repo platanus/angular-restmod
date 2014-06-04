@@ -90,7 +90,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
 
       // bubble up the object scope
       if(this.$scope && this.$scope.$dispatch) {
-        this.$scope.$dispatch.call(this.$scope, _hook, _args, _ctx);
+        this.$scope.$dispatch(_hook, _args, _ctx);
       }
 
       this.$$dsp = dsp; // reenable dsp.

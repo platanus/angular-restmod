@@ -181,7 +181,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     setUrlPrefix: function(_prefix) {
-      this.$$m.$$urlPrefix = _prefix;
+      this.$$m.$$setUrlPrefix(_prefix);
       return this;
     },
 
@@ -198,7 +198,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     setPrimaryKey: function(_key) {
-      this.$$m.$$primaryKey = _key;
+      this.$$m.$$setPrimaryKey(_key);
       return this;
     },
 
@@ -217,7 +217,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     setNameDecoder: function(_decoder) {
-      this.$$m.$$nameDecoder = _decoder;
+      this.$$m.$$setNameDecoder(_decoder);
       return this;
     },
 
@@ -236,7 +236,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     setNameEncoder: function(_encoder) {
-      this.$$m.$$nameEncoder = _encoder;
+      this.$$m.$$setNameEncoder(_encoder);
       return this;
     },
 
@@ -251,6 +251,47 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
       return this
         .setNameDecoder(false)
         .setNameEncoder(false);
+    },
+
+    /**
+     * @memberof BuilderApi#
+     *
+     * @description
+     *
+     * Sets the object "packer", the packer is responsable of providing the object wrapping strategy
+     * so it matches the API.
+     *
+     * The method accepts a packer name, an instance or a packer contructor, if the first (preferred)
+     * option is used, then a <Name>Packer factory must be available that return an object or a constructor.
+     *
+     * In case of using a constructor function, the constructor will be called passing the model type
+     * as first parameter:
+     *
+     * ```javascript
+     * // like this:
+     * var packer = new MyPacker(theModelType);
+     * ```
+     *
+     * ### Packer structure.
+     *
+     * Custom packers must implement the following methods:
+     *
+     * * **unpack(_rawData, _record):** unwraps data belonging to a single record, must return the unpacked
+     * data to be passed to `$decode`.
+     * * **unpackMany(_rawData, _collection):** unwraps the data belonging to a collection of records,
+     * must return the unpacked data array, each array element will be passed to $decode on each new element.
+     * * **pack(_rawData, _record):** wraps the encoded data from a record before is sent to the server,
+     * must return the packed data object to be sent.
+     *
+     * Currently the following builtin strategies are provided:
+     * TODO: provide builtin strategies!
+     *
+     * @param {string|object} _mode The packer instance, constructor or name
+     * @return {BuilderApi} self
+     */
+    setPacker: function(_packer) {
+      this.$$m.$$setPacker(_packer);
+      return this;
     },
 
     /**
@@ -374,8 +415,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     attrDefault: function(_attr, _init) {
-      // IDEA: maybe fixed defaults could be added to Model prototype...
-      this.$$m.$$defaults.push([_attr, _init]);
+      this.$$m.$$setDefault(_attr, _init);
       return this;
     },
 
@@ -430,8 +470,8 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
 
       // TODO: if(!_serializer) throw $setupError
       if(isFunction(_serializer)) _serializer = _serializer(_opt);
-      if(_serializer.decode) this.attrDecoder(_name, bind(_serializer, _serializer.decode));
-      if(_serializer.encode) this.attrEncoder(_name, bind(_serializer, _serializer.encode));
+      if(_serializer.decode) this.$$m.$$setDecoder(_name, bind(_serializer, _serializer.decode));
+      if(_serializer.encode) this.$$m.$$setEncoder(_name, bind(_serializer, _serializer.encode));
       return this;
     },
 
@@ -447,13 +487,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     attrDecoder: function(_name, _filter, _filterParam, _chain) {
-      if(typeof _filter === 'string') {
-        var filter = $filter(_filter);
-        // TODO: if(!_filter) throw $setupError
-        _filter = function(_value) { return filter(_value, _filterParam); };
-      }
-
-      this.$$m.$$decoders[_name] = _chain ? Utils.chain(this.$$m.$$decoders[_name], _filter) : _filter;
+      this.$$m.$$setDecoder(_name, _filter, _filterParam, _chain);
       return this;
     },
 
@@ -469,13 +503,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     attrEncoder: function(_name, _filter, _filterParam, _chain) {
-      if(typeof _filter === 'string') {
-        var filter = $filter(_filter);
-        // TODO: if(!_filter) throw $setupError
-        _filter = function(_value) { return filter(_value, _filterParam); };
-      }
-
-      this.$$m.$$encoders[_name] = _chain ? Utils.chain(this.$$m.$$encoders[_name], _filter) : _filter;
+      this.$$m.$$setEncoder(_name, _filter, _filterParam, _chain);
       return this;
     },
 
@@ -492,7 +520,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     attrAsCollection: function(_attr, _model, _url, _source, _inverseOf) {
-      return this.attrDefault(_attr, function() {
+      this.$$m.$$setDefault(_attr, function() {
 
         if(typeof _model === 'string') {
           _model = $injector.get(_model);
@@ -521,9 +549,13 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
 
         return col;
       // simple support for inline data, TODO: maybe deprecate this.
-      }).attrDecoder(_source || _url || _attr, function(_raw) {
+      });
+      this.$$m.$$setDecoder(_source || _url || _attr, function(_raw) {
         this[_attr].$reset().$feed(_raw);
-      }).attrMask(_attr, Utils.WRITE_MASK);
+      });
+      this.$$m.$$setMask(_attr, Utils.WRITE_MASK);
+
+      return this;
     },
 
     /**
@@ -540,33 +572,34 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      */
     attrAsResource: function(_attr, _model, _url, _source, _inverseOf) {
 
-      return this
-        .attrDefault(_attr, function() {
+      this.$$m.$$setDefault(_attr, function() {
 
-          if(typeof _model === 'string') {
-            _model = $injector.get(_model);
-
-            if(_inverseOf) {
-              _model.$$setMask(_inverseOf, Utils.WRITE_MASK);
-            }
-          }
-
-          var scope = this.$buildScope(_model, _url || $inflector.parameterize(_attr)),
-              inst = new _model(scope);
-
-          // TODO: provide a way to modify scope behavior just for this relation
+        if(typeof _model === 'string') {
+          _model = $injector.get(_model);
 
           if(_inverseOf) {
-            inst[_inverseOf] = this;
+            _model.$$setMask(_inverseOf, Utils.WRITE_MASK);
           }
+        }
 
-          return inst;
-        })
-        // simple support for inline data, TODO: maybe deprecate this.
-        .attrDecoder(_source || _url || _attr, function(_raw) {
-          this[_attr].$decode(_raw);
-        })
-        .attrMask(_attr, Utils.WRITE_MASK);
+        var scope = this.$buildScope(_model, _url || $inflector.parameterize(_attr)),
+            inst = _model.$new(null, scope);
+
+        // TODO: provide a way to modify scope behavior just for this relation
+
+        if(_inverseOf) {
+          inst[_inverseOf] = this;
+        }
+
+        return inst;
+      });
+      // simple support for inline data, TODO: maybe deprecate this.
+      this.$$m.$$setDecoder(_source || _url || _attr, function(_raw) {
+        this[_attr].$decode(_raw);
+      });
+      this.$$m.$$setMask(_attr, Utils.WRITE_MASK);
+
+      return this;
     },
 
     /**
@@ -586,35 +619,36 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
     attrAsReference: function(_attr, _model, _inline, _key, _source, _prefetch) {
 
       var watch = _inline ? (_source || _attr) : (_key || (_attr + 'Id'));
-      this
-        .attrDefault(_attr, null)
-        .attrMask(_attr, Utils.WRITE_MASK)
-        .attrDecoder(watch , function(_raw) {
+      this.$$m.$$setDefault(_attr, null);
+      this.$$m.$$setMask(_attr, Utils.WRITE_MASK);
+      this.$$m.$$setDecoder(watch , function(_raw) {
 
-          // load model
-          if(typeof _model === 'string') {
-            _model = $injector.get(_model);
+        // load model
+        if(typeof _model === 'string') {
+          _model = $injector.get(_model);
+        }
+
+        // only reload object if id changes
+        if(_inline)
+        {
+          if(!this[_attr] || this[_attr].$pk !== _model.$$inferKey(_raw)) {
+            this[_attr] = _model.$buildRaw(_raw);
+          } else {
+            this[_attr].$decode(_raw);
           }
-
-          // only reload object if id changes
-          if(_inline)
-          {
-            if(!this[_attr] || this[_attr].$pk !== _model.$inferKey(_raw)) {
-              this[_attr] = _model.$buildRaw(_raw);
-            } else {
-              this[_attr].$decode(_raw);
+        }
+        else
+        {
+          if(!this[_attr] || this[_attr].$pk !== _raw) {
+            this[_attr] = _model.$new(_raw); // use $new instead of $build
+            if(_prefetch) {
+              this[_attr].$fetch();
             }
           }
-          else
-          {
-            if(!this[_attr] || this[_attr].$pk !== _raw) {
-              this[_attr] = _model.$new(_raw); // use $new instead of $build
-              if(_prefetch) {
-                this[_attr].$fetch();
-              }
-            }
-          }
-        });
+        }
+      });
+
+      return this;
     },
 
     /**
@@ -658,13 +692,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     classDefine: function(_name, _fun) {
-      if(typeof _name === 'string') {
-        this.$$m.Collection.prototype[_name] = Utils.override(this.$$m.Collection.prototype[_name], _fun);
-        this.$$m[_name] = Utils.override(this.$$m[_name], _fun);
-      } else {
-        Utils.extendOverriden(this.$$m.Collection.prototype, _name);
-        Utils.extendOverriden(this.$$m, _name);
-      }
+      this.$$m.$$addScopeMethod(_name, _fun);
       return this;
     },
 
@@ -701,9 +729,10 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      */
     attrExpression: function(_name, _expr) {
       var filter = $parse(_expr);
-      this.on('after-feed', function() {
+      this.$$m.$on('after-feed', function() {
         this[_name] = filter(this);
       });
+      return this;
     }
   };
 

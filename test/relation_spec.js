@@ -2,7 +2,7 @@
 
 describe('Restmod model relation:', function() {
 
-  var $httpBackend, $restmod, Bike;
+  var $httpBackend, $restmod, $injector, Bike;
 
   beforeEach(module('plRestmod'));
 
@@ -26,10 +26,11 @@ describe('Restmod model relation:', function() {
   }));
 
   // cache entities to be used in tests
-  beforeEach(inject(function($injector) {
+  beforeEach(inject(['$injector', function(_$injector) {
+    $injector = _$injector;
     $httpBackend = $injector.get('$httpBackend');
     $restmod = $injector.get('$restmod');
-  }));
+  }]));
 
   describe('hasMany', function() {
 
@@ -151,6 +152,13 @@ describe('Restmod model relation:', function() {
     it('should load inline content into relation if available and use path as source', function() {
       var bike = Bike.$new(1).$decode({ serial: { value: 'SERIAL' } });
       expect(bike.serialNo.value).toEqual('SERIAL');
+    });
+
+    it('should bubble child events to child type', function() {
+      var spy = jasmine.createSpy();
+      $injector.get('SerialNo').$on('after-init', spy);
+      Bike.$new(1).$decode({ serial: { value: 'SERIAL' } });
+      expect(spy).toHaveBeenCalled();
     });
   });
 
