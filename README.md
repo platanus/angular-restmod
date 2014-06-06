@@ -19,7 +19,7 @@ Saving Bikes on your serverside database would be as easy as:
 var Bike = $restmod.model('/bikes');
 var newBike = Bike.$build({ brand: 'Trek' });
 newBike.model = '5200';
-newBike.$save(); // bike is persisted
+newBike.$save(); // bike is persisted sending a POST to /bikes
 ```
 It also supports collections, relations, lifecycle hooks, attribute renaming and much more.
 Continue reading for a quick start or check the API Reference for more: http://platanus.github.io/angular-restmod
