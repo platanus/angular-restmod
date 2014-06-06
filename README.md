@@ -81,9 +81,25 @@ The generated model type provides basic CRUD operations to interact with the API
 
 To retrieve an object by ID use `$find`, the returned object will be filled with the response data when the server response is received.
 
+Let's say you have a REST api that responds JSON to a GET REQUEST on /bikes/1
+```json
+{
+	"id": 1,
+	"brand": "Trek",
+	"created_at": "2014-05-23"
+}
+```
+Then, on your code you would call
+
 ```javascripts
 bike = Bike.$find(1);
 ```
+and you'll be able to do
+```javascripts
+alert(bike.createdAt); // note that created_at is now called createdAt
+```
+
+**IMPORTANT**: RestMod will rename attributes from under_score to camelCase.
 
 <!-- it: $httpBackend.flush(); expect(bike.model).toEqual('Slash') -->
 <!-- end -->
@@ -176,7 +192,7 @@ bike.$fetch().$promise.then(function(_bike) {
 });
 ```
 
-# Customizing Model Behaviour
+# Customizing model behaviour
 
 When defining a model, you can pass a **definition object** that allows you to:
 * Define relations between models
@@ -185,11 +201,13 @@ When defining a model, you can pass a **definition object** that allows you to:
 * Add lifecycle hooks
 
 ```javascript
-var Bike = $restmod.model('api/bikes', {
-	// This is the definition object
+var Bike = $restmod.model('api/bikes',
+// This is the definition object:
+{
 	createdAt: { serialize: 'Date' },
 	owner: { belongsTo: 'User' }
-});
+}
+);
 ```
 
 ## Relations
