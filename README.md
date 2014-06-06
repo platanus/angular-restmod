@@ -2,18 +2,25 @@
 <!-- provide: $provide -->
 <!-- inject: $httpBackend -->
 <!-- inject: $injector -->
+<!-- inject: $injector -->
 
 <!-- before:
-	$httpBackend.when('GET', '/bikes/1').respond({ model: 'Slash' })
+	$httpBackend.when('GET', '/bikes/1').respond({ model: 'Slash', brand: 'Trek' })
 	$httpBackend.when('GET', '/bikes?brand=trek').respond([ { model: 'Slash' }, { model: 'Remedy' } ])
+	$httpBackend.when('GET', '/bikes?category=enduro').respond([ { model: 'Slash' }, { model: 'Remedy' } ])
 
 	module = $provide;
 -->
+
 Angular Restmod  [![Build Status](https://api.travis-ci.org/platanus/angular-restmod.png)](https://travis-ci.org/angular-platanus/restmod)
 ===============
 Restmod creates objects that you can use from within Angular to interact with your RESTful API.
 
 Saving Bikes on your serverside database would be as easy as:
+
+<!-- section: main example -->
+
+<!-- inject: $restmod -->
 
 ```javascript
 var Bike = $restmod.model('/bikes');
@@ -21,6 +28,9 @@ var newBike = Bike.$build({ brand: 'Trek' });
 newBike.model = '5200';
 newBike.$save(); // bike is persisted sending a POST to /bikes
 ```
+
+<!-- end -->
+
 It also supports collections, relations, lifecycle hooks, attribute renaming and much more.
 Continue reading for a quick start or check the API Reference for more: http://platanus.github.io/angular-restmod
 
@@ -51,22 +61,26 @@ but we recommend you to use bower to retrieve the Restmod package
 bower install angular-restmod --save
 ```
 
-
 #### 2. Include it on your project
 
 Make sure the source file (dist/angular-restmod.min.js) is required in your code.
 
 Include angular module
 
-```js
+<!-- before: module = $provide; -->
+<!-- ignore -->
+
+```javascript
 module = angular.module('MyApp', ['plRestmod'])
 ```
+
+<!-- end -->
 
 # Basic usage
 
 You begin by creating a new model using the `$restmod.model` method. We recommend you to put each model on a separate factory. The first argument for `model` is the resource URL.
 
-```javascripts
+```javascript
 module.factory('Bike', function($restmod) {
 	return $restmod.model('/bikes');
 });
@@ -82,6 +96,7 @@ The generated model type provides basic CRUD operations to interact with the API
 To retrieve an object by ID use `$find`, the returned object will be filled with the response data when the server response is received.
 
 Let's say you have a REST api that responds JSON to a GET REQUEST on /bikes/1
+
 ```json
 {
 	"id": 1,
@@ -89,62 +104,84 @@ Let's say you have a REST api that responds JSON to a GET REQUEST on /bikes/1
 	"created_at": "2014-05-23"
 }
 ```
+
 Then, on your code you would call
 
-```javascripts
+```javascript
 bike = Bike.$find(1);
 ```
-and you'll be able to do
-```javascripts
-alert(bike.createdAt); // note that created_at is now called createdAt
+
+The bike object will be populated as soon as the API returns some data. Yo can use `$then` to do something when data becomes available.
+
+```javascript
+bike.$then(function() {
+	console.log(bike.brand); // will output 'Trek'
+});
 ```
 
-**IMPORTANT**: RestMod will rename attributes from under_score to camelCase.
+**IMPORTANT**: RestMod will rename attributes from under_score to camelCase by default, refer to the building docs if you need to disable this feature. In the example above you should use `bike.createdAt` to refer to the value of the `created_at` returned by the API.
 
 <!-- it: $httpBackend.flush(); expect(bike.model).toEqual('Slash') -->
 <!-- end -->
-
 
 <!-- section: $fetch -->
 <!-- before: bike = Bike.$new(1) -->
 
 To reload an object use `$fetch`. **WARNING:** This will overwrite modified properties.
 
-```javascripts
+```javascript
 bike.$fetch();
 ```
 
 <!-- it: $httpBackend.flush(); expect(bike.model).toEqual('Slash') -->
 <!-- end -->
 
-
 <!-- section: $collection and $search -->
 
 To retrieve an object collection `$collection` or `$search` can be used.
 
 ```javascript
-bikes = Bike.$search({ keyword: 'enduro' });
+bikes = Bike.$search({ category: 'enduro' });
 // same as
-bikes = Bike.$collection({ keyword: 'enduro' }); // server request not yet sent
+bikes = Bike.$collection({ category: 'enduro' }); // server request not yet sent
 bikes.$refresh();
 ```
 
+<!-- it: $httpBackend.flush(); expect(bikes.length).toEqual(2) -->
 <!-- end -->
+
+<!-- section: scoped -->
+
+<!-- before: bikes = Bike.$collection({ category: 'enduro' }); -->
+
+<!-- section: $refresh -->
 
 To reload a collection use `$refresh`. To append more results use `$fetch`.
 
 ```javascript
+bikes = Bike.$collection({ category: 'enduro' });
 bikes.$refresh({ page: 1 }); // clear collection and load page 1
 bikes.$fetch({ page: 2 }); // page 2 is appended to page 1, usefull for infinite scrolls...
 bikes.$refresh({ page: 3 }); // collection is reset, page 3 is loaded on response
 ```
 
+<!-- it: $httpBackend.flush(); expect(bikes.length).toEqual(2) -->
+<!-- end -->
+
+<!-- section: $save -->
+
 To update an object, just modify the properties and call `$save`.
 
 ```javascript
+bike = Bike.$find(1);
 bike.brand = 'Trek';
 bike.$save();
 ```
+
+<!-- it: $httpBackend.expectPUT('/bikes/1').respond(200, '{}'); $httpBackend.flush(); -->
+<!-- end -->
+
+<!-- section: $save -->
 
 To create a new object use `$build` and then call `$save`. This will send a POST request to the server.
 
@@ -154,18 +191,38 @@ newBike.model = 'Meta';
 newBike.$save(); // bike is persisted
 ```
 
+<!-- it: $httpBackend.expectPOST('/bikes').respond(200, '{}'); $httpBackend.flush(); -->
+<!-- end -->
+
+<!-- section: $create on type -->
+
 Or use `$create`
 
 ```javascript
 var newBike = Bike.$create({ brand: 'Comencal', model: 'Meta' });
 ```
 
+<!-- it: $httpBackend.expectPOST('/bikes').respond(200, '{}'); $httpBackend.flush(); -->
+<!-- end -->
+
+<!-- section: $create on collection -->
+
 If called on a collection, `$build` and `$create` will return a collection-bound object that will be added when saved successfully.
 
 ```javascript
-var newBike = bikes.$create({ brand: 'Comencal', model: 'Meta' });
+newBike = bikes.$create({ brand: 'Comencal', model: 'Meta' });
 // after server returns, 'bikes' will contain 'newBike'.
 ```
+
+<!-- it:
+	expect(bikes.length).toEqual(0);
+	$httpBackend.expectPOST('/bikes').respond(200, '{}');
+	$httpBackend.flush();
+	expect(bikes.length).toEqual(1);
+-->
+<!-- end -->
+
+<!-- section: $reveal -->
 
 To show a non saved object on the bound collection use `$reveal`
 
@@ -174,11 +231,29 @@ var newBike = bikes.$create({ brand: 'Comencal', model: 'Meta' }).$reveal();
 // 'newBike' is inmediatelly available at 'bikes'
 ```
 
+<!-- it: expect(bikes.length).toEqual(1); -->
+<!-- end -->
+
+<!-- section: $destroy -->
+
 Finally, to destroy an object just call `$destroy`. Destroying an object bound to a collection will remove it from the collection.
 
 ```javascript
 bike.$destroy();
 ```
+<!-- $httpBackend.expectDELETE('/bikes').respond(200, '{}'); $httpBackend.flush(); -->
+<!-- end -->
+
+<!-- section: $destroy on collection -->
+
+As with $create, calling `$destroy` on a record bound to a collection will remove it from the collection on server response.
+
+<!-- end -->
+
+<!-- section: $then -->
+
+<!-- before: bike = Bike.$new(1); -->
+<!-- before: doSomething = jasmine.createSpy(); -->
 
 All operations described above will set the `$promise` property. This property is a regular `$q` promise that is resolved when operation succeds or fail. It can be used directly or using the `$then` method.
 
@@ -186,11 +261,18 @@ All operations described above will set the `$promise` property. This property i
 bike.$fetch().$then(function(_bike) {
 	doSomething(_bike.brand);
 });
-// or
+// same as:
 bike.$fetch().$promise.then(function(_bike) {
 	doSomething(_bike.brand);
 });
 ```
+
+<!-- it: $httpBackend.flush(); expect(doSomething).toHaveBeenCalled(); -->
+<!-- end -->
+
+<!-- end -->
+
+<!-- ignore -->
 
 # Customizing model behaviour
 
@@ -442,3 +524,5 @@ var Bike = $restmod.model('/bikes', 'Vehicle', {
 ```
 
 API Reference: http://platanus.github.io/angular-restmod
+
+<!-- end -->
