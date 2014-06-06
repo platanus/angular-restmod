@@ -393,7 +393,7 @@ var Bike = $restmod.model('/bikes', {
 });
 
 ```
-Note that a hook can be defined for a type, a collection or a record. Also, hooks can also be defined for a given execution context using $decorate. Check the hooks advanced documentation [here]().
+Note that a hook can be defined for a type, a collection or a record. Also, hooks can also be defined for a given execution context using $decorate. Check the [hooks advanced documentation](https://github.com/platanus/angular-restmod/blob/readme-test/docs/guides/hooks.md).
 
 # Mixins
 
