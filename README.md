@@ -64,7 +64,7 @@ module = angular.module('MyApp', ['plRestmod'])
 
 # Basic usage
 
-A new model type can be created using the `$restmod.model` method. We recommend you to put each model on a separate factory. The first argument for `model` is the resource URL, if not given the resource is considered anonymous, more on this later.
+You begin by creating a new model using the `$restmod.model` method. We recommend you to put each model on a separate factory. The first argument for `model` is the resource URL.
 
 ```javascripts
 module.factory('Bike', function($restmod) {
@@ -146,7 +146,7 @@ bike.brand = 'Trek';
 bike.$save();
 ```
 
-To create a new object use `$build` and then call `$save` to send a POST request to the server.
+To create a new object use `$build` and then call `$save`. This will send a POST request to the server.
 
 ```javascript
 var newBike = Bike.$build({ brand: 'Comencal' });
@@ -164,7 +164,7 @@ If called on a collection, `$build` and `$create` will return a collection-bound
 
 ```javascript
 var newBike = bikes.$create({ brand: 'Comencal', model: 'Meta' });
-// after server returns 'bikes' will contain 'newBike'.
+// after server returns, 'bikes' will contain 'newBike'.
 ```
 
 To show a non saved object on the bound collection use `$reveal`
@@ -194,12 +194,7 @@ bike.$fetch().$promise.then(function(_bike) {
 
 # Customizing model behaviour
 
-When defining a model, you can pass a **definition object** that allows you to:
-* Define relations between models
-* Customize an attribute's serialization and default value
-* Add custom methods
-* Add lifecycle hooks
-
+When defining a model, you can pass a **definition object**
 ```javascript
 var Bike = $restmod.model('api/bikes',
 // This is the definition object:
@@ -209,10 +204,16 @@ var Bike = $restmod.model('api/bikes',
 }
 );
 ```
+The **definition object** allows you to:
+* Define **relations** between models
+* Customize an attribute's **serialization** and **default values**
+* Add **custom methods**
+* Add lifecycle **hooks**
+
 
 ## Relations
 
-Relations are defined within the **definition object**.
+Relations are defined like this:
 
 ```javascript
 var Bike = $restmod.model('api/bikes', {
@@ -225,23 +226,27 @@ There are three types of relations:
 
 #### HasMany
 
-This is a hirearchical relation between a model instance and another model collection. The child collection url is bound to the parent url. The child collection is created **at the same time** as the parent, so it is available even is the parent is not resolved.
+Let's say you have a Part model and a Bike model. The HasMany relation allows you to access parts of a specific bike directly from a bike object.
+
+In other words, HasMany is a hirearchical relation between a model instance (bike) and a model collection (parts).
 
 ```javascript
 var Part = $restmod.model('api/parts');
 var Bike = $restmod.model('api/bikes', {
-	parts: { hasMany: Part } // use 'Part' string if using factories.
+	parts: { hasMany: Part } // here, we would use 'Part' as a string if we where using factories.
 });
 
-var bike = Bike.$new(1); // no request are made to the server here.
-var parts = bike.parts.$fetch(); // sends GET /api/bikes/1/parts
-// later on, after parts is resolved.
-parts[0].$fetch(); // updates part at index 0 context, this will GET /api/parts/X
+var bike = Bike.$new(1); // no request are made to the server yet.
+var parts = bike.parts.$fetch(); // sends a GET to /api/bikes/1/parts
+// later on, after 'parts' has already been resolved.
+parts[0].$fetch(); // updates the part at index 0. This will do a GET /api/parts/:id
 ```
+
 Calling `$create` on the collection will POST to the collection nested url.
 
 ```javascript
-var part = bike.parts.$create({ serialNo: 'XX123', category: 'wheels' }); // sends POST /api/bikes/1/parts
+var part = bike.parts.$create({ serialNo: 'XX123', category: 'wheels' });
+// sends POST /api/bikes/1/parts
 ```
 
 If the child collection model is anonymous (no url given to `model`) then all CRUD routes for the collection items are bound to the parent. The example above would behave like this:
@@ -250,7 +255,7 @@ If the child collection model is anonymous (no url given to `model`) then all CR
 // So if parts were to be defined like
 var Part = $restmod.model(null); // Anonymous model
 // then
-bike.parts[0].$fetch(); // sends GET /api/bikes/1/parts/X instead of /api/parts/X
+bike.parts[0].$fetch(); // sends GET /api/bikes/1/parts/:id instead of /api/parts/:id
 ```
 
 #### HasOne
