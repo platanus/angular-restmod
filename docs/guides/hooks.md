@@ -48,55 +48,68 @@ bike.$save(); // this call will trigger the hook defined above
 
 #### Object lifecycle
 
+When calling `$new` to generate a new record:
+
+| Hook's name           | parameters      | 'this' refers to | notes
+| --------------------- | --------------- | ---------------- | ---
+| after-init            |                 | record           |
+
 For `$fetch` on a record:
 
 | Hook's name           | parameters      | 'this' refers to | notes
 | --------------------- | --------------- | ---------------- | ---
 | before-fetch          | http-request    | record           |
 | before-request        | http-request    | record           |
-| after-request[-error] | http-response   | record          |
-| after-feed            | raw record data | record | (only called if no errors)
-| after-fetch[-error] |   http-response | record |
-
+| after-request[-error] | http-response   | record           |
+| after-feed            | raw record data | record           | (only called if no errors)
+| after-fetch[-error]   |   http-response | record           |
 
 For `$fetch` on a collection:
 
-* before-fetch-many
-* before-request
-* after-request[-error]
-* after-feed (only called if no errors)
-* after-fetch-many[-error]
+| Hook's name                | parameters          | 'this' refers to | notes
+| -------------------------- | ------------------- | ---------------- | ---
+| before-fetch-many          | http-request        | collection       |
+| before-request             | http-request        | collection       |
+| after-request[-error]      | http-response       | collection       |
+| after-feed                 | raw collection data | collection       | (only called if no errors)
+| after-fetch-many[-error]   | http-response       | collection       |
 
-For `$save` when creating:
+For `$save` when record is new (creating):
 
-* before-render
-* before-save
-* before-create
-* before-request
-* after-request[-error]
-* after-feed (only called if no errors)
-* after-create[-error]
-* after-save[-error]
+| Hook's name           | parameters        | 'this' refers to | notes
+| --------------------- | ----------------- | ---------------- | ---
+| before-render         | serialized record | record           | allows modifiying serialized record data before is sent to server
+| before-save           | http-request      | record           |
+| before-create         | http-request      | record           |
+| before-request        | http-request      | record           | only called if no errors
+| after-request[-error] | http-response     | record           |
+| after-feed            | serialized record | record           | only called if no errors and if server returned data
+| after-add             | record            | collection       | only called if record belongs to a collection and has not been revealed yet
+| after-create[-error]  | http-response     | record           |
+| after-save[-error]    | http-response     | record           |
 
-For `$save` when updating:
+For `$save` when record is not new (updating):
 
-* before-render
-* before-save
-* before-update
-* before-request
-* after-request[-error]
-* after-feed (only called if no errors)
-* after-update[-error]
-* after-save[-error]
+| Hook's name           | parameters        | 'this' refers to | notes
+| --------------------- | ----------------- | ---------------- | ---
+| before-render         | serialized record | record           | allows modifiying serialized record data before is sent to server
+| before-save           | http-request      | record           |
+| before-update         | http-request      | record           |
+| before-request        | http-request      | record           | only called if no errors
+| after-request[-error] | http-response     | record           |
+| after-feed            | serialized record | record           | only called if no errors and if server returned data
+| after-update[-error]  | http-response     | record           |
+| after-save[-error]    | http-response     | record           |
 
 For `$destroy`:
 
-* before-destroy
-* before-request
-* after-request[-error]
-* after-destroy[-error]
-
-
+| Hook's name           | parameters      | 'this' refers to | notes
+| --------------------- | --------------- | ---------------- | ---
+| before-destroy        | http-request    | record           |
+| before-request        | http-request    | record           |
+| after-request[-error] | http-response   | record           |
+| after-remove          | record          | collection       | only called if record belongs to a collection
+| after-destroy[-error] |   http-response | record           |
 
 Notes:
 * The **before-request** hooks can be used to modify the request before is sent.
