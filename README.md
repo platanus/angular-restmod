@@ -62,7 +62,7 @@ Include angular module
 module = angular.module('MyApp', ['plRestmod'])
 ```
 
-## Basic usage
+# Basic usage
 
 A new model type can be created using the `$restmod.model` method. We recommend you to put each model on a separate factory. The first argument for `model` is the resource URL, if not given the resource is considered anonymous, more on this later.
 
@@ -176,17 +176,30 @@ bike.$fetch().$promise.then(function(_bike) {
 });
 ```
 
-## Relations
+# Customizing Model Behaviour
 
-Relations are defined in $restmod using the **definition object**. The `$restmod.model` method can take as argument an arbitrary number of definition objects, models and builder functions after the url (first argument), more on this later.
-
+When defining a model, you can pass a **definition object** that allows you to:
+* Define relations between models
+* Customize an attribute's serialization and default value
+* Add custom methods
+* Add lifecycle hooks
 
 ```javascript
 var Bike = $restmod.model('api/bikes', {
 	// This is the definition object
+	createdAt: { serialize: 'Date' },
+	owner: { belongsTo: 'User' }
+});
+```
+
+## Relations
+
+Relations are defined within the **definition object**.
+
+```javascript
+var Bike = $restmod.model('api/bikes', {
 	parts: { hasMany: 'Part' },
-	owner: { belongsTo: 'User' },
-	createdAt: { serialize: 'Date' }
+	owner: { belongsTo: 'User' }
 });
 ```
 
@@ -275,7 +288,7 @@ var bike = Bike.$find(1);
 alert(bike.owner.name); // echoes 'Peat'
 ```
 
-# Serialization, Encoding and Decoding
+## Serialization, masking and default values.
 
 When you communicate with an API, some attribute types require special treatment (like a date, for instance)
 
@@ -313,7 +326,7 @@ var Bike = $restmod.model('/bikes', {
 
 On both **encode** and **decode** you can use an inline function instead of the filter's name. It is also possible to bundle an encoder and decoder together using a Serializer object, check the [API Reference](http://platanus.github.io/angular-restmod) for more.
 
-# Attribute masking
+### Attribute masking
 
 Following the Angular conventions, attributes that start with a '$' symbol are considered private and never sent to the server. Furthermore, you can define a mask that allows you to specify a more advanced behaviour for other attributes:
 
@@ -325,7 +338,50 @@ var Bike = $restmod.model('/bikes', {
 });
 ```
 
-# Hooks (callbacks)
+### Default value
+
+You can define default values for your attributes, both static and dynamic. Dynamic defaults are defined using a function that will be called on record creation.
+
+```javascript
+var Bike = $restmod.model('/bikes', {
+	wheels: { init: 2 }, // every new bike will have 2 wheels by default
+	createdAt: { init: function() {
+	 return new Date();
+	}}
+});
+```
+
+## Custom methods
+
+You can add a custom instance method to a Model
+
+```javascript
+var Bike = $restmod.model('/bikes', {
+	pedal: function() {
+	 this.strokes += 1;
+	}
+});
+```
+
+You can also add a class method to the Model type
+
+```javascript
+var Bike = $restmod.model('/bikes', {
+	'@searchByBrand': function(_brand) {
+	 return this.$search({ brand: _brand });
+	}
+});
+```
+
+Methods added to the class are available to the Model's collections.
+
+```javascript
+var xc_bikes = Bike.$search({category:'xc'}); //$search returns a collection
+xc_treks = xc_bikes.searchByBrand('Trek');
+```
+
+
+## Hooks (callbacks)
 
 Just like you do with ActiveRecord, you can add triggers on certain steps of the object lifecycle
 
@@ -337,7 +393,7 @@ var Bike = $restmod.model('/bikes', {
 });
 
 ```
-Note that a hook can be defined for a type, a collection or a record. Also, hooks can also be defined for a given execution context using $decorate. Check Restmod advanced documentation here.
+Note that a hook can be defined for a type, a collection or a record. Also, hooks can also be defined for a given execution context using $decorate. Check the hooks advanced documentation [here]().
 
 # Mixins
 
