@@ -4,11 +4,10 @@ define(['text!README.md'], function(_readme) {
 
   var MD_HEADER_RGX = /(?:[\r\n]|^)\s+(#+)([^\r\n]*)/,
       MD_COMMENT_RGX = /<!--\s*(?:(describe|context|section|let|before|it|load|inject|provide):((?:.|[\r\n])*?)|(end|ignore|describe))\s*-->/,
-      MD_JSBLOCK_RGX = /\u0060\u0060\u0060javascripts((?:.|[\r\n])*?)\u0060\u0060\u0060/,
+      MD_JSBLOCK_RGX = /\u0060\u0060\u0060javascript((?:.|[\r\n])*?)\u0060\u0060\u0060/,
       PARSER_RGX = new RegExp('(?:' + MD_HEADER_RGX.source + '|' + MD_COMMENT_RGX.source + '|' + MD_JSBLOCK_RGX.source + ')', 'g');
 
   var blocks = _readme.match(PARSER_RGX), index = 0;
-
 
   function wrapBeforeEachCode(_code) {
     return function(_scope) {
@@ -65,17 +64,17 @@ define(['text!README.md'], function(_readme) {
         if(m[1] === 'describe' || m[1] === 'context' || m[1] === 'section') {
           index++;
           node.childs.push(buildTokenTree(m[2], -1));
-        } else if(m[1] === 'ignore') {
+        } else if(m[3] === 'ignore') {
           // ignore everything until 'end' is found
           do {
             index++;
-          } while((block = blocks[index]) && !(block[0] === '<' && block.match(MD_COMMENT_RGX)[1] === 'end'));
+          } while((block = blocks[index]) && !(block[0] === '<' && block.match(MD_COMMENT_RGX)[3] === 'end'));
         } else if(m[1] === 'before') {
           node.statements.push(wrapBeforeEachCode(m[2].trim()));
         } else if(m[1] === 'it') {
           node.statements.push(wrapItCode(m[2].trim()));
-        } else if(m[1] === 'end') {
-          if(_level === -1) { index++; }
+        } else if(m[3] === 'end') {
+          if(_level !== -1) { index--; }
           break;
 
         // angular related extensions.
@@ -93,6 +92,7 @@ define(['text!README.md'], function(_readme) {
           index++;
           node.childs.push(buildTokenTree(m[2], m[1].length));
         } else {
+          index--;
           break;
         }
       }
@@ -103,7 +103,6 @@ define(['text!README.md'], function(_readme) {
 
   // create the test tree.
   var tree = buildTokenTree('README.md: ', -1);
-  // debugger;
 
   function createScope(_parent) {
     function ScopeType() {}
