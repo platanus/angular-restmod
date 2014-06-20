@@ -243,8 +243,32 @@ describe('Restmod collection:', function() {
       col.$add(Bike.$build());
 
       expect(col.$indexOf(function(_obj) {
-        return _obj.brand == 'Giant';
+        return _obj.brand === 'Giant';
       })).toEqual(1);
+    });
+
+  });
+
+  describe('$unwrap', function() {
+
+    it('should call the packer unpackMany method if a packer is provided', function() {
+      var packer = { unpackMany: null };
+      spyOn(packer, 'unpackMany').andReturn([]);
+
+      var bikes = $restmod.model('/api/bikes', function() {
+        this.setPacker(packer);
+      }).$collection();
+
+      var raw = [{}];
+      bikes.$unwrap(raw);
+      expect(packer.unpackMany).toHaveBeenCalledWith(raw, bikes);
+    });
+
+    it('should call $feed', function() {
+      var bikes = Bike.$collection();
+      spyOn(bikes, '$feed');
+      bikes.$unwrap([{}]);
+      expect(bikes.$feed).toHaveBeenCalled();
     });
 
   });

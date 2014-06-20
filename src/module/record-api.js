@@ -1,71 +1,6 @@
 'use strict';
 
-RMModule.factory('RMRecordApi', ['RMCommonApi', 'RMUtils', function(CommonApi, Utils) {
-
-  var extend = angular.extend,
-      isArray = angular.isArray;
-
-  // recursive transformation function, used by $decode and $encode.
-  var transform = function (_data, _ctx, _prefix, _mask, _decode, _into) {
-
-    var key, decodedName, encodedName, fullName, mask, filter, value, result = _into || {};
-
-    for(key in _data) {
-      if(_data.hasOwnProperty(key) && key[0] !== '$') {
-
-        decodedName = (_decode && this.$$nameDecoder) ? this.$$nameDecoder(key) : key;
-        fullName = _prefix + decodedName;
-
-        // skip property if masked for this operation
-        mask = this.$$masks[fullName];
-        if(mask && mask.indexOf(_mask) !== -1) {
-          continue;
-        }
-
-        value = _data[key];
-        filter = _decode ? this.$$decoders[fullName] : this.$$encoders[fullName];
-
-        if(filter) {
-          value = filter.call(_ctx, value);
-          if(value === undefined) continue; // ignore value if filter returns undefined
-        } else if(typeof value === 'object' && value &&
-          (_decode || typeof value.toJSON !== 'function')) {
-          // IDEA: make extended decoding/encoding optional, could be a little taxing for some apps
-          value = transformExtended.call(this, value, _ctx, fullName, _mask, _decode);
-        }
-
-        encodedName = (!_decode && this.$$nameEncoder) ? this.$$nameEncoder(decodedName) : decodedName;
-        result[encodedName] = value;
-      }
-    }
-
-    return result;
-  };
-
-  // extended part of transformation function, enables deep object transform.
-  var transformExtended = function(_data, _ctx, _prefix, _mask, _decode) {
-    if(isArray(_data))
-    {
-      var fullName = _prefix + '[]',
-          filter = _decode ? this.$$decoders[fullName] : this.$$encoders[fullName],
-          result = [], i, l, value;
-
-      for(i = 0, l = _data.length; i < l; i++) {
-        value = _data[i];
-        if(filter) {
-          value = filter.call(_ctx, value);
-        } else if(typeof value === 'object' && value &&
-          (_decode || typeof value.toJSON !== 'function')) {
-          value = transformExtended.call(this, value, _ctx, _prefix, _mask, _decode);
-        }
-        result.push(value);
-      }
-
-      return result;
-    } else {
-      return transform.call(this, _data, _ctx, _prefix + '.', _mask, _decode);
-    }
-  };
+RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
 
   /**
    * @class RecordApi
@@ -78,8 +13,51 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', 'RMUtils', function(CommonApi, U
    *
    * Provides record synchronization and manipulation methods. This is the base API for every restmod record.
    *
+   * TODO: Talk about the object lifecycle.
+   *
+   * ### Object lifecycle hooks
+   *
+   * For `$fetch`:
+   *
+   * * before-fetch
+   * * before-request
+   * * after-request[-error]
+   * * after-feed (only called if no errors)
+   * * after-fetch[-error]
+   *
+   * For `$save` when creating:
+   *
+   * * before-render
+   * * before-save
+   * * before-create
+   * * before-request
+   * * after-request[-error]
+   * * after-feed (only called if no errors)
+   * * after-create[-error]
+   * * after-save[-error]
+   *
+   * For `$save` when updating:
+   *
+   * * before-render
+   * * before-save
+   * * before-update
+   * * before-request
+   * * after-request[-error]
+   * * after-feed (only called if no errors)
+   * * after-update[-error]
+   * * after-save[-error]
+   *
+   * For `$destroy`:
+   *
+   * * before-destroy
+   * * before-request
+   * * after-request[-error]
+   * * after-destroy[-error]
+   *
+   * @property {mixed} $pk The record primary key
+   * @property {object} $scope The collection scope (hierarchical scope, not angular scope)
    */
-	return extend({
+	return {
 
     /**
      * @memberof RecordApi#
@@ -87,20 +65,10 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', 'RMUtils', function(CommonApi, U
      * @description Called by record constructor on initialization.
      *
      * Note: Is better to add a hook to after-init than overriding this method.
-     *
-     * @param {mixed} _scope The instance scope.
-     * @param {mixed} _pk The record primary key.
      */
-    $initialize: function(_scope, _pk) {
-      this.$scope = _scope || this.$type;
-      this.$pk = _pk;
-
-      var tmp;
-
+    $initialize: function() {
       // apply defaults
-      for(var i = 0; (tmp = this.$type.$$defaults[i]); i++) {
-        this[tmp[0]] = (typeof tmp[1] === 'function') ? tmp[1].apply(this) : tmp[1];
-      }
+      this.$$loadDefaults();
 
       // after initialization hook
       // TODO: put this on $new so it can use stacked DSP?
@@ -128,6 +96,8 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', 'RMUtils', function(CommonApi, U
      * By default, no create url is provided and the update/destroy url providers
      * attempt to first use the unscoped resource url.
      *
+     * // TODO: create special api to hold scope (so it is not necessary to recreate the whole object every time.)
+     *
      * @param {mixed} _for Scope target type, accepts any model class.
      * @param {string} _partial Partial route.
      * @return {ScopeInterface} New scope.
@@ -138,22 +108,30 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', 'RMUtils', function(CommonApi, U
       } else {
         var self = this;
         return {
+          // forward events to child model
+          $dispatch: function() {
+            _for.$dispatch.apply(_for, arguments);
+          },
+
+          // nest collection url
           $url: function() {
-            // collection url is always nested
             return Utils.joinUrl(self.$url(), _partial);
           },
+
+          // record url is nested only for anonymous resources
           $urlFor: function(_pk) {
-            // resource url is nested only for anonymous resources
             if(_for.$anonymous()) {
               return this.$fetchUrlFor();
             } else {
               return _for.$urlFor(_pk);
             }
           },
+
           $fetchUrlFor: function(/* _pk */) {
             // fetch url is nested
             return Utils.joinUrl(self.$url(), _partial);
           },
+
           $createUrlFor: function() {
             // create is not posible in nested members
             return null;
@@ -203,11 +181,12 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', 'RMUtils', function(CommonApi, U
      * @description Feed raw data to this instance.
      *
      * @param {object} _raw Raw data to be fed
+     * @param {string} _mask 'CRU' mask
      * @return {RecordApi} this
      */
     $decode: function(_raw, _mask) {
-      transform.call(this.$type, _raw, this, '', _mask || Utils.READ_MASK, true, this);
-      if(!this.$pk) this.$pk = this.$type.$inferKey(_raw); // TODO: warn if key changes
+      this.$$transform(_raw, '', _mask || Utils.READ_MASK, true, this);
+      if(!this.$pk) this.$pk = this.$$inferKey(_raw); // TODO: warn if key changes
       this.$dispatch('after-feed', [_raw]);
       return this;
     },
@@ -217,12 +196,50 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', 'RMUtils', function(CommonApi, U
      *
      * @description Generate data to be sent to the server when creating/updating the resource.
      *
-     * @param {string} _action Action that originated the render
-     * @return {RecordApi} this
+     * @param {string} _mask 'CRU' mask
+     * @return {string} raw data
      */
     $encode: function(_mask) {
-      var raw = transform.call(this.$type, this, this, '', _mask || Utils.CREATE_MASK, false);
+      var raw = this.$$transform(this, '', _mask || Utils.CREATE_MASK, false);
       this.$dispatch('before-render', [raw]);
+      return raw;
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description
+     *
+     * Unpacks and decode raw data from a server generated structure.
+     *
+     * ATTENTION: do not override this method to change the object wrapping strategy,
+     * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
+     *
+     * @param  {mixed} _raw Raw server data
+     * @param  {string} _mask 'CRU' mask
+     * @return {RecordApi} this
+     */
+    $unwrap: function(_raw, _mask) {
+      _raw = this.$$unpack(_raw);
+      return this.$decode(_raw, _mask);
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description
+     *
+     * Encode and packs object into a server compatible structure that can be used for PUT/POST operations.
+     *
+     * ATTENTION: do not override this method to change the object wrapping strategy,
+     * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
+     *
+     * @param  {string} _mask 'CRU' mask
+     * @return {string} raw data
+     */
+    $wrap: function(_mask) {
+      var raw = this.$encode(_mask);
+      raw = this.$$pack(raw);
       return raw;
     },
 
@@ -245,14 +262,7 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', 'RMUtils', function(CommonApi, U
 
       this.$dispatch('before-fetch', [request]);
       return this.$send(request, function(_response) {
-
-        var data = _response.data;
-        if (!data || isArray(data)) {
-          throw new Error('Expected object while feeding resource');
-        }
-
-        this.$decode(data);
-
+        this.$unwrap(_response.data);
         this.$dispatch('after-fetch', [_response]);
       }, function(_response) {
         this.$dispatch('after-fetch-error', [_response]);
@@ -276,12 +286,11 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', 'RMUtils', function(CommonApi, U
 
       if(url) {
         // If bound, update
-        request = { method: 'PUT', url: url, data: this.$encode(Utils.CREATE_MASK) };
+        request = { method: 'PUT', url: url, data: this.$wrap(Utils.UPDATE_MASK) };
         this.$dispatch('before-update', [request]);
         this.$dispatch('before-save', [request]);
         return this.$send(request, function(_response) {
-          var data = _response.data;
-          if (data && !isArray(data)) this.$decode(data);
+          this.$unwrap(_response.data);
           this.$dispatch('after-update', [_response]);
           this.$dispatch('after-save', [_response]);
         }, function(_response) {
@@ -292,12 +301,11 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', 'RMUtils', function(CommonApi, U
         // If not bound create.
         url = this.$scope.$createUrlFor ? this.$scope.$createUrlFor(this.$pk) : (this.$scope.$url && this.$scope.$url());
         if(!url) throw new Error('Create is not supported by this resource');
-        request = { method: 'POST', url: url, data: this.$encode(Utils.UPDATE_MASK) };
+        request = { method: 'POST', url: url, data: this.$wrap(Utils.CREATE_MASK) };
         this.$dispatch('before-save', [request]);
         this.$dispatch('before-create', [request]);
         return this.$send(request, function(_response) {
-          var data = _response.data;
-          if (data && !isArray(data)) this.$decode(data);
+          this.$unwrap(_response.data);
 
           // reveal item (if not yet positioned)
           if(this.$scope.$isCollection && this.$position === undefined && !this.$preventReveal) {
@@ -384,6 +392,6 @@ RMModule.factory('RMRecordApi', ['RMCommonApi', 'RMUtils', function(CommonApi, U
       }
       return this;
     }
-  }, CommonApi);
+  };
 
 }]);
