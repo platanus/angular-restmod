@@ -3,6 +3,7 @@
 <!-- inject: $httpBackend -->
 <!-- inject: $injector -->
 <!-- inject: $injector -->
+<!-- inject: $restmod -->
 
 <!-- before:
 	$httpBackend.when('GET', '/bikes/1').respond({ model: 'Slash', brand: 'Trek' })
@@ -19,8 +20,6 @@ Restmod creates objects that you can use from within Angular to interact with yo
 Saving Bikes on your serverside database would be as easy as:
 
 <!-- section: main example -->
-
-<!-- inject: $restmod -->
 
 ```javascript
 var Bike = $restmod.model('/bikes');
@@ -125,9 +124,10 @@ bike.$then(function() {
 <!-- end -->
 
 <!-- section: $fetch -->
-<!-- before: bike = Bike.$new(1) -->
 
 To reload an object use `$fetch`. **WARNING:** This will overwrite modified properties.
+
+<!-- before: bike = Bike.$new(1) -->
 
 ```javascript
 bike.$fetch();
@@ -158,6 +158,12 @@ bikes.$refresh();
 
 To reload a collection use `$refresh`. To append more results use `$fetch`.
 
+<!-- before:
+	$httpBackend.when('GET', '/bikes?category=enduro&page=1').respond([{ model: 'Slash', brand: 'Trek' }]);
+	$httpBackend.when('GET', '/bikes?category=enduro&page=2').respond([{ model: 'Meta', brand: 'Commencal' }]);
+	$httpBackend.when('GET', '/bikes?category=enduro&page=3').respond([{ model: 'Mach 6', brand: 'Pivot' }]);
+-->
+
 ```javascript
 bikes = Bike.$collection({ category: 'enduro' });
 bikes.$refresh({ page: 1 }); // clear collection and load page 1
@@ -165,7 +171,7 @@ bikes.$fetch({ page: 2 }); // page 2 is appended to page 1, usefull for infinite
 bikes.$refresh({ page: 3 }); // collection is reset, page 3 is loaded on response
 ```
 
-<!-- it: $httpBackend.flush(); expect(bikes.length).toEqual(2) -->
+<!-- it: $httpBackend.flush(); expect(bikes.length).toEqual(1) -->
 <!-- end -->
 
 <!-- section: $save -->
@@ -272,20 +278,26 @@ bike.$fetch().$promise.then(function(_bike) {
 
 <!-- end -->
 
-<!-- ignore -->
 
 # Customizing model behaviour
 
 When defining a model, you can pass a **definition object**
+
 ```javascript
-var Bike = $restmod.model('api/bikes',
+Bike = $restmod.model('api/bikes',
 // This is the definition object:
 {
-	createdAt: { serialize: 'Date' },
+	createdAt: { encode: 'date' },
 	owner: { belongsTo: 'User' }
 }
 );
 ```
+
+<!-- it:
+	expect(Bike.$new().owner).toBeDefined();
+	expect(typeof Bike.$build({ createdAt: new Date() }).$encode().created_at).toEqual('string');
+-->
+
 The **definition object** allows you to:
 * Define **relations** between models
 * Customize an attribute's **serialization** and **default values**
@@ -297,108 +309,304 @@ The **definition object** allows you to:
 
 Relations are defined like this:
 
+<!-- before:
+	module.factory('User', function() { return $restmod.model(); });
+	module.factory('Part', function() { return $restmod.model(); });
+	$httpBackend.when('GET', '/bikes/1/parts').respond([ { id: 1, brand: 'Shimano' }, { id: 2, brand: 'SRAM' } ]);
+	$httpBackend.when('GET', '/parts/1').respond({ brand: 'Shimano', category: 'brakes' });
+-->
+
 ```javascript
-var Bike = $restmod.model('api/bikes', {
+Bike = $restmod.model('/bikes', {
 	parts: { hasMany: 'Part' },
 	owner: { belongsTo: 'User' }
 });
 ```
 
+<!-- it:
+	expect(Bike.$new().owner).toBeDefined();
+	expect(Bike.$new().parts).toBeDefined();
+-->
+
 There are three types of relations:
 
 #### HasMany
 
-Let's say you have a Part model and a Bike model. The HasMany relation allows you to access parts of a specific bike directly from a bike object.
-
-In other words, HasMany is a hirearchical relation between a model instance (bike) and a model collection (parts).
+Let's say you have the following 'Part' model:
 
 ```javascript
-var Part = $restmod.model('api/parts');
-var Bike = $restmod.model('api/bikes', {
-	parts: { hasMany: Part } // here, we would use 'Part' as a string if we where using factories.
+module.factory('Part', function() {
+	return $restmod.model('/parts');
+});
+```
+
+The HasMany relation allows you to access parts of a specific bike directly from a bike object. In other words, HasMany is a hirearchical relation between a model instance (bike) and a model collection (parts).
+
+```javascript
+Bike = $restmod.model('/bikes', {
+	parts: { hasMany: 'Part' }
 });
 
-var bike = Bike.$new(1); // no request are made to the server yet.
-var parts = bike.parts.$fetch(); // sends a GET to /api/bikes/1/parts
-// later on, after 'parts' has already been resolved.
-parts[0].$fetch(); // updates the part at index 0. This will do a GET /api/parts/:id
+bike = Bike.$new(1); 			// no request are made to the server yet.
+parts = bike.parts.$fetch(); 	// sends a GET to /bikes/1/parts
 ```
+
+<!-- it:
+	$httpBackend.expectGET('/bikes/1/parts');
+	$httpBackend.flush();
+	expect(parts.length).toEqual(2);
+-->
+
+<!-- section: $fetch -->
+
+Later on, after 'parts' has already been resolved,
+
+<!-- before: $httpBackend.flush() -->
+
+```javascript
+parts[0].$fetch(); // updates the part at index 0. This will do a GET /parts/:id
+```
+
+<!-- it:
+	$httpBackend.expectGET('/parts/1');
+	$httpBackend.flush();
+	expect(parts[0].category).toEqual('brakes');
+-->
+<!-- end -->
+
+<!-- section: $create -->
 
 Calling `$create` on the collection will POST to the collection nested url.
 
 ```javascript
-var part = bike.parts.$create({ serialNo: 'XX123', category: 'wheels' });
-// sends POST /api/bikes/1/parts
+var part = bike.parts.$create({ serialNo: 'XX123', category: 'wheels' }); // sends POST /bikes/1/parts
 ```
 
-If the child collection model is anonymous (no url given to `model`) then all CRUD routes for the collection items are bound to the parent. The example above would behave like this:
+<!-- it:
+	$httpBackend.expectPOST('/bikes/1/parts').respond(200, {});
+	$httpBackend.flush();
+-->
+<!-- end -->
+
+<!-- section: anonymous -->
+
+If the child collection model is anonymous (no url given to `model`) then all CRUD routes for the collection items are bound to the parent.
+
+So if 'Part' was defined like:
 
 ```javascript
-// So if parts were to be defined like
-var Part = $restmod.model(null); // Anonymous model
-// then
-bike.parts[0].$fetch(); // sends GET /api/bikes/1/parts/:id instead of /api/parts/:id
+$restmod.model(null);
 ```
+
+<!-- section: $fetch -->
+
+The example above would behave like this:
+
+<!-- before:
+	bike = $restmod.model('/bikes', { parts: { hasMany: $restmod.model(null) } }).$new(1);
+	bike.parts.$feed([{ id: 1 }]);
+-->
+
+```javascript
+console.log(bike.parts[0].$url())
+bike.parts[0].$fetch();
+```
+
+Will send GET to /bikes/1/parts/:id instead of /parts/:id
+
+<!-- it:
+	$httpBackend.expectGET('/bikes/1/parts/1').respond(200, {});
+	$httpBackend.flush();
+-->
+
+<!-- end -->
+
+<!-- end -->
 
 #### HasOne
 
-This is a hirearchical relation between a model instance and another model instance. The child instance url is bound to the parent url. The child instance is created **at the same time** as the parent, so its available even if the parent is not resolved.
+This is a hirearchical relation between one model's instance and another model's instance.
+The child instance url is bound to the parent url.
+The child instance is created **at the same time** as the parent, so its available even if the parent is not resolved.
+
+Let's say you have the following 'User' model:
 
 ```javascript
-var Owner = $restmod.model('api/users');
-var Bike = $restmod.model('api/bikes', {
-	owner: { hasOne: User } // use 'User' string if using factories.
+module.factory('User', function() {
+	return $restmod.model('/users');
 });
-
-var owner = Bike.$build(1).owner.$fetch(); // will send GET /api/bikes/1/owner
-
-// ... server answers with { "name": "Steve", "id": 20 } ...
-
-alert(owner.name); // Echoes 'Steve'
-owner.name = 'Stevie';
-owner.$save(); // will send PUT /api/users/20 with { "name": "Stevie" }
 ```
 
-If the child object model is anonymous (no url given to `model`) then all CRUD routes are bound to the parent (same as hasMany).
-
-#### belongsTo
-
-This is a reference relation between a model instance and another model instance. The child instance is not bound to the parent and is **generated after** server response to a parent's `$fetch` is received. A key is used by default to bind child to parent. The key property name can be optionally selected using the `key` attribute.
+That relates to a 'Bike' through a *hasOne* relation:
 
 ```javascript
-var Owner = $restmod.model('api/users');
-var Bike = $restmod.model('api/bikes', {
-	owner: { belongsTo: User, key: 'userId' } // key would default to *ownerId*
+Bike = $restmod.model('/bikes', {
+	owner: { hasOne: 'User' }
 });
-
-var bike = Bike.$find(1); // sends GET to /api/bikes/1
-// ... server answers with { "user_id": 20 } ...
-alert(bike.owner.$pk); // echoes '20'
-alert(bike.owner.name); // echoes 'undefined' since user information has not been fetched.
-bike.owner.$fetch(); // sends GET to /api/users/20
-// ... server answers with { "name": "Peat" } ...
-alert(bike.owner.name); // echoes 'Peat'
 ```
 
-This relation can be optionally defined as `inline`, this means that it is expected that the child object data comes inlined in the parent object server data. The inline property name can be optionally selected using the `source` attribute.
+<!-- section: not anonymous -->
+
+Then a bike's owner data can then be retrieved just by knowing the bike primary key (id):
 
 ```javascript
-var Owner = $restmod.model('api/users');
-var Bike = $restmod.model('api/bikes', {
-	owner: { belongsTo: User, inline: true, source: 'user' } // source would default to *owner*
-});
+owner = Bike.$new(1).owner.$fetch();
+```
 
+> will send GET /bikes/1/owner
+
+<!-- it:
+	$httpBackend.expectGET('/bikes/1/owner').respond(200, {});
+	$httpBackend.flush();
+-->
+
+<!-- end -->
+
+<!-- section: not anonymous -->
+
+Since the user resource has its own resource url defined:
+
+<!-- before: owner = Bike.$new(1).owner.$decode({ id: 1 }); -->
+
+```javascript
+owner.name = 'User';
+owner.$save();
+```
+
+<!-- it:
+	$httpBackend.expectPUT('/users/1').respond(200, {});
+	$httpBackend.flush();
+-->
+
+> will send PUT /user/X.
+
+<!-- end -->
+
+<!-- section: anonymous -->
+
+If 'User' was to be defined like an anonymous resource:
+
+```javascript
+module.factory('User', function() {
+	return $restmod.model(null); // note that the url is null
+});
+```
+
+<!-- before:
+	owner = $restmod.model('/bikes', { owner: { hasOne: 'User' } }).$new(1).owner;
+-->
+
+Then calling:
+
+```javascript
+owner.name = 'User';
+owner.$save();
+```
+
+<!-- it:
+	$httpBackend.expectPUT('/bikes/1/owner').respond(200, {});
+	$httpBackend.flush();
+-->
+
+> will send a PUT to /bikes/1/owner
+
+<!-- end -->
+
+<!-- ignore -->
+
+#### BelongsTo
+
+This is a reference relation between a model instance and another model instance.
+The child instance is not bound to the parent and is **generated after** server response to a parent's `$fetch` is received.
+A key is used by default to bind child to parent. The key property name can be optionally selected using the `key` attribute.
+
+Let's say you have the same 'User' model as before:
+
+```javascript
+module.factory('User', function() {
+	return $restmod.model('/users');
+});
+```
+
+That relates to a 'Bike' through a *belongsTo* relation this time:
+
+```javascript
+Bike = $restmod.model('/bikes', {
+	owner: { belongsTo: 'User', key: 'last_owner_id' } // default key would be 'owner_id'
+});
+```
+
+Also you have the following bike resource:
+
+```
+GET /bikes/1
+
+{
+	id: 1,
+	brand: 'Transition',
+	last_owner_id: 2
+}
+```
+
+Then retrieving the resource:
+
+```javascript
+bike = Bike.$find(1);
+```
+
+Will produce a `bike` object with its owner property initialized to a user with id=2, the owner property will only be available **AFTER** server response arrives.
+
+Then calling
+
+```javascript
+bike.owner.$fetch();
+```
+
+Will send a GET to /users/2 and populate the owner property with the user data.
+
+This relation can be optionally defined as `inline`, this means that it is expected that the child object data comes inlined in the parent object server data.
+The inline property name can be optionally selected using the `source` attribute.
+
+Lets redefine the `Bike` model as:
+
+```javascript
+var Bike = $restmod.model('/bikes', {
+	owner: { belongsTo: 'User', inline: true, source: 'last_owner' } // source would default to *owner*
+});
+```
+
+And suppose that the last bike resource looks like:
+
+```
+GET /bikes/1
+
+{
+	id: 1,
+	brand: 'Transition',
+	last_owner: {
+		id: 2
+		name: 'Juanito'
+	}
+}
+```
+
+Then retrieving the bike resource:
+
+```javascript
 var bike = Bike.$find(1);
-// ... server answers with { "user": { "name": "Peat" } } ...
-alert(bike.owner.name); // echoes 'Peat'
 ```
+
+Will produce a `bike` object with its owner property initialized to a user with id=2 and name=Juanito. As before, the owner property will only be available **AFTER** server response arrives.
+
+<!-- ignore -->
 
 ## Serialization, masking and default values.
 
 When you communicate with an API, some attribute types require special treatment (like a date, for instance)
 
 ### Decode
- You can specify a way of decoding an attribute when it arrives from the server.
+
+You can specify a way of decoding an attribute when it arrives from the server.
 
 Let's say you have defined a filter like this:
 
@@ -419,7 +627,9 @@ var Bike = $restmod.model('/bikes', {
 	createdAt: {decode:'date_parse'}
 });
 ```
+
 ### Encode
+
  To specify a way of encoding an attribute before you send it back to the server:
 Just as with the previous example (decode), you use an Angular Filter. In this example we use the built in 'date' filter.
 
@@ -523,6 +733,9 @@ var Bike = $restmod.model('/bikes', 'Vehicle', {
 
 ```
 
-API Reference: http://platanus.github.io/angular-restmod
-
 <!-- end -->
+
+Some links:
+
+REST api designs guidelines: https://github.com/interagent/http-api-design
+REST json api standard: http://jsonapi.org

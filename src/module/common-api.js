@@ -267,7 +267,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
         // if request was canceled, then just return a resolved promise
         if(_options.canceled) {
           self.$status = 'canceled';
-          return $q.resolve(self);
+          return $q.when(self);
         }
 
         self.$decorate(dsp, function() {
@@ -280,7 +280,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
 
           // if request was canceled, ignore post request actions.
           if(_options.canceled) {
-            self.$status = 'canceled';
+            self.$status =  'canceled';
             return self;
           }
 
