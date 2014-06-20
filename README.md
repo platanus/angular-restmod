@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/platanus/angular-restmod.png?label=ready&title=Ready)](https://waffle.io/platanus/angular-restmod)
 <!-- load: plRestmod -->
 <!-- provide: $provide -->
 <!-- inject: $httpBackend -->
