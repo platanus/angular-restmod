@@ -62,7 +62,7 @@ bower install angular-restmod --save
 
 #### 2. Include it on your project
 
-Make sure the source file (dist/angular-restmod.min.js) is required in your code.
+Make sure the restmod source and its dependencies (angular-restmod.min.js and angular-inflector.min.js) are required in your code.
 
 Include angular module
 
