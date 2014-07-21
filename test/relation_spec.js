@@ -87,6 +87,13 @@ describe('Restmod model relation:', function() {
       bike.$decode({ rides: [{ id: 3 }] });
       expect(bike.activity.length).toEqual(1);
     });
+
+    it('should bubble child events to child type', function() {
+      var spy = jasmine.createSpy();
+      $injector.get('BikeRide').$on('after-init', spy);
+      Bike.$new(1).$decode({ rides: [{ id: 1 }] });
+      expect(spy).toHaveBeenCalled();
+    });
   });
 
   describe('hasOne', function() {

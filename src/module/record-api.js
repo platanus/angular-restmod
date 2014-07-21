@@ -3,6 +3,45 @@
 RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
 
   /**
+   * @class RelationScope
+   *
+   * @description
+   *
+   * Special scope a record provides to resources related via hasMany or hasOne relation.
+   */
+  var RelationScope = function(_scope, _target, _partial) {
+    this.$scope = _scope;
+    this.$target = _target;
+    this.$partial = _partial;
+  };
+
+  RelationScope.prototype = {
+    // nest collection url
+    $url: function() {
+      return Utils.joinUrl(this.$scope.$url(), this.$partial);
+    },
+
+    // record url is nested only for anonymous resources
+    $urlFor: function(_pk) {
+      if(this.$target.$anonymous()) {
+        return this.$fetchUrlFor();
+      } else {
+        return this.$target.$urlFor(_pk);
+      }
+    },
+
+    // fetch url is nested
+    $fetchUrlFor: function(/* _pk */) {
+      return Utils.joinUrl(this.$scope.$url(), this.$partial);
+    },
+
+    // create is not posible in nested members
+    $createUrlFor: function() {
+      return null;
+    }
+  };
+
+  /**
    * @class RecordApi
    * @extends CommonApi
    *
@@ -100,43 +139,13 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      *
      * @param {mixed} _for Scope target type, accepts any model class.
      * @param {string} _partial Partial route.
-     * @return {ScopeInterface} New scope.
+     * @return {RelationScope} New scope.
      */
     $buildScope: function(_for, _partial) {
       if(_for.$buildOwnScope) {
         // TODO
       } else {
-        var self = this;
-        return {
-          // forward events to child model
-          $dispatch: function() {
-            _for.$dispatch.apply(_for, arguments);
-          },
-
-          // nest collection url
-          $url: function() {
-            return Utils.joinUrl(self.$url(), _partial);
-          },
-
-          // record url is nested only for anonymous resources
-          $urlFor: function(_pk) {
-            if(_for.$anonymous()) {
-              return this.$fetchUrlFor();
-            } else {
-              return _for.$urlFor(_pk);
-            }
-          },
-
-          $fetchUrlFor: function(/* _pk */) {
-            // fetch url is nested
-            return Utils.joinUrl(self.$url(), _partial);
-          },
-
-          $createUrlFor: function() {
-            // create is not posible in nested members
-            return null;
-          }
-        };
+        return new RelationScope(this, _for, _partial);
       }
     },
 

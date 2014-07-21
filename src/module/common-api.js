@@ -88,9 +88,11 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
         }
       }
 
-      // bubble up the object scope
+      // bubble up the object scope, bubble to type only if there isnt a viable parent scope.
       if(this.$scope && this.$scope.$dispatch) {
         this.$scope.$dispatch(_hook, _args, _ctx);
+      } else if(this.$type) {
+        this.$type.$dispatch(_hook, _args, _ctx);
       }
 
       this.$$dsp = dsp; // reenable dsp.
