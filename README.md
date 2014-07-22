@@ -62,9 +62,13 @@ bower install angular-restmod --save
 
 #### 2. Include it on your project
 
-Make sure the restmod source and its dependencies (angular-restmod.min.js and angular-inflector.min.js) are required in your code.
+Make sure the restmod source is required in your code.
 
-Include angular module
+```html
+<script type="text/javascript" src="js/angular-restmod-bundle.min.js"></script>
+```
+
+Next, include angular module as one of your app's dependencies
 
 <!-- before: module = $provide; -->
 <!-- ignore -->
