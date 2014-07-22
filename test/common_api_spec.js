@@ -2,23 +2,84 @@
 
 describe('Restmod model class:', function() {
 
-  var $httpBackend, $restmod, Bike, query;
+  var $httpBackend, $restmod, $rootScope, Bike, query;
 
   beforeEach(module('plRestmod'));
 
   beforeEach(inject(function($injector) {
     $httpBackend = $injector.get('$httpBackend');
     $restmod = $injector.get('$restmod');
+    $rootScope = $injector.get('$rootScope');
     Bike = $restmod.model('/api/bikes');
     query = Bike.$collection();
   }));
 
   describe('$send', function() {
-    // TODO!
+
+    beforeEach(function() {
+      $httpBackend.when('GET','/api/bikes/1').respond(200, { last: false });
+      $httpBackend.when('GET','/api/bikes/2').respond(200, { last: true });
+      $httpBackend.when('GET','/api/bikes/3').respond(404);
+    });
+
+    it('should execute request in FIFO order', function() {
+      var bike = Bike.$new();
+      bike.$send({ method: 'GET', url: '/api/bikes/1' });
+      bike.$send({ method: 'GET', url: '/api/bikes/2' });
+      $httpBackend.flush();
+
+      expect(bike.$response.data.last).toEqual(true);
+    });
+
+    it('should properly update the $status property', function() {
+      var bike = Bike.$new();
+      expect(bike.$status).toBeUndefined();
+      bike.$send({ method: 'GET', url: '/api/bikes/1' });
+      expect(bike.$status).toEqual('pending');
+      $httpBackend.flush();
+      expect(bike.$status).toEqual('ok');
+
+      bike.$send({ method: 'GET', url: '/api/bikes/3' });
+      $rootScope.$digest(); // force digest, since this is a second request.
+      expect(bike.$status).toEqual('pending');
+      $httpBackend.flush();
+      expect(bike.$status).toEqual('error');
+    });
+
+    it('should properly update the $pending property', function() {
+      var bike = Bike.$new();
+      expect(bike.$pending).toBeUndefined();
+      bike.$send({ method: 'GET', url: '/api/bikes/1' });
+      bike.$send({ method: 'GET', url: '/api/bikes/2' });
+      expect(bike.$pending.length).toEqual(2);
+      $httpBackend.flush();
+      expect(bike.$pending.length).toEqual(0);
+    });
+
+  });
+
+  describe('$hasPendingRequests', function() {
+    it('should return true if there are pending requests', function() {
+      var bike = Bike.$new();
+      expect(bike.$hasPendingRequests()).toEqual(false);
+      bike.$send({ method: 'GET', url: '/api/bikes/1' });
+      expect(bike.$hasPendingRequests()).toEqual(true);
+      $httpBackend.when('GET','/api/bikes/1').respond(200, {});
+      $httpBackend.flush();
+      expect(bike.$hasPendingRequests()).toEqual(false);
+    });
   });
 
   describe('$cancel', function() {
-    // TODO!
+    it('should cancel every pending request', function() {
+      var bike = Bike.$new();
+      bike.$send({ method: 'GET', url: '/api/bikes/1' });
+      bike.$send({ method: 'GET', url: '/api/bikes/6' });
+
+      expect(bike.$hasPendingRequests()).toEqual(true);
+      bike.$cancel();
+      expect(bike.$hasPendingRequests()).toEqual(false);
+    });
   });
 
   describe('$then', function() {

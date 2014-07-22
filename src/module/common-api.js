@@ -225,6 +225,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
      * @return {CommonApi} self
      */
     $then: function(_success, _error) {
+      if(!this.$promise) this.$promise = $q.when(this);
       this.$promise = this.$promise.then(_success, _error);
       return this;
     },
@@ -246,6 +247,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
      * @return {CommonApi} self
      */
     $finally: function(_cb) {
+      if(!this.$promise) this.$promise = $q.when(this);
       this.$promise = this.$promise['finally'](_cb);
       return this;
     },
@@ -257,7 +259,11 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
      *
      * @description Low level communication method, wraps the $http api.
      *
-     * This method is responsible for request queuing and lifecycle.
+     * This method is responsible for request queuing and lifecycle. This method guaraties that:
+     * * The $promise property will always contain the last request promise right after calling the method.
+     * * Pending requests will be available at the $pending property (array)
+     * * Current request execution status can be queried using the $status property (current request, not last).
+     * * The $status property refers to the current request inside $send `_success` and `_error` callbacks.
      *
      * @param {object} _options $http options
      * @param {function} _success sucess callback (sync)
@@ -275,65 +281,64 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
 
         // if request was canceled, then just return a resolved promise
         if(_options.canceled) {
+          self.$pending.splice(0, 1);
           self.$status = 'canceled';
-          return $q.when(self);
+          return $q.when(self); // it is necesary to return a promise to be consistent.
         }
 
         self.$decorate(dsp, function() {
           this.$response = null;
-          this.$error = false;
+          this.$status = 'pending';
           this.$dispatch('before-request', [_options]);
         });
 
-        return $http(_options).then(function(_response) {
+        var $promise = $http(_options).then(function(_response) {
 
-          // if request was canceled, ignore post request actions.
-          if(_options.canceled) {
-            self.$status =  'canceled';
-            return self;
-          }
+          return self.$decorate(dsp, function() {
 
-          self.$decorate(dsp, function() {
+            this.$pending.splice(0, 1);
+            if(this.$promise === $promise) this.$promise = undefined; // reset promise to avoid unnecessary waiting
 
-            // IDEA: a response interceptor could add additional error states based on returned data,
-            // this could allow for additional error state behaviours (for example, an interceptor
-            // could watch for rails validation errors and store them in the model, then return false
-            // to trigger a promise queue error).
+            if(_options.canceled) {
+              // if request was canceled during request, ignore post request actions.
+              this.$status =  'canceled';
+            } else {
+              this.$status = 'ok';
+              this.$response = _response;
 
-            this.$pending.splice(this.$pending.indexOf(_options), 1);
-            if(this.$pending.length === 0) this.$pending = undefined; // reset pending so it can be used as boolean
-            this.$status = 'ok';
-            this.$response = _response;
+              this.$dispatch('after-request', [_response]);
+              if(_success) _success.call(this, _response);
+            }
 
-            this.$dispatch('after-request', [_response]);
-            if(_success) _success.call(this, _response);
-
+            return this;
           });
-
-          return self;
 
         }, function(_response) {
 
-          // if request was canceled, ignore error handling
-          if(_options.canceled) {
-            self.$status = 'canceled';
-            return self;
-          }
+          return self.$decorate(dsp, function() {
 
-          self.$decorate(dsp, function() {
+            this.$pending.splice(0, 1);
+            if(this.$promise === $promise) this.$promise = undefined; // reset promise to avoid unnecessary waiting
 
-            this.$pending.splice(this.$pending.indexOf(_options), 1);
-            if(this.$pending.length === 0) this.$pending = null; // reset pending so it can be used as boolean
-            this.$status = 'error';
-            this.$response = _response;
+            if(_options.canceled) {
+              // if request was canceled during request, ignore error handling
+              this.$status = 'canceled';
+              return this;
+            } else {
+              this.$status = 'error';
+              this.$response = _response;
 
-            this.$dispatch('after-request-error', [_response]);
-            if(_error) _error.call(this, _response);
+              // IDEA: Consider flushing pending request in case of an error. Also continue ignoring requests
+              // until the error flag is reset by user.
 
+              this.$dispatch('after-request-error', [_response]);
+              if(_error) _error.call(this, _response);
+              return $q.reject(this);
+            }
           });
-
-          return $q.reject(self);
         });
+
+        return $promise;
       }
 
       // chain requests, do not allow parallel request per resource.
@@ -366,6 +371,25 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
       // reset request
       this.$promise = null;
       return this;
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Returns true if object has queued pending request
+     *
+     * @return {Boolean} Object request pending status.
+     */
+    $hasPendingRequests: function() {
+      var pendingCount = 0;
+
+      if(this.$pending) {
+        angular.forEach(this.$pending, function(_config) {
+          if(!_config.canceled) pendingCount++;
+        });
+      }
+
+      return pendingCount > 0;
     }
   };
 
