@@ -31,6 +31,11 @@ module.exports = function(grunt) {
             'src/module.js',
             'src/module/*.js'
           ],
+          'dist/<%= pkg.name %>-bundle.js': [
+            'bower_components/angular-inflector/dist/angular-inflector.js',
+            'src/module.js',
+            'src/module/*.js'
+          ],
           'dist/plugins/debounced.js': 'src/plugins/debounced.js',
           'dist/plugins/dirty.js': 'src/plugins/dirty.js',
           'dist/plugins/paged.js': 'src/plugins/paged.js'
@@ -44,6 +49,7 @@ module.exports = function(grunt) {
       dist: {
         files: {
           'dist/<%= pkg.name %>.min.js': 'dist/<%= pkg.name %>.js',
+          'dist/<%= pkg.name %>-bundle.min.js': 'dist/<%= pkg.name %>-bundle.js',
           'dist/plugins/debounced.min.js': 'dist/plugins/debounced.js',
           'dist/plugins/dirty.min.js': 'dist/plugins/dirty.js',
           'dist/plugins/paged.min.js': 'dist/plugins/paged.js'
