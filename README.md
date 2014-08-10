@@ -34,7 +34,7 @@ It also supports collections, relations, lifecycle hooks, attribute renaming and
 Continue reading for a quick start or check the API Reference for more: http://platanus.github.io/angular-restmod
 
 ## Why Restmod?
-Restmod brings Rails ActiveRecord's ease of use to the Angular Framework. It succesfuly combines Angular's encapsulated design with Active Record's opionated style. There are other alternatives available though:
+Restmod brings Rails ActiveRecord's ease of use to the Angular Framework. It succesfuly combines Angular's encapsulated design with Active Record's opinionated style. There are other alternatives available though:
 
 **$resource:** Might be enough for small projects, included as an Angular opt-in. It only provides a basic model type layer, with limited features.
 
@@ -98,7 +98,7 @@ The generated model type provides basic CRUD operations to interact with the API
 
 To retrieve an object by ID use `$find`, the returned object will be filled with the response data when the server response is received.
 
-Let's say you have a REST api that responds JSON to a GET REQUEST on /bikes/1
+Let's say you have a REST API that responds JSON to a GET REQUEST on /bikes/1
 
 ```json
 {
