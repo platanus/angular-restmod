@@ -114,7 +114,7 @@ Then, on your code you would call
 bike = Bike.$find(1);
 ```
 
-The bike object will be populated as soon as the API returns some data. Yo can use `$then` to do something when data becomes available.
+The bike object will be populated as soon as the API returns some data. You can use `$then` to do something when data becomes available.
 
 ```javascript
 bike.$then(function() {
