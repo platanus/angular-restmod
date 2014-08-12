@@ -55,7 +55,7 @@ describe('Restmod model relation:', function() {
       expect(bike.activity[1].bike).toEqual(bike);
     });
 
-    it('should use nested url only for create if resource is not anonynous', function() {
+    it('should use nested url only for create if resource is not anonymous', function() {
       var part = Bike.$new(1).allParts.$buildRaw({ id: 'HW101' });
 
       part.$fetch();
