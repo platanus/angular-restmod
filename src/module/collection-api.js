@@ -137,14 +137,12 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
 
       // TODO: check that collection is bound.
       this.$dispatch('before-fetch-many', [request]);
-      this.$send(request, function(_response) {
+      return this.$send(request, function(_response) {
         this.$unwrap(_response.data); // feed retrieved data.
         this.$dispatch('after-fetch-many', [_response]);
       }, function(_response) {
         this.$dispatch('after-fetch-many-error', [_response]);
       });
-
-      return this;
     },
 
     /**
