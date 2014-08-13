@@ -670,6 +670,16 @@ var Bike = $restmod.model('/bikes', {
 });
 ```
 
+### Explicit attribute mapping
+
+You can explicitly tell restmod to map a given server attribute to one of the model's attributs:
+
+```javascript
+var Bike = $restmod.model('/bikes', {
+	created: { map: 'stats.created_at' }
+});
+```
+
 ## Custom methods
 
 You can add a custom instance method to a Model

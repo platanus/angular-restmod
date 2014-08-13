@@ -155,6 +155,60 @@ describe('Restmod model class:', function() {
       expect(bike.nested[0].snakeCase).toBeDefined();
     });
 
+    it('should allow server simple property mapping', function() {
+      var bike = $restmod.model(null, {
+        brand: { map: 'full_brand' },
+      }).$build().$decode({ full_brand: 'Trek' });
+
+      expect(bike.brand).toEqual('Trek');
+      // expect(bike.fullBrand).toBeUndefined();
+      bike.brand = 'Giant';
+      expect(bike.$encode().full_brand).toEqual('Giant');
+    });
+
+    it('should allow server nested property mapping', function() {
+      var bike = $restmod.model(null, {
+        brand: { map: 'brand.full_name' }
+      }).$build().$decode({ brand: { full_name: 'Trek' } });
+
+      expect(bike.brand).toEqual('Trek');
+      bike.brand = 'Giant';
+      expect(bike.$encode().brand).toBeDefined();
+      expect(bike.$encode().brand.full_name).toEqual('Giant');
+    });
+
+    it('should allow server nested property mapping inside ignored property', function() {
+      var bike = $restmod.model(null, {
+        brand: { ignore: true },
+        brandName: { map: 'brand.full_name' }
+      }).$build().$decode({ brand: { full_name: 'Trek' } });
+
+      expect(bike.brand).toBeUndefined();
+      expect(bike.brandName).toEqual('Trek');
+    });
+
+    it('should allow server nested property mapping inside an array', function() {
+      var bike = $restmod.model(null, {
+        'allParts[].brand': { map: 'brand_name' }
+      }).$build().$decode({
+        all_parts: [
+          { brand_name: 'Shimano' },
+          { brand_name: 'SRAM' }
+        ]
+      });
+
+      // expect(bike.allParts[0].brandName).toBeUndefined();
+      expect(bike.allParts[0].brand).toEqual('Shimano');
+    });
+
+    it('should allow decoders on mapped properties', function() {
+      var bike = $restmod.model(null, {
+        brand: { map: 'full_brand', decode: function(v) { return v + '!'; } }
+      }).$build().$decode({ full_brand: 'Trek' });
+
+      expect(bike.brand).toEqual('Trek!');
+    });
+
     it('should skip masked properties', function() {
       var bike = $restmod.model(null, {
         imMasked: { ignore: 'R' },
@@ -190,11 +244,11 @@ describe('Restmod model class:', function() {
 
     it('should apply decoders to values in nested arrays', function() {
       var bike = $restmod.model(null, function() {
-        this.attrDecoder('users.name', function(_name) { return 'Mr. ' + _name; });
+        this.attrDecoder('users[].name', function(_name) { return 'Mr. ' + _name; });
       }).$build();
 
-      bike.$decode({ users: [{ name: 'Petty' }] });
-      expect(bike.users[0].name).toEqual('Mr. Petty');
+      bike.$decode({ users: [{ name: 'Peety' }] });
+      expect(bike.users[0].name).toEqual('Mr. Peety');
     });
   });
 

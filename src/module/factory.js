@@ -1,11 +1,10 @@
 'use strict';
 
-RMModule.factory('RMModelFactory', ['$injector', '$inflector', '$filter', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', function($injector, $inflector, $filter, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi) {
+RMModule.factory('RMModelFactory', ['$injector', '$inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', 'RMSerializerFactory', function($injector, $inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi, buildSerializer) {
 
   return function(_identity) {
 
-    var extend = angular.extend,
-        isArray = angular.isArray;
+    var extend = angular.extend;
 
     // Private model attributes
     var urlPrefix = null,
@@ -13,12 +12,8 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', '$filter', 'RMUti
         name = null,
         primaryKey = 'id',
         packer = null,
-        masks = {},
-        defaults = [],
-        decoders = {},
-        encoders = {},
-        nameDecoder = $inflector.camelize,
-        nameEncoder = function(_v) { return $inflector.parameterize(_v, '_'); };
+        serializer = buildSerializer(),
+        defaults = [];
 
     // setup model identity
     if(_identity)
@@ -91,14 +86,9 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', '$filter', 'RMUti
         primaryKey = _key;
       },
 
-      // sets the model name decoder
-      $$setNameDecoder: function(_fun) {
-        nameDecoder = _fun;
-      },
-
-      // sets the model name encoder
-      $$setNameEncoder: function(_fun) {
-        nameEncoder = _fun;
+      // gets the model serializer
+      $$getSerializer: function() {
+        return serializer;
       },
 
       // sets the model packer
@@ -117,39 +107,6 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', '$filter', 'RMUti
       // sets an attrinute default value
       $$setDefault: function(_attr, _default) {
         defaults.push([_attr, _default]);
-      },
-
-      // sets an attrinute mask
-      $$setMask: function(_attr, _mask) {
-        if(!_mask) {
-          delete masks[_attr];
-        } else {
-          masks[_attr] = _mask === true ? Utils.FULL_MASK : _mask;
-        }
-      },
-
-      // sets an attrinute decoder
-      $$setDecoder: function(_attr, _filter, _filterParam, _chain) {
-
-        if(typeof _filter === 'string') {
-          var filter = $filter(_filter);
-          // TODO: if(!_filter) throw $setupError
-          _filter = function(_value) { return filter(_value, _filterParam); };
-        }
-
-        decoders[_attr] = _chain ? Utils.chain(decoders[_attr], _filter) : _filter;
-      },
-
-      // sets an attribute encoder
-      $$setEncoder: function(_attr, _filter, _filterParam, _chain) {
-
-        if(typeof _filter === 'string') {
-          var filter = $filter(_filter);
-          // TODO: if(!_filter) throw $setupError
-          _filter = function(_value) { return filter(_value, _filterParam); };
-        }
-
-        encoders[_attr] = _chain ? Utils.chain(encoders[_attr], _filter) : _filter;
       },
 
       // registers a new scope method (available at type and collection)
@@ -298,68 +255,11 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', '$filter', 'RMUti
         return _raw;
       },
 
-      // base transformation method used by $decode/$encode
-      $$transform: function (_data, _prefix, _mask, _decode, _into) {
-
-        var key, decodedName, encodedName, fullName, mask, filter, value, result = _into || {};
-
-        for(key in _data) {
-          if(_data.hasOwnProperty(key) && key[0] !== '$') {
-
-            decodedName = (_decode && nameDecoder) ? nameDecoder(key) : key;
-            fullName = _prefix + decodedName;
-
-            // skip property if masked for this operation
-            mask = masks[fullName];
-            if(mask && mask.indexOf(_mask) !== -1) {
-              continue;
-            }
-
-            value = _data[key];
-            filter = _decode ? decoders[fullName] : encoders[fullName];
-
-            if(filter) {
-              value = filter.call(this, value);
-              if(value === undefined) continue; // ignore value if filter returns undefined
-            } else if(typeof value === 'object' && value &&
-              (_decode || typeof value.toJSON !== 'function')) {
-              // IDEA: make extended decoding/encoding optional, could be a little taxing for some apps
-              value = transformExtended.call(this, value, fullName, _mask, _decode);
-            }
-
-            encodedName = (!_decode && nameEncoder) ? nameEncoder(decodedName) : decodedName;
-            result[encodedName] = value;
-          }
-        }
-
-        return result;
+      // gets the model default serializer
+      $$getSerializer: function() {
+        return serializer;
       }
     }, RecordApi, CommonApi);
-
-    // extended part of $$transform function, enables deep object transform.
-    var transformExtended = function(_data, _prefix, _mask, _decode) {
-      if(isArray(_data))
-      {
-        var fullName = _prefix + '[]',
-            filter = _decode ? decoders[fullName] : encoders[fullName],
-            result = [], i, l, value;
-
-        for(i = 0, l = _data.length; i < l; i++) {
-          value = _data[i];
-          if(filter) {
-            value = filter.call(this, value);
-          } else if(typeof value === 'object' && value &&
-            (_decode || typeof value.toJSON !== 'function')) {
-            value = transformExtended.call(this, value, _prefix, _mask, _decode);
-          }
-          result.push(value);
-        }
-
-        return result;
-      } else {
-        return this.$$transform(_data, _prefix + '.', _mask, _decode);
-      }
-    };
 
     ///// Setup collection api
 

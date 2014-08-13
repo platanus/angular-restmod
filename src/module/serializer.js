@@ -1,0 +1,212 @@
+'use strict';
+
+RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', 'RMUtils', function($injector, $inflector, $filter, Utils) {
+
+  function extract(_from, _path) {
+    var node;
+    for(var i = 0; _from && (node = _path[i]); i++) {
+      _from = _from[node];
+    }
+    return _from;
+  }
+
+  function insert(_into, _path, _value) {
+    for(var i = 0, l = _path.length-1; i < l; i++) {
+      var node = _path[i];
+      _into = _into[node] || (_into[node] = {});
+    }
+    _into[_path[_path.length-1]] = _value;
+  }
+
+  return function() {
+
+    var isArray = angular.isArray;
+
+    // Private serializer attributes
+    var masks = {},
+        decoders = {},
+        encoders = {},
+        mapped = {},
+        mappings = {},
+        nameDecoder = $inflector.camelize,
+        nameEncoder = function(_v) { return $inflector.parameterize(_v, '_'); };
+
+    function isMasked(_name, _mask) {
+      var mask = masks[_name];
+      return (mask && mask.indexOf(_mask) !== -1);
+    }
+
+    function decodeProp(_value, _name, _mask, _ctx) {
+      var filter = decoders[_name], result = _value;
+
+      if(filter) {
+        result = filter.call(_ctx, _value);
+      } else if(typeof _value === 'object') {
+        // IDEA: make extended decoding/encoding optional, could be a little taxing for some apps
+        if(isArray(_value)) {
+          result = [];
+          for(var i = 0, l = _value.length; i < l; i++) {
+            result.push(decodeProp(_value[i], _name + '[]', _mask, _ctx));
+          }
+        } else if(_value) {
+          result = {};
+          decode(_value, result, _name, _mask, _ctx);
+        }
+      }
+
+      return result;
+    }
+
+    function encodeProp(_value, _name, _mask, _ctx) {
+      var filter = encoders[_name], result = _value;
+
+      if(filter) {
+        result = filter.call(_ctx, _value);
+      } else if(typeof _value === 'object' && typeof _value.toJSON !== 'function') {
+        // IDEA: make extended decoding/encoding optional, could be a little taxing for some apps
+        if(isArray(_value)) {
+          result = [];
+          for(var i = 0, l = _value.length; i < l; i++) {
+            result.push(encodeProp(_value[i], _name + '[]', _mask, _ctx));
+          }
+        } else if(_value) {
+          result = {};
+          encode(_value, result, _name, _mask, _ctx);
+        }
+      }
+
+      return result;
+    }
+
+    function decode(_from, _to, _prefix, _mask, _ctx) {
+      var key, decodedName, fullName, value, maps,
+          prefix = _prefix ? _prefix + '.' : '';
+
+      for(key in _from) {
+        if(_from.hasOwnProperty(key) && key[0] !== '$') {
+          decodedName = nameDecoder ? nameDecoder(key) : key;
+
+          fullName = prefix + decodedName;
+          if(isMasked(fullName, _mask) || mapped[fullName]) continue;
+
+          value = decodeProp(_from[key], fullName, _mask, _ctx);
+          if(value !== undefined) _to[decodedName] = value; // ignore value if filter returns undefined
+        }
+      }
+
+      // process mappings for node:
+      maps = mappings[_prefix];
+      if(maps) {
+        for(var i = 0, l = maps.length; i < l; i++) {
+          fullName = prefix + maps[i].path;
+          if(isMasked(fullName, _mask)) continue;
+
+          value = extract(_from, maps[i].map);
+          value = decodeProp(value, fullName, _mask, _ctx);
+          if(value !== undefined) _to[maps[i].path] = value;
+        }
+      }
+    }
+
+    function encode(_from, _to, _prefix, _mask, _ctx) {
+      var key, fullName, encodedName, value, maps,
+          prefix = _prefix ? _prefix + '.' : '';
+
+      for(key in _from) {
+        if(_from.hasOwnProperty(key) && key[0] !== '$') {
+          fullName = prefix + key;
+          if(isMasked(fullName, _mask) || mapped[fullName]) continue;
+
+          value = encodeProp(_from[key], fullName, _mask, _ctx);
+          if(value !== undefined) {
+            encodedName = nameEncoder ? nameEncoder(key) : key;
+            _to[encodedName] = value;
+          }
+        }
+      }
+
+      // process mappings for node:
+      maps = mappings[_prefix];
+      if(maps) {
+        for(var i = 0, l = maps.length; i < l; i++) {
+          fullName = _prefix ? _prefix + '.' + maps[i].path : maps[i].path;
+          if(isMasked(fullName, _mask)) continue;
+
+          value = encodeProp(_from[maps[i].path], fullName, _mask, _ctx);
+          if(value !== undefined) insert(_to, maps[i].map, value);
+        }
+      }
+    }
+
+    return {
+
+      // sets the model name decoder
+      setNameDecoder: function(_fun) {
+        nameDecoder = _fun;
+      },
+
+      // sets the model name encoder
+      setNameEncoder: function(_fun) {
+        nameEncoder = _fun;
+      },
+
+      // specifies a single server to client property mapping
+      setMapping: function(_attr, _serverPath) {
+        // extract parent node from client name:
+        var index = _attr.lastIndexOf('.'),
+            node = index !== -1 ? _attr.substr(0, index) : '',
+            leaf = index !== -1 ? _attr.substr(index + 1) : _attr;
+
+        mapped[_attr] = true;
+        var nodes = (mappings[node] || (mappings[node] = []));
+        nodes.push({ path: leaf, map: _serverPath.split('.') });
+      },
+
+      // sets an attrinute mask
+      setMask: function(_attr, _mask) {
+        if(!_mask) {
+          delete masks[_attr];
+        } else {
+          masks[_attr] = _mask === true ? Utils.FULL_MASK : _mask;
+        }
+      },
+
+      // sets an attrinute decoder
+      setDecoder: function(_attr, _filter, _filterParam, _chain) {
+
+        if(typeof _filter === 'string') {
+          var filter = $filter(_filter);
+          // TODO: if(!_filter) throw $setupError
+          _filter = function(_value) { return filter(_value, _filterParam); };
+        }
+
+        decoders[_attr] = _chain ? Utils.chain(decoders[_attr], _filter) : _filter;
+      },
+
+      // sets an attribute encoder
+      setEncoder: function(_attr, _filter, _filterParam, _chain) {
+
+        if(typeof _filter === 'string') {
+          var filter = $filter(_filter);
+          // TODO: if(!_filter) throw $setupError
+          _filter = function(_value) { return filter(_value, _filterParam); };
+        }
+
+        encoders[_attr] = _chain ? Utils.chain(encoders[_attr], _filter) : _filter;
+      },
+
+      // decodes a raw record into a record
+      decode: function(_record, _raw, _mask) {
+        decode(_raw, _record, '', _mask, _record);
+      },
+
+      // encodes a record, returning a raw record
+      encode: function(_record, _mask) {
+        var raw = {};
+        encode(_record, raw, '', _mask, _record);
+        return raw;
+      }
+    };
+  };
+
+}]);

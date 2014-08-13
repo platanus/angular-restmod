@@ -62,6 +62,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    *
    * * `init` sets an attribute default value, see {@link BuilderApi#attrDefault}
    * * `mask` and `ignore` sets an attribute mask, see {@link BuilderApi#attrMask}
+   * * `map` sets an explicit server attribute mapping, see {@link BuilderApi#attrMap}
    * * `decode` sets how an attribute is decoded after being fetch, maps to {@link BuilderApi#attrDecoder}
    * * `encode` sets how an attribute is encoded before being sent, maps to {@link BuilderApi#attrEncoder}
    * * `serialize` sets the encoder and decoder beaviour for an attribute, maps to {@link BuilderApi#attrSerializer}
@@ -136,10 +137,12 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    */
   function BuilderDSL(_targetModel) {
     this.$$m = _targetModel;
+    this.$$s = _targetModel.$$getSerializer();
     this.$$mappings = {
       init: ['attrDefault'],
       mask: ['attrMask'],
       ignore: ['attrMask'],
+      map: ['attrMap'],
       decode: ['attrDecoder', 'param', 'chain'],
       encode: ['attrEncoder', 'param', 'chain'],
       serialize: ['attrSerializer'],
@@ -217,7 +220,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     setNameDecoder: function(_decoder) {
-      this.$$m.$$setNameDecoder(_decoder);
+      this.$$s.setNameDecoder(_decoder);
       return this;
     },
 
@@ -236,7 +239,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     setNameEncoder: function(_encoder) {
-      this.$$m.$$setNameEncoder(_encoder);
+      this.$$s.setNameEncoder(_encoder);
       return this;
     },
 
@@ -445,7 +448,29 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     attrMask: function(_attr, _mask) {
-      this.$$m.$$setMask(_attr, _mask);
+      this.$$s.setMask(_attr, _mask);
+      return this;
+    },
+
+    /**
+     * @memberof BuilderApi#
+     *
+     * @description Sets an attribute mapping.
+     *
+     * Allows a explicit server to model property mapping to be defined.
+     *
+     * For example, to map the response property `stats.created_at` to model's `created` property.
+     *
+     * ```javascript
+     * builder.attrMap('created', 'stats.created_at');
+     * ```
+     *
+     * @param {string} _attr Attribute name
+     * @param {string} _serverName Server (request/response) property name
+     * @return {BuilderApi} self
+     */
+    attrMap: function(_attr, _serverName) {
+      this.$$s.setMapping(_attr, _serverName);
       return this;
     },
 
@@ -470,8 +495,8 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
 
       // TODO: if(!_serializer) throw $setupError
       if(isFunction(_serializer)) _serializer = _serializer(_opt);
-      if(_serializer.decode) this.$$m.$$setDecoder(_name, bind(_serializer, _serializer.decode));
-      if(_serializer.encode) this.$$m.$$setEncoder(_name, bind(_serializer, _serializer.encode));
+      if(_serializer.decode) this.$$s.setDecoder(_name, bind(_serializer, _serializer.decode));
+      if(_serializer.encode) this.$$s.setEncoder(_name, bind(_serializer, _serializer.encode));
       return this;
     },
 
@@ -487,7 +512,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     attrDecoder: function(_name, _filter, _filterParam, _chain) {
-      this.$$m.$$setDecoder(_name, _filter, _filterParam, _chain);
+      this.$$s.setDecoder(_name, _filter, _filterParam, _chain);
       return this;
     },
 
@@ -503,7 +528,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     attrEncoder: function(_name, _filter, _filterParam, _chain) {
-      this.$$m.$$setEncoder(_name, _filter, _filterParam, _chain);
+      this.$$s.setEncoder(_name, _filter, _filterParam, _chain);
       return this;
     },
 
@@ -526,7 +551,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
           _model = $injector.get(_model);
 
           if(_inverseOf) {
-            _model.$$setMask(_inverseOf, Utils.WRITE_MASK);
+            _model.$$getSerializer().setMask(_inverseOf, Utils.WRITE_MASK);
           }
         }
 
@@ -550,10 +575,10 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
         return col;
       // simple support for inline data, TODO: maybe deprecate this.
       });
-      this.$$m.$$setDecoder(_source || _url || _attr, function(_raw) {
+      this.$$s.setDecoder(_source || _url || _attr, function(_raw) {
         this[_attr].$reset().$feed(_raw);
       });
-      this.$$m.$$setMask(_attr, Utils.WRITE_MASK);
+      this.$$s.setMask(_attr, Utils.WRITE_MASK);
 
       return this;
     },
@@ -578,7 +603,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
           _model = $injector.get(_model);
 
           if(_inverseOf) {
-            _model.$$setMask(_inverseOf, Utils.WRITE_MASK);
+            _model.$$getSerializer().setMask(_inverseOf, Utils.WRITE_MASK);
           }
         }
 
@@ -594,10 +619,10 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
         return inst;
       });
       // simple support for inline data, TODO: maybe deprecate this.
-      this.$$m.$$setDecoder(_source || _url || _attr, function(_raw) {
+      this.$$s.setDecoder(_source || _url || _attr, function(_raw) {
         this[_attr].$decode(_raw);
       });
-      this.$$m.$$setMask(_attr, Utils.WRITE_MASK);
+      this.$$s.setMask(_attr, Utils.WRITE_MASK);
 
       return this;
     },
@@ -620,8 +645,8 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
 
       var watch = _inline ? (_source || _attr) : (_key || (_attr + 'Id'));
       this.$$m.$$setDefault(_attr, null);
-      this.$$m.$$setMask(_attr, Utils.WRITE_MASK);
-      this.$$m.$$setDecoder(watch , function(_raw) {
+      this.$$s.setMask(_attr, Utils.WRITE_MASK);
+      this.$$s.setDecoder(watch , function(_raw) {
 
         // load model
         if(typeof _model === 'string') {
