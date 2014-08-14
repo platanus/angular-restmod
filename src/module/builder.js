@@ -147,7 +147,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
       encode: ['attrEncoder', 'param', 'chain'],
       serialize: ['attrSerializer'],
       // relations
-      hasMany: ['attrAsCollection', 'path', 'source', 'inverseOf'],
+      hasMany: ['attrAsCollection', 'path', 'source', 'inverseOf'], // TODO: rename source to map, but disable attrMap if map is used here...
       hasOne: ['attrAsResource', 'path', 'source', 'inverseOf'],
       belongsTo: ['attrAsReference', 'inline', 'key', 'source', 'prefetch']
     };
@@ -575,7 +575,9 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
         return col;
       // simple support for inline data, TODO: maybe deprecate this.
       });
-      this.$$s.setDecoder(_source || _url || _attr, function(_raw) {
+
+      if(_source || _url) this.$$s.setMapping(_attr, _source || _url);
+      this.$$s.setDecoder(_attr, function(_raw) {
         this[_attr].$reset().$feed(_raw);
       });
       this.$$s.setMask(_attr, Utils.WRITE_MASK);
@@ -618,8 +620,9 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
 
         return inst;
       });
-      // simple support for inline data, TODO: maybe deprecate this.
-      this.$$s.setDecoder(_source || _url || _attr, function(_raw) {
+
+      if(_source || _url) this.$$s.setMapping(_attr, _source || _url);
+      this.$$s.setDecoder(_attr, function(_raw) {
         this[_attr].$decode(_raw);
       });
       this.$$s.setMask(_attr, Utils.WRITE_MASK);
@@ -643,10 +646,10 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      */
     attrAsReference: function(_attr, _model, _inline, _key, _source, _prefetch) {
 
-      var watch = _inline ? (_source || _attr) : (_key || (_attr + 'Id'));
       this.$$m.$$setDefault(_attr, null);
       this.$$s.setMask(_attr, Utils.WRITE_MASK);
-      this.$$s.setDecoder(watch , function(_raw) {
+      if(!_inline || _source) this.$$s.setMapping(_attr, _inline ? _source : _key || (_attr + 'Id'));
+      this.$$s.setDecoder(_attr , function(_raw) {
 
         // load model
         if(typeof _model === 'string') {
