@@ -2,14 +2,14 @@
 
 describe('Restmod model class:', function() {
 
-  var $httpBackend, $restmod, Bike, query;
+  var $httpBackend, restmod, Bike, query;
 
   beforeEach(module('restmod'));
 
   beforeEach(inject(function($injector) {
     $httpBackend = $injector.get('$httpBackend');
-    $restmod = $injector.get('$restmod');
-    Bike = $restmod.model('/api/bikes');
+    restmod = $injector.get('restmod');
+    Bike = restmod.model('/api/bikes');
     query = Bike.$collection();
   }));
 
@@ -135,28 +135,28 @@ describe('Restmod model class:', function() {
   describe('$decode', function() {
 
     it('should rename all snake case attributes by default', function() {
-      var bike = $restmod.model(null).$build();
+      var bike = restmod.model(null).$build();
       bike.$decode({ snake_case: true });
       expect(bike.snake_case).toBeUndefined();
       expect(bike.snakeCase).toBeDefined();
     });
 
     it('should rename nested values', function() {
-      var bike = $restmod.model(null).$build();
+      var bike = restmod.model(null).$build();
       bike.$decode({ nested: { snake_case: true } });
       expect(bike.nested.snake_case).toBeUndefined();
       expect(bike.nested.snakeCase).toBeDefined();
     });
 
     it('should rename nested object arrays', function() {
-      var bike = $restmod.model(null).$build();
+      var bike = restmod.model(null).$build();
       bike.$decode({ nested: [ { snake_case: true } ] });
       expect(bike.nested[0].snake_case).toBeUndefined();
       expect(bike.nested[0].snakeCase).toBeDefined();
     });
 
     it('should allow server simple property mapping', function() {
-      var bike = $restmod.model(null, {
+      var bike = restmod.model(null, {
         brand: { map: 'full_brand' },
       }).$build().$decode({ full_brand: 'Trek' });
 
@@ -167,7 +167,7 @@ describe('Restmod model class:', function() {
     });
 
     it('should allow server nested property mapping', function() {
-      var bike = $restmod.model(null, {
+      var bike = restmod.model(null, {
         brand: { map: 'brand.full_name' }
       }).$build().$decode({ brand: { full_name: 'Trek' } });
 
@@ -178,7 +178,7 @@ describe('Restmod model class:', function() {
     });
 
     it('should allow server nested property mapping inside ignored property', function() {
-      var bike = $restmod.model(null, {
+      var bike = restmod.model(null, {
         brand: { ignore: true },
         brandName: { map: 'brand.full_name' }
       }).$build().$decode({ brand: { full_name: 'Trek' } });
@@ -188,7 +188,7 @@ describe('Restmod model class:', function() {
     });
 
     it('should allow server nested property mapping inside an array', function() {
-      var bike = $restmod.model(null, {
+      var bike = restmod.model(null, {
         'allParts[].brand': { map: 'brand_name' }
       }).$build().$decode({
         all_parts: [
@@ -202,7 +202,7 @@ describe('Restmod model class:', function() {
     });
 
     it('should allow decoders on mapped properties', function() {
-      var bike = $restmod.model(null, {
+      var bike = restmod.model(null, {
         brand: { map: 'full_brand', decode: function(v) { return v + '!'; } }
       }).$build().$decode({ full_brand: 'Trek' });
 
@@ -210,7 +210,7 @@ describe('Restmod model class:', function() {
     });
 
     it('should skip masked properties', function() {
-      var bike = $restmod.model(null, {
+      var bike = restmod.model(null, {
         imMasked: { ignore: 'R' },
         imMaskedToo: { ignore: true },
         imNotMasked: { ignore: 'U' }
@@ -225,7 +225,7 @@ describe('Restmod model class:', function() {
     });
 
     it('should apply registered decoders', function() {
-      var bike = $restmod.model(null, function() {
+      var bike = restmod.model(null, function() {
         this.attrDecoder('size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
       }).$build();
 
@@ -234,7 +234,7 @@ describe('Restmod model class:', function() {
     });
 
     it('should apply decoders to nested values', function() {
-      var bike = $restmod.model(null, function() {
+      var bike = restmod.model(null, function() {
         this.attrDecoder('user.name', function(_name) { return 'Mr. ' + _name; });
       }).$build();
 
@@ -243,7 +243,7 @@ describe('Restmod model class:', function() {
     });
 
     it('should apply decoders to values in nested arrays', function() {
-      var bike = $restmod.model(null, function() {
+      var bike = restmod.model(null, function() {
         this.attrDecoder('users[].name', function(_name) { return 'Mr. ' + _name; });
       }).$build();
 
@@ -263,7 +263,7 @@ describe('Restmod model class:', function() {
     });
 
     it('should rename nested values', function() {
-      var bike = $restmod.model(null).$build({ user: { lastName: 'Peat' } }),
+      var bike = restmod.model(null).$build({ user: { lastName: 'Peat' } }),
           raw = bike.$encode();
 
       expect(raw.user.lastName).toBeUndefined();
@@ -271,7 +271,7 @@ describe('Restmod model class:', function() {
     });
 
     it('should skip masked properties', function() {
-      var bike = $restmod.model(null, {
+      var bike = restmod.model(null, {
         imMasked: { ignore: 'C' },
         imMaskedToo: { ignore: true },
         imNotMasked: { ignore: 'R' }
@@ -290,7 +290,7 @@ describe('Restmod model class:', function() {
     });
 
     it('should apply registered encoders', function() {
-      var bike = $restmod.model(null, function() {
+      var bike = restmod.model(null, function() {
         this.attrEncoder('size', function(_val) { return _val === 'small' ? 'S' : 'M'; });
       }).$build({ size: 'small' });
 
@@ -299,15 +299,15 @@ describe('Restmod model class:', function() {
 
     it('should not encode objects with a toJSON implementation', function() {
       var now = new Date(),
-          bike = $restmod.model(null).$build({ created: now }),
+          bike = restmod.model(null).$build({ created: now }),
           raw = bike.$encode();
 
       expect(raw.created instanceof Date).toBeTruthy();
     });
 
     it('should ignore relations', function() {
-      var User = $restmod.model(null),
-          bike = $restmod
+      var User = restmod.model(null),
+          bike = restmod
             .model(null, { user: { hasOne: User } })
             .$buildRaw({ user: { name: 'Petty' }, size: 'M'}),
           raw = bike.$encode();
@@ -316,7 +316,7 @@ describe('Restmod model class:', function() {
     });
 
     it('should ignore angular private properties (prefixed with $$)', function() {
-      var bike = $restmod.model(null).$build({ brand: 'Commencal', $$hashKey: '00F' }),
+      var bike = restmod.model(null).$build({ brand: 'Commencal', $$hashKey: '00F' }),
           raw = bike.$encode();
 
       expect(raw.brand).toBeDefined();
@@ -328,7 +328,7 @@ describe('Restmod model class:', function() {
 
     it('should call the packer unpack method if a packer is provided', function() {
       var spy = jasmine.createSpy();
-      var bike = $restmod.model('/api/bikes', function() {
+      var bike = restmod.model('/api/bikes', function() {
         this.setPacker({
           unpack: spy
         });
@@ -352,7 +352,7 @@ describe('Restmod model class:', function() {
 
     it('should call the packer pack method if a packer is provided', function() {
       var spy = jasmine.createSpy();
-      var bike = $restmod.model('/api/bikes', function() {
+      var bike = restmod.model('/api/bikes', function() {
         this.setPacker({
           pack: spy
         });

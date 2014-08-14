@@ -5,9 +5,9 @@ describe('Restmod builder:', function() {
   beforeEach(module('restmod'));
 
   var Bike;
-  var $restmod, $httpBackend;
+  var restmod, $httpBackend;
   beforeEach(inject(function($injector) {
-    $restmod = $injector.get('$restmod');
+    restmod = $injector.get('restmod');
     $httpBackend = $injector.get('$httpBackend');
 
     $httpBackend.when('GET', '/api/bikes/1').respond(200, { 'dropper_seat': true });
@@ -16,7 +16,7 @@ describe('Restmod builder:', function() {
   describe('setUrlPrefix', function() {
 
     beforeEach(function() {
-      Bike = $restmod.model('/bikes', function() {
+      Bike = restmod.model('/bikes', function() {
         this.setUrlPrefix('/api');
       });
     });
@@ -33,7 +33,7 @@ describe('Restmod builder:', function() {
 
   describe('setPrimaryKey', function() {
     beforeEach(function() {
-      Bike = $restmod.model('/bikes', function() {
+      Bike = restmod.model('/bikes', function() {
         this.setPrimaryKey('my_id');
       });
     });
@@ -47,7 +47,7 @@ describe('Restmod builder:', function() {
   describe('disableRenaming', function() {
 
     beforeEach(function() {
-      Bike = $restmod.model('/api/bikes', function() {
+      Bike = restmod.model('/api/bikes', function() {
         this.disableRenaming();
       });
     });
@@ -63,7 +63,7 @@ describe('Restmod builder:', function() {
   describe('setNameDecoder', function() {
 
     beforeEach(function() {
-      Bike = $restmod.model('/api/bikes', function() {
+      Bike = restmod.model('/api/bikes', function() {
         this.setNameDecoder(function(_name) { return '_' + _name; });
       });
     });
@@ -79,7 +79,7 @@ describe('Restmod builder:', function() {
   describe('setNameEncoder', function() {
 
     beforeEach(function() {
-      Bike = $restmod.model('/api/bikes', function() {
+      Bike = restmod.model('/api/bikes', function() {
         this.setNameDecoder(function(_name) { return _name.substr(1); });
       });
     });
@@ -95,7 +95,7 @@ describe('Restmod builder:', function() {
 
   describe('OD prefix: @', function() {
     it('should register a new class ', function() {
-      var Bike = $restmod.model(null, {
+      var Bike = restmod.model(null, {
         '@classMethod': function() {
           return 'teapot';
         }
@@ -107,7 +107,7 @@ describe('Restmod builder:', function() {
 
   describe('OD prefix: ~', function() {
     it('should register a new hook callback ', function() {
-      var Bike = $restmod.model(null, {
+      var Bike = restmod.model(null, {
         '~afterFeed': function() {
           this.teapot = true;
         }

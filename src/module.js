@@ -4,19 +4,19 @@
 var RMModule = angular.module('restmod', ['ng', 'platanus.inflector']);
 
 /**
- * @class $restmodProvider
+ * @class restmodProvider
  *
  * @description
  *
- * The $restmodProvider exposes $restmod configuration methods
+ * The restmodProvider exposes restmod configuration methods
  */
-RMModule.provider('$restmod', [function() {
+RMModule.provider('restmod', [function() {
 
   var BASE_CHAIN = []; // The base mixin chain
 
   return {
     /**
-     * @memberof $restmodProvider#
+     * @memberof restmodProvider#
      *
      * @description
      *
@@ -39,7 +39,7 @@ RMModule.provider('$restmod', [function() {
     },
 
     /**
-     * @class $restmod
+     * @class restmod
      *
      * @description
      *
@@ -51,19 +51,19 @@ RMModule.provider('$restmod', [function() {
 
       var restmod = {
         /**
-         * @memberOf $restmod#
+         * @memberOf restmod#
          *
          * @description
          *
-         * The model factory is used to generate new $restmod model types. It's recommended to put models inside factories,
+         * The model factory is used to generate new restmod model types. It's recommended to put models inside factories,
          * this is usefull later when defining relations and inheritance, since the angular $injector is used by
          * these features. It's also the angular way of doing things.
          *
          * A simple model can be built like this:
          *
          * ```javascript
-         * angular.module('bike-app').factory('Bike', function($restmod) {
-         *   return $restmod.model('/bikes');
+         * angular.module('bike-app').factory('Bike', function(restmod) {
+         *   return restmod.model('/bikes');
          * });
          *```
          *
@@ -76,7 +76,7 @@ RMModule.provider('$restmod', [function() {
          * * A definition object (more on this at the {@link BuilderApi}):
          *
          * ```javascript
-         * $restmod.model('/bikes', {
+         * restmod.model('/bikes', {
          *   viewed: { init: false },
          *   parts: { hasMany: 'Part' },
          *   '~afterCreate': function() {
@@ -88,7 +88,7 @@ RMModule.provider('$restmod', [function() {
          * * A definition function (more on this at the {@link BuilderApi}):
          *
          * ```javascript
-         * $restmod.model('/bikes', function() {
+         * restmod.model('/bikes', function() {
          *   this.attrDefault('viewed', false);
          *   this.attrMask('id', 'CU');
          * });
@@ -97,13 +97,13 @@ RMModule.provider('$restmod', [function() {
          * * A mixin (generated using the mixin method) or model factory name:
          *
          * ```javascript
-         * $restmod.model('/bikes', 'BaseModel', 'PagedModel');
+         * restmod.model('/bikes', 'BaseModel', 'PagedModel');
          *```
          *
          * * A mixin (generated using the mixin method) or model object:
          *
          * ```javascript
-         * $restmod.model('/bikes', BaseModel, PagedModel);
+         * restmod.model('/bikes', BaseModel, PagedModel);
          * ```
          *
          * @param {string} _url Resource url.
@@ -124,15 +124,15 @@ RMModule.provider('$restmod', [function() {
         },
 
         /**
-         * @memberOf $restmod#
+         * @memberOf restmod#
          *
          * @description
          *
          * The mixin factory is used to pack model behaviors without the overload of generating a new
-         * model. The mixin can then be passed as argument to a call to {@link $restmod#model#model}
+         * model. The mixin can then be passed as argument to a call to {@link restmod#model#model}
          * to extend the model capabilities.
          *
-         * A mixin can also be passed to the {@link $restmodProvider#pushModelBase} method to provide
+         * A mixin can also be passed to the {@link restmodProvider#pushModelBase} method to provide
          * a base behavior for all generated models.
          *
          * @param {mixed} _mix One or more mixins, description objects or description blocks.
@@ -143,13 +143,13 @@ RMModule.provider('$restmod', [function() {
         },
 
         /**
-         * @memberOf $restmod#
+         * @memberOf restmod#
          *
          * @description
          *
          * Shorcut method used to create singleton resources.
          *
-         * Same as calling `$restmod.model(null).$single(_url)`
+         * Same as calling `restmod.model(null).$single(_url)`
          *
          * Check the {@link StaticApi#$single} documentation for more information.
          *
@@ -166,9 +166,9 @@ RMModule.provider('$restmod', [function() {
     }]
   };
 }])
-.factory('model', ['$restmod', function($restmod) {
-  return $restmod.model;
+.factory('model', ['restmod', function(restmod) {
+  return restmod.model;
 }])
-.factory('mixin', ['$restmod', function($restmod) {
-  return $restmod.mixin;
+.factory('mixin', ['restmod', function(restmod) {
+  return restmod.mixin;
 }]);

@@ -6,9 +6,9 @@
 
 'use strict';
 
-angular.module('restmod').factory('DirtyModel', ['$restmod', function($restmod) {
+angular.module('restmod').factory('DirtyModel', ['restmod', function(restmod) {
 
-  return $restmod.mixin(function() {
+  return restmod.mixin(function() {
     this.on('after-feed', function(_original) {
           // store original information in a model's special property
           var original = this.$cmStatus = {};

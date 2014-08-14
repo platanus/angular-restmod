@@ -35,7 +35,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
      * Usage:
      *
      * ```javascript
-     * var mixin = $restmod.mixin({
+     * var mixin = restmod.mixin({
      *   triggerDummy: function(_param) {
      *     this.$dispatch('dummy-hook', _param);
      *   }
@@ -132,7 +132,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
      *
      * ```javascript
      * // special fetch method that sends a special token header.
-     * $restmod.mixin({
+     * restmod.mixin({
      *   $fetchWithToken: function(_token) {
      *     return this.$decorate({
      *       'before-fetch': function(_req) {
@@ -183,7 +183,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
      * Usage:
      *
      * ```javascript
-     * $restmod.mixin({
+     * restmod.mixin({
      *   $saveAndTrack: function() {
      *     var dsp = this.$dispatcher(), // capture the current dispatcher function.
      *         self = this;

@@ -2,16 +2,16 @@
 
 describe('Restmod model class:', function() {
 
-  var $restmod;
+  var restmod;
 
   beforeEach(module('restmod'));
   beforeEach(inject(function($injector) {
-    $restmod = $injector.get('$restmod');
+    restmod = $injector.get('restmod');
   }));
 
   describe('model', function() {
     it('should create a resource ', function() {
-      var Bike = $restmod.model('/user/bike', {}, {});
+      var Bike = restmod.model('/user/bike', {}, {});
       expect(Bike.$url()).toEqual('/user/bike');
       expect(Bike.$name()).toEqual('bike');
       // expect(Bike.$name(true)).toEqual('bikes');
@@ -20,7 +20,7 @@ describe('Restmod model class:', function() {
     });
 
     it('should create a resource ', function() {
-      var Bike = $restmod.model('/user/bike', {}, {});
+      var Bike = restmod.model('/user/bike', {}, {});
       expect(Bike.$url()).toEqual('/user/bike');
       expect(Bike.$chain.length).toEqual(2);
     });
@@ -28,14 +28,14 @@ describe('Restmod model class:', function() {
 
   describe('mixin', function() {
     it('should create a mixin module', function() {
-      var Bike = $restmod.mixin({}, {});
+      var Bike = restmod.mixin({}, {});
       expect(Bike.$chain.length).toEqual(2);
     });
   });
 
   describe('singleton', function() {
     it('should create a singleton resource', function() {
-      var bike = $restmod.singleton('/user/bike', {}, {});
+      var bike = restmod.singleton('/user/bike', {}, {});
       expect(bike.$url()).toEqual('/user/bike');
       expect(bike.$type.$chain.length).toEqual(2);
     });

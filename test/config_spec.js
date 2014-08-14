@@ -6,14 +6,14 @@ describe('Restmod builder:', function() {
 
   describe('pushModelBase', function() {
 
-    beforeEach(module(function($restmodProvider) {
-      $restmodProvider.pushModelBase({
+    beforeEach(module(function(restmodProvider) {
+      restmodProvider.pushModelBase({
         createdAt: { init: 10 }
       });
     }));
 
-    it('should modify the mixin chain of every model', inject(function($restmod) {
-      var bike = $restmod.model('/api/bikes').$build({ brand: 'Merida' });
+    it('should modify the mixin chain of every model', inject(function(restmod) {
+      var bike = restmod.model('/api/bikes').$build({ brand: 'Merida' });
       expect(bike.createdAt).toBeDefined();
     }));
   });

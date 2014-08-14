@@ -64,7 +64,7 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', 'RMUtils', 'RMSco
      *
      * @description
      *
-     * The $restmod type API, every generated $restmod model type exposes this API.
+     * The restmod type API, every generated restmod model type exposes this API.
      *
      * @property {object} $type Reference to the type itself, for compatibility with the {@link ScopeApi}
      *
@@ -170,8 +170,8 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', 'RMUtils', 'RMSco
        * This can be used to create singleton resources:
        *
        * ```javascript
-       * module('BikeShop', []).factory('Status', function($restmod) {
-       *   return $restmod.model(null).$single('/api/status');
+       * module('BikeShop', []).factory('Status', function(restmod) {
+       *   return restmod.model(null).$single('/api/status');
        * };)
        * ```
        *

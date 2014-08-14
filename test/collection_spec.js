@@ -2,14 +2,14 @@
 
 describe('Restmod collection:', function() {
 
-  var $restmod, $httpBackend, Bike, query;
+  var restmod, $httpBackend, Bike, query;
 
   beforeEach(module('restmod'));
 
   beforeEach(inject(function($injector) {
-    $restmod = $injector.get('$restmod');
+    restmod = $injector.get('restmod');
 
-    Bike = $restmod.model('/api/bikes');
+    Bike = restmod.model('/api/bikes');
     query = Bike.$collection({ brand: 'trek' });
 
     // mock api
@@ -255,7 +255,7 @@ describe('Restmod collection:', function() {
       var packer = { unpackMany: null };
       spyOn(packer, 'unpackMany').andReturn([]);
 
-      var bikes = $restmod.model('/api/bikes', function() {
+      var bikes = restmod.model('/api/bikes', function() {
         this.setPacker(packer);
       }).$collection();
 

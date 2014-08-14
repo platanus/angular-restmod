@@ -24,7 +24,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    * A model description object looks like this:
    *
    * ```javascript
-   * $restmod.model('', {
+   * restmod.model('', {
    *
    *   // ATTRIBUTE MODIFIERS
    *
@@ -74,7 +74,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    * description properties:
    *
    * ```javascript
-   * var Model = $restmod.model('/', {
+   * var Model = restmod.model('/', {
    *   sayHello: function() { alert('hello!'); }
    * })
    *
@@ -86,7 +86,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    * then it is considered to be a default value. (same as calling {@link BuilderApi#define} at a definition function)
    *
    * ```javascript
-   * var Model = $restmod.model('/', {
+   * var Model = restmod.model('/', {
    *   im20: 20 // same as { init: 20 }
    * })
    *
@@ -98,7 +98,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    * (same as calling {@link BuilderApi#classDefine} at a definition function).
    *
    * ```javascript
-   * var Model = $restmod.model('/', {
+   * var Model = restmod.model('/', {
    *   '@sayHello': function() { alert('hello!'); }
    * })
    *
@@ -111,7 +111,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    * property name matches the event name (same as calling {@link BuilderApi#on} at a definition function).
    *
    * ```javascript
-   * var Model = $restmod.model('/', {
+   * var Model = restmod.model('/', {
    *   '~afterInit': function() { alert('hello!'); }
    * })
    *
@@ -125,7 +125,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    * in this page can be called from the definition function by referencing *this*.
    *
    * ```javascript
-   * $restmod.model('', function() {
+   * restmod.model('', function() {
    *   this.attrDefault('propWithDefault', 20)
    *       .attrAsCollection('hasManyRelation', 'ModelName')
    *       .on('after-create', function() {
@@ -172,11 +172,11 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * Usage:
      *
      * ```javascript
-     * var BaseModel = $restmod.mixin(function() {
+     * var BaseModel = restmod.mixin(function() {
      *   this.setUrlPrefix('/api');
      * })
      *
-     * var bike = $restmod.model('/bikes', BaseModel).$build({ id: 1 });
+     * var bike = restmod.model('/bikes', BaseModel).$build({ id: 1 });
      * console.log(bike.$url()) // outputs '/api/bikes/1'
      * ```
      *

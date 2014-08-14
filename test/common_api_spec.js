@@ -2,15 +2,15 @@
 
 describe('Restmod model class:', function() {
 
-  var $httpBackend, $restmod, $rootScope, Bike, query;
+  var $httpBackend, restmod, $rootScope, Bike, query;
 
   beforeEach(module('restmod'));
 
   beforeEach(inject(function($injector) {
     $httpBackend = $injector.get('$httpBackend');
-    $restmod = $injector.get('$restmod');
+    restmod = $injector.get('restmod');
     $rootScope = $injector.get('$rootScope');
-    Bike = $restmod.model('/api/bikes');
+    Bike = restmod.model('/api/bikes');
     query = Bike.$collection();
   }));
 

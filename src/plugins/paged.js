@@ -8,7 +8,7 @@
  * Just add mixin to a model's mixin chain
  *
  * ```javascript
- * var Bike = $restmod.model('api/bikes', 'PagedModel');
+ * var Bike = restmod.model('api/bikes', 'PagedModel');
  * ```
  *
  * Then using fetch on a collection bound to a paged api should provide page information
@@ -24,7 +24,7 @@
  * override the $pageHeader or the $pageCountHeader definition during model building.
  *
  * ```javascript
- * $restmod.model('PagedModel', function() {
+ * restmod.model('PagedModel', function() {
  *  this.define('$pageHeader', 'X-My-Page-Header');
  * })
  * ```
@@ -33,9 +33,9 @@
 
 'use strict';
 
-angular.module('restmod').factory('PagedModel', ['$restmod', function($restmod) {
+angular.module('restmod').factory('PagedModel', ['restmod', function(restmod) {
 
-  return $restmod.mixin({
+  return restmod.mixin({
     '@$pageHeader': 'X-Page',
     '@$pageCountHeader': 'X-Page-Total',
     '~afterFetchMany': function(_response) {

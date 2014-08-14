@@ -2,26 +2,26 @@
 
 describe('Restmod model relation:', function() {
 
-  var $httpBackend, $restmod, $injector, Bike;
+  var $httpBackend, restmod, $injector, Bike;
 
   beforeEach(module('restmod'));
 
   // generate a dummy module
   beforeEach(module(function($provide) {
-    $provide.factory('Part', function($restmod) {
-      return $restmod.model('/api/parts');
+    $provide.factory('Part', function(restmod) {
+      return restmod.model('/api/parts');
     });
 
-    $provide.factory('BikeRide', function($restmod) {
-      return $restmod.model(null);
+    $provide.factory('BikeRide', function(restmod) {
+      return restmod.model(null);
     });
 
-    $provide.factory('User', function($restmod) {
-      return $restmod.model('/api/users');
+    $provide.factory('User', function(restmod) {
+      return restmod.model('/api/users');
     });
 
-    $provide.factory('SerialNo', function($restmod) {
-      return $restmod.model(null);
+    $provide.factory('SerialNo', function(restmod) {
+      return restmod.model(null);
     });
   }));
 
@@ -29,13 +29,13 @@ describe('Restmod model relation:', function() {
   beforeEach(inject(['$injector', function(_$injector) {
     $injector = _$injector;
     $httpBackend = $injector.get('$httpBackend');
-    $restmod = $injector.get('$restmod');
+    restmod = $injector.get('restmod');
   }]));
 
   describe('hasMany', function() {
 
     beforeEach(function() {
-      Bike = $restmod.model('/api/bikes', {
+      Bike = restmod.model('/api/bikes', {
         allParts: { hasMany: 'Part' },
         activity: { hasMany: 'BikeRide', path: 'rides', inverseOf: 'bike' }
       });
@@ -99,7 +99,7 @@ describe('Restmod model relation:', function() {
   describe('hasOne', function() {
 
     beforeEach(function() {
-      Bike = $restmod.model('/api/bikes', {
+      Bike = restmod.model('/api/bikes', {
         owner: { hasOne: 'User' },
         activity: { hasMany: 'BikeRide' },
         serialNo: { hasOne: 'SerialNo', path: 'serial', inverseOf: 'bike' }
@@ -172,7 +172,7 @@ describe('Restmod model relation:', function() {
   describe('referenceTo', function() {
 
     beforeEach(function() {
-      Bike = $restmod.model('/api/bikes', {
+      Bike = restmod.model('/api/bikes', {
         frame: { belongsTo: 'Part' },
         user: { belongsTo: 'User', key: 'ownerId' }
       });
@@ -211,7 +211,7 @@ describe('Restmod model relation:', function() {
   describe('belongsTo inline', function() {
 
     beforeEach(function() {
-      Bike = $restmod.model('/api/bikes', {
+      Bike = restmod.model('/api/bikes', {
         frame: { belongsTo: 'Part', inline: true },
         user: { belongsTo: 'User', inline: true, source: 'owner' }
       });

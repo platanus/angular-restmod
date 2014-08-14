@@ -8,7 +8,7 @@
  * First add mixin to a model's mixin chain
  *
  * ```javascript
- * var Bike = $restmod.model('api/bikes', 'DebouncedModel'),
+ * var Bike = restmod.model('api/bikes', 'DebouncedModel'),
  *     bike = Bike.build({ id: 1, brand: 'Yeti' });
  * ```
  *
@@ -35,7 +35,7 @@
 
 var isObject = angular.isObject;
 
-angular.module('restmod').factory('DebouncedModel', ['$restmod', '$timeout', '$q', function($restmod, $timeout, $q) {
+angular.module('restmod').factory('DebouncedModel', ['restmod', '$timeout', '$q', function(restmod, $timeout, $q) {
 
   // builds a new async save function bound to a given context and promise.
   function buildAsyncSaveFun(_this, _oldSave, _promise, _oldPromise) {
@@ -61,7 +61,7 @@ angular.module('restmod').factory('DebouncedModel', ['$restmod', '$timeout', '$q
     };
   }
 
-  return $restmod.mixin(function() {
+  return restmod.mixin(function() {
     this.define('$dmTimeout', 500)
         .define('$dmAdjourn', true)
 
@@ -72,7 +72,7 @@ angular.module('restmod').factory('DebouncedModel', ['$restmod', '$timeout', '$q
          * @description ModelBuilder extension that allows model debounce configuration.
          *
          * ```javascript
-         * $restmod.model(null, function() {
+         * restmod.model(null, function() {
          *   // Sets 1000ms timeout and no rescheduling for this and child models
          *   this.setDebounceOptions({ timeout: 1000, adjourn: false });
          * });

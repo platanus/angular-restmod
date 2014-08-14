@@ -6,10 +6,10 @@ describe('Plugin: Dirty Model', function() {
 
   beforeEach(module('restmod'));
 
-  beforeEach(module(function($provide, $restmodProvider) {
-    $restmodProvider.pushModelBase('DirtyModel');
-    $provide.factory('Bike', function($restmod) {
-      return $restmod.model('/api/bikes');
+  beforeEach(module(function($provide, restmodProvider) {
+    restmodProvider.pushModelBase('DirtyModel');
+    $provide.factory('Bike', function(restmod) {
+      return restmod.model('/api/bikes');
     });
   }));
 
