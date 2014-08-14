@@ -4,7 +4,7 @@ describe('Restmod model class:', function() {
 
   var $httpBackend, $restmod, Bike, query;
 
-  beforeEach(module('plRestmod'));
+  beforeEach(module('restmod'));
 
   beforeEach(inject(function($injector) {
     $httpBackend = $injector.get('$httpBackend');

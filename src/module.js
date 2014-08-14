@@ -1,7 +1,7 @@
 'use strict';
 
 // Preload some angular stuff
-var RMModule = angular.module('plRestmod', ['ng', 'platanus.inflector']);
+var RMModule = angular.module('restmod', ['ng', 'platanus.inflector']);
 
 /**
  * @class $restmodProvider

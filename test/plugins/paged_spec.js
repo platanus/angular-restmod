@@ -2,7 +2,7 @@
 
 describe('Plugin: Paged Model', function() {
 
-  beforeEach(module('plRestmod'));
+  beforeEach(module('restmod'));
 
   beforeEach(module(function($provide, $restmodProvider) {
     $restmodProvider.pushModelBase('PagedModel');

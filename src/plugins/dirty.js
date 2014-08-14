@@ -6,7 +6,7 @@
 
 'use strict';
 
-angular.module('plRestmod').factory('DirtyModel', ['$restmod', function($restmod) {
+angular.module('restmod').factory('DirtyModel', ['$restmod', function($restmod) {
 
   return $restmod.mixin(function() {
     this.on('after-feed', function(_original) {

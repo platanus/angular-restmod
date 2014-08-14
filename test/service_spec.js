@@ -4,7 +4,7 @@ describe('Restmod model class:', function() {
 
   var $restmod;
 
-  beforeEach(module('plRestmod'));
+  beforeEach(module('restmod'));
   beforeEach(inject(function($injector) {
     $restmod = $injector.get('$restmod');
   }));

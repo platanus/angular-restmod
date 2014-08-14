@@ -35,7 +35,7 @@
 
 var isObject = angular.isObject;
 
-angular.module('plRestmod').factory('DebouncedModel', ['$restmod', '$timeout', '$q', function($restmod, $timeout, $q) {
+angular.module('restmod').factory('DebouncedModel', ['$restmod', '$timeout', '$q', function($restmod, $timeout, $q) {
 
   // builds a new async save function bound to a given context and promise.
   function buildAsyncSaveFun(_this, _oldSave, _promise, _oldPromise) {

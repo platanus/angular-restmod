@@ -1,4 +1,4 @@
-<!-- load: plRestmod -->
+<!-- load: restmod -->
 <!-- provide: $provide -->
 <!-- inject: $httpBackend -->
 <!-- inject: $injector -->

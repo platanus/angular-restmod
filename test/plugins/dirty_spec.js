@@ -4,7 +4,7 @@ describe('Plugin: Dirty Model', function() {
 
   var bike;
 
-  beforeEach(module('plRestmod'));
+  beforeEach(module('restmod'));
 
   beforeEach(module(function($provide, $restmodProvider) {
     $restmodProvider.pushModelBase('DirtyModel');

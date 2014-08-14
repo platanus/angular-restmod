@@ -4,7 +4,7 @@ describe('Restmod model relation:', function() {
 
   var $httpBackend, $restmod, $injector, Bike;
 
-  beforeEach(module('plRestmod'));
+  beforeEach(module('restmod'));
 
   // generate a dummy module
   beforeEach(module(function($provide) {

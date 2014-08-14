@@ -33,7 +33,7 @@
 
 'use strict';
 
-angular.module('plRestmod').factory('PagedModel', ['$restmod', function($restmod) {
+angular.module('restmod').factory('PagedModel', ['$restmod', function($restmod) {
 
   return $restmod.mixin({
     '@$pageHeader': 'X-Page',

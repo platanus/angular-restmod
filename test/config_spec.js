@@ -2,7 +2,7 @@
 
 describe('Restmod builder:', function() {
 
-  beforeEach(module('plRestmod'));
+  beforeEach(module('restmod'));
 
   describe('pushModelBase', function() {
 
