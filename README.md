@@ -7,6 +7,7 @@
 
 <!-- before:
 	$httpBackend.when('GET', '/bikes/1').respond({ model: 'Slash', brand: 'Trek' })
+	$httpBackend.when('GET', '/bikes/1?includeParts=true').respond({ model: 'Slash', brand: 'Trek', parts: [] })
 	$httpBackend.when('GET', '/bikes?brand=trek').respond([ { model: 'Slash' }, { model: 'Remedy' } ])
 	$httpBackend.when('GET', '/bikes?category=enduro').respond([ { model: 'Slash' }, { model: 'Remedy' } ])
 
@@ -120,6 +121,12 @@ The bike object will be populated as soon as the API returns some data. You can 
 bike.$then(function() {
 	console.log(bike.brand); // will output 'Trek'
 });
+```
+
+If you need to pass additional parameters to `$find`, you can use the second function argument.
+
+```javascript
+bike = Bike.$find(1, { includeParts: true });
 ```
 
 **IMPORTANT**: RestMod will rename attributes from under_score to camelCase by default, refer to the building docs if you need to disable this feature. In the example above you should use `bike.createdAt` to refer to the value of the `created_at` returned by the API.

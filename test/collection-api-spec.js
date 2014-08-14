@@ -18,25 +18,6 @@ describe('Restmod collection:', function() {
     $httpBackend.when('GET', '/api/bikes?brand=giant').respond([ { model: 'Reign' } ]);
   }));
 
-
-  describe('$collection', function() {
-    // TODO.
-  });
-
-  describe('$search', function() {
-
-    it('should retrieve a collection of items of same type', function() {
-      var bikes = query.$search({ brand: 'giant' });
-      expect(bikes.length).toEqual(0);
-      expect(bikes.$resolved).toBeFalsy();
-      $httpBackend.flush();
-      expect(bikes.length).toEqual(1);
-      expect(bikes.$resolved).toBeTruthy();
-      expect(bikes[0] instanceof Bike).toBeTruthy();
-    });
-
-  });
-
   describe('$fetch', function() {
 
     it('should retrieve a collection of items of same type', function() {
@@ -94,26 +75,7 @@ describe('Restmod collection:', function() {
 
   });
 
-  describe('$new', function() {
-
-    it('should initialize model with given primary key', function() {
-      var bike = Bike.$new(20);
-      expect(bike.$pk).toEqual(20);
-    });
-
-  });
-
   describe('$build', function() {
-
-    it('should initialize model with given object properties', function() {
-      var bike = Bike.$build({ model: 'Teocali' });
-      expect(bike.model).toEqual('Teocali');
-    });
-
-    it('should not infer $pk', function() {
-      var bike = Bike.$build({ id: 5, model: 'Teocali' });
-      expect(bike.$pk).not.toBeDefined();
-    });
 
     it('should not add resource to collection by default', function() {
       query.$build({ model: 'Teocali' });
@@ -124,39 +86,8 @@ describe('Restmod collection:', function() {
 
   describe('$create', function() {
 
-    it('should build and save', function() {
-      Bike.$create({ model: 'Teocali' });
-      $httpBackend.expectPOST('/api/bikes', { model: 'Teocali' }).respond(200, '{ "id": 1 }');
-      $httpBackend.flush();
-    });
-
-    it('should allow an empty response', function() {
-      Bike.$create({ model: 'Teocali' });
-
-      $httpBackend.expectPOST('/api/bikes', { model: 'Teocali' }).respond(200, '');
-      $httpBackend.flush();
-    });
-
-    it('should assign an ID to the new resource', function() {
-      var bike = Bike.$create({ model: 'Teocali' });
-      expect(bike.id).toBeUndefined();
-
-      $httpBackend.expectPOST('/api/bikes', { model: 'Teocali' }).respond(200, '{ "id": 1 }');
-      $httpBackend.flush();
-      expect(bike.id).toEqual(1);
-    });
-
-    it('should bind to the new resource', function() {
-      var bike = Bike.$create({ model: 'Teocali' });
-
-      $httpBackend.expectPOST('/api/bikes', { model: 'Teocali' }).respond(200, '{ "id": 1 }');
-      $httpBackend.flush();
-      expect(bike.$url()).toEqual('/api/bikes/1');
-    });
-
     it('should add resource to collection after success', function() {
-      var bike = query.$create({ model: 'Teocali' });
-
+      query.$create({ model: 'Teocali' });
       expect(query.length).toEqual(0);
       $httpBackend.expectPOST('/api/bikes', { model: 'Teocali' }).respond(200, '{ "id": 1 }');
       $httpBackend.flush();

@@ -62,10 +62,11 @@ RMModule.factory('RMScopeApi', [function() {
      * @description Attempts to resolve a resource using provided private key.
      *
      * @param {mixed} _pk Private key
+     * @param {object} _params Additional query parameters
      * @return {RecordApi} single record
      */
-    $find: function(_pk) {
-      return this.$new(_pk).$fetch();
+    $find: function(_pk, _params) {
+      return this.$new(_pk).$fetch(_params);
     },
 
     /**
