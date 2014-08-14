@@ -11,7 +11,7 @@
 	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
 
 	
-	<link type="text/css" rel="stylesheet" href="styles/site.spacelab.css">
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
 	
 </head>
 
@@ -23,21 +23,17 @@
 			<ul class="nav">
 				
 				<li class="dropdown">
-					<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b
+					<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b
 						class="caret"></b></a>
 
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="constants.html">constants</a>
+							<a href="$restmod.html">$restmod</a>
 						</li>
 						
 						<li>
-							<a href="providers.html">providers</a>
-						</li>
-						
-						<li>
-							<a href="services.html">services</a>
+							<a href="$restmodProvider.html">$restmodProvider</a>
 						</li>
 						
 
@@ -51,31 +47,27 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
+							<a href="BuilderApi.html">BuilderApi</a>
+						</li>
+						
+						<li>
 							<a href="CommonApi.html">CommonApi</a>
 						</li>
 						
 						<li>
-							<a href="constants.Utils.html">Utils</a>
+							<a href="RecordApi.html">RecordApi</a>
 						</li>
 						
 						<li>
-							<a href="Model.html">Model</a>
+							<a href="ScopeApi.html">ScopeApi</a>
 						</li>
 						
 						<li>
-							<a href="ModelBuilder.html">ModelBuilder</a>
+							<a href="StaticApi.html">StaticApi</a>
 						</li>
 						
 						<li>
-							<a href="ModelCollection.html">ModelCollection</a>
-						</li>
-						
-						<li>
-							<a href="providers.$restmodProvider.html">$restmodProvider</a>
-						</li>
-						
-						<li>
-							<a href="services.$restmod.html">$restmod</a>
+							<a href="Utils.html">Utils</a>
 						</li>
 						
 
@@ -153,9 +145,9 @@
 <h3>Asyncronic operations</h3>
 <p>All asynchronic server operations return inmeditelly:</p>
 <ul>
-<li>If the operation is expected to return an object (as in <a href="ModelCollection.html#$create">ModelCollection#$create</a> or <a href="ModelCollection.html#$find">ModelCollection#$find</a>) it will return an unresolved object that will be filled with data when the server responds.</li>
-<li>If the operation is expected to update the object data (as in <a href="Model.html#$fetch">Model#$fetch</a>) it will update the object properties when the server responds.</li>
-<li>If the operations returns a collection (as in <a href="ModelCollection.html#$search">ModelCollection#$search</a>) it will return an empty collection that will be filled when the server responds.</li>
+<li>If the operation is expected to return an object (as in ModelCollection#$create or ModelCollection#$find) it will return an unresolved object that will be filled with data when the server responds.</li>
+<li>If the operation is expected to update the object data (as in Model#$fetch) it will update the object properties when the server responds.</li>
+<li>If the operations returns a collection (as in ModelCollection#$search) it will return an empty collection that will be filled when the server responds.</li>
 </ul>
 <p>There are several properties that can be queried to track an object request status:</p>
 <ul>
@@ -172,15 +164,15 @@
     alert('always');
 });</code></pre>
 <h2>CRUD Operations</h2>
-<p>Building a new model instance is done using the <a href="ModelCollection.html#$build">ModelCollection#$build</a> method, the build method will not generate any request.</p>
+<p>Building a new model instance is done using the ModelCollection#$build method, the build method will not generate any request.</p>
 <pre><code class="lang-javascript">var bike = Bike.$build({ brand: 'Giant', model: 'Anthem' });</code></pre>
 <p><strong>IMPORTANT</strong> do not use the default type constructor directly unless you have read the <a href="Model.html">Model</a> documentation.</p>
-<p>Creating a model instance can be done using the <a href="ModelCollection.html#$create">ModelCollection#$create</a> method, it is called using the collection's base url. If using the type directly then the model's base url is used.</p>
+<p>Creating a model instance can be done using the ModelCollection#$create method, it is called using the collection's base url. If using the type directly then the model's base url is used.</p>
 <pre><code class="lang-javascript">var bike = Bike.$create({ brand: 'Giant', model: 'Anthem' }); // will send a POST to /bikes</code></pre>
 <p>It is also posible to save an already built object:</p>
 <pre><code class="lang-javascript">var bike = Bike.$build({ brand: 'Giant', model: 'Anthem' });
 bike.$save(); // will send POST to /bikes</code></pre>
-<p>Retrieving an objects is done using the <a href="ModelCollection.html#$find">ModelCollection#$find</a> method.</p>
+<p>Retrieving an objects is done using the {@link ModelCollection#$find} method.</p>
 <pre><code class="lang-javascript">var bike = Bike.$find(22); // will send a GET to /bikes</code></pre>
 <p>To update an object just modify the required properties and call ModelCollection#$save, if object is bound (has an id) it will be updated, if not it will be created.</p>
 <pre><code class="lang-javascript">var bike = Bike.$find(22); // will send GET to /bikes
@@ -203,7 +195,7 @@ bike.$save(); // will send a PUT to /bikes/22</code></pre>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on 2014-05-20T18:42:31-04:00 using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Wed May 28 2014 18:42:23 GMT-0400 (CLT) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
@@ -225,14 +217,11 @@ bike.$save(); // will send a PUT to /bikes/22</code></pre>
 	<script src="scripts/toc.js"></script>
 
 
-	<script>  Sunlight.highlightAll({lineNumbers: true,  showMenu: true, enableDoclinks: true}); </script>
+	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
 
 	<script>
 		$( function () {
 			$( "#toc" ).toc( {
-			    anchorName  : function(i, heading, prefix) {
-					return $(heading).attr("id") || ( prefix + i );
-				},
 				selectors   : "h1,h2,h3,h4",
 				showAndHide : false,
 				scrollTo    : 60

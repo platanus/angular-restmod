@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>$restmod tutorialModel Building</title>
+	<title>$restmod tutorialbuilding</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -11,7 +11,7 @@
 	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
 
 	
-	<link type="text/css" rel="stylesheet" href="styles/site.spacelab.css">
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
 	
 </head>
 
@@ -23,59 +23,49 @@
 			<ul class="nav">
 				
 				<li class="dropdown">
-					<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b
-						class="caret"></b></a>
-
-					<ul class="dropdown-menu ">
-						
-						<li>
-							<a href="constants.html">constants</a>
-						</li>
-						
-						<li>
-							<a href="providers.html">providers</a>
-						</li>
-						
-						<li>
-							<a href="services.html">services</a>
-						</li>
-						
-
-					</ul>
-				</li>
-				
-				<li class="dropdown">
 					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
 						class="caret"></b></a>
 
 					<ul class="dropdown-menu ">
 						
 						<li>
+							<a href="BuilderApi.html">BuilderApi</a>
+						</li>
+						
+						<li>
+							<a href="CollectionApi.html">CollectionApi</a>
+						</li>
+						
+						<li>
 							<a href="CommonApi.html">CommonApi</a>
 						</li>
 						
 						<li>
-							<a href="constants.Utils.html">Utils</a>
+							<a href="RecordApi.html">RecordApi</a>
 						</li>
 						
 						<li>
-							<a href="Model.html">Model</a>
+							<a href="RelationScope.html">RelationScope</a>
 						</li>
 						
 						<li>
-							<a href="ModelBuilder.html">ModelBuilder</a>
+							<a href="restmod.html">restmod</a>
 						</li>
 						
 						<li>
-							<a href="ModelCollection.html">ModelCollection</a>
+							<a href="restmodProvider.html">restmodProvider</a>
 						</li>
 						
 						<li>
-							<a href="providers.$restmodProvider.html">$restmodProvider</a>
+							<a href="ScopeApi.html">ScopeApi</a>
 						</li>
 						
 						<li>
-							<a href="services.$restmod.html">$restmod</a>
+							<a href="StaticApi.html">StaticApi</a>
+						</li>
+						
+						<li>
+							<a href="Utils.html">Utils</a>
 						</li>
 						
 
@@ -111,15 +101,15 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="tutorial-building.html">Model Building</a>
+							<a href="tutorial-building.html">building</a>
 						</li>
 						
 						<li>
-							<a href="tutorial-model_.html">Using Generated Models</a>
+							<a href="tutorial-hooks.html">hooks</a>
 						</li>
 						
 						<li>
-							<a href="tutorial-relations.html">Using Relations</a>
+							<a href="tutorial-model.html">model</a>
 						</li>
 						
 
@@ -141,7 +131,7 @@
 <header>
     
 
-    <h2>Model Building</h2>
+    <h2>building</h2>
 </header>  
 
 <article>
@@ -155,7 +145,7 @@
 <p>It's recommended to put models inside factories, this is usefull later when defining relations and inheritance, since the angular $injector is used by these features. It's also the angular way of doing things. This guide will skip the factory code in examples for simplicity sake.</p>
 <p>The first and only required parameter is the base url for the model, if null is given then the model is considered unbound.</p>
 <p>Unbound models can only be fetched/created/updated when bound to other models (via a relation).</p>
-<p>Refer to <a href="tutorial-model_.html">Using Generated Models</a> for information about how to use the generated model.</p>
+<p>Refer to <a href="tutorial-model.html">model</a> for information about how to use the generated model.</p>
 <h2>Advanced model building</h2>
 <p>Restmod offers two ways of customizing a model's behaviour, <strong>definition blocks</strong> and <strong>definition objects</strong>, both are used by passing the required parameters to the <code>model</code> function after the base url parameter.</p>
 <h3>Model definition blocks</h3>
@@ -185,7 +175,7 @@
 <pre><code class="lang-javascript">$restmod.model('', function() {
   this.attrDefault('prop', 20);
 }</code></pre>
-<p>For more information about available property modifiers check the <a href="ModelBuilder.html">ModelBuilder</a> class documentation.</p>
+<p>For more information about available property modifiers check the ModelBuilder class documentation.</p>
 <p>Some plugins also add additional modifiers.</p>
 <p>Property modifiers map directly to builder DSL methods, but not every builder method is available as a property behavior modifier. The model definition object only provides a subset of the available builder DSL methods.</p>
 <h3>The mixin chain</h3>
@@ -208,18 +198,18 @@ function() {
 <p>It is also posible to define a common mixin chain for all models in the application, this is done using the <code>pushModelBase</code> method available at the $restmodProvider provider in the configuration stage.</p>
 <h2>The builder DSL</h2>
 <h3>Defaults</h3>
-<p>A default value can be given to any model property, this is done via de <code>init</code> property modifier. Check the <a href="ModelBuilder.html#attrDefault">ModelBuilder#attrDefault</a> docs for more information.</p>
+<p>A default value can be given to any model property, this is done via de <code>init</code> property modifier. Check the ModelBuilder#attrDefault docs for more information.</p>
 <pre><code class="lang-javascript">var Model = $restmod.model(null, {
     owner: { init: 'anonymous' }
 };</code></pre>
 <p>If a function is provided then it will be evaluated every time a model instance is created and its return value assigned to the property.</p>
 <h3>Property transformation</h3>
-<p>It is posible to specify how a given property is serialized or deserialized using the <code>encode</code> or <code>decode</code> property modifiers respectively. This modifiers take a filter name or a function and applies it to the property value during transformation. Check the <a href="ModelBuilder.html#attrDecoder">ModelBuilder#attrDecoder</a> and <a href="ModelBuilder.html#attrEncoder">ModelBuilder#attrEncoder</a> docs for more information.</p>
+<p>It is posible to specify how a given property is serialized or deserialized using the <code>encode</code> or <code>decode</code> property modifiers respectively. This modifiers take a filter name or a function and applies it to the property value during transformation. Check the ModelBuilder#attrDecoder and {@link ModelBuilder#attrEncoder} docs for more information.</p>
 <pre><code class="lang-javascript">var Model = $restmod.model(null, {
     createdAt: { encode: 'date', param: 'yyyy-MM-dd' }, // use the angular date filter to serialize
     sku: { decode: function(v) { return v.replace(/[^\d]+/,''); } } // use an inline function to deserialize
 });</code></pre>
-<p>Another way of specifying how a property is serialized is using a serializer. A serializer is an object that defines al least a decode or an encode method (or both). The methods are called with the property value and are expected to return a new value. The <code>serialize</code> modifier can be used to define a Serializer, if a <em>string</em> is given then the angular injector is used to load the required serializer by appending 'Serializer' to the given string. Check the <a href="ModelBuilder.html#attrSerializer">ModelBuilder#attrSerializer</a> docs for more information.</p>
+<p>Another way of specifying how a property is serialized is using a serializer. A serializer is an object that defines al least a decode or an encode method (or both). The methods are called with the property value and are expected to return a new value. The <code>serialize</code> modifier can be used to define a Serializer, if a <em>string</em> is given then the angular injector is used to load the required serializer by appending 'Serializer' to the given string. Check the ModelBuilder#attrSerializer docs for more information.</p>
 <pre><code class="lang-javascript">var Model = $restmod.model(null, {
     createdAt: { serialize: 'date' }, // will search for a 'DateSerializer' in the current injector.
     sku: {
@@ -232,7 +222,7 @@ function() {
 });</code></pre>
 <h3>Masks</h3>
 <p>Masks can be used to prevent certain properties to be sent to or loaded from the server. They specify a set actions a property is masked from. Available mask values are enumerated in the SyncMask constant and can be combined using bit operations.</p>
-<p>Masks can be specified using the <code>mask</code> or <code>ignore</code> property modifiers. Check the <a href="ModelBuilder.html#attrMask">ModelBuilder#attrMask</a> docs for more information.</p>
+<p>Masks can be specified using the <code>mask</code> or <code>ignore</code> property modifiers. Check the ModelBuilder#attrMask docs for more information.</p>
 <pre><code class="lang-javascript">var Model = $restmod.model(null, {
     viewed: { mask: true }, // the property value is never sent to or loaded from the server.
     createdAt: { mask: SyncMask.ENCODE }, // this property value is never sent to the server (but it is loaded from)
@@ -249,7 +239,7 @@ function() {
             parts: { hasMany: 'Part' }
         });
     });</code></pre>
-<p>More about relations in the <a href="tutorial-model_.html">Using Generated Models</a> guide.</p>
+<p>More about relations in the <a href="tutorial-model.html">model</a> guide.</p>
 <h3>Hooks</h3>
 <p>A model behavior can be modified using a wide range of hooks provided by restmod. The hooks are placed on model's lifecycle key points and can be used to modify/extend the model behavior.</p>
 <pre><code class="lang-javascript">var Model = $restmod.model(null, function() {
@@ -310,7 +300,7 @@ function() {
 <li>after-destroy[-error]</li>
 </ul>
 <h3>Adding new methods and actions</h3>
-<p>Methods can be added or overriden both in model instances and model collections using the builder <a href="ModelBuilder.html#define">ModelBuilder#define</a> and the <a href="ModelBuilder.html#classDefine">ModelBuilder#classDefine</a> respectively. Methods that override another method through these functions will have access to the this.$super property that points to the old method (prebound, so its not necessary to call this.$super.call).</p>
+<p>Methods can be added or overriden both in model instances and model collections using the builder ModelBuilder#define and the ModelBuilder#classDefine respectively. Methods that override another method through these functions will have access to the this.$super property that points to the old method (prebound, so its not necessary to call this.$super.call).</p>
 <pre><code class="lang-javascript">$restmod.model(null, function() {
     // add the $create method to model instances
     this.define('$create', function() {
@@ -348,7 +338,7 @@ function() {
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on 2014-05-20T18:42:31-04:00 using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Thu Aug 14 2014 17:34:55 GMT-0400 (CLT) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
@@ -370,14 +360,11 @@ function() {
 	<script src="scripts/toc.js"></script>
 
 
-	<script>  Sunlight.highlightAll({lineNumbers: true,  showMenu: true, enableDoclinks: true}); </script>
+	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
 
 	<script>
 		$( function () {
 			$( "#toc" ).toc( {
-			    anchorName  : function(i, heading, prefix) {
-					return $(heading).attr("id") || ( prefix + i );
-				},
 				selectors   : "h1,h2,h3,h4",
 				showAndHide : false,
 				scrollTo    : 60

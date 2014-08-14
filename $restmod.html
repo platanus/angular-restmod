@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>$restmod Mixin: DebouncedModel</title>
+	<title>$restmod Class: $restmod</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -29,6 +29,14 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
+							<a href="$restmod.html">$restmod</a>
+						</li>
+						
+						<li>
+							<a href="$restmodProvider.html">$restmodProvider</a>
+						</li>
+						
+						<li>
 							<a href="BuilderApi.html">BuilderApi</a>
 						</li>
 						
@@ -42,18 +50,6 @@
 						
 						<li>
 							<a href="RecordApi.html">RecordApi</a>
-						</li>
-						
-						<li>
-							<a href="RelationScope.html">RelationScope</a>
-						</li>
-						
-						<li>
-							<a href="restmod.html">restmod</a>
-						</li>
-						
-						<li>
-							<a href="restmodProvider.html">restmodProvider</a>
 						</li>
 						
 						<li>
@@ -105,10 +101,6 @@
 						</li>
 						
 						<li>
-							<a href="tutorial-hooks.html">hooks</a>
-						</li>
-						
-						<li>
 							<a href="tutorial-model.html">model</a>
 						</li>
 						
@@ -129,12 +121,12 @@
 					
 
 
-	<h1 class="page-title">Mixin: DebouncedModel</h1>
+	<h1 class="page-title">Class: $restmod</h1>
 <section>
 
 <header>
     <h2>
-    DebouncedModel
+    $restmod
     </h2>
     
 </header>
@@ -145,23 +137,26 @@
 
     
         
-            <div class="description"><p>Adds debouncing to <code>$save</code> operations so rapid consecutive calls result in only one server request.</p>
-<p>Usage:</p>
-<p>First add mixin to a model's mixin chain</p>
-<pre><code class="lang-javascript">var Bike = restmod.model('api/bikes', 'DebouncedModel'),
-    bike = Bike.build({ id: 1, brand: 'Yeti' });</code></pre>
-<p>Then use <code>$save</code> as always</p>
-<pre><code class="lang-javascript">// The following code will just generate 1 request
-bike.$save();
-bike.$save();
-bike.$save();</code></pre>
-<p>Or with options</p>
-<pre><code class="lang-javascript">bike.$save({ timeout: 0, adjourn: false });
-// same as
-bike.$saveNow();</code></pre></div>
-        
+<dt>
+    <h4 class="name" id="$restmod"><span class="type-signature"></span>new $restmod<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>The restmod service provides factory methods for the different restmod consumables.</p>
+    </div>
+    
 
-        
+    
+    
+    
+    
+    
+    
+    
 <dl class="details">
     
 
@@ -184,7 +179,7 @@ bike.$saveNow();</code></pre></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        plugins/debounced.js, line 1
+        module.js, line 41
     </li></ul></dd>
     
 
@@ -195,8 +190,20 @@ bike.$saveNow();</code></pre></div>
     
 </dl>
 
+    
+    
 
-        
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
     
     </div>
 
@@ -218,7 +225,7 @@ bike.$saveNow();</code></pre></div>
         <dl>
             
 <dt>
-    <h4 class="name" id="$save"><span class="type-signature">&lt;static> </span>$save<span class="signature">(_opt)</span><span class="type-signature"> &rarr; {Model}</span></h4>
+    <h4 class="name" id="mixin"><span class="type-signature"></span>mixin<span class="signature">(_mix)</span><span class="type-signature"> &rarr; {object}</span></h4>
     
     
 </dt>
@@ -226,12 +233,11 @@ bike.$saveNow();</code></pre></div>
     
     
     <div class="description">
-        <p>Debounced <code>$save</code> implementation</p>
-<p>IDEA: think of a way of separating the scheduling-rescheduling logic from
-the async save implementation, this way it can be used for other actions.
-Something like:</p>
-<p>   this.$debounce('$save', fun, timeout, adjourn);</p>
-<p>This would call fun with a promise in the model context.</p>
+        <p>The mixin factory is used to pack model behaviors without the overload of generating a new
+model. The mixin can then be passed as argument to a call to $restmod#model#model
+to extend the model capabilities.</p>
+<p>A mixin can also be passed to the <a href="$restmodProvider.html#pushModelBase">$restmodProvider#pushModelBase</a> method to provide
+a base behavior for all generated models.</p>
     </div>
     
 
@@ -265,13 +271,13 @@ Something like:</p>
 
         <tr>
             
-                <td class="name"><code>_opt</code></td>
+                <td class="name"><code>_mix</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">mixed</span>
 
 
             
@@ -281,7 +287,7 @@ Something like:</p>
 
             
 
-            <td class="description last"><p>Same as <code>setDebounceOptions</code> options.</p></td>
+            <td class="description last"><p>One or more mixins, description objects or description blocks.</p></td>
         </tr>
 
 	
@@ -313,7 +319,7 @@ Something like:</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        plugins/debounced.js, line 93
+        module.js, line 141
     </li></ul></dd>
     
 
@@ -338,7 +344,7 @@ Something like:</p>
     
             
 <div class="param-desc">
-    <p>self</p>
+    <p>The mixin</p>
 </div>
 
 
@@ -349,7 +355,7 @@ Something like:</p>
 	</dt>
 	<dd>
 		
-<span class="param-type">Model</span>
+<span class="param-type">object</span>
 
 
 	</dd>
@@ -364,7 +370,7 @@ Something like:</p>
         
             
 <dt>
-    <h4 class="name" id="$saveNow"><span class="type-signature">&lt;static> </span>$saveNow<span class="signature">()</span><span class="type-signature"> &rarr; {Model}</span></h4>
+    <h4 class="name" id="model"><span class="type-signature"></span>model<span class="signature">(_url, _mix)</span><span class="type-signature"> &rarr; {<a href="StaticApi.html">StaticApi</a>}</span></h4>
     
     
 </dt>
@@ -372,103 +378,42 @@ Something like:</p>
     
     
     <div class="description">
-        <p>Convenience method that will cancel any pending save and save inmediatelly.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        plugins/debounced.js, line 161
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">Model</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="setDebounceOptions"><span class="type-signature">&lt;static> </span>setDebounceOptions<span class="signature">(_opt)</span><span class="type-signature"> &rarr; {ModelBuilder}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>ModelBuilder extension that allows model debounce configuration.</p>
-<pre><code class="lang-javascript">restmod.model(null, function() {
-  // Sets 1000ms timeout and no rescheduling for this and child models
-  this.setDebounceOptions({ timeout: 1000, adjourn: false });
+        <p>The model factory is used to generate new $restmod model types. It's recommended to put models inside factories,
+this is usefull later when defining relations and inheritance, since the angular $injector is used by
+these features. It's also the angular way of doing things.</p>
+<p>A simple model can be built like this:</p>
+<pre><code class="lang-javascript">angular.module('bike-app').factory('Bike', function($restmod) {
+  return $restmod.model('/bikes');
 });</code></pre>
+<p>The <code>_url</code> parameter is the resource url the generated model will be bound to, if <code>null</code> is given then
+the model is <em>anonymous</em> and can only be used in another model context.</p>
+<p>The model also accepts one or more definition providers as one or more arguments after the _url parameter,
+posible definition providers are:</p>
+<ul>
+<li>A definition object (more on this at the <a href="BuilderApi.html">BuilderApi</a>):</li>
+</ul>
+<pre><code class="lang-javascript">$restmod.model('/bikes', {
+  viewed: { init: false },
+  parts: { hasMany: 'Part' },
+  '~afterCreate': function() {
+    alert('Bike created!!');
+  }
+});</code></pre>
+<ul>
+<li>A definition function (more on this at the <a href="BuilderApi.html">BuilderApi</a>):</li>
+</ul>
+<pre><code class="lang-javascript">$restmod.model('/bikes', function() {
+  this.attrDefault('viewed', false);
+  this.attrMask('id', 'CU');
+});</code></pre>
+<ul>
+<li>A mixin (generated using the mixin method) or model factory name:</li>
+</ul>
+<pre><code class="lang-javascript">$restmod.model('/bikes', 'BaseModel', 'PagedModel');</code></pre>
+<ul>
+<li>A mixin (generated using the mixin method) or model object:</li>
+</ul>
+<pre><code class="lang-javascript">$restmod.model('/bikes', BaseModel, PagedModel);</code></pre>
     </div>
     
 
@@ -502,13 +447,13 @@ Something like:</p>
 
         <tr>
             
-                <td class="name"><code>_opt</code></td>
+                <td class="name"><code>_url</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">string</span>
 
 
             
@@ -518,9 +463,30 @@ Something like:</p>
 
             
 
-            <td class="description last"><p>Debouncing options:
-<em> timeout: sets the debounce timeout, if 0 then debouncing is deactivated.
-</em> adjourn: if true, then save operation is rescheduled on every $save call.</p></td>
+            <td class="description last"><p>Resource url.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_mix</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">mixed</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>One or more mixins, description objects or description blocks.</p></td>
         </tr>
 
 	
@@ -552,7 +518,7 @@ Something like:</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        plugins/debounced.js, line 68
+        module.js, line 113
     </li></ul></dd>
     
 
@@ -577,7 +543,7 @@ Something like:</p>
     
             
 <div class="param-desc">
-    <p>self</p>
+    <p>The new model.</p>
 </div>
 
 
@@ -588,7 +554,173 @@ Something like:</p>
 	</dt>
 	<dd>
 		
-<span class="param-type">ModelBuilder</span>
+<span class="param-type"><a href="StaticApi.html">StaticApi</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="singleton"><span class="type-signature"></span>singleton<span class="signature">(_url, _mix)</span><span class="type-signature"> &rarr; {<a href="RecordApi.html">RecordApi</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Shorcut method used to create singleton resources.</p>
+<p>Same as calling <code>$restmod.model(null).$single(_url)</code></p>
+<p>Check the <a href="StaticApi.html#$single">StaticApi#$single</a> documentation for more information.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Resource url,</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_mix</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">mixed</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Mixin chain.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module.js, line 160
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>New resource instance.</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="RecordApi.html">RecordApi</a></span>
 
 
 	</dd>
@@ -621,7 +753,7 @@ Something like:</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on Thu Aug 14 2014 17:34:55 GMT-0400 (CLT) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Wed Jun 04 2014 13:05:37 GMT-0400 (CLT) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

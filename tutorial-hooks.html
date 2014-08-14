@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>$restmod tutorialhooks</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+	
+</head>
+
+<body>
+<div class="container-fluid">
+	<div class="navbar navbar-fixed-top ">
+		<div class="navbar-inner">
+			<a class="brand" href="index.html">$restmod</a>
+			<ul class="nav">
+				
+				<li class="dropdown">
+					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="BuilderApi.html">BuilderApi</a>
+						</li>
+						
+						<li>
+							<a href="CollectionApi.html">CollectionApi</a>
+						</li>
+						
+						<li>
+							<a href="CommonApi.html">CommonApi</a>
+						</li>
+						
+						<li>
+							<a href="RecordApi.html">RecordApi</a>
+						</li>
+						
+						<li>
+							<a href="RelationScope.html">RelationScope</a>
+						</li>
+						
+						<li>
+							<a href="restmod.html">restmod</a>
+						</li>
+						
+						<li>
+							<a href="restmodProvider.html">restmodProvider</a>
+						</li>
+						
+						<li>
+							<a href="ScopeApi.html">ScopeApi</a>
+						</li>
+						
+						<li>
+							<a href="StaticApi.html">StaticApi</a>
+						</li>
+						
+						<li>
+							<a href="Utils.html">Utils</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="mixins.list.html" class="dropdown-toggle" data-toggle="dropdown">Mixins<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="DebouncedModel.html">DebouncedModel</a>
+						</li>
+						
+						<li>
+							<a href="DirtyModel.html">DirtyModel</a>
+						</li>
+						
+						<li>
+							<a href="PagedModel.html">PagedModel</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="tutorials.list.html" class="dropdown-toggle" data-toggle="dropdown">Tutorials<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="tutorial-building.html">building</a>
+						</li>
+						
+						<li>
+							<a href="tutorial-hooks.html">hooks</a>
+						</li>
+						
+						<li>
+							<a href="tutorial-model.html">model</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+			</ul>
+		</div>
+	</div>
+
+	<div class="row-fluid">
+
+		
+			<div class="span12">
+				
+				<div id="main">
+					<section>
+    
+<header>
+    
+
+    <h2>hooks</h2>
+</header>  
+
+<article>
+    <h1>Hooks</h1>
+<p>Just like ActiveRecord in Rails, RestMod lets you modify a model's behavior using a wide range of hooks. The hooks are placed on the model's lifecycle key points.</p>
+<h5>1. Hooks that apply to every record and collection of a given Model</h5>
+<p>This is the most ActiveRecord'ish approach</p>
+<pre><code class="lang-javascript">var Bike = $restmod.model('/bikes', {
+  '~beforeSave': function() {
+    this.partCount = this.parts.length;
+  }
+});</code></pre>
+<h5>2. Hooks that apply only to a particular record</h5>
+<p>It's also possible to modify only a single record's (model instance) behavior.</p>
+<pre><code class="lang-javascript">var bike = Bike.$new();
+bike.$on('before-save', function() {
+  this.partCount = this.parts.length;
+});</code></pre>
+<h5>3. Hooks that apply only to a certain collection and its records</h5>
+<p>You can catch collection related events by attaching hooks directly to a collection:</p>
+<pre><code class="lang-javascript">var bikes = Bike.$collection();
+bikes.$on('after-fetch-many', function() {
+  this.redBikesCount = this.countBikes({color:'red'});
+});
+bikes.$fetch(); // this call will trigger the hook defined above</code></pre>
+<p>Note that Hooks that are defined at the collection level will also catch the contained record's events.</p>
+<pre><code class="lang-javascript">var bikes = Bike.$collection();
+bikes.$on('before-save', function() {
+  this.partCount = this.parts.length;
+});
+bike = bikes.$new();
+bike.$save(); // this call will trigger the hook defined above</code></pre>
+<h4>Object lifecycle</h4>
+<p>When calling <code>$new</code> to generate a new record:</p>
+<table>
+<thead>
+<tr>
+<th>Hook's name</th>
+<th>parameters</th>
+<th>'this' refers to</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>after-init</td>
+<td></td>
+<td>record</td>
+</tr>
+</tbody>
+</table>
+<p>For <code>$fetch</code> on a record:</p>
+<table>
+<thead>
+<tr>
+<th>Hook's name</th>
+<th>parameters</th>
+<th>'this' refers to</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>before-fetch</td>
+<td>http-request</td>
+<td>record</td>
+</tr>
+<tr>
+<td>before-request</td>
+<td>http-request</td>
+<td>record</td>
+</tr>
+<tr>
+<td>after-request[-error]</td>
+<td>http-response</td>
+<td>record</td>
+</tr>
+<tr>
+<td>after-feed</td>
+<td>raw record data</td>
+<td>record</td>
+<td>(only called if no errors)</td>
+</tr>
+<tr>
+<td>after-fetch[-error]</td>
+<td>http-response</td>
+<td>record</td>
+</tr>
+</tbody>
+</table>
+<p>For <code>$fetch</code> on a collection:</p>
+<table>
+<thead>
+<tr>
+<th>Hook's name</th>
+<th>parameters</th>
+<th>'this' refers to</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>before-fetch-many</td>
+<td>http-request</td>
+<td>collection</td>
+</tr>
+<tr>
+<td>before-request</td>
+<td>http-request</td>
+<td>collection</td>
+</tr>
+<tr>
+<td>after-request[-error]</td>
+<td>http-response</td>
+<td>collection</td>
+</tr>
+<tr>
+<td>after-feed</td>
+<td>raw collection data</td>
+<td>collection</td>
+<td>(only called if no errors)</td>
+</tr>
+<tr>
+<td>after-fetch-many[-error]</td>
+<td>http-response</td>
+<td>collection</td>
+</tr>
+</tbody>
+</table>
+<p>For <code>$save</code> when record is new (creating):</p>
+<table>
+<thead>
+<tr>
+<th>Hook's name</th>
+<th>parameters</th>
+<th>'this' refers to</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>before-render</td>
+<td>serialized record</td>
+<td>record</td>
+<td>allows modifiying serialized record data before is sent to server</td>
+</tr>
+<tr>
+<td>before-save</td>
+<td>http-request</td>
+<td>record</td>
+</tr>
+<tr>
+<td>before-create</td>
+<td>http-request</td>
+<td>record</td>
+</tr>
+<tr>
+<td>before-request</td>
+<td>http-request</td>
+<td>record</td>
+<td>only called if no errors</td>
+</tr>
+<tr>
+<td>after-request[-error]</td>
+<td>http-response</td>
+<td>record</td>
+</tr>
+<tr>
+<td>after-feed</td>
+<td>serialized record</td>
+<td>record</td>
+<td>only called if no errors and if server returned data</td>
+</tr>
+<tr>
+<td>after-add</td>
+<td>record</td>
+<td>collection</td>
+<td>only called if record belongs to a collection and has not been revealed yet</td>
+</tr>
+<tr>
+<td>after-create[-error]</td>
+<td>http-response</td>
+<td>record</td>
+</tr>
+<tr>
+<td>after-save[-error]</td>
+<td>http-response</td>
+<td>record</td>
+</tr>
+</tbody>
+</table>
+<p>For <code>$save</code> when record is not new (updating):</p>
+<table>
+<thead>
+<tr>
+<th>Hook's name</th>
+<th>parameters</th>
+<th>'this' refers to</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>before-render</td>
+<td>serialized record</td>
+<td>record</td>
+<td>allows modifiying serialized record data before is sent to server</td>
+</tr>
+<tr>
+<td>before-save</td>
+<td>http-request</td>
+<td>record</td>
+</tr>
+<tr>
+<td>before-update</td>
+<td>http-request</td>
+<td>record</td>
+</tr>
+<tr>
+<td>before-request</td>
+<td>http-request</td>
+<td>record</td>
+<td>only called if no errors</td>
+</tr>
+<tr>
+<td>after-request[-error]</td>
+<td>http-response</td>
+<td>record</td>
+</tr>
+<tr>
+<td>after-feed</td>
+<td>serialized record</td>
+<td>record</td>
+<td>only called if no errors and if server returned data</td>
+</tr>
+<tr>
+<td>after-update[-error]</td>
+<td>http-response</td>
+<td>record</td>
+</tr>
+<tr>
+<td>after-save[-error]</td>
+<td>http-response</td>
+<td>record</td>
+</tr>
+</tbody>
+</table>
+<p>For <code>$destroy</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Hook's name</th>
+<th>parameters</th>
+<th>'this' refers to</th>
+<th>notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>before-destroy</td>
+<td>http-request</td>
+<td>record</td>
+</tr>
+<tr>
+<td>before-request</td>
+<td>http-request</td>
+<td>record</td>
+</tr>
+<tr>
+<td>after-request[-error]</td>
+<td>http-response</td>
+<td>record</td>
+</tr>
+<tr>
+<td>after-remove</td>
+<td>record</td>
+<td>collection</td>
+<td>only called if record belongs to a collection</td>
+</tr>
+<tr>
+<td>after-destroy[-error]</td>
+<td>http-response</td>
+<td>record</td>
+</tr>
+</tbody>
+</table>
+<p>Notes:
+<em> The <strong>before-request</strong> hooks can be used to modify the request before is sent.
+</em> The <strong>after-request[-error]</strong> hooks can be used to modify the request before processed by model.</p>
+<h3>Defining custom hooks</h3>
+<p>Additional hooks can be called by user defined methods using the <code>$callback</code> method</p>
+</article>
+
+</section>  
+
+				</div>
+
+				<div class="clearfix"></div>
+				<footer>
+					
+					
+		<span class="jsdoc-message">
+		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
+		on Thu Aug 14 2014 17:34:55 GMT-0400 (CLT) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		</span>
+				</footer>
+			</div>
+
+			
+			<br clear="both">
+		</div>
+
+	</div>
+	<script src="scripts/sunlight.js"></script>
+	<script src="scripts/sunlight.javascript.js"></script>
+	<script src="scripts/sunlight-plugin.doclinks.js"></script>
+	<script src="scripts/sunlight-plugin.linenumbers.js"></script>
+	<script src="scripts/sunlight-plugin.menu.js"></script>
+	<script src="scripts/jquery.min.js"></script>
+	<script src="scripts/jquery.scrollTo.js"></script>
+	<script src="scripts/jquery.localScroll.js"></script>
+	<script src="scripts/bootstrap-dropdown.js"></script>
+	<script src="scripts/toc.js"></script>
+
+
+	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
+
+	<script>
+		$( function () {
+			$( "#toc" ).toc( {
+				selectors   : "h1,h2,h3,h4",
+				showAndHide : false,
+				scrollTo    : 60
+			} );
+			$( "#toc>ul" ).addClass( "nav nav-pills nav-stacked" );
+			$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+
+		} );
+	</script>
+
+	
+
+</body>
+</html>

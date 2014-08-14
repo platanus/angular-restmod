@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>$restmod Tutorials</title>
+	<title>$restmod tutorialmodel</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -123,120 +123,67 @@
 	<div class="row-fluid">
 
 		
-		<div class="span8">
-			
+			<div class="span12">
+				
 				<div id="main">
-					
-
-
-	<h1 class="page-title">Tutorials</h1>
-<section>
-
+					<section>
+    
 <header>
-    <h2>
     
-    </h2>
-    
-</header>
+
+    <h2>model</h2>
+</header>  
 
 <article>
-    <div class="container-overview">
-    
-
-    
-        
-
-        
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="BuilderApi.html">BuilderApi</a></dt>
-            <dd></dd>
-        
-            <dt><a href="CollectionApi.html">CollectionApi</a></dt>
-            <dd></dd>
-        
-            <dt><a href="CommonApi.html">CommonApi</a></dt>
-            <dd></dd>
-        
-            <dt><a href="RecordApi.html">RecordApi</a></dt>
-            <dd></dd>
-        
-            <dt><a href="RelationScope.html">RelationScope</a></dt>
-            <dd></dd>
-        
-            <dt><a href="restmod.html">restmod</a></dt>
-            <dd></dd>
-        
-            <dt><a href="restmodProvider.html">restmodProvider</a></dt>
-            <dd></dd>
-        
-            <dt><a href="ScopeApi.html">ScopeApi</a></dt>
-            <dd></dd>
-        
-            <dt><a href="StaticApi.html">StaticApi</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Utils.html">Utils</a></dt>
-            <dd></dd>
-        </dl>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
+    <p>$restmod provides two levels of model interaction, through collections and instances.</p>
+<p>The model type is considered the base collection and is limited to certain collection methods.</p>
+<p>This guide will use the following model definition in examples.</p>
+<pre><code class="lang-javascript">Bike = $restmod.model('/bikes');</code></pre>
+<h2>General Considerations</h2>
+<h3>Asyncronic operations</h3>
+<p>All asynchronic server operations return inmeditelly:</p>
+<ul>
+<li>If the operation is expected to return an object (as in ModelCollection#$create or ModelCollection#$find) it will return an unresolved object that will be filled with data when the server responds.</li>
+<li>If the operation is expected to update the object data (as in Model#$fetch) it will update the object properties when the server responds.</li>
+<li>If the operations returns a collection (as in ModelCollection#$search) it will return an empty collection that will be filled when the server responds.</li>
+</ul>
+<p>There are several properties that can be queried to track an object request status:</p>
+<ul>
+<li>It is posible to query the resolve status of an object using the <code>$pending</code> property, it is set to true when a request starts and back to false when it ends.</li>
+<li>Its also posible to access the last request response object through the <code>$response</code> property.</li>
+<li>If the last response was an error then the <code>$error</code> property will be true.</li>
+</ul>
+<p>Special care shoult be taken when using these properties since they apply only to the last request. To track more than one request is better to use promises.</p>
+<h3>Promises</h3>
+<p>The <code>$promise</code> property of an object (model instance or collection) contains the promise made by that object's last request, it can be accessed directly or using the shorthand methods Model#$then and {@link Model#$finally}. The aforementioned methods both change the last promise property and return the object instance so they can be chained.</p>
+<pre><code class="lang-javascript">Bike.$find(1).$then(function(_bike) {
+    alert('success');
+}).$finally(function(_bike) {
+    alert('always');
+});</code></pre>
+<h2>CRUD Operations</h2>
+<p>Building a new model instance is done using the ModelCollection#$build method, the build method will not generate any request.</p>
+<pre><code class="lang-javascript">var bike = Bike.$build({ brand: 'Giant', model: 'Anthem' });</code></pre>
+<p><strong>IMPORTANT</strong> do not use the default type constructor directly unless you have read the Model documentation.</p>
+<p>Creating a model instance can be done using the ModelCollection#$create method, it is called using the collection's base url. If using the type directly then the model's base url is used.</p>
+<pre><code class="lang-javascript">var bike = Bike.$create({ brand: 'Giant', model: 'Anthem' }); // will send a POST to /bikes</code></pre>
+<p>It is also posible to save an already built object:</p>
+<pre><code class="lang-javascript">var bike = Bike.$build({ brand: 'Giant', model: 'Anthem' });
+bike.$save(); // will send POST to /bikes</code></pre>
+<p>Retrieving an objects is done using the {@link ModelCollection#$find} method.</p>
+<pre><code class="lang-javascript">var bike = Bike.$find(22); // will send a GET to /bikes</code></pre>
+<p>To update an object just modify the required properties and call ModelCollection#$save, if object is bound (has an id) it will be updated, if not it will be created.</p>
+<pre><code class="lang-javascript">var bike = Bike.$find(22); // will send GET to /bikes
+console.log(bike.id); // should print out 22
+bike.brand = 'Trek';
+bike.$save(); // will send a PUT to /bikes/22</code></pre>
+<h2>Collections</h2>
+<p>TODO</p>
+<h2>Relations</h2>
+<p>TODO</p>
 </article>
 
-</section>
-
-
-
+</section>  
 
 				</div>
 
@@ -251,10 +198,6 @@
 				</footer>
 			</div>
 
-			
-			<div class="span3">
-				<div id="toc"></div>
-			</div>
 			
 			<br clear="both">
 		</div>

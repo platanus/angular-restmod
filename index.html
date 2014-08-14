@@ -11,7 +11,7 @@
 	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
 
 	
-	<link type="text/css" rel="stylesheet" href="styles/site.spacelab.css">
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
 	
 </head>
 
@@ -23,59 +23,49 @@
 			<ul class="nav">
 				
 				<li class="dropdown">
-					<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b
-						class="caret"></b></a>
-
-					<ul class="dropdown-menu ">
-						
-						<li>
-							<a href="constants.html">constants</a>
-						</li>
-						
-						<li>
-							<a href="providers.html">providers</a>
-						</li>
-						
-						<li>
-							<a href="services.html">services</a>
-						</li>
-						
-
-					</ul>
-				</li>
-				
-				<li class="dropdown">
 					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
 						class="caret"></b></a>
 
 					<ul class="dropdown-menu ">
 						
 						<li>
+							<a href="BuilderApi.html">BuilderApi</a>
+						</li>
+						
+						<li>
+							<a href="CollectionApi.html">CollectionApi</a>
+						</li>
+						
+						<li>
 							<a href="CommonApi.html">CommonApi</a>
 						</li>
 						
 						<li>
-							<a href="constants.Utils.html">Utils</a>
+							<a href="RecordApi.html">RecordApi</a>
 						</li>
 						
 						<li>
-							<a href="Model.html">Model</a>
+							<a href="RelationScope.html">RelationScope</a>
 						</li>
 						
 						<li>
-							<a href="ModelBuilder.html">ModelBuilder</a>
+							<a href="restmod.html">restmod</a>
 						</li>
 						
 						<li>
-							<a href="ModelCollection.html">ModelCollection</a>
+							<a href="restmodProvider.html">restmodProvider</a>
 						</li>
 						
 						<li>
-							<a href="providers.$restmodProvider.html">$restmodProvider</a>
+							<a href="ScopeApi.html">ScopeApi</a>
 						</li>
 						
 						<li>
-							<a href="services.$restmod.html">$restmod</a>
+							<a href="StaticApi.html">StaticApi</a>
+						</li>
+						
+						<li>
+							<a href="Utils.html">Utils</a>
 						</li>
 						
 
@@ -111,15 +101,15 @@
 					<ul class="dropdown-menu ">
 						
 						<li>
-							<a href="tutorial-building.html">Model Building</a>
+							<a href="tutorial-building.html">building</a>
 						</li>
 						
 						<li>
-							<a href="tutorial-model_.html">Using Generated Models</a>
+							<a href="tutorial-hooks.html">hooks</a>
 						</li>
 						
 						<li>
-							<a href="tutorial-relations.html">Using Relations</a>
+							<a href="tutorial-model.html">model</a>
 						</li>
 						
 
@@ -164,9 +154,31 @@
 
     <section>
         <article><h1>Angular Restmod</h1>
-<p>Welcome to the restmod documentation page!</p>
-<p>Im looking forward on improving this page, any contributions are welcome.</p>
-<p>Im also looking forward on moving the docs to docular when non-root support and client side routing are supported.</p></article>
+<p>Welcome to the restmod reference page!</p>
+<p>For a quick usage reference checkout the <a href="https://github.com/platanus/angular-restmod/blob/master/README.md">README</a></p>
+<h2>Main Components</h2>
+<h3>The <strong>$restmod</strong> service</h3>
+<p>The main entry point for the library is the <a href="$restmod.html">$restmod service</a>. This service provides the <code>model</code> factory method that allow creation of new models via the builder DSL.</p>
+<p>There is also a <a href="$restmodProvider.html">$restmod provider</a> that allows some global configuration of models.</p>
+<h3>The Model Builder</h3>
+<p>The model builder provides a rich DSL used to describe new model types. There is also support for builder extensions!</p>
+<p>An extensive description of the builder usage and options can be found in the <a href="BuilderApi.html">BuilderApi</a> section.</p>
+<h3>The Model Type</h3>
+<p>Every call to <code>$restmod.model</code> generates a new model type.</p>
+<p>The model type has a set of static methods, these are listed in the <a href="StaticApi.html">StaticApi</a> section.</p>
+<p>Every instance of the model is called a record, every record has its own set of instance methods, check the <a href="RecordApi.html">RecordApi</a> section for reference.</p>
+<h3>The Collection Type</h3>
+<p>For every model type there is also a collection type, the collection type holds a set of records bound to a given resource url.</p>
+<p>The collection type also has a rich set of instance methods described in the <a href="CollectionApi.html">CollectionApi</a> section.</p>
+<p>Im also looking forward on moving the docs to docular when non-root support and client side routing are supported.</p>
+<h3>Mixins</h3>
+<p>The restmod lib includes a couple of mixins that can be included in the project to extend the default behaviour of generated models:</p>
+<ul>
+<li><a href="PagedModel.html">PagedModel</a>: basic paging support, included in <strong>plugins/paged.js</strong>. (very basic)</li>
+<li><a href="DirtyModel.html">DirtyModel</a>: change tracking for record properties, included in <strong>plugins/dirty.js</strong>.</li>
+<li><a href="DebouncedModel.html">DebouncedModel</a>: provides a debounced/throttled implementation of $save, included in <strong>plugins/debounced.js</strong>. (DEPRECATED: To be moved to a separate library!)</li>
+</ul>
+<p>Check the <a href="$restmod.html">$restmod service</a> docs for more information about mixin creation.</p></article>
     </section>
 
 
@@ -183,7 +195,7 @@
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on 2014-05-20T18:42:31-04:00 using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Thu Aug 14 2014 17:34:55 GMT-0400 (CLT) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
@@ -209,14 +221,11 @@
 	<script src="scripts/toc.js"></script>
 
 
-	<script>  Sunlight.highlightAll({lineNumbers: true,  showMenu: true, enableDoclinks: true}); </script>
+	<script>  Sunlight.highlightAll({lineNumbers:true,  showMenu: true, enableDoclinks :true}); </script>
 
 	<script>
 		$( function () {
 			$( "#toc" ).toc( {
-			    anchorName  : function(i, heading, prefix) {
-					return $(heading).attr("id") || ( prefix + i );
-				},
 				selectors   : "h1,h2,h3,h4",
 				showAndHide : false,
 				scrollTo    : 60
