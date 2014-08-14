@@ -22,7 +22,7 @@ module.exports = function(config) {
         'src/plugins/*.js',
 
 		// tests
-		{ pattern: 'test/**/*_spec.js', included: false },
+		{ pattern: 'test/**/*spec.js', included: false },
         { pattern: 'README.md', included: false },
 
         'test/requirejs-main.js',
