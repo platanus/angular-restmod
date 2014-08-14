@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.15.0 - 2014-07-21
+ * @version v0.16.0 - 2014-08-14
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -9,22 +9,22 @@
 (function(angular, undefined) {
 'use strict';
 // Preload some angular stuff
-var RMModule = angular.module('plRestmod', ['ng', 'platanus.inflector']);
+var RMModule = angular.module('restmod', ['ng', 'platanus.inflector']);
 
 /**
- * @class $restmodProvider
+ * @class restmodProvider
  *
  * @description
  *
- * The $restmodProvider exposes $restmod configuration methods
+ * The restmodProvider exposes restmod configuration methods
  */
-RMModule.provider('$restmod', [function() {
+RMModule.provider('restmod', [function() {
 
   var BASE_CHAIN = []; // The base mixin chain
 
   return {
     /**
-     * @memberof $restmodProvider#
+     * @memberof restmodProvider#
      *
      * @description
      *
@@ -47,7 +47,7 @@ RMModule.provider('$restmod', [function() {
     },
 
     /**
-     * @class $restmod
+     * @class restmod
      *
      * @description
      *
@@ -59,19 +59,19 @@ RMModule.provider('$restmod', [function() {
 
       var restmod = {
         /**
-         * @memberOf $restmod#
+         * @memberOf restmod#
          *
          * @description
          *
-         * The model factory is used to generate new $restmod model types. It's recommended to put models inside factories,
+         * The model factory is used to generate new restmod model types. It's recommended to put models inside factories,
          * this is usefull later when defining relations and inheritance, since the angular $injector is used by
          * these features. It's also the angular way of doing things.
          *
          * A simple model can be built like this:
          *
          * ```javascript
-         * angular.module('bike-app').factory('Bike', function($restmod) {
-         *   return $restmod.model('/bikes');
+         * angular.module('bike-app').factory('Bike', function(restmod) {
+         *   return restmod.model('/bikes');
          * });
          *```
          *
@@ -84,7 +84,7 @@ RMModule.provider('$restmod', [function() {
          * * A definition object (more on this at the {@link BuilderApi}):
          *
          * ```javascript
-         * $restmod.model('/bikes', {
+         * restmod.model('/bikes', {
          *   viewed: { init: false },
          *   parts: { hasMany: 'Part' },
          *   '~afterCreate': function() {
@@ -96,7 +96,7 @@ RMModule.provider('$restmod', [function() {
          * * A definition function (more on this at the {@link BuilderApi}):
          *
          * ```javascript
-         * $restmod.model('/bikes', function() {
+         * restmod.model('/bikes', function() {
          *   this.attrDefault('viewed', false);
          *   this.attrMask('id', 'CU');
          * });
@@ -105,13 +105,13 @@ RMModule.provider('$restmod', [function() {
          * * A mixin (generated using the mixin method) or model factory name:
          *
          * ```javascript
-         * $restmod.model('/bikes', 'BaseModel', 'PagedModel');
+         * restmod.model('/bikes', 'BaseModel', 'PagedModel');
          *```
          *
          * * A mixin (generated using the mixin method) or model object:
          *
          * ```javascript
-         * $restmod.model('/bikes', BaseModel, PagedModel);
+         * restmod.model('/bikes', BaseModel, PagedModel);
          * ```
          *
          * @param {string} _url Resource url.
@@ -132,15 +132,15 @@ RMModule.provider('$restmod', [function() {
         },
 
         /**
-         * @memberOf $restmod#
+         * @memberOf restmod#
          *
          * @description
          *
          * The mixin factory is used to pack model behaviors without the overload of generating a new
-         * model. The mixin can then be passed as argument to a call to {@link $restmod#model#model}
+         * model. The mixin can then be passed as argument to a call to {@link restmod#model#model}
          * to extend the model capabilities.
          *
-         * A mixin can also be passed to the {@link $restmodProvider#pushModelBase} method to provide
+         * A mixin can also be passed to the {@link restmodProvider#pushModelBase} method to provide
          * a base behavior for all generated models.
          *
          * @param {mixed} _mix One or more mixins, description objects or description blocks.
@@ -151,13 +151,13 @@ RMModule.provider('$restmod', [function() {
         },
 
         /**
-         * @memberOf $restmod#
+         * @memberOf restmod#
          *
          * @description
          *
          * Shorcut method used to create singleton resources.
          *
-         * Same as calling `$restmod.model(null).$single(_url)`
+         * Same as calling `restmod.model(null).$single(_url)`
          *
          * Check the {@link StaticApi#$single} documentation for more information.
          *
@@ -174,11 +174,11 @@ RMModule.provider('$restmod', [function() {
     }]
   };
 }])
-.factory('model', ['$restmod', function($restmod) {
-  return $restmod.model;
+.factory('model', ['restmod', function(restmod) {
+  return restmod.model;
 }])
-.factory('mixin', ['$restmod', function($restmod) {
-  return $restmod.mixin;
+.factory('mixin', ['restmod', function(restmod) {
+  return restmod.mixin;
 }]);
 
 RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', 'RMUtils', function($injector, $parse, $filter, $inflector, Utils) {
@@ -205,7 +205,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    * A model description object looks like this:
    *
    * ```javascript
-   * $restmod.model('', {
+   * restmod.model('', {
    *
    *   // ATTRIBUTE MODIFIERS
    *
@@ -243,6 +243,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    *
    * * `init` sets an attribute default value, see {@link BuilderApi#attrDefault}
    * * `mask` and `ignore` sets an attribute mask, see {@link BuilderApi#attrMask}
+   * * `map` sets an explicit server attribute mapping, see {@link BuilderApi#attrMap}
    * * `decode` sets how an attribute is decoded after being fetch, maps to {@link BuilderApi#attrDecoder}
    * * `encode` sets how an attribute is encoded before being sent, maps to {@link BuilderApi#attrEncoder}
    * * `serialize` sets the encoder and decoder beaviour for an attribute, maps to {@link BuilderApi#attrSerializer}
@@ -254,7 +255,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    * description properties:
    *
    * ```javascript
-   * var Model = $restmod.model('/', {
+   * var Model = restmod.model('/', {
    *   sayHello: function() { alert('hello!'); }
    * })
    *
@@ -266,7 +267,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    * then it is considered to be a default value. (same as calling {@link BuilderApi#define} at a definition function)
    *
    * ```javascript
-   * var Model = $restmod.model('/', {
+   * var Model = restmod.model('/', {
    *   im20: 20 // same as { init: 20 }
    * })
    *
@@ -278,7 +279,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    * (same as calling {@link BuilderApi#classDefine} at a definition function).
    *
    * ```javascript
-   * var Model = $restmod.model('/', {
+   * var Model = restmod.model('/', {
    *   '@sayHello': function() { alert('hello!'); }
    * })
    *
@@ -291,7 +292,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    * property name matches the event name (same as calling {@link BuilderApi#on} at a definition function).
    *
    * ```javascript
-   * var Model = $restmod.model('/', {
+   * var Model = restmod.model('/', {
    *   '~afterInit': function() { alert('hello!'); }
    * })
    *
@@ -305,7 +306,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    * in this page can be called from the definition function by referencing *this*.
    *
    * ```javascript
-   * $restmod.model('', function() {
+   * restmod.model('', function() {
    *   this.attrDefault('propWithDefault', 20)
    *       .attrAsCollection('hasManyRelation', 'ModelName')
    *       .on('after-create', function() {
@@ -317,15 +318,17 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    */
   function BuilderDSL(_targetModel) {
     this.$$m = _targetModel;
+    this.$$s = _targetModel.$$getSerializer();
     this.$$mappings = {
       init: ['attrDefault'],
       mask: ['attrMask'],
       ignore: ['attrMask'],
+      map: ['attrMap'],
       decode: ['attrDecoder', 'param', 'chain'],
       encode: ['attrEncoder', 'param', 'chain'],
       serialize: ['attrSerializer'],
       // relations
-      hasMany: ['attrAsCollection', 'path', 'source', 'inverseOf'],
+      hasMany: ['attrAsCollection', 'path', 'source', 'inverseOf'], // TODO: rename source to map, but disable attrMap if map is used here...
       hasOne: ['attrAsResource', 'path', 'source', 'inverseOf'],
       belongsTo: ['attrAsReference', 'inline', 'key', 'source', 'prefetch']
     };
@@ -350,11 +353,11 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * Usage:
      *
      * ```javascript
-     * var BaseModel = $restmod.mixin(function() {
+     * var BaseModel = restmod.mixin(function() {
      *   this.setUrlPrefix('/api');
      * })
      *
-     * var bike = $restmod.model('/bikes', BaseModel).$build({ id: 1 });
+     * var bike = restmod.model('/bikes', BaseModel).$build({ id: 1 });
      * console.log(bike.$url()) // outputs '/api/bikes/1'
      * ```
      *
@@ -398,7 +401,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     setNameDecoder: function(_decoder) {
-      this.$$m.$$setNameDecoder(_decoder);
+      this.$$s.setNameDecoder(_decoder);
       return this;
     },
 
@@ -417,7 +420,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     setNameEncoder: function(_encoder) {
-      this.$$m.$$setNameEncoder(_encoder);
+      this.$$s.setNameEncoder(_encoder);
       return this;
     },
 
@@ -626,7 +629,29 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     attrMask: function(_attr, _mask) {
-      this.$$m.$$setMask(_attr, _mask);
+      this.$$s.setMask(_attr, _mask);
+      return this;
+    },
+
+    /**
+     * @memberof BuilderApi#
+     *
+     * @description Sets an attribute mapping.
+     *
+     * Allows a explicit server to model property mapping to be defined.
+     *
+     * For example, to map the response property `stats.created_at` to model's `created` property.
+     *
+     * ```javascript
+     * builder.attrMap('created', 'stats.created_at');
+     * ```
+     *
+     * @param {string} _attr Attribute name
+     * @param {string} _serverName Server (request/response) property name
+     * @return {BuilderApi} self
+     */
+    attrMap: function(_attr, _serverName) {
+      this.$$s.setMapping(_attr, _serverName);
       return this;
     },
 
@@ -651,8 +676,8 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
 
       // TODO: if(!_serializer) throw $setupError
       if(isFunction(_serializer)) _serializer = _serializer(_opt);
-      if(_serializer.decode) this.$$m.$$setDecoder(_name, bind(_serializer, _serializer.decode));
-      if(_serializer.encode) this.$$m.$$setEncoder(_name, bind(_serializer, _serializer.encode));
+      if(_serializer.decode) this.$$s.setDecoder(_name, bind(_serializer, _serializer.decode));
+      if(_serializer.encode) this.$$s.setEncoder(_name, bind(_serializer, _serializer.encode));
       return this;
     },
 
@@ -668,7 +693,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     attrDecoder: function(_name, _filter, _filterParam, _chain) {
-      this.$$m.$$setDecoder(_name, _filter, _filterParam, _chain);
+      this.$$s.setDecoder(_name, _filter, _filterParam, _chain);
       return this;
     },
 
@@ -684,7 +709,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * @return {BuilderApi} self
      */
     attrEncoder: function(_name, _filter, _filterParam, _chain) {
-      this.$$m.$$setEncoder(_name, _filter, _filterParam, _chain);
+      this.$$s.setEncoder(_name, _filter, _filterParam, _chain);
       return this;
     },
 
@@ -707,7 +732,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
           _model = $injector.get(_model);
 
           if(_inverseOf) {
-            _model.$$setMask(_inverseOf, Utils.WRITE_MASK);
+            _model.$$getSerializer().setMask(_inverseOf, Utils.WRITE_MASK);
           }
         }
 
@@ -731,10 +756,12 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
         return col;
       // simple support for inline data, TODO: maybe deprecate this.
       });
-      this.$$m.$$setDecoder(_source || _url || _attr, function(_raw) {
+
+      if(_source || _url) this.$$s.setMapping(_attr, _source || _url);
+      this.$$s.setDecoder(_attr, function(_raw) {
         this[_attr].$reset().$feed(_raw);
       });
-      this.$$m.$$setMask(_attr, Utils.WRITE_MASK);
+      this.$$s.setMask(_attr, Utils.WRITE_MASK);
 
       return this;
     },
@@ -759,7 +786,7 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
           _model = $injector.get(_model);
 
           if(_inverseOf) {
-            _model.$$setMask(_inverseOf, Utils.WRITE_MASK);
+            _model.$$getSerializer().setMask(_inverseOf, Utils.WRITE_MASK);
           }
         }
 
@@ -774,11 +801,12 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
 
         return inst;
       });
-      // simple support for inline data, TODO: maybe deprecate this.
-      this.$$m.$$setDecoder(_source || _url || _attr, function(_raw) {
+
+      if(_source || _url) this.$$s.setMapping(_attr, _source || _url);
+      this.$$s.setDecoder(_attr, function(_raw) {
         this[_attr].$decode(_raw);
       });
-      this.$$m.$$setMask(_attr, Utils.WRITE_MASK);
+      this.$$s.setMask(_attr, Utils.WRITE_MASK);
 
       return this;
     },
@@ -799,10 +827,10 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      */
     attrAsReference: function(_attr, _model, _inline, _key, _source, _prefetch) {
 
-      var watch = _inline ? (_source || _attr) : (_key || (_attr + 'Id'));
       this.$$m.$$setDefault(_attr, null);
-      this.$$m.$$setMask(_attr, Utils.WRITE_MASK);
-      this.$$m.$$setDecoder(watch , function(_raw) {
+      this.$$s.setMask(_attr, Utils.WRITE_MASK);
+      if(!_inline || _source) this.$$s.setMapping(_attr, _inline ? _source : _key || (_attr + 'Id'));
+      this.$$s.setDecoder(_attr , function(_raw) {
 
         // load model
         if(typeof _model === 'string') {
@@ -1082,14 +1110,12 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
 
       // TODO: check that collection is bound.
       this.$dispatch('before-fetch-many', [request]);
-      this.$send(request, function(_response) {
+      return this.$send(request, function(_response) {
         this.$unwrap(_response.data); // feed retrieved data.
         this.$dispatch('after-fetch-many', [_response]);
       }, function(_response) {
         this.$dispatch('after-fetch-many-error', [_response]);
       });
-
-      return this;
     },
 
     /**
@@ -1207,7 +1233,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
      * Usage:
      *
      * ```javascript
-     * var mixin = $restmod.mixin({
+     * var mixin = restmod.mixin({
      *   triggerDummy: function(_param) {
      *     this.$dispatch('dummy-hook', _param);
      *   }
@@ -1304,7 +1330,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
      *
      * ```javascript
      * // special fetch method that sends a special token header.
-     * $restmod.mixin({
+     * restmod.mixin({
      *   $fetchWithToken: function(_token) {
      *     return this.$decorate({
      *       'before-fetch': function(_req) {
@@ -1355,7 +1381,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
      * Usage:
      *
      * ```javascript
-     * $restmod.mixin({
+     * restmod.mixin({
      *   $saveAndTrack: function() {
      *     var dsp = this.$dispatcher(), // capture the current dispatcher function.
      *         self = this;
@@ -1568,12 +1594,11 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
   return CommonApi;
 
 }]);
-RMModule.factory('RMModelFactory', ['$injector', '$inflector', '$filter', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', function($injector, $inflector, $filter, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi) {
+RMModule.factory('RMModelFactory', ['$injector', '$inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', 'RMSerializerFactory', function($injector, $inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi, buildSerializer) {
 
   return function(_identity) {
 
-    var extend = angular.extend,
-        isArray = angular.isArray;
+    var extend = angular.extend;
 
     // Private model attributes
     var urlPrefix = null,
@@ -1581,12 +1606,8 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', '$filter', 'RMUti
         name = null,
         primaryKey = 'id',
         packer = null,
-        masks = {},
-        defaults = [],
-        decoders = {},
-        encoders = {},
-        nameDecoder = $inflector.camelize,
-        nameEncoder = function(_v) { return $inflector.parameterize(_v, '_'); };
+        serializer = buildSerializer(),
+        defaults = [];
 
     // setup model identity
     if(_identity)
@@ -1637,7 +1658,7 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', '$filter', 'RMUti
      *
      * @description
      *
-     * The $restmod type API, every generated $restmod model type exposes this API.
+     * The restmod type API, every generated restmod model type exposes this API.
      *
      * @property {object} $type Reference to the type itself, for compatibility with the {@link ScopeApi}
      *
@@ -1659,14 +1680,9 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', '$filter', 'RMUti
         primaryKey = _key;
       },
 
-      // sets the model name decoder
-      $$setNameDecoder: function(_fun) {
-        nameDecoder = _fun;
-      },
-
-      // sets the model name encoder
-      $$setNameEncoder: function(_fun) {
-        nameEncoder = _fun;
+      // gets the model serializer
+      $$getSerializer: function() {
+        return serializer;
       },
 
       // sets the model packer
@@ -1685,39 +1701,6 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', '$filter', 'RMUti
       // sets an attrinute default value
       $$setDefault: function(_attr, _default) {
         defaults.push([_attr, _default]);
-      },
-
-      // sets an attrinute mask
-      $$setMask: function(_attr, _mask) {
-        if(!_mask) {
-          delete masks[_attr];
-        } else {
-          masks[_attr] = _mask === true ? Utils.FULL_MASK : _mask;
-        }
-      },
-
-      // sets an attrinute decoder
-      $$setDecoder: function(_attr, _filter, _filterParam, _chain) {
-
-        if(typeof _filter === 'string') {
-          var filter = $filter(_filter);
-          // TODO: if(!_filter) throw $setupError
-          _filter = function(_value) { return filter(_value, _filterParam); };
-        }
-
-        decoders[_attr] = _chain ? Utils.chain(decoders[_attr], _filter) : _filter;
-      },
-
-      // sets an attribute encoder
-      $$setEncoder: function(_attr, _filter, _filterParam, _chain) {
-
-        if(typeof _filter === 'string') {
-          var filter = $filter(_filter);
-          // TODO: if(!_filter) throw $setupError
-          _filter = function(_value) { return filter(_value, _filterParam); };
-        }
-
-        encoders[_attr] = _chain ? Utils.chain(encoders[_attr], _filter) : _filter;
       },
 
       // registers a new scope method (available at type and collection)
@@ -1781,8 +1764,8 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', '$filter', 'RMUti
        * This can be used to create singleton resources:
        *
        * ```javascript
-       * module('BikeShop', []).factory('Status', function($restmod) {
-       *   return $restmod.model(null).$single('/api/status');
+       * module('BikeShop', []).factory('Status', function(restmod) {
+       *   return restmod.model(null).$single('/api/status');
        * };)
        * ```
        *
@@ -1866,68 +1849,11 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', '$filter', 'RMUti
         return _raw;
       },
 
-      // base transformation method used by $decode/$encode
-      $$transform: function (_data, _prefix, _mask, _decode, _into) {
-
-        var key, decodedName, encodedName, fullName, mask, filter, value, result = _into || {};
-
-        for(key in _data) {
-          if(_data.hasOwnProperty(key) && key[0] !== '$') {
-
-            decodedName = (_decode && nameDecoder) ? nameDecoder(key) : key;
-            fullName = _prefix + decodedName;
-
-            // skip property if masked for this operation
-            mask = masks[fullName];
-            if(mask && mask.indexOf(_mask) !== -1) {
-              continue;
-            }
-
-            value = _data[key];
-            filter = _decode ? decoders[fullName] : encoders[fullName];
-
-            if(filter) {
-              value = filter.call(this, value);
-              if(value === undefined) continue; // ignore value if filter returns undefined
-            } else if(typeof value === 'object' && value &&
-              (_decode || typeof value.toJSON !== 'function')) {
-              // IDEA: make extended decoding/encoding optional, could be a little taxing for some apps
-              value = transformExtended.call(this, value, fullName, _mask, _decode);
-            }
-
-            encodedName = (!_decode && nameEncoder) ? nameEncoder(decodedName) : decodedName;
-            result[encodedName] = value;
-          }
-        }
-
-        return result;
+      // gets the model default serializer
+      $$getSerializer: function() {
+        return serializer;
       }
     }, RecordApi, CommonApi);
-
-    // extended part of $$transform function, enables deep object transform.
-    var transformExtended = function(_data, _prefix, _mask, _decode) {
-      if(isArray(_data))
-      {
-        var fullName = _prefix + '[]',
-            filter = _decode ? decoders[fullName] : encoders[fullName],
-            result = [], i, l, value;
-
-        for(i = 0, l = _data.length; i < l; i++) {
-          value = _data[i];
-          if(filter) {
-            value = filter.call(this, value);
-          } else if(typeof value === 'object' && value &&
-            (_decode || typeof value.toJSON !== 'function')) {
-            value = transformExtended.call(this, value, _prefix, _mask, _decode);
-          }
-          result.push(value);
-        }
-
-        return result;
-      } else {
-        return this.$$transform(_data, _prefix + '.', _mask, _decode);
-      }
-    };
 
     ///// Setup collection api
 
@@ -2155,7 +2081,8 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {RecordApi} this
      */
     $decode: function(_raw, _mask) {
-      this.$$transform(_raw, '', _mask || Utils.READ_MASK, true, this);
+      // IDEA: let user override serializer
+      this.$$getSerializer().decode(this, _raw, _mask || Utils.READ_MASK);
       if(!this.$pk) this.$pk = this.$$inferKey(_raw); // TODO: warn if key changes
       this.$dispatch('after-feed', [_raw]);
       return this;
@@ -2170,7 +2097,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {string} raw data
      */
     $encode: function(_mask) {
-      var raw = this.$$transform(this, '', _mask || Utils.CREATE_MASK, false);
+      var raw = this.$$getSerializer().encode(this, _mask || Utils.CREATE_MASK);
       this.$dispatch('before-render', [raw]);
       return raw;
     },
@@ -2427,10 +2354,11 @@ RMModule.factory('RMScopeApi', [function() {
      * @description Attempts to resolve a resource using provided private key.
      *
      * @param {mixed} _pk Private key
+     * @param {object} _params Additional query parameters
      * @return {RecordApi} single record
      */
-    $find: function(_pk) {
-      return this.$new(_pk).$fetch();
+    $find: function(_pk, _params) {
+      return this.$new(_pk).$fetch(_params);
     },
 
     /**
@@ -2474,6 +2402,233 @@ RMModule.factory('RMScopeApi', [function() {
       return this.$collection(_params).$fetch();
     }
 
+  };
+
+}]);
+RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', 'RMUtils', function($injector, $inflector, $filter, Utils) {
+
+  function extract(_from, _path) {
+    var node;
+    for(var i = 0; _from && (node = _path[i]); i++) {
+      _from = _from[node];
+    }
+    return _from;
+  }
+
+  function insert(_into, _path, _value) {
+    for(var i = 0, l = _path.length-1; i < l; i++) {
+      var node = _path[i];
+      _into = _into[node] || (_into[node] = {});
+    }
+    _into[_path[_path.length-1]] = _value;
+  }
+
+  return function() {
+
+    var isArray = angular.isArray;
+
+    // Private serializer attributes
+    var masks = {},
+        decoders = {},
+        encoders = {},
+        mapped = {},
+        mappings = {},
+        nameDecoder = $inflector.camelize,
+        nameEncoder = function(_v) { return $inflector.parameterize(_v, '_'); };
+
+    function isMasked(_name, _mask) {
+      var mask = masks[_name];
+      return (mask && mask.indexOf(_mask) !== -1);
+    }
+
+    function decode(_from, _to, _prefix, _mask, _ctx) {
+      var key, decodedName, fullName, value, maps, isMapped, i, l,
+          prefix = _prefix ? _prefix + '.' : '';
+
+      // explicit mappings
+      maps = mappings[_prefix];
+      if(maps) {
+        for(i = 0, l = maps.length; i < l; i++) {
+          fullName = prefix + maps[i].path;
+          if(isMasked(fullName, _mask)) continue;
+
+          value = extract(_from, maps[i].map);
+          value = decodeProp(value, fullName, _mask, _ctx);
+          if(value !== undefined) _to[maps[i].path] = value;
+        }
+      }
+
+      // implicit mappings
+      for(key in _from) {
+        if(_from.hasOwnProperty(key) && key[0] !== '$') {
+          if(maps) {
+            // ignore already mapped keys
+            // TODO: ignore nested mappings too.
+            for(
+              // is this so much faster than using .some? http://jsperf.com/some-vs-for-loop
+              isMapped = false, i = 0, l = maps.length;
+              i < l && !(isMapped = (maps[i].mapPath === key));
+              i++
+            );
+            if(isMapped) continue;
+          }
+
+          decodedName = nameDecoder ? nameDecoder(key) : key;
+
+          fullName = prefix + decodedName;
+          // prevent masked or already mapped properties to be set
+          if(mapped[fullName] || isMasked(fullName, _mask)) continue;
+
+          value = decodeProp(_from[key], fullName, _mask, _ctx);
+          if(value !== undefined) _to[decodedName] = value; // ignore value if filter returns undefined
+        }
+      }
+    }
+
+    function decodeProp(_value, _name, _mask, _ctx) {
+      var filter = decoders[_name], result = _value;
+
+      if(filter) {
+        result = filter.call(_ctx, _value);
+      } else if(typeof _value === 'object') {
+        // IDEA: make extended decoding/encoding optional, could be a little taxing for some apps
+        if(isArray(_value)) {
+          result = [];
+          for(var i = 0, l = _value.length; i < l; i++) {
+            result.push(decodeProp(_value[i], _name + '[]', _mask, _ctx));
+          }
+        } else if(_value) {
+          result = {};
+          decode(_value, result, _name, _mask, _ctx);
+        }
+      }
+
+      return result;
+    }
+
+    function encode(_from, _to, _prefix, _mask, _ctx) {
+      var key, fullName, encodedName, value, maps,
+          prefix = _prefix ? _prefix + '.' : '';
+
+      // implicit mappings
+      for(key in _from) {
+        if(_from.hasOwnProperty(key) && key[0] !== '$') {
+          fullName = prefix + key;
+          // prevent masked or already mapped properties to be copied
+          if(mapped[fullName] || isMasked(fullName, _mask)) continue;
+
+          value = encodeProp(_from[key], fullName, _mask, _ctx);
+          if(value !== undefined) {
+            encodedName = nameEncoder ? nameEncoder(key) : key;
+            _to[encodedName] = value;
+          }
+        }
+      }
+
+      // explicit mappings:
+      maps = mappings[_prefix];
+      if(maps) {
+        for(var i = 0, l = maps.length; i < l; i++) {
+          fullName = _prefix ? _prefix + '.' + maps[i].path : maps[i].path;
+          if(isMasked(fullName, _mask)) continue;
+
+          value = encodeProp(_from[maps[i].path], fullName, _mask, _ctx);
+          if(value !== undefined) insert(_to, maps[i].map, value);
+        }
+      }
+    }
+
+    function encodeProp(_value, _name, _mask, _ctx) {
+      var filter = encoders[_name], result = _value;
+
+      if(filter) {
+        result = filter.call(_ctx, _value);
+      } else if(typeof _value === 'object' && typeof _value.toJSON !== 'function') {
+        // IDEA: make deep decoding/encoding optional, could be a little taxing for some apps
+        if(isArray(_value)) {
+          result = [];
+          for(var i = 0, l = _value.length; i < l; i++) {
+            result.push(encodeProp(_value[i], _name + '[]', _mask, _ctx));
+          }
+        } else if(_value) {
+          result = {};
+          encode(_value, result, _name, _mask, _ctx);
+        }
+      }
+
+      return result;
+    }
+
+    return {
+
+      // sets the model name decoder
+      setNameDecoder: function(_fun) {
+        nameDecoder = _fun;
+      },
+
+      // sets the model name encoder
+      setNameEncoder: function(_fun) {
+        nameEncoder = _fun;
+      },
+
+      // specifies a single server to client property mapping
+      setMapping: function(_attr, _serverPath) {
+        // extract parent node from client name:
+        var index = _attr.lastIndexOf('.'),
+            node = index !== -1 ? _attr.substr(0, index) : '',
+            leaf = index !== -1 ? _attr.substr(index + 1) : _attr;
+
+        mapped[_attr] = true;
+
+        var nodes = (mappings[node] || (mappings[node] = []));
+        nodes.push({ path: leaf, map: _serverPath.split('.'), mapPath: _serverPath });
+      },
+
+      // sets an attrinute mask
+      setMask: function(_attr, _mask) {
+        if(!_mask) {
+          delete masks[_attr];
+        } else {
+          masks[_attr] = _mask === true ? Utils.FULL_MASK : _mask;
+        }
+      },
+
+      // sets an attrinute decoder
+      setDecoder: function(_attr, _filter, _filterParam, _chain) {
+
+        if(typeof _filter === 'string') {
+          var filter = $filter(_filter);
+          // TODO: if(!_filter) throw $setupError
+          _filter = function(_value) { return filter(_value, _filterParam); };
+        }
+
+        decoders[_attr] = _chain ? Utils.chain(decoders[_attr], _filter) : _filter;
+      },
+
+      // sets an attribute encoder
+      setEncoder: function(_attr, _filter, _filterParam, _chain) {
+
+        if(typeof _filter === 'string') {
+          var filter = $filter(_filter);
+          // TODO: if(!_filter) throw $setupError
+          _filter = function(_value) { return filter(_value, _filterParam); };
+        }
+
+        encoders[_attr] = _chain ? Utils.chain(encoders[_attr], _filter) : _filter;
+      },
+
+      // decodes a raw record into a record
+      decode: function(_record, _raw, _mask) {
+        decode(_raw, _record, '', _mask, _record);
+      },
+
+      // encodes a record, returning a raw record
+      encode: function(_record, _mask) {
+        var raw = {};
+        encode(_record, raw, '', _mask, _record);
+        return raw;
+      }
+    };
   };
 
 }]);

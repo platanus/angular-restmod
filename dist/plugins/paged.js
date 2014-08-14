@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.15.0 - 2014-07-21
+ * @version v0.16.0 - 2014-08-14
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -18,7 +18,7 @@
  * Just add mixin to a model's mixin chain
  *
  * ```javascript
- * var Bike = $restmod.model('api/bikes', 'PagedModel');
+ * var Bike = restmod.model('api/bikes', 'PagedModel');
  * ```
  *
  * Then using fetch on a collection bound to a paged api should provide page information
@@ -34,16 +34,16 @@
  * override the $pageHeader or the $pageCountHeader definition during model building.
  *
  * ```javascript
- * $restmod.model('PagedModel', function() {
+ * restmod.model('PagedModel', function() {
  *  this.define('$pageHeader', 'X-My-Page-Header');
  * })
  * ```
  *
  */
 
-angular.module('plRestmod').factory('PagedModel', ['$restmod', function($restmod) {
+angular.module('restmod').factory('PagedModel', ['restmod', function(restmod) {
 
-  return $restmod.mixin({
+  return restmod.mixin({
     '@$pageHeader': 'X-Page',
     '@$pageCountHeader': 'X-Page-Total',
     '~afterFetchMany': function(_response) {

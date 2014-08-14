@@ -1,3 +1,25 @@
+# 0.16.0 (2014-08-14)
+
+## Features
+
+## Builder
+
+* Adds attribute mapping support
+
+## Model
+
+* Adds packer support
+
+* Adds $wrap/$unwrap methods
+
+## Breaking Changes
+
+* Adds query parameter support to $find (193dedc)
+
+* Changes module name to 'restmod'
+
+* Changes service name to 'restmod' and provider name to 'restmodProvider'
+
 # 0.14.0 (2014-05-19)
 
 ## Features

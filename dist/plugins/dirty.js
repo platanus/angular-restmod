@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.15.0 - 2014-07-21
+ * @version v0.16.0 - 2014-08-14
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -14,9 +14,9 @@
  * @description Adds the `$dirty` method to a model`s instances.
  */
 
-angular.module('plRestmod').factory('DirtyModel', ['$restmod', function($restmod) {
+angular.module('restmod').factory('DirtyModel', ['restmod', function(restmod) {
 
-  return $restmod.mixin(function() {
+  return restmod.mixin(function() {
     this.on('after-feed', function(_original) {
           // store original information in a model's special property
           var original = this.$cmStatus = {};
