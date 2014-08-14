@@ -63,7 +63,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
       if(filter) {
         result = filter.call(_ctx, _value);
       } else if(typeof _value === 'object' && typeof _value.toJSON !== 'function') {
-        // IDEA: make extended decoding/encoding optional, could be a little taxing for some apps
+        // IDEA: make deep decoding/encoding optional, could be a little taxing for some apps
         if(isArray(_value)) {
           result = [];
           for(var i = 0, l = _value.length; i < l; i++) {
@@ -79,25 +79,13 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
     }
 
     function decode(_from, _to, _prefix, _mask, _ctx) {
-      var key, decodedName, fullName, value, maps,
+      var key, decodedName, fullName, value, maps, isMapped, i, l,
           prefix = _prefix ? _prefix + '.' : '';
 
-      for(key in _from) {
-        if(_from.hasOwnProperty(key) && key[0] !== '$') {
-          decodedName = nameDecoder ? nameDecoder(key) : key;
-
-          fullName = prefix + decodedName;
-          if(isMasked(fullName, _mask) || mapped[fullName]) continue;
-
-          value = decodeProp(_from[key], fullName, _mask, _ctx);
-          if(value !== undefined) _to[decodedName] = value; // ignore value if filter returns undefined
-        }
-      }
-
-      // process mappings for node:
+      // explicit mappings
       maps = mappings[_prefix];
       if(maps) {
-        for(var i = 0, l = maps.length; i < l; i++) {
+        for(i = 0, l = maps.length; i < l; i++) {
           fullName = prefix + maps[i].path;
           if(isMasked(fullName, _mask)) continue;
 
@@ -106,16 +94,44 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
           if(value !== undefined) _to[maps[i].path] = value;
         }
       }
+
+      // implicit mappings
+      for(key in _from) {
+        if(_from.hasOwnProperty(key) && key[0] !== '$') {
+          if(maps) {
+            // ignore already mapped keys
+            // TODO: ignore nested mappings too.
+            for(
+              // is this so much faster than using .some? http://jsperf.com/some-vs-for-loop
+              isMapped = false, i = 0, l = maps.length;
+              i < l && !(isMapped = (maps[i].mapPath === key));
+              i++
+            );
+            if(isMapped) continue;
+          }
+
+          decodedName = nameDecoder ? nameDecoder(key) : key;
+
+          fullName = prefix + decodedName;
+          // prevent masked or already mapped properties to be set
+          if(mapped[fullName] || isMasked(fullName, _mask)) continue;
+
+          value = decodeProp(_from[key], fullName, _mask, _ctx);
+          if(value !== undefined) _to[decodedName] = value; // ignore value if filter returns undefined
+        }
+      }
     }
 
     function encode(_from, _to, _prefix, _mask, _ctx) {
       var key, fullName, encodedName, value, maps,
           prefix = _prefix ? _prefix + '.' : '';
 
+      // implicit mappings
       for(key in _from) {
         if(_from.hasOwnProperty(key) && key[0] !== '$') {
           fullName = prefix + key;
-          if(isMasked(fullName, _mask) || mapped[fullName]) continue;
+          // prevent masked or already mapped properties to be copied
+          if(mapped[fullName] || isMasked(fullName, _mask)) continue;
 
           value = encodeProp(_from[key], fullName, _mask, _ctx);
           if(value !== undefined) {
@@ -125,7 +141,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
         }
       }
 
-      // process mappings for node:
+      // explicit mappings:
       maps = mappings[_prefix];
       if(maps) {
         for(var i = 0, l = maps.length; i < l; i++) {
@@ -158,8 +174,9 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
             leaf = index !== -1 ? _attr.substr(index + 1) : _attr;
 
         mapped[_attr] = true;
+
         var nodes = (mappings[node] || (mappings[node] = []));
-        nodes.push({ path: leaf, map: _serverPath.split('.') });
+        nodes.push({ path: leaf, map: _serverPath.split('.'), mapPath: _serverPath });
       },
 
       // sets an attrinute mask

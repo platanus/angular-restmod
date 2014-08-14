@@ -161,7 +161,7 @@ describe('Restmod model class:', function() {
       }).$build().$decode({ full_brand: 'Trek' });
 
       expect(bike.brand).toEqual('Trek');
-      // expect(bike.fullBrand).toBeUndefined();
+      expect(bike.fullBrand).toBeUndefined();
       bike.brand = 'Giant';
       expect(bike.$encode().full_brand).toEqual('Giant');
     });
