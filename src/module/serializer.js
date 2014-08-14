@@ -36,48 +36,6 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
       return (mask && mask.indexOf(_mask) !== -1);
     }
 
-    function decodeProp(_value, _name, _mask, _ctx) {
-      var filter = decoders[_name], result = _value;
-
-      if(filter) {
-        result = filter.call(_ctx, _value);
-      } else if(typeof _value === 'object') {
-        // IDEA: make extended decoding/encoding optional, could be a little taxing for some apps
-        if(isArray(_value)) {
-          result = [];
-          for(var i = 0, l = _value.length; i < l; i++) {
-            result.push(decodeProp(_value[i], _name + '[]', _mask, _ctx));
-          }
-        } else if(_value) {
-          result = {};
-          decode(_value, result, _name, _mask, _ctx);
-        }
-      }
-
-      return result;
-    }
-
-    function encodeProp(_value, _name, _mask, _ctx) {
-      var filter = encoders[_name], result = _value;
-
-      if(filter) {
-        result = filter.call(_ctx, _value);
-      } else if(typeof _value === 'object' && typeof _value.toJSON !== 'function') {
-        // IDEA: make deep decoding/encoding optional, could be a little taxing for some apps
-        if(isArray(_value)) {
-          result = [];
-          for(var i = 0, l = _value.length; i < l; i++) {
-            result.push(encodeProp(_value[i], _name + '[]', _mask, _ctx));
-          }
-        } else if(_value) {
-          result = {};
-          encode(_value, result, _name, _mask, _ctx);
-        }
-      }
-
-      return result;
-    }
-
     function decode(_from, _to, _prefix, _mask, _ctx) {
       var key, decodedName, fullName, value, maps, isMapped, i, l,
           prefix = _prefix ? _prefix + '.' : '';
@@ -122,6 +80,27 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
       }
     }
 
+    function decodeProp(_value, _name, _mask, _ctx) {
+      var filter = decoders[_name], result = _value;
+
+      if(filter) {
+        result = filter.call(_ctx, _value);
+      } else if(typeof _value === 'object') {
+        // IDEA: make extended decoding/encoding optional, could be a little taxing for some apps
+        if(isArray(_value)) {
+          result = [];
+          for(var i = 0, l = _value.length; i < l; i++) {
+            result.push(decodeProp(_value[i], _name + '[]', _mask, _ctx));
+          }
+        } else if(_value) {
+          result = {};
+          decode(_value, result, _name, _mask, _ctx);
+        }
+      }
+
+      return result;
+    }
+
     function encode(_from, _to, _prefix, _mask, _ctx) {
       var key, fullName, encodedName, value, maps,
           prefix = _prefix ? _prefix + '.' : '';
@@ -152,6 +131,27 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
           if(value !== undefined) insert(_to, maps[i].map, value);
         }
       }
+    }
+
+    function encodeProp(_value, _name, _mask, _ctx) {
+      var filter = encoders[_name], result = _value;
+
+      if(filter) {
+        result = filter.call(_ctx, _value);
+      } else if(typeof _value === 'object' && typeof _value.toJSON !== 'function') {
+        // IDEA: make deep decoding/encoding optional, could be a little taxing for some apps
+        if(isArray(_value)) {
+          result = [];
+          for(var i = 0, l = _value.length; i < l; i++) {
+            result.push(encodeProp(_value[i], _name + '[]', _mask, _ctx));
+          }
+        } else if(_value) {
+          result = {};
+          encode(_value, result, _name, _mask, _ctx);
+        }
+      }
+
+      return result;
     }
 
     return {
