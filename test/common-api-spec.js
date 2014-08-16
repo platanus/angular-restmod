@@ -20,6 +20,7 @@ describe('Restmod model class:', function() {
       $httpBackend.when('GET','/api/bikes/1').respond(200, { last: false });
       $httpBackend.when('GET','/api/bikes/2').respond(200, { last: true });
       $httpBackend.when('GET','/api/bikes/3').respond(404);
+      $httpBackend.when('POST','/api/bikes').respond(422);
     });
 
     it('should execute request in FIFO order', function() {
@@ -54,6 +55,22 @@ describe('Restmod model class:', function() {
       expect(bike.$pending.length).toEqual(2);
       $httpBackend.flush();
       expect(bike.$pending.length).toEqual(0);
+    });
+
+    it('should properly propagate success states to $then', function() {
+      var bike = Bike.$new();
+      var spy = jasmine.createSpy('callback');
+      bike.$send({ method: 'GET', url: '/api/bikes/2' }).$then(spy, null);
+      $httpBackend.flush();
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('should properly propagate error states to $then', function() {
+      var bike = Bike.$new();
+      var spy = jasmine.createSpy('callback');
+      bike.$send({ method: 'POST', url: '/api/bikes' }).$then(null, spy);
+      $httpBackend.flush();
+      expect(spy).toHaveBeenCalled();
     });
 
   });
