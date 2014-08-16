@@ -465,6 +465,11 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
      * builder.attrMap('created', 'stats.created_at');
      * ```
      *
+     * It's also posible to use a wildcard '*' as server name to use the default name decoder as
+     * server name. This is used to force a property to be processed on decode/encode even if its
+     * not present on request/record (respectively), by doing this its posible, for example, to define
+     * a dynamic property that is generated automatically before the object is send to the server.
+     *
      * @param {string} _attr Attribute name
      * @param {string} _serverName Server (request/response) property name
      * @return {BuilderApi} self
