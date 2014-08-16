@@ -75,7 +75,7 @@ Next, include angular module as one of your app's dependencies
 <!-- ignore -->
 
 ```javascript
-module = angular.module('MyApp', ['plRestmod'])
+module = angular.module('MyApp', ['restmod'])
 ```
 
 <!-- end -->
