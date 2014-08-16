@@ -229,6 +229,17 @@ describe('Restmod serializer', function() {
       expect(result.allParts[1].brand).toEqual('SRAM');
     });
 
+    it('should allow for a wildcard as server name to use encoded attribute name', function() {
+      serializer.setMapping('fullBrand', '*');
+
+      var result = {};
+      serializer.decode(result, { full_brand: 'Bianchi' }, '');
+      expect(result.fullBrand).toEqual('Bianchi');
+
+      result = serializer.encode(result, '');
+      expect(result.full_brand).toEqual('Bianchi');
+    });
+
     it('should allow for a wildcard as server name to force a property to be processed even if not set', function() {
       serializer.setMapping('gearRatio', '*');
       serializer.setEncoder('gearRatio', function() { return this.calculateGearRatio(); });
