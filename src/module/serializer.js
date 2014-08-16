@@ -50,7 +50,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
           if(maps[i].map) {
             value = extract(_from, maps[i].map);
           } else {
-            value =  _from[nameDecoder ? nameDecoder(maps[i].path) : maps[i].path];
+            value = _from[nameEncoder ? nameEncoder(maps[i].path) : maps[i].path];
           }
 
           value = decodeProp(value, fullName, _mask, _ctx);
