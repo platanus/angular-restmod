@@ -115,13 +115,18 @@ Then, on your code you would call
 bike = Bike.$find(1);
 ```
 
+<!-- section: $then -->
+
 The bike object will be populated as soon as the API returns some data. You can use `$then` to do something when data becomes available.
 
 ```javascript
 bike.$then(function() {
-	console.log(bike.brand); // will output 'Trek'
+	expect(bike.brand).toBeDefined();
 });
 ```
+
+<!-- it: $httpBackend.flush() -->
+<!-- end -->
 
 If you need to pass additional parameters to `$find`, you can use the second function argument.
 
@@ -527,9 +532,32 @@ owner.$save();
 
 #### BelongsTo
 
-This is a reference relation between a model instance and another model instance.
-The child instance is not bound to the parent and is **generated after** server response to a parent's `$fetch` is received.
-A key is used by default to bind child to parent. The key property name can be optionally selected using the `key` attribute.
+This relation should be used in the following scenarios:
+
+1. The api resource references another resource by id:
+
+```
+{
+	name: '...',
+	brand: '...',
+	owner_id: 20
+}
+```
+
+2. The api resource contanis another resource as an inline property and does not provide the same object as a nested url:
+
+```
+{
+	name: '...',
+	brand: '...',
+	owner: {
+		id: 20,
+		user: 'extreme_rider_99'
+	}
+}
+```
+
+When applied, the referenced instance is not bound to the host's scope and is **generated after** server responds to a parent's `$fetch`.
 
 Let's say you have the same 'User' model as before:
 
@@ -575,14 +603,14 @@ bike.owner.$fetch();
 
 Will send a GET to /users/2 and populate the owner property with the user data.
 
-This relation can be optionally defined as `inline`, this means that it is expected that the child object data comes inlined in the parent object server data.
+This relation also support the child object data to come inlined in the parent object data.
 The inline property name can be optionally selected using the `source` attribute.
 
 Lets redefine the `Bike` model as:
 
 ```javascript
 var Bike = restmod.model('/bikes', {
-	owner: { belongsTo: 'User', inline: true, source: 'last_owner' } // source would default to *owner*
+	owner: { belongsTo: 'User', source: 'last_owner' } // source would default to *owner*
 });
 ```
 
@@ -608,6 +636,24 @@ var bike = Bike.$find(1);
 ```
 
 Will produce a `bike` object with its owner property initialized to a user with id=2 and name=Juanito. As before, the owner property will only be available **AFTER** server response arrives.
+
+Whenever the host object is saved, the reference primary key will be sent in the request using the selected foreign key.
+
+So given the previous model definition, doing:
+
+```javascript
+var bike = Bike.$create({ last_owner: User.$find(20) });
+```
+
+Will generate the following request:
+
+```
+POST /bikes
+
+{
+	owner_id: 20
+}
+```
 
 <!-- ignore -->
 

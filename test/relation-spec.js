@@ -169,52 +169,54 @@ describe('Restmod model relation:', function() {
     });
   });
 
-  describe('referenceTo', function() {
+  describe('belongsTo', function() {
 
     beforeEach(function() {
       Bike = restmod.model('/api/bikes', {
         frame: { belongsTo: 'Part' },
-        user: { belongsTo: 'User', key: 'ownerId' }
+        user: { belongsTo: 'User', key: 'owner_id', source: 'owner' }
       });
+    });
+
+    it('should initialize resource as null', function() {
+      var bike = Bike.$new(1);
+      expect(bike.frame).toBeDefined();
+    });
+
+    it('should set resource foreign key when host object is encoded', function() {
+      var bike = Bike.$new(1);
+      bike.frame = $injector.get('Part').$new(2);
+      expect(bike.$encode().frame_id).toEqual(2);
     });
 
     it('should load resource after fetching id', function() {
       var bike = Bike.$new(1);
       expect(bike.frame).toBeNull();
-      bike.$decode({ frameId: 'XX' });
+      bike.$decode({ frame_id: 'XX' });
+      expect(bike.frame).not.toBeNull();
       expect(bike.frame.$pk).toEqual('XX');
     });
 
     it('should load resource using id specified in key', function() {
       var bike = Bike.$new(1);
-      bike.$decode({ ownerId: 'XX' });
+      bike.$decode({ owner_id: 'XX' });
       expect(bike.user.$pk).toEqual('XX');
     });
 
     it('should behave as an independent resource', function() {
-      var bike = Bike.$new(1).$decode({ frameId: 'XX' });
+      var bike = Bike.$new(1).$decode({ frame_id: 'XX' });
       expect(bike.frame.$url()).toEqual('/api/parts/XX');
     });
 
     it('should reload resource only if id changes', function() {
-      var bike = Bike.$new(1).$decode({ frameId: 'XX' }),
+      var bike = Bike.$new(1).$decode({ frame_id: 'XX' }),
           original = bike.frame;
 
-      bike.$decode({ frameId: 'XX' });
+      bike.$decode({ frame_id: 'XX' });
       expect(bike.frame).toEqual(original);
 
-      bike.$decode({ frameId: 'XY' });
+      bike.$decode({ frame_id: 'XY' });
       expect(bike.frame).not.toEqual(original);
-    });
-  });
-
-  describe('belongsTo inline', function() {
-
-    beforeEach(function() {
-      Bike = restmod.model('/api/bikes', {
-        frame: { belongsTo: 'Part', inline: true },
-        user: { belongsTo: 'User', inline: true, source: 'owner' }
-      });
     });
 
     it('should load resource after fetching id', function() {
@@ -243,6 +245,12 @@ describe('Restmod model relation:', function() {
 
       bike.$decode({ frame: { id: 'XY' } });
       expect(bike.frame).not.toEqual(original);
+    });
+
+    it('should be encoded as a $pk reference', function() {
+      var bike = Bike.$build({ id: 1, frame: $injector.get('Part').$new('XX'), user: $injector.get('User').$new('YY') });
+      expect(bike.$encode().frame_id).toEqual('XX');
+      expect(bike.$encode().owner_id).toEqual('YY');
     });
   });
 
