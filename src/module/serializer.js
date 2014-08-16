@@ -33,7 +33,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
 
     function isMasked(_name, _mask) {
       var mask = masks[_name];
-      return (mask && mask.indexOf(_mask) !== -1);
+      return (mask && (mask === true || mask.indexOf(_mask) !== -1));
     }
 
     function decode(_from, _to, _prefix, _mask, _ctx) {
@@ -47,7 +47,12 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
           fullName = prefix + maps[i].path;
           if(isMasked(fullName, _mask)) continue;
 
-          value = extract(_from, maps[i].map);
+          if(maps[i].map) {
+            value = extract(_from, maps[i].map);
+          } else {
+            value =  _from[nameDecoder ? nameDecoder(maps[i].path) : maps[i].path];
+          }
+
           value = decodeProp(value, fullName, _mask, _ctx);
           if(value !== undefined) _to[maps[i].path] = value;
         }
@@ -124,11 +129,17 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
       maps = mappings[_prefix];
       if(maps) {
         for(var i = 0, l = maps.length; i < l; i++) {
-          fullName = _prefix ? _prefix + '.' + maps[i].path : maps[i].path;
+          fullName = prefix + maps[i].path;
           if(isMasked(fullName, _mask)) continue;
 
           value = encodeProp(_from[maps[i].path], fullName, _mask, _ctx);
-          if(value !== undefined) insert(_to, maps[i].map, value);
+          if(value !== undefined) {
+            if(maps[i].map) {
+              insert(_to, maps[i].map, value);
+            } else {
+              _to[nameEncoder ? nameEncoder(maps[i].path) : maps[i].path] = value;
+            }
+          }
         }
       }
     }
@@ -176,7 +187,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
         mapped[_attr] = true;
 
         var nodes = (mappings[node] || (mappings[node] = []));
-        nodes.push({ path: leaf, map: _serverPath.split('.'), mapPath: _serverPath });
+        nodes.push({ path: leaf, map: _serverPath === '*' ? null : _serverPath.split('.'), mapPath: _serverPath });
       },
 
       // sets an attrinute mask
@@ -184,7 +195,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
         if(!_mask) {
           delete masks[_attr];
         } else {
-          masks[_attr] = _mask === true ? Utils.FULL_MASK : _mask;
+          masks[_attr] = _mask;
         }
       },
 

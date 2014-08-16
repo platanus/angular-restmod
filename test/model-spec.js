@@ -133,195 +133,31 @@ describe('Restmod model class:', function() {
   });
 
   describe('$decode', function() {
+    it('should call callbacks in proper order', function() {
+      var calls = [];
 
-    it('should rename all snake case attributes by default', function() {
-      var bike = restmod.model(null).$build();
-      bike.$decode({ snake_case: true });
-      expect(bike.snake_case).toBeUndefined();
-      expect(bike.snakeCase).toBeDefined();
+      Bike.$new(1)
+          .$on('after-feed', function() { calls.push('af'); })
+          .$decode({});
+
+      expect(calls).toEqual(['af']);
     });
 
-    it('should rename nested values', function() {
-      var bike = restmod.model(null).$build();
-      bike.$decode({ nested: { snake_case: true } });
-      expect(bike.nested.snake_case).toBeUndefined();
-      expect(bike.nested.snakeCase).toBeDefined();
-    });
-
-    it('should rename nested object arrays', function() {
-      var bike = restmod.model(null).$build();
-      bike.$decode({ nested: [ { snake_case: true } ] });
-      expect(bike.nested[0].snake_case).toBeUndefined();
-      expect(bike.nested[0].snakeCase).toBeDefined();
-    });
-
-    it('should allow server simple property mapping', function() {
-      var bike = restmod.model(null, {
-        brand: { map: 'full_brand' },
-      }).$build().$decode({ full_brand: 'Trek' });
-
-      expect(bike.brand).toEqual('Trek');
-      expect(bike.fullBrand).toBeUndefined();
-      bike.brand = 'Giant';
-      expect(bike.$encode().full_brand).toEqual('Giant');
-    });
-
-    it('should allow server nested property mapping', function() {
-      var bike = restmod.model(null, {
-        brand: { map: 'brand.full_name' }
-      }).$build().$decode({ brand: { full_name: 'Trek' } });
-
-      expect(bike.brand).toEqual('Trek');
-      bike.brand = 'Giant';
-      expect(bike.$encode().brand).toBeDefined();
-      expect(bike.$encode().brand.full_name).toEqual('Giant');
-    });
-
-    it('should allow server nested property mapping inside ignored property', function() {
-      var bike = restmod.model(null, {
-        brand: { ignore: true },
-        brandName: { map: 'brand.full_name' }
-      }).$build().$decode({ brand: { full_name: 'Trek' } });
-
-      expect(bike.brand).toBeUndefined();
-      expect(bike.brandName).toEqual('Trek');
-    });
-
-    it('should allow server nested property mapping inside an array', function() {
-      var bike = restmod.model(null, {
-        'allParts[].brand': { map: 'brand_name' }
-      }).$build().$decode({
-        all_parts: [
-          { brand_name: 'Shimano' },
-          { brand_name: 'SRAM' }
-        ]
-      });
-
-      // expect(bike.allParts[0].brandName).toBeUndefined();
-      expect(bike.allParts[0].brand).toEqual('Shimano');
-    });
-
-    it('should allow decoders on mapped properties', function() {
-      var bike = restmod.model(null, {
-        brand: { map: 'full_brand', decode: function(v) { return v + '!'; } }
-      }).$build().$decode({ full_brand: 'Trek' });
-
-      expect(bike.brand).toEqual('Trek!');
-    });
-
-    it('should skip masked properties', function() {
-      var bike = restmod.model(null, {
-        imMasked: { ignore: 'R' },
-        imMaskedToo: { ignore: true },
-        imNotMasked: { ignore: 'U' }
-      }).$build();
-
-      bike.$decode({ imMasked: true, imMaskedToo: true, imNotMasked: true, imNotMaskedEither: true });
-
-      expect(bike.imMasked).toBeUndefined();
-      expect(bike.imMaskedToo).toBeUndefined();
-      expect(bike.imNotMasked).toBeDefined();
-      expect(bike.imNotMaskedEither).toBeDefined();
-    });
-
-    it('should apply registered decoders', function() {
-      var bike = restmod.model(null, function() {
-        this.attrDecoder('size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
-      }).$build();
-
-      bike.$decode({ size: 'S' });
-      expect(bike.size).toEqual('small');
-    });
-
-    it('should apply decoders to nested values', function() {
-      var bike = restmod.model(null, function() {
-        this.attrDecoder('user.name', function(_name) { return 'Mr. ' + _name; });
-      }).$build();
-
-      bike.$decode({ user: { name: 'Petty' } });
-      expect(bike.user.name).toEqual('Mr. Petty');
-    });
-
-    it('should apply decoders to values in nested arrays', function() {
-      var bike = restmod.model(null, function() {
-        this.attrDecoder('users[].name', function(_name) { return 'Mr. ' + _name; });
-      }).$build();
-
-      bike.$decode({ users: [{ name: 'Peety' }] });
-      expect(bike.users[0].name).toEqual('Mr. Peety');
-    });
+    // TODO: test interaction with serializer.
   });
 
   describe('$encode', function() {
+    it('should call callbacks in proper order', function() {
+      var calls = [];
 
-    it('should rename all camel case attributes by default', function() {
-      var bike = Bike.$build({ camelCase: true }),
-          encoded = bike.$encode();
+      Bike.$new(1)
+          .$on('before-render', function() { calls.push('br'); })
+          .$encode();
 
-      expect(encoded.camelCase).toBeUndefined();
-      expect(encoded.camel_case).toBeDefined();
+      expect(calls).toEqual(['br']);
     });
 
-    it('should rename nested values', function() {
-      var bike = restmod.model(null).$build({ user: { lastName: 'Peat' } }),
-          raw = bike.$encode();
-
-      expect(raw.user.lastName).toBeUndefined();
-      expect(raw.user.last_name).toBeDefined();
-    });
-
-    it('should skip masked properties', function() {
-      var bike = restmod.model(null, {
-        imMasked: { ignore: 'C' },
-        imMaskedToo: { ignore: true },
-        imNotMasked: { ignore: 'R' }
-      }).$build();
-
-      angular.extend(bike, { imMasked: true, imMaskedToo: true, imNotMasked: true, imNotMaskedEither: true });
-      var raw = bike.$encode('C');
-      expect(raw.im_masked).toBeUndefined();
-      expect(raw.im_masked_too).toBeUndefined();
-      expect(raw.im_not_masked).toBeDefined();
-      expect(raw.im_not_masked_either).toBeDefined();
-
-      var raw = bike.$encode('U');
-      expect(raw.im_masked).toBeDefined(); // not this time!
-      expect(raw.im_masked_too).toBeUndefined();
-    });
-
-    it('should apply registered encoders', function() {
-      var bike = restmod.model(null, function() {
-        this.attrEncoder('size', function(_val) { return _val === 'small' ? 'S' : 'M'; });
-      }).$build({ size: 'small' });
-
-      expect(bike.$encode().size).toEqual('S');
-    });
-
-    it('should not encode objects with a toJSON implementation', function() {
-      var now = new Date(),
-          bike = restmod.model(null).$build({ created: now }),
-          raw = bike.$encode();
-
-      expect(raw.created instanceof Date).toBeTruthy();
-    });
-
-    it('should ignore relations', function() {
-      var User = restmod.model(null),
-          bike = restmod
-            .model(null, { user: { hasOne: User } })
-            .$buildRaw({ user: { name: 'Petty' }, size: 'M'}),
-          raw = bike.$encode();
-
-      expect(raw.user).toBeUndefined();
-    });
-
-    it('should ignore angular private properties (prefixed with $$)', function() {
-      var bike = restmod.model(null).$build({ brand: 'Commencal', $$hashKey: '00F' }),
-          raw = bike.$encode();
-
-      expect(raw.brand).toBeDefined();
-      expect(raw.$$hashKey).toBeUndefined();
-    });
+    // TODO: test interaction with serializer.
   });
 
   describe('$unwrap', function() {
