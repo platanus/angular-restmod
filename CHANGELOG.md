@@ -1,3 +1,19 @@
+# 0.16.2 (2014-08-18)
+
+## Features
+
+### builder
+
+* adds the belongsToMany relation. (8c368ff)
+
+## Bug fixes
+
+### serializer
+
+* fixes wildcard mapping for decoding and adds missing test (db27cf1)
+
+* encoding failing for null values (4d515c8)
+
 # 0.16.0 (2014-08-14)
 
 ## Features
