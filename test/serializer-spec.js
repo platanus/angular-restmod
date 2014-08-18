@@ -33,6 +33,12 @@ describe('Restmod serializer', function() {
       var raw = serializer.encode({ created: new Date() });
       expect(raw.created instanceof Date).toBeTruthy();
     });
+
+    it('should not fail when decoding a null value (Issue #90)', function() {
+      expect(function() {
+        serializer.encode({ test: null });
+      }).not.toThrow();
+    });
   });
 
   describe('decode', function() {

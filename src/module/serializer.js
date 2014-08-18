@@ -154,7 +154,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
 
       if(filter) {
         result = filter.call(_ctx, _value);
-      } else if(typeof _value === 'object' && typeof _value.toJSON !== 'function') {
+      } else if(_value != null && typeof _value === 'object' && typeof _value.toJSON !== 'function') {
         // IDEA: make deep decoding/encoding optional, could be a little taxing for some apps
         if(isArray(_value)) {
           result = [];
