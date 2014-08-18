@@ -240,8 +240,8 @@ describe('Restmod serializer', function() {
       expect(result.full_brand).toEqual('Bianchi');
     });
 
-    it('should allow for a wildcard as server name to force a property to be processed even if not set', function() {
-      serializer.setMapping('gearRatio', '*');
+    it('should allow to set it as forced to force a property to be processed even if not set', function() {
+      serializer.setMapping('gearRatio', '*', true);
       serializer.setEncoder('gearRatio', function() { return this.calculateGearRatio(); });
 
       var result = { calculateGearRatio: function() { return 24/36; } };

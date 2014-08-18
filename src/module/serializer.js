@@ -53,6 +53,8 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
             value = _from[nameEncoder ? nameEncoder(maps[i].path) : maps[i].path];
           }
 
+          if(!maps[i].forced && value === undefined) continue;
+
           value = decodeProp(value, fullName, _mask, _ctx);
           if(value !== undefined) _to[maps[i].path] = value;
         }
@@ -132,7 +134,10 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
           fullName = prefix + maps[i].path;
           if(isMasked(fullName, _mask)) continue;
 
-          value = encodeProp(_from[maps[i].path], fullName, _mask, _ctx);
+          value = _from[maps[i].path];
+          if(!maps[i].forced && value === undefined) continue;
+
+          value = encodeProp(value, fullName, _mask, _ctx);
           if(value !== undefined) {
             if(maps[i].map) {
               insert(_to, maps[i].map, value);
@@ -178,7 +183,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
       },
 
       // specifies a single server to client property mapping
-      setMapping: function(_attr, _serverPath) {
+      setMapping: function(_attr, _serverPath, _forced) {
         // extract parent node from client name:
         var index = _attr.lastIndexOf('.'),
             node = index !== -1 ? _attr.substr(0, index) : '',
@@ -187,7 +192,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
         mapped[_attr] = true;
 
         var nodes = (mappings[node] || (mappings[node] = []));
-        nodes.push({ path: leaf, map: _serverPath === '*' ? null : _serverPath.split('.'), mapPath: _serverPath });
+        nodes.push({ path: leaf, map: _serverPath === '*' ? null : _serverPath.split('.'), mapPath: _serverPath, forced: _forced });
       },
 
       // sets an attrinute mask
