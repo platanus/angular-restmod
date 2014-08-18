@@ -174,7 +174,7 @@ describe('Restmod model relation:', function() {
     beforeEach(function() {
       Bike = restmod.model('/api/bikes', {
         frame: { belongsTo: 'Part' },
-        user: { belongsTo: 'User', key: 'owner_id', source: 'owner' }
+        user: { belongsTo: 'User', key: 'owner_id', map: 'owner' }
       });
     });
 
@@ -226,7 +226,7 @@ describe('Restmod model relation:', function() {
       expect(bike.frame.name).toEqual('XX');
     });
 
-    it('should load resource from property specified in source', function() {
+    it('should load resource from property specified in map', function() {
       var bike = Bike.$build({ id: 1 }).$decode({ owner: { name: 'XX' } });
       expect(bike.user.name).toEqual('XX');
     });
@@ -251,6 +251,60 @@ describe('Restmod model relation:', function() {
       var bike = Bike.$build({ id: 1, frame: $injector.get('Part').$new('XX'), user: $injector.get('User').$new('YY') });
       expect(bike.$encode().frame_id).toEqual('XX');
       expect(bike.$encode().owner_id).toEqual('YY');
+    });
+  });
+
+  describe('belongsToMany', function() {
+
+    beforeEach(function() {
+      Bike = restmod.model('/api/bikes', {
+        parts: { belongsToMany: 'Part' }
+      });
+    });
+
+    it('should initialize resource as ampty array', function() {
+      var bike = Bike.$new(1);
+      expect(bike.parts).toBeDefined();
+      expect(bike.parts instanceof Array).toBeTruthy();
+      expect(bike.parts.length).toEqual(0);
+    });
+
+    it('should load resources after fetching host with inline data', function() {
+      var bike = Bike.$buildRaw({ parts: [{ id: 1, brand: 'Shimano' }, { id: 2, brand: 'SRAM' }] });
+      expect(bike.parts.length).toEqual(2);
+      expect(bike.parts[0].$pk).toEqual(1);
+      expect(bike.parts[0].brand).toEqual('Shimano');
+      expect(bike.parts[1].$pk).toEqual(2);
+    });
+
+    it('should load resources after fetching host with ids', function() {
+      var bike = Bike.$buildRaw({ parts_ids: [1, 2, 3] });
+      expect(bike.parts.length).toEqual(3);
+      expect(bike.parts[0].$pk).toEqual(1);
+      expect(bike.parts[1].$pk).toEqual(2);
+      expect(bike.parts[2].$pk).toEqual(3);
+    });
+
+    it('should set resource foreign key when host object is encoded', function() {
+      var bike = Bike.$new(1);
+      bike.parts.push($injector.get('Part').$new(1));
+      bike.parts.push($injector.get('Part').$new(2));
+      expect(bike.$encode().parts_ids).toEqual([1, 2]);
+    });
+
+    it('should load references as independent resources', function() {
+      var bike = Bike.$buildRaw({ parts_ids: [1, 2, 3] });
+      expect(bike.parts[0].$url()).toEqual('/api/parts/1');
+    });
+
+    it('should load keys to/from the property specified in \'keys\'', function() {
+      Bike = restmod.model('/api/bikes', {
+        parts: { belongsToMany: 'Part', keys: 'part_keys' }
+      });
+
+      var bike = Bike.$buildRaw({ part_keys: [1, 2, 3] });
+      expect(bike.parts.length).toEqual(3);
+      expect(bike.$encode().part_keys.length).toEqual(3);
     });
   });
 

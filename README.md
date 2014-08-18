@@ -604,13 +604,13 @@ bike.owner.$fetch();
 Will send a GET to /users/2 and populate the owner property with the user data.
 
 This relation also support the child object data to come inlined in the parent object data.
-The inline property name can be optionally selected using the `source` attribute.
+The inline property name can be optionally selected using the `map` attribute.
 
 Lets redefine the `Bike` model as:
 
 ```javascript
 var Bike = restmod.model('/bikes', {
-	owner: { belongsTo: 'User', source: 'last_owner' } // source would default to *owner*
+	owner: { belongsTo: 'User', map: 'last_owner' } // map would default to *owner*
 });
 ```
 
@@ -652,6 +652,118 @@ POST /bikes
 
 {
 	owner_id: 20
+}
+```
+
+#### BelongsToMany
+
+This relation should be used in the following scenarios:
+
+1. The api resource references another resource by id:
+
+```
+{
+	name: '...',
+	brand: '...',
+	parts_ids: [1,2]
+}
+```
+
+2. The api resource contanis another resource as an inline property and does not provide the same object as a nested url:
+
+```
+{
+	name: '...',
+	brand: '...',
+	parts: [
+		{ id: 1, user: 'handlebar' },
+		{ id: 2, user: 'wheel' }
+	]
+}
+```
+
+When retrieved, the referenced instances will not be bound to the host's scope.
+
+Let's say you have the following 'Part' definition:
+
+```javascript
+module.factory('Part', function() {
+	return restmod.model('/parts');
+});
+```
+
+That relates to a 'Bike' through a *belongsToMany* relation this time:
+
+```javascript
+Bike = restmod.model('/bikes', {
+	parts: { belongsToMany: 'Part', keys: 'part_keys' } // default key would be 'parts_ids'
+});
+```
+
+Also you have the following bike resource:
+
+```
+GET /bikes/1
+
+{
+	id: 1,
+	brand: 'Transition',
+	parts_keys: [1, 2]
+}
+```
+
+Then retrieving the resource:
+
+```javascript
+bike = Bike.$find(1);
+```
+
+Will produce a `bike` object with the `parts` property containing two **Part** objects with $pks set to 1 and 2 (but empty).
+
+
+This relation also support the childs object data to come inlined in the hosts object data.
+The inline property name can be optionally selected using the `map` attribute.
+
+Given the same **Bike** model as before, lets suppose now that the bike API resource looks like this:
+
+And suppose that the last bike resource looks like:
+
+```
+GET /bikes/1
+
+{
+	id: 1,
+	brand: 'Transition',
+	parts: [
+		{ id: 1, user: 'handlebar' },
+		{ id: 2, user: 'wheel' }
+	]
+}
+```
+
+Then retrieving the bike resource:
+
+```javascript
+var bike = Bike.$find(1);
+```
+
+Will produce a `bike` object with the `parts` property containing two populated **Part** objects with $pks set to 1 and 2.
+
+Whenever the host object is saved, the references primary keys will be sent in the request using the selected key.
+
+So given the previous model definition, doing:
+
+```javascript
+var bike = Bike.$create({ parts: [Part.$find(1), Part.$find(2)] });
+```
+
+Will generate the following request:
+
+```
+POST /bikes
+
+{
+	parts_keys: [1, 2] // remember we changed the keys property name before!
 }
 ```
 
