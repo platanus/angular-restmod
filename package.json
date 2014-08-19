@@ -17,7 +17,7 @@
     "karma-chrome-launcher": "*",
     "karma-firefox-launcher": "*",
     "karma-osx-reporter": "*",
-    "grunt-conventional-changelog": "0.0.12",
+    "grunt-conventional-changelog": "1.1.0",
     "grunt-gh-pages": "~0.8.1",
     "grunt-jsdoc": "~0.5.4",
     "karma-cli": "*",
