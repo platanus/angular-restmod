@@ -1,3 +1,11 @@
+# 0.16.3 (2014-08-19)
+
+## Bug fixes
+
+### serializer
+
+* moves the check for the $ prefix to after the nameDecoder is called. (c0c0f65)
+
 # 0.16.2 (2014-08-18)
 
 ## Features

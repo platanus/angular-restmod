@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.16.2 - 2014-08-18
+ * @version v0.16.3 - 2014-08-19
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <iobaixas@gmai.com>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -2615,7 +2615,11 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
 
       // implicit mappings
       for(key in _from) {
-        if(_from.hasOwnProperty(key) && key[0] !== '$') {
+        if(_from.hasOwnProperty(key)) {
+
+          decodedName = nameDecoder ? nameDecoder(key) : key;
+          if(decodedName[0] === '$') continue;
+
           if(maps) {
             // ignore already mapped keys
             // TODO: ignore nested mappings too.
@@ -2627,8 +2631,6 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
             );
             if(isMapped) continue;
           }
-
-          decodedName = nameDecoder ? nameDecoder(key) : key;
 
           fullName = prefix + decodedName;
           // prevent masked or already mapped properties to be set
