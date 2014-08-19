@@ -62,7 +62,11 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
 
       // implicit mappings
       for(key in _from) {
-        if(_from.hasOwnProperty(key) && key[0] !== '$') {
+        if(_from.hasOwnProperty(key)) {
+
+          decodedName = nameDecoder ? nameDecoder(key) : key;
+          if(decodedName[0] === '$') continue;
+
           if(maps) {
             // ignore already mapped keys
             // TODO: ignore nested mappings too.
@@ -74,8 +78,6 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
             );
             if(isMapped) continue;
           }
-
-          decodedName = nameDecoder ? nameDecoder(key) : key;
 
           fullName = prefix + decodedName;
           // prevent masked or already mapped properties to be set

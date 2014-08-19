@@ -69,6 +69,15 @@ describe('Restmod serializer', function() {
       expect(result.$ignored).toBeUndefined();
       expect(result.notIgnored).toBeDefined();
     });
+
+    it('should ignore properties prefixed with $ AFTER rename is computed', function() {
+      serializer.setNameDecoder(function(_name) { return _name === '$mustSee' ? 'mustSee' : _name; } );
+
+      var result = {};
+      serializer.decode(result, { $mustSee: true });
+
+      expect(result.mustSee).toBeDefined();
+    });
   });
 
   describe('setNameEncoder', function() {
