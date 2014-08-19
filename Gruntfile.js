@@ -146,14 +146,13 @@ module.exports = function(grunt) {
       while(++idx < parts.length) { parts[idx] = 0; }
       return parts.join('.');
     }
-    var version;
-    function updateFile(file) {
-      var json = grunt.file.readJSON(file);
-      version = json.version = bumpVersion(json.version, versionType || 'patch');
-      grunt.file.write(file, JSON.stringify(json, null, '  '));
-    }
-    // updateFile('package.json');
-    updateFile('bower.json');
+
+    var version = grunt.config.data.pkg.version;
+    version = bumpVersion(version, versionType || 'patch');
+
+    grunt.config.data.pkg.version = version;
+    grunt.file.write('bower.json', JSON.stringify(grunt.config.data.pkg, null, '  '));
+
     grunt.log.ok('Version bumped to ' + version);
   });
 
