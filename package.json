@@ -20,6 +20,7 @@
     "grunt-conventional-changelog": "1.1.0",
     "grunt-gh-pages": "~0.8.1",
     "grunt-jsdoc": "~0.5.4",
+    "grunt-git": "^0.2.14",
     "karma-cli": "*",
     "karma-jasmine": "*",
     "karma-chrome-launcher": "*",
