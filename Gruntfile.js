@@ -135,6 +135,9 @@ module.exports = function(grunt) {
   // Test task
   grunt.registerTask('test', ['karma:build']);
 
+  // Release Task
+  grunt.registerTask('release', ['bump', 'changelog', 'build'])
+
   // Provides the "bump" task.
   grunt.registerTask('bump', 'Increment version number', function() {
     var versionType = grunt.option('type');
