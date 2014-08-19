@@ -111,6 +111,37 @@ module.exports = function(grunt) {
       options: {
         dest: 'CHANGELOG.md'
       }
+    },
+    gitcommit: {
+      bump: {
+        options: {
+          message: "<%= pkg.version %>",
+          noStatus: true
+        },
+        files: {
+          src: [
+            'bower.json',
+            'CHANGELOG.md',
+            'dist/**/*'
+            ]
+        }
+      }
+    },
+    gittag: {
+      bump: {
+        options: {
+          tag: "v<%= pkg.version %>",
+          noStatus: true
+        }
+      }
+    },
+    gitpush: {
+      bump: {
+        options: {
+          branch: 'master',
+          tags: true
+        }
+      }
     }
   });
 
@@ -122,6 +153,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-jsdoc'); // use jsdocs for now, until docular is ready
   grunt.loadNpmTasks('grunt-gh-pages');
   grunt.loadNpmTasks('grunt-conventional-changelog');
+  grunt.loadNpmTasks('grunt-git');
 
   // Default task
   grunt.registerTask('default', ['build']);
@@ -137,6 +169,9 @@ module.exports = function(grunt) {
 
   // Release Task
   grunt.registerTask('release', ['bump', 'changelog', 'build'])
+
+  // Publish Task
+  grunt.registerTask('publish', ['gitcommit:bump', 'gittag:bump', 'gitpush:bump'];
 
   // Provides the "bump" task.
   grunt.registerTask('bump', 'Increment version number', function() {
