@@ -1,14 +1,14 @@
 'use strict';
 
-RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', 'RMUtils', function($injector, $parse, $filter, $inflector, Utils) {
+RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializerFactory', 'RMModelFactory', 'RMBuilderExt', function($injector, $inflector, Utils, buildSerializer, buildModel, builderExt) {
 
   // TODO: add urlPrefix option
 
   var forEach = angular.forEach,
-      bind = angular.bind,
       isObject = angular.isObject,
       isArray = angular.isArray,
-      isFunction = angular.isFunction;
+      isFunction = angular.isFunction,
+      extend = angular.extend;
 
   /**
    * @class BuilderApi
@@ -25,6 +25,12 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    *
    * ```javascript
    * restmod.model({
+   *
+   *   // MODEL CONFIGURATION
+   *
+   *   '!baseUrl': 'resource',
+   *   '!name': 'resource'
+   *   '!primaryKey': '_id',
    *
    *   // ATTRIBUTE MODIFIERS
    *
@@ -51,7 +57,10 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    * });
    * ```
    *
-   * With the exception of properties starting with a special character (**@** or **~**),
+   * Special model configuration variables can be set using the name prefixed with the **!** character.
+   * See the {@link BuilderApi#attrAsReferenceToMany} documentation for more information.
+   *
+   * With the exception of properties starting with a special character (**!**, **@** or **~**),
    * each property in the definition object asigns a behavior to the same named property
    * in a model's record.
    *
@@ -136,784 +145,376 @@ RMModule.factory('RMBuilder', ['$injector', '$parse', '$filter', '$inflector', '
    * ```
    *
    */
-  function BuilderDSL(_targetModel) {
-    this.$$m = _targetModel;
-    this.$$s = _targetModel.$$getSerializer();
-    this.$$mappings = {
-      init: ['attrDefault'],
-      mask: ['attrMask'],
-      ignore: ['attrMask'],
-      map: ['attrMap'],
-      decode: ['attrDecoder', 'param', 'chain'],
-      encode: ['attrEncoder', 'param', 'chain'],
-      serialize: ['attrSerializer'],
-      // relations
-      hasMany: ['attrAsCollection', 'path', 'source', 'inverseOf'], // TODO: rename source to map, but disable attrMap if map is used here...
-      hasOne: ['attrAsResource', 'path', 'source', 'inverseOf'],
-      belongsTo: ['attrAsReference', 'key', 'prefetch'],
-      belongsToMany: ['attrAsReferenceToMany', 'keys']
+  function Builder() {
+
+    var vars = {
+        primaryKey: 'id',
+        baseUrl: null,
+        urlPrefix: null
+      },
+      defaults = [],
+      serializer = buildSerializer(),
+      packer = null,
+      deferred = [],
+      meta = {},
+      mappings = {
+        init: ['attrDefault'],
+        mask: ['attrMask'],
+        ignore: ['attrMask'],
+        map: ['attrMap', 'force'],
+        decode: ['attrDecoder', 'param', 'chain'],
+        encode: ['attrEncoder', 'param', 'chain'],
+        serialize: ['attrSerializer'],
+        hasMany: ['attrAsCollection', 'path', 'source', 'inverseOf'], // TODO: rename source to map, but disable attrMap if map is used here...
+        hasOne: ['attrAsResource', 'path', 'source', 'inverseOf'],
+        belongsTo: ['attrAsReference', 'key', 'prefetch'],
+        belongsToMany: ['attrAsReferenceToMany', 'keys']
+      };
+
+    // DSL core functions.
+
+    this.dsl = extend({
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Parses a description object, calls the proper builder method depending
+       * on each property description type.
+       *
+       * @param {object} _description The description object
+       * @return {BuilderApi} self
+       */
+      describe: function(_description) {
+        forEach(_description, function(_desc, _attr) {
+          switch(_attr.charAt(0)) {
+          case '@':
+            this.classDefine(_attr.substring(1), _desc);
+            break;
+          case '~':
+            _attr = $inflector.parameterize(_attr.substring(1));
+            this.on(_attr, _desc);
+            break;
+          case '=':
+            this.setProperty(_attr.substring(2), _description);
+            break;
+          default:
+            if(isObject(_desc)) this.attribute(_attr, _desc);
+            else if(isFunction(_desc)) this.define(_attr, _desc);
+            else this.attrDefault(_attr, _desc);
+          }
+        }, this);
+        return this;
+      },
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Extends the builder DSL
+       *
+       * Adds a function to de builder and alternatively maps the function to an
+       * attribute definition keyword that can be later used when calling
+       * `define` or `attribute`.
+       *
+       * Mapping works as following:
+       *
+       *    // Given the following call
+       *    builder.extend('testAttr', function(_attr, _test, _param1, param2) {
+       *      // wharever..
+       *    }, ['test', 'testP1', 'testP2']);
+       *
+       *    // A call to
+       *    builder.attribute('chapter', { test: 'hello', testP1: 'world' });
+       *
+       *    // Its equivalent to
+       *    builder.testAttr('chapter', 'hello', 'world');
+       *
+       * The method can also be passed an object with various methods to be added.
+       *
+       * @param {string|object} _name function name or object to merge
+       * @param {function} _fun function
+       * @param {array} _mapping function mapping definition
+       * @return {BuilderApi} self
+       */
+      extend: function(_name, _fun, _mapping) {
+        if(typeof _name === 'string') {
+          this[_name] = Utils.override(this[name], _fun);
+          if(_mapping) {
+            mappings[_mapping[0]] = _mapping;
+            _mapping[0] = _name;
+          }
+        } else Utils.extendOverriden(this, _name);
+        return this;
+      },
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Sets an attribute properties.
+       *
+       * This method uses the attribute modifiers mapping to call proper
+       * modifiers on the argument.
+       *
+       * For example, using the following description on the createdAt attribute
+       *
+       *    { decode: 'date', param; 'YY-mm-dd' }
+       *
+       * Is the same as calling
+       *
+       *    builder.attrDecoder('createdAt', 'date', 'YY-mm-dd')
+       *
+       * @param {string} _name Attribute name
+       * @param {object} _description Description object
+       * @return {BuilderApi} self
+       */
+      attribute: function(_name, _description) {
+        var key, map, args, i;
+        for(key in _description) {
+          if(_description.hasOwnProperty(key)) {
+            map = mappings[key];
+            if(map) {
+              args = [_name, _description[key]];
+              for(i = 1; i < map.length; i++) {
+                args.push(_description[map[i]]);
+              }
+              args.push(_description);
+              this[map[0]].apply(this, args);
+            }
+          }
+        }
+        return this;
+      },
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Adds a function to be applied to model after being created.
+       *
+       * Funtion is called with model as the first argument.
+       *
+       * @param {function} _fun Function to be called
+       * @return {BuilderApi} self
+       */
+      defer: function(_fun) {
+        deferred.push(_fun);
+        return this;
+      },
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description
+       *
+       * Sets the object "packer", the packer is responsable of providing the object wrapping strategy
+       * so it matches the API.
+       *
+       * The method accepts a packer name, an instance or a packer factory, if the first (preferred)
+       * option is used, then a <Name>Packer factory must be available that return an object or factory function.
+       *
+       * In case of using a factory function, the constructor will be called passing the model type object
+       * as first parameter:
+       *
+       * ```javascript
+       * // like this:
+       * var packer = packerFactory(Model);
+       * ```
+       *
+       * ### Packer structure.
+       *
+       * Custom packers must implement the following methods:
+       *
+       * * **unpack(_rawData, _record):** unwraps data belonging to a single record, must return the unpacked
+       * data to be passed to `$decode`.
+       * * **unpackMany(_rawData, _collection):** unwraps the data belonging to a collection of records,
+       * must return the unpacked data array, each array element will be passed to $decode on each new element.
+       * * **pack(_rawData, _record):** wraps the encoded data from a record before is sent to the server,
+       * must return the packed data object to be sent.
+       *
+       * Currently the following builtin strategies are provided:
+       * TODO: provide builtin strategies!
+       *
+       * @param {string|object} _mode The packer instance, constructor or name
+       * @return {BuilderApi} self
+       */
+      setPacker: function(_packer) {
+        if(typeof _packer === 'string') {
+          _packer = $injector.get($inflector.camelize(_packer, true) + 'Packer');
+        }
+
+        packer = _packer;
+        return this;
+      },
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * Sets one of the model's configuration properties.
+       *
+       * The following configuration parameters are available by default:
+       * * primaryKey: The model's primary key, defaults to **id**. Keys must use server naming convention!
+       * * urlPrefix: Url prefix to prepend to resource url, usefull to use in a base mixin when multiples models have the same prefix.
+       * * baseUrl: The resource base url, null by default. If not given resource is considered anonymous.
+       *
+       * @param {string} _key The configuration key to set.
+       * @param {mixed} _value The configuration value.
+       * @return {BuilderApi} self
+       */
+      setProperty: function(_key, _value) {
+        vars[_key] = _value;
+        return this;
+      },
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Sets the default value for an attribute.
+       *
+       * Defaults values are set only on object construction phase.
+       *
+       * if `_init` is a function, then its evaluated every time the
+       * default value is required.
+       *
+       * @param {string} _attr Attribute name
+       * @param {mixed} _init Defaulf value / iniline function
+       * @return {BuilderApi} self
+       */
+      attrDefault: function(_attr, _init) {
+        defaults.push([_attr, _init]);
+        return this;
+      },
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Registers attribute metadata.
+       *
+       * @param {string} _name Attribute name
+       * @param {object} _meta Attribute metadata
+       * @return {BuilderApi} self
+       */
+      attrMeta: function(_name, _metadata) {
+        meta[_name] = extend(meta[_name] || {}, _metadata);
+        return this;
+      },
+
+      // serializer forwards:
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Changes the way restmod renames attributes every time a server resource is decoded.
+       *
+       * This is intended to be used as a way of keeping property naming style consistent accross
+       * languajes. By default, property naming in js should use camelcase and property naming
+       * in JSON api should use snake case with underscores.
+       *
+       * If `false` is given, then renaming is disabled
+       *
+       * @param {function|false} _value decoding function
+       * @return {BuilderApi} self
+       */
+      setNameDecoder: serializer.setNameDecoder,
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Changes the way restmod renames attributes every time a local resource is encoded to be sent.
+       *
+       * This is intended to be used as a way of keeping property naming style consistent accross
+       * languajes. By default, property naming in js should use camelcase and property naming
+       * in JSON api should use snake case with underscores.
+       *
+       * If `false` is given, then renaming is disabled
+       *
+       * @param {function|false} _value encoding function
+       * @return {BuilderApi} self
+       */
+      setNameEncoder: serializer.setNameEncoder,
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Sets an attribute mask.
+       *
+       * An attribute mask prevents the attribute to be loaded from or sent to the server on certain operations.
+       *
+       * The attribute mask is a string composed by:
+       * * C: To prevent attribute from being sent on create
+       * * R: To prevent attribute from being loaded from server
+       * * U: To prevent attribute from being sent on update
+       *
+       * For example, the following will prevent an attribute to be send on create or update:
+       *
+       * ```javascript
+       * builder.attrMask('readOnly', 'CU');
+       * ```
+       *
+       * If a true boolean value is passed as mask, then 'CRU' will be used
+       * If a false boolean valus is passed as mask, then mask will be removed
+       *
+       * @param {string} _attr Attribute name
+       * @param {boolean|string} _mask Attribute mask
+       * @return {BuilderApi} self
+       */
+      attrMask: serializer.setMask,
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Sets an attribute mapping.
+       *
+       * Allows a explicit server to model property mapping to be defined.
+       *
+       * For example, to map the response property `stats.created_at` to model's `created` property.
+       *
+       * ```javascript
+       * builder.attrMap('created', 'stats.created_at');
+       * ```
+       *
+       * It's also posible to use a wildcard '*' as server name to use the default name decoder as
+       * server name. This is used to force a property to be processed on decode/encode even if its
+       * not present on request/record (respectively), by doing this its posible, for example, to define
+       * a dynamic property that is generated automatically before the object is send to the server.
+       *
+       * @param {string} _attr Attribute name
+       * @param {string} _serverName Server (request/response) property name
+       * @return {BuilderApi} self
+       */
+      attrMap: serializer.setMapping,
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Assigns a decoding function/filter to a given attribute.
+       *
+       * @param {string} _name Attribute name
+       * @param {string|function} _filter filter or function to register
+       * @param {mixed} _filterParam Misc filter parameter
+       * @param {boolean} _chain If true, filter is chained to the current attribute filter.
+       * @return {BuilderApi} self
+       */
+      attrDecoder: serializer.setDecoder,
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Assigns a encoding function/filter to a given attribute.
+       *
+       * @param {string} _name Attribute name
+       * @param {string|function} _filter filter or function to register
+       * @param {mixed} _filterParam Misc filter parameter
+       * @param {boolean} _chain If true, filter is chained to the current attribute filter.
+       * @return {BuilderApi} self
+       */
+      attrEncoder: serializer.setEncoder
+
+    }, builderExt);
+
+    // Generate factory function
+    this.buildModel = function() {
+      var model = buildModel(vars, defaults, serializer, packer, meta);
+      forEach(deferred, function(_fun) { _fun(model); });
+      return model;
     };
-  }
-
-  BuilderDSL.prototype = {
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Sets an url prefix to be added to every url generated by the model.
-     *
-     * This applies even to objects generated by the `$single` method.
-     *
-     * This method is intended to be used in a base model mixin so everymodel that extends from it
-     * gets the same url prefix.
-     *
-     * Usage:
-     *
-     * ```javascript
-     * var BaseModel = restmod.mixin(function() {
-     *   this.setUrlPrefix('/api');
-     * })
-     *
-     * var bike = restmod.model('/bikes', BaseModel).$build({ id: 1 });
-     * console.log(bike.$url()) // outputs '/api/bikes/1'
-     * ```
-     *
-     * @param {string} _prefix url portion
-     * @return {BuilderApi} self
-     */
-    setUrlPrefix: function(_prefix) {
-      this.$$m.$$setUrlPrefix(_prefix);
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Changes the model's primary key.
-     *
-     * Primary keys are passed to scope's url methods to generate urls. The default primary key is 'id'.
-     *
-     * **ATTENTION** Primary keys are extracted from raw data, so _key must use raw api naming.
-     *
-     * @param {string|function} _key New primary key.
-     * @return {BuilderApi} self
-     */
-    setPrimaryKey: function(_key) {
-      this.$$m.$$setPrimaryKey(_key);
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Changes the way restmod renames attributes every time a server resource is decoded.
-     *
-     * This is intended to be used as a way of keeping property naming style consistent accross
-     * languajes. By default, property naming in js should use camelcase and property naming
-     * in JSON api should use snake case with underscores.
-     *
-     * If `false` is given, then renaming is disabled
-     *
-     * @param {function|false} _value decoding function
-     * @return {BuilderApi} self
-     */
-    setNameDecoder: function(_decoder) {
-      this.$$s.setNameDecoder(_decoder);
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Changes the way restmod renames attributes every time a local resource is encoded to be sent.
-     *
-     * This is intended to be used as a way of keeping property naming style consistent accross
-     * languajes. By default, property naming in js should use camelcase and property naming
-     * in JSON api should use snake case with underscores.
-     *
-     * If `false` is given, then renaming is disabled
-     *
-     * @param {function|false} _value encoding function
-     * @return {BuilderApi} self
-     */
-    setNameEncoder: function(_encoder) {
-      this.$$s.setNameEncoder(_encoder);
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Disables renaming alltogether
-     *
-     * @return {BuilderApi} self
-     */
-    disableRenaming: function() {
-      return this
-        .setNameDecoder(false)
-        .setNameEncoder(false);
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description
-     *
-     * Sets the object "packer", the packer is responsable of providing the object wrapping strategy
-     * so it matches the API.
-     *
-     * The method accepts a packer name, an instance or a packer contructor, if the first (preferred)
-     * option is used, then a <Name>Packer factory must be available that return an object or a constructor.
-     *
-     * In case of using a constructor function, the constructor will be called passing the model type
-     * as first parameter:
-     *
-     * ```javascript
-     * // like this:
-     * var packer = new MyPacker(theModelType);
-     * ```
-     *
-     * ### Packer structure.
-     *
-     * Custom packers must implement the following methods:
-     *
-     * * **unpack(_rawData, _record):** unwraps data belonging to a single record, must return the unpacked
-     * data to be passed to `$decode`.
-     * * **unpackMany(_rawData, _collection):** unwraps the data belonging to a collection of records,
-     * must return the unpacked data array, each array element will be passed to $decode on each new element.
-     * * **pack(_rawData, _record):** wraps the encoded data from a record before is sent to the server,
-     * must return the packed data object to be sent.
-     *
-     * Currently the following builtin strategies are provided:
-     * TODO: provide builtin strategies!
-     *
-     * @param {string|object} _mode The packer instance, constructor or name
-     * @return {BuilderApi} self
-     */
-    setPacker: function(_packer) {
-      this.$$m.$$setPacker(_packer);
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Extends the builder DSL
-     *
-     * Adds a function to de builder and alternatively maps the function to an
-     * attribute definition keyword that can be later used when calling
-     * `define` or `attribute`.
-     *
-     * Mapping works as following:
-     *
-     *    // Given the following call
-     *    builder.extend('testAttr', function(_attr, _test, _param1, param2) {
-     *      // wharever..
-     *    }, ['test', 'testP1', 'testP2']);
-     *
-     *    // A call to
-     *    builder.attribute('chapter', { test: 'hello', testP1: 'world' });
-     *
-     *    // Its equivalent to
-     *    builder.testAttr('chapter', 'hello', 'world');
-     *
-     * The method can also be passed an object with various methods to be added.
-     *
-     * @param {string|object} _name function name or object to merge
-     * @param {function} _fun function
-     * @param {array} _mapping function mapping definition
-     * @return {BuilderApi} self
-     */
-    extend: function(_name, _fun, _mapping) {
-      if(typeof _name === 'string') {
-        this[_name] = Utils.override(this[name], _fun);
-        if(_mapping) {
-          this.$$mappings[_mapping[0]] = _mapping;
-          _mapping[0] = _name;
-        }
-      } else Utils.extendOverriden(this, _name);
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Parses a description object, calls the proper builder method depending
-     * on each property description type.
-     *
-     * @param {object} _description The description object
-     * @return {BuilderApi} self
-     */
-    describe: function(_description) {
-      forEach(_description, function(_desc, _attr) {
-        switch(_attr.charAt(0)) {
-        case '@':
-          this.classDefine(_attr.substring(1), _desc);
-          break;
-        case '~':
-          _attr = $inflector.parameterize(_attr.substring(1));
-          this.on(_attr, _desc);
-          break;
-        default:
-          if(isObject(_desc)) this.attribute(_attr, _desc);
-          else if(isFunction(_desc)) this.define(_attr, _desc);
-          else this.attrDefault(_attr, _desc);
-        }
-      }, this);
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Sets an attribute properties.
-     *
-     * This method uses the attribute modifiers mapping to call proper
-     * modifiers on the argument.
-     *
-     * For example, using the following description on the createdAt attribute
-     *
-     *    { decode: 'date', param; 'YY-mm-dd' }
-     *
-     * Is the same as calling
-     *
-     *    builder.attrDecoder('createdAt', 'date', 'YY-mm-dd')
-     *
-     * @param {string} _name Attribute name
-     * @param {object} _description Description object
-     * @return {BuilderApi} self
-     */
-    attribute: function(_name, _description) {
-      var key, map, args, i;
-      for(key in _description) {
-        if(_description.hasOwnProperty(key)) {
-          map = this.$$mappings[key];
-          if(map) {
-            args = [_name, _description[key]];
-            for(i = 1; i < map.length; i++) {
-              args.push(_description[map[i]]);
-            }
-            args.push(_description);
-            this[map[0]].apply(this, args);
-          }
-        }
-      }
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Sets the default value for an attribute.
-     *
-     * Defaults values are set only on object construction phase.
-     *
-     * if `_init` is a function, then its evaluated every time the
-     * default value is required.
-     *
-     * @param {string} _attr Attribute name
-     * @param {mixed} _init Defaulf value / iniline function
-     * @return {BuilderApi} self
-     */
-    attrDefault: function(_attr, _init) {
-      this.$$m.$$setDefault(_attr, _init);
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Sets an attribute mask.
-     *
-     * An attribute mask prevents the attribute to be loaded from or sent to the server on certain operations.
-     *
-     * The attribute mask is a string composed by:
-     * * C: To prevent attribute from being sent on create
-     * * R: To prevent attribute from being loaded from server
-     * * U: To prevent attribute from being sent on update
-     *
-     * For example, the following will prevent an attribute to be send on create or update:
-     *
-     * ```javascript
-     * builder.attrMask('readOnly', 'CU');
-     * ```
-     *
-     * If a true boolean value is passed as mask, then 'CRU' will be used
-     * If a false boolean valus is passed as mask, then mask will be removed
-     *
-     * @param {string} _attr Attribute name
-     * @param {boolean|string} _mask Attribute mask
-     * @return {BuilderApi} self
-     */
-    attrMask: function(_attr, _mask) {
-      this.$$s.setMask(_attr, _mask);
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Sets an attribute mapping.
-     *
-     * Allows a explicit server to model property mapping to be defined.
-     *
-     * For example, to map the response property `stats.created_at` to model's `created` property.
-     *
-     * ```javascript
-     * builder.attrMap('created', 'stats.created_at');
-     * ```
-     *
-     * It's also posible to use a wildcard '*' as server name to use the default name decoder as
-     * server name. This is used to force a property to be processed on decode/encode even if its
-     * not present on request/record (respectively), by doing this its posible, for example, to define
-     * a dynamic property that is generated automatically before the object is send to the server.
-     *
-     * @param {string} _attr Attribute name
-     * @param {string} _serverName Server (request/response) property name
-     * @return {BuilderApi} self
-     */
-    attrMap: function(_attr, _serverName) {
-      this.$$s.setMapping(_attr, _serverName);
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Assigns a serializer to a given attribute.
-     *
-     * A _serializer is:
-     * * an object that defines both a `decode` and a `encode` method
-     * * a function that when called returns an object that matches the above description.
-     * * a string that represents an injectable that matches any of the above descriptions.
-     *
-     * @param {string} _name Attribute name
-     * @param {string|object|function} _serializer The serializer
-     * @return {BuilderApi} self
-     */
-    attrSerializer: function(_name, _serializer, _opt) {
-      if(typeof _serializer === 'string') {
-        _serializer = $injector.get($inflector.camelize(_serializer, true) + 'Serializer');
-      }
-
-      // TODO: if(!_serializer) throw $setupError
-      if(isFunction(_serializer)) _serializer = _serializer(_opt);
-      if(_serializer.decode) this.$$s.setDecoder(_name, bind(_serializer, _serializer.decode));
-      if(_serializer.encode) this.$$s.setEncoder(_name, bind(_serializer, _serializer.encode));
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Assigns a decoding function/filter to a given attribute.
-     *
-     * @param {string} _name Attribute name
-     * @param {string|function} _filter filter or function to register
-     * @param {mixed} _filterParam Misc filter parameter
-     * @param {boolean} _chain If true, filter is chained to the current attribute filter.
-     * @return {BuilderApi} self
-     */
-    attrDecoder: function(_name, _filter, _filterParam, _chain) {
-      this.$$s.setDecoder(_name, _filter, _filterParam, _chain);
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Assigns a encoding function/filter to a given attribute.
-     *
-     * @param {string} _name Attribute name
-     * @param {string|function} _filter filter or function to register
-     * @param {mixed} _filterParam Misc filter parameter
-     * @param {boolean} _chain If true, filter is chained to the current attribute filter.
-     * @return {BuilderApi} self
-     */
-    attrEncoder: function(_name, _filter, _filterParam, _chain) {
-      this.$$s.setEncoder(_name, _filter, _filterParam, _chain);
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Registers a model **resources** relation
-     *
-     * @param {string}  _name Attribute name
-     * @param {string|object} _model Other model, supports a model name or a direct reference.
-     * @param {string} _url Partial url
-     * @param {string} _source Inline resource alias (optional)
-     * @param {string} _inverseOf Inverse property name (optional)
-     * @return {BuilderApi} self
-     */
-    attrAsCollection: function(_attr, _model, _url, _source, _inverseOf) {
-      this.$$m.$$setDefault(_attr, function() {
-
-        if(typeof _model === 'string') {
-          _model = $injector.get(_model);
-
-          if(_inverseOf) {
-            _model.$$getSerializer().setMask(_inverseOf, Utils.WRITE_MASK);
-          }
-        }
-
-        var self = this,
-            scope = this.$buildScope(_model, _url || $inflector.parameterize(_attr)),
-            col = _model.$collection(null, scope);
-
-        // TODO: there should be a way to modify scope behavior just for this relation,
-        // since relation item scope IS the collection, then the collection should
-        // be extended to provide a modified scope. For this an additional _extensions
-        // parameters could be added to collection, then these 'extensions' are inherited
-        // by child collections, the other alternative is to enable full property inheritance ...
-
-        // set inverse property if required.
-        if(_inverseOf) {
-          col.$on('after-add', function(_obj) {
-            _obj[_inverseOf] = self;
-          });
-        }
-
-        return col;
-      // simple support for inline data, TODO: maybe deprecate this.
-      });
-
-      if(_source || _url) this.$$s.setMapping(_attr, _source || _url);
-      this.$$s.setDecoder(_attr, function(_raw) {
-        this[_attr].$reset().$feed(_raw);
-      });
-      this.$$s.setMask(_attr, Utils.WRITE_MASK);
-
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Registers a model **resource** relation
-     *
-     * @param {string}  _name Attribute name
-     * @param {string|object} _model Other model, supports a model name or a direct reference.
-     * @param {string} _url Partial url (optional)
-     * @param {string} _source Inline resource alias (optional)
-     * @param {string} _inverseOf Inverse property name (optional)
-     * @return {BuilderApi} self
-     */
-    attrAsResource: function(_attr, _model, _url, _source, _inverseOf) {
-
-      this.$$m.$$setDefault(_attr, function() {
-
-        if(typeof _model === 'string') {
-          _model = $injector.get(_model);
-
-          if(_inverseOf) {
-            _model.$$getSerializer().setMask(_inverseOf, Utils.WRITE_MASK);
-          }
-        }
-
-        var scope = this.$buildScope(_model, _url || $inflector.parameterize(_attr)),
-            inst = _model.$new(null, scope);
-
-        // TODO: provide a way to modify scope behavior just for this relation
-
-        if(_inverseOf) {
-          inst[_inverseOf] = this;
-        }
-
-        return inst;
-      });
-
-      if(_source || _url) this.$$s.setMapping(_attr, _source || _url);
-      this.$$s.setDecoder(_attr, function(_raw) {
-        this[_attr].$decode(_raw);
-      });
-      this.$$s.setMask(_attr, Utils.WRITE_MASK);
-
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Registers a model **reference** relation.
-     *
-     * A reference relation expects the host object to provide the primary key of the referenced object or the referenced object itself (including its key).
-     *
-     * For example, given the following resource structure with a foreign key:
-     *
-     * ```json
-     * {
-     *   user_id: 20
-     * }
-     * ```
-     *
-     * Or this other structure with inlined data:
-     *
-     * ```json
-     * {
-     *   user: {
-     *     id: 30,
-     *     name: 'Steve'
-     *   }
-     * }
-     * ```
-     *
-     * You should define the following model:
-     *
-     * ```javascript
-     * restmod.model('/bikes', {
-     *   user: { belongsTo: 'User' } // works for both cases detailed above
-     * })
-     * ```
-     *
-     * The object generated by the relation is not scoped to the host object, but to it's base class instead (not like hasOne),
-     * so the type should not be anonymous.
-     *
-     * Its also posible to override the **foreign key name**.
-     *
-     * When a object containing a belongsTo reference is encoded for a server request, only the primary key value is sent using the
-     * same **foreign key name** that was using on decoding. (`user_id` in the above example).
-     *
-     * @param {string}  _name Attribute name
-     * @param {string|object} _model Other model, supports a model name or a direct reference.
-     * @param {string} _key foreign key property name (optional, defaults to _attr + '_id').
-     * @param {bool} _prefetch if set to true, $fetch will be automatically called on relation object load.
-     * @return {BuilderApi} self
-     */
-    attrAsReference: function(_attr, _model, _key, _prefetch) {
-
-      this.$$m.$$setDefault(_attr, null);
-      this.$$s.setMask(_attr, Utils.WRITE_MASK);
-
-      function loadModel() {
-        if(typeof _model === 'string') {
-          _model = $injector.get(_model);
-        }
-      }
-
-      // TODO: the following code assumes that attribute is at root level! (when uses this[_attr] or this[_attr + 'Id'])
-
-      // inline data handling
-      this.$$s.setDecoder(_attr, function(_raw) {
-        if(_raw === null) return null;
-        loadModel();
-        if(!this[_attr] || this[_attr].$pk !== _model.$$inferKey(_raw)) {
-          this[_attr] = _model.$buildRaw(_raw);
-        } else {
-          this[_attr].$decode(_raw);
-        }
-      });
-
-      // foreign key handling
-      if(_key !== false) {
-        this.$$s.setMapping(_attr + 'Id', _key || '*', true); // use dummy  set a mapping if explicit key is given.
-        this.$$s.setDecoder(_attr + 'Id', function(_value) {
-          if(_value === undefined) return;
-          if(!this[_attr] || this[_attr].$pk !== _value) {
-            if(_value !== null && _value !== false) {
-              loadModel();
-              this[_attr] = _model.$new(_value);
-              if(_prefetch) this[_attr].$fetch();
-            } else {
-              this[_attr] = null;
-            }
-          }
-        });
-
-        this.$$s.setEncoder(_attr + 'Id', function() {
-          return this[_attr] ? this[_attr].$pk : null;
-        });
-      }
-
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Registers a model **reference** relation.
-     *
-     * A reference relation expects the host object to provide the primary key of the referenced objects or the referenced objects themselves (including its key).
-     *
-     * For example, given the following resource structure with a foreign key array:
-     *
-     * ```json
-     * {
-     *   users_ids: [20, 30]
-     * }
-     * ```
-     *
-     * Or this other structure with inlined data:
-     *
-     * ```json
-     * {
-     *   users: [{
-     *     id: 20,
-     *     name: 'Steve'
-     *   },{
-     *     id: 30,
-     *     name: 'Pili'
-     *   }]
-     * }
-     * ```
-     *
-     * You should define the following model:
-     *
-     * ```javascript
-     * restmod.model('/bikes', {
-     *   users: { belongsToMany: 'User' } // works for both cases detailed above
-     * })
-     * ```
-     *
-     * The object generated by the relation is not scoped to the host object, but to it's base class instead (unlike hasMany),
-     * so the referenced type should not be anonymous.
-     *
-     * When a object containing a belongsToMany reference is encoded for a server request, only the primary key value is sent for each object.
-     *
-     * @param {string}  _name Attribute name
-     * @param {string|object} _model Other model, supports a model name or a direct reference.
-     * @param {string} _keys Server name for the property that holds the referenced keys in response and request.
-     * @return {BuilderApi} self
-     */
-    attrAsReferenceToMany: function(_attr, _model, _keys) {
-
-      this.$$m.$$setDefault(_attr, function() { return []; });
-      this.$$s.setMask(_attr, Utils.WRITE_MASK);
-
-      // TODO: the following code assumes that attribute is at root level! (when uses this[_attr])
-
-      function loadModel() {
-        if(typeof _model === 'string') {
-          _model = $injector.get(_model);
-        }
-      }
-
-      function processInbound(_raw, _ref) {
-        loadModel();
-        _ref.length = 0;
-        // TODO: reuse objects that do not change (compare $pks)
-        for(var i = 0, l = _raw.length; i < l; i++) {
-          if(typeof _raw[i] === 'object') {
-            _ref.push(_model.$buildRaw(_raw[i]));
-          } else {
-            _ref.push(_model.$new(_raw[i]));
-          }
-        }
-      }
-
-      // inline data handling
-      this.$$s.setDecoder(_attr, function(_raw) {
-        // TODO: if _keys == _attr then inbound data will be processed twice!
-        if(_raw) processInbound(_raw, this[_attr]);
-      });
-
-      // foreign key handling
-      if(_keys !== false) {
-        this.$$s.setMapping(_attr + 'Ids', _keys || '*', true); // TODO: $inflector.singularize(_attr)
-        this.$$s.setDecoder(_attr + 'Ids', function(_raw) {
-          if(_raw) processInbound(_raw, this[_attr]);
-        });
-
-        this.$$s.setEncoder(_attr + 'Ids', function() {
-          var result = [], others = this[_attr];
-          for(var i = 0, l = others.length; i < l; i++) {
-            result.push(others[i].$pk);
-          }
-          return result;
-        });
-      }
-
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Registers an instance method
-     *
-     * Usage:
-     *    builder.define(function(_super) {
-     *      return $fetch()
-     *    });
-     *
-     * It is posible to override an existing method using define,
-     * if overriden, the old method can be called using `this.$super`
-     * inside de new method.
-     *
-     * @param {string} _name Method name
-     * @param {function} _fun Function to define
-     * @return {BuilderApi} self
-     */
-    define: function(_name, _fun) {
-      if(typeof _name === 'string') {
-        this.$$m.prototype[_name] = Utils.override(this.$$m.prototype[_name], _fun);
-      } else {
-        Utils.extendOverriden(this.$$m.prototype, _name);
-      }
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Registers a class method
-     *
-     * It is posible to override an existing method using define,
-     * if overriden, the old method can be called using `this.$super`
-     * inside de new method.
-     *
-     * @param {string} _name Method name
-     * @param {function} _fun Function to define
-     * @return {BuilderApi} self
-     */
-    classDefine: function(_name, _fun) {
-      this.$$m.$$addScopeMethod(_name, _fun);
-      return this;
-    },
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Adds an event hook
-     *
-     * Hooks are used to extend or modify the model behavior, and are not
-     * designed to be used as an event listening system.
-     *
-     * The given function is executed in the hook's context, different hooks
-     * make different parameters available to callbacks.
-     *
-     * @param {string} _hook The hook name, refer to restmod docs for builtin hooks.
-     * @param {function} _do function to be executed
-     * @return {BuilderApi} self
-     */
-    on: function(_hook, _do) {
-      this.$$m.$on(_hook, _do);
-      return this;
-    },
-
-    /// Experimental modifiers
-
-    /**
-     * @memberof BuilderApi#
-     *
-     * @description Expression attributes are evaluated every time new data is fed to the model.
-     *
-     * @param {string}  _name Attribute name
-     * @param {string} _expr Angular expression to evaluate
-     * @return {BuilderApi} self
-     */
-    attrExpression: function(_name, _expr) {
-      var filter = $parse(_expr);
-      this.$$m.$on('after-feed', function() {
-        this[_name] = filter(this);
-      });
-      return this;
-    }
-  };
-
-  function Builder(_target) {
-    this.dsl = new BuilderDSL(_target);
   }
 
   Builder.prototype = {

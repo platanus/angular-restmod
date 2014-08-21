@@ -13,7 +13,9 @@ describe('Restmod model relation:', function() {
     });
 
     $provide.factory('BikeRide', function(restmod) {
-      return restmod.model(null);
+      return restmod.model(null, {
+        bike: { belongsTo: 'Bike' }
+      });
     });
 
     $provide.factory('User', function(restmod) {
@@ -21,7 +23,9 @@ describe('Restmod model relation:', function() {
     });
 
     $provide.factory('SerialNo', function(restmod) {
-      return restmod.model(null);
+      return restmod.model(null, {
+        bike: { belongsTo: 'Bike' }
+      });
     });
   }));
 
@@ -166,6 +170,11 @@ describe('Restmod model relation:', function() {
       $injector.get('SerialNo').$on('after-init', spy);
       Bike.$new(1).$decode({ serial: { value: 'SERIAL' } });
       expect(spy).toHaveBeenCalled();
+    });
+
+    it('should assign inverse relation with host instance', function() {
+      var bike = Bike.$new(1).$decode({ serial: { id: 'XX' } });
+      expect(bike.serialNo.bike).toEqual(bike);
     });
   });
 

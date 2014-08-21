@@ -1,35 +1,21 @@
 'use strict';
 
-RMModule.factory('RMModelFactory', ['$injector', '$inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', 'RMSerializerFactory', function($injector, $inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi, buildSerializer) {
+RMModule.factory('RMModelFactory', ['$injector', '$inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', function($injector, $inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi) {
 
-  return function(_identity) {
+  return function(
+    _internal,      // internal properties as an object
+    _defaults,      // attribute defaults as an array of [key, value]
+    _serializer,    // serializer instance
+    _packer,        // packer factory
+    _meta           // atribute metadata
+  ) {
+
+    // cache some stuff:
+    var urlPrefix = _internal.urlPrefix,
+        baseUrl = _internal.baseUrl,
+        primaryKey = _internal.primaryKey;
 
     var extend = angular.extend;
-
-    // Private model attributes
-    var urlPrefix = null,
-        baseUrl = null,
-        name = null,
-        primaryKey = 'id',
-        packer = null,
-        serializer = buildSerializer(),
-        defaults = [];
-
-    // setup model identity
-    if(_identity)
-    {
-      if(typeof _identity === 'string') {
-        baseUrl = _identity;
-      } else {
-        baseUrl = _identity.url;
-        name = _identity.name;
-      }
-
-      // infer name from url.
-      if(!name && baseUrl) {
-        name = baseUrl.replace(/(.*?)([^\/]+$)/, '$2'); // TODO: make sure name is singular -> $inflector.singularize(this.$$name)
-      }
-    }
 
     // IDEA: make constructor inaccessible, use separate type for records?
     // * Will ensure proper usage.
@@ -76,50 +62,6 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', 'RMUtils', 'RMSco
      */
     extend(Model, {
 
-      // sets the model url prefix
-      $$setUrlPrefix: function(_prefix) {
-        urlPrefix = _prefix;
-      },
-
-      // sets the model primary key
-      $$setPrimaryKey: function(_key) {
-        primaryKey = _key;
-      },
-
-      // gets the model serializer
-      $$getSerializer: function() {
-        return serializer;
-      },
-
-      // sets the model packer
-      $$setPacker: function(_packer) {
-        if(typeof _packer === 'string') {
-          _packer = $injector.get($inflector.camelize(_packer, true) + 'Packer');
-        }
-
-        if(typeof _packer === 'function') {
-          _packer = new _packer(Model);
-        }
-
-        packer = _packer;
-      },
-
-      // sets an attrinute default value
-      $$setDefault: function(_attr, _default) {
-        defaults.push([_attr, _default]);
-      },
-
-      // registers a new scope method (available at type and collection)
-      $$addScopeMethod: function(_name, _fun) {
-        if(typeof _name === 'string') {
-          Collection.prototype[_name] = Utils.override(Collection.prototype[_name], _fun);
-          Model[_name] = Utils.override(Model[_name], _fun);
-        } else {
-          Utils.extendOverriden(Collection.prototype, _name);
-          Utils.extendOverriden(Model, _name);
-        }
-      },
-
       // extracts the primary key from a raw data record
       $$inferKey: function(_rawData) {
         if(!_rawData || typeof _rawData[primaryKey] === 'undefined') return null;
@@ -136,17 +78,28 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', 'RMUtils', 'RMSco
         return newCollection(_scope || Model, _params);
       },
 
+      // gets an attribute description (metadata)
+      $$getDescription: function(_attribute) {
+        return _meta[_attribute];
+      },
+
       /**
        * @memberof StaticApi#
        *
        * @description
        *
-       * Gets the model primary key
+       * Gets a model's internal property value.
        *
-       * @return {mixed} model primary key
+       * Some builtin properties:
+       * * primaryKey
+       * * baseUrl
+       * * urlPrefix
+       *
+       * @param  {string} _key Property name
+       * @return {mixed} value
        */
-      $getPrimaryKey: function() {
-        return primaryKey;
+      $getProperty: function(_key) {
+        return _internal[_key];
       },
 
       /**
@@ -207,7 +160,7 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', 'RMUtils', 'RMSco
        * @return {string} The base url.
        */
       $name: function() {
-        return name;
+        return _internal.name;
       },
 
       /**
@@ -234,30 +187,37 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', 'RMUtils', 'RMSco
       // loads the default parameter values
       $$loadDefaults: function() {
         var tmp;
-        for(var i = 0; (tmp = defaults[i]); i++) {
+        for(var i = 0; (tmp = _defaults[i]); i++) {
           this[tmp[0]] = (typeof tmp[1] === 'function') ? tmp[1].apply(this) : tmp[1];
         }
       },
 
-      // pack adaptor used by $wrap
+      // packer pack adaptor used by $wrap
       $$pack: function(_raw) {
-        if(packer) {
-          _raw = packer.pack(_raw, this);
+        if(_packer) {
+          var packerInstance = (typeof _packer === 'function') ? _packer(Model) : _packer;
+          _raw = packerInstance.pack(_raw, this);
         }
         return _raw;
       },
 
-      // unpack adaptor used by $unwrap
+      // packer unpack adaptor used by $unwrap
       $$unpack: function(_raw) {
-        if(packer) {
-          _raw = packer.unpack(_raw, this);
+        if(_packer) {
+          var packerInstance = (typeof _packer === 'function') ? _packer(Model) : _packer;
+          _raw = packerInstance.unpack(_raw, this);
         }
         return _raw;
       },
 
-      // gets the model default serializer
-      $$getSerializer: function() {
-        return serializer;
+      // serializer decode adaptor used by $decode
+      $$decode: function(_raw, _mask) {
+        return _serializer.decode(this, _raw, _mask);
+      },
+
+      // serializer encode adaptor used by $encode
+      $$encode: function(_mask) {
+        return _serializer.encode(this, _mask);
       }
     }, RecordApi, CommonApi);
 
@@ -281,12 +241,16 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', 'RMUtils', 'RMSco
 
       // provide unpack function
       $$unpack: function(_raw) {
-        if(packer) {
-          _raw = packer.unpackMany(_raw, this);
+        if(_packer) {
+          var packerInstance = (typeof _packer === 'function') ? _packer(Model) : _packer;
+          _raw = packerInstance.unpackMany(_raw, this);
         }
         return _raw;
       },
     }, CollectionApi, ScopeApi, CommonApi);
+
+    // expose collection prototype.
+    Model.collectionPrototype = Collection.prototype;
 
     return Model;
   };

@@ -177,11 +177,13 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
       // sets the model name decoder
       setNameDecoder: function(_fun) {
         nameDecoder = _fun;
+        return this;
       },
 
       // sets the model name encoder
       setNameEncoder: function(_fun) {
         nameEncoder = _fun;
+        return this;
       },
 
       // specifies a single server to client property mapping
@@ -195,6 +197,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
 
         var nodes = (mappings[node] || (mappings[node] = []));
         nodes.push({ path: leaf, map: _serverPath === '*' ? null : _serverPath.split('.'), mapPath: _serverPath, forced: _forced });
+        return this;
       },
 
       // sets an attrinute mask
@@ -204,6 +207,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
         } else {
           masks[_attr] = _mask;
         }
+        return this;
       },
 
       // sets an attrinute decoder
@@ -216,6 +220,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
         }
 
         decoders[_attr] = _chain ? Utils.chain(decoders[_attr], _filter) : _filter;
+        return this;
       },
 
       // sets an attribute encoder
@@ -228,6 +233,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
         }
 
         encoders[_attr] = _chain ? Utils.chain(encoders[_attr], _filter) : _filter;
+        return this;
       },
 
       // decodes a raw record into a record

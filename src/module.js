@@ -45,7 +45,7 @@ RMModule.provider('restmod', [function() {
      *
      * The restmod service provides factory methods for the different restmod consumables.
      */
-    $get: ['RMModelFactory', 'RMBuilder', function(factory, Builder) {
+    $get: ['RMBuilder', function(Builder) {
 
       var arraySlice = Array.prototype.slice;
 
@@ -112,15 +112,16 @@ RMModule.provider('restmod', [function() {
          */
         model: function(_baseUrl/* , _mix */) {
 
-          // Generate a new model type.
-          var Model = factory(_baseUrl);
-
           // Load builder and execute it.
-          var builder = new Builder(Model);
+          var builder = new Builder(), chain;
           builder.loadMixinChain(BASE_CHAIN);
-          builder.loadMixinChain(Model.$chain = arraySlice.call(arguments, 1));
+          builder.loadMixinChain(chain = arraySlice.call(arguments, 1));
+          builder.dsl.setProperty('baseUrl', _baseUrl);
 
-          return Model;
+          // build model
+          var model = builder.buildModel();
+          model.$chain = chain;
+          return model;
         },
 
         /**
