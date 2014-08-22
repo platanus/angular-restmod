@@ -23,6 +23,17 @@ describe('Restmod model class:', function() {
     });
   });
 
+  describe('$getProperty', function() {
+
+    it('should retrieve an internal property', function() {
+      expect(Bike.$getProperty('url')).toEqual('/api/bikes');
+    });
+
+    it('should return default value if requested property is not set', function() {
+      expect(Bike.$getProperty('teapot', 'banzai')).toEqual('banzai');
+    });
+  });
+
   describe('$single', function() {
 
     it('should create a resource bound to a given url', function() {

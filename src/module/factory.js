@@ -96,10 +96,12 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        * * primaryKey
        *
        * @param  {string} _key Property name
+       * @param  {mixed} _default Value to return if property is not defined
        * @return {mixed} value
        */
-      $getProperty: function(_key) {
-        return _internal[_key];
+      $getProperty: function(_key, _default) {
+        var val = _internal[_key];
+        return val !== undefined ? val : _default;
       },
 
       /**
