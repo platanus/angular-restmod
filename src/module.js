@@ -12,7 +12,7 @@ var RMModule = angular.module('restmod', ['ng', 'platanus.inflector']);
  */
 RMModule.provider('restmod', [function() {
 
-  var BASE_CHAIN = []; // The base mixin chain
+  var BASE_CHAIN = ['RMBuilderExt', 'RMBuilderRelations']; // The base mixin chain
 
   return {
     /**

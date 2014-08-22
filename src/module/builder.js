@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializerFactory', 'RMModelFactory', 'RMBuilderExt', function($injector, $inflector, Utils, buildSerializer, buildModel, builderExt) {
+RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializerFactory', 'RMModelFactory', function($injector, $inflector, Utils, buildSerializer, buildModel) {
 
   // TODO: add urlPrefix option
 
@@ -74,11 +74,6 @@ RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializ
    * * `map` sets an explicit server attribute mapping, see {@link BuilderApi#attrMap}
    * * `decode` sets how an attribute is decoded after being fetch, maps to {@link BuilderApi#attrDecoder}
    * * `encode` sets how an attribute is encoded before being sent, maps to {@link BuilderApi#attrEncoder}
-   * * `serialize` sets the encoder and decoder beaviour for an attribute, maps to {@link BuilderApi#attrSerializer}
-   * * `hasMany` sets a one to many hierarchical relation under the attribute name, maps to {@link BuilderApi#attrAsCollection}
-   * * `hasOne` sets a one to one hierarchical relation under the attribute name, maps to {@link BuilderApi#attrAsResource}
-   * * `belongsTo` sets a one to one reference relation under the attribute name, maps to {@link BuilderApi#attrAsReference}
-   * * `belongsToMany` sets a one to many reference relation under the attribute name, maps to {@link BuilderApi#attrAsReferenceToMany}
    *
    * To add/override methods from the record api, a function can be passed to one of the
    * description properties:
@@ -163,17 +158,12 @@ RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializ
         ignore: ['attrMask'],
         map: ['attrMap', 'force'],
         decode: ['attrDecoder', 'param', 'chain'],
-        encode: ['attrEncoder', 'param', 'chain'],
-        serialize: ['attrSerializer'],
-        hasMany: ['attrAsCollection', 'path', 'source', 'inverseOf'], // TODO: rename source to map, but disable attrMap if map is used here...
-        hasOne: ['attrAsResource', 'path', 'source', 'inverseOf'],
-        belongsTo: ['attrAsReference', 'key', 'prefetch'],
-        belongsToMany: ['attrAsReferenceToMany', 'keys']
+        encode: ['attrEncoder', 'param', 'chain']
       };
 
     // DSL core functions.
 
-    this.dsl = extend({
+    this.dsl = {
 
       /**
        * @memberof BuilderApi#
@@ -505,9 +495,61 @@ RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializ
        * @param {boolean} _chain If true, filter is chained to the current attribute filter.
        * @return {BuilderApi} self
        */
-      attrEncoder: serializer.setEncoder
+      attrEncoder: serializer.setEncoder,
 
-    }, builderExt);
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Registers an instance method
+       *
+       * Usage:
+       *    builder.define(function(_super) {
+       *      return $fetch()
+       *    });
+       *
+       * It is posible to override an existing method using define,
+       * if overriden, the old method can be called using `this.$super`
+       * inside de new method.
+       *
+       * @param {string} _name Method name
+       * @param {function} _fun Function to define
+       * @return {BuilderApi} self
+       */
+      define: defineImpl,
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Registers a class method
+       *
+       * It is posible to override an existing method using define,
+       * if overriden, the old method can be called using `this.$super`
+       * inside de new method.
+       *
+       * @param {string} _name Method name
+       * @param {function} _fun Function to define
+       * @return {BuilderApi} self
+       */
+      classDefine: classDefineImpl,
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Adds an event hook
+       *
+       * Hooks are used to extend or modify the model behavior, and are not
+       * designed to be used as an event listening system.
+       *
+       * The given function is executed in the hook's context, different hooks
+       * make different parameters available to callbacks.
+       *
+       * @param {string} _hook The hook name, refer to restmod docs for builtin hooks.
+       * @param {function} _do function to be executed
+       * @return {BuilderApi} self
+       */
+      on: onImpl
+
+    };
 
     // Generate factory function
     this.buildModel = function() {
@@ -516,6 +558,37 @@ RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializ
       return model;
     };
   }
+
+  // dsl.define implementation
+  var defineImpl = function(_name, _fun) {
+    return this.defer(function(_model) {
+      if(typeof _name === 'object') {
+        Utils.extendOverriden(_model.prototype, _name);
+      } else {
+        _model.prototype[_name] = Utils.override(_model.prototype[_name], _fun);
+      }
+    });
+  };
+
+  // dsl.classDefine implementation
+  var classDefineImpl = function(_name, _fun) {
+    return this.defer(function(_model) {
+      if(typeof _name === 'object') {
+        Utils.extendOverriden(_model, _name);
+        Utils.extendOverriden(_model.collectionPrototype, _name);
+      } else {
+        _model[_name] = Utils.override(_model[_name], _fun);
+        _model.collectionPrototype[_name] = Utils.override(_model.collectionPrototype[_name], _fun);
+      }
+    });
+  };
+
+  // dsl.on implementation
+  var onImpl = function(_hook, _do) {
+    return this.defer(function(_model) {
+      _model.$on(_hook, _do);
+    });
+  };
 
   Builder.prototype = {
     // use the builder to process a mixin chain
