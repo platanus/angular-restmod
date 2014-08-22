@@ -44,6 +44,18 @@ describe('Restmod builder:', function() {
     });
   });
 
+  describe('setProperty', function() {
+    beforeEach(function() {
+      Bike = restmod.model('/bikes', function() {
+        this.setProperty('test', 'test');
+      });
+    });
+
+    it('should set the internal model property', function() {
+      expect(Bike.$getProperty('test')).toEqual('test');
+    });
+  });
+
   describe('disableRenaming', function() {
 
     beforeEach(function() {
