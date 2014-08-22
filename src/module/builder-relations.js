@@ -306,11 +306,12 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
 
       // foreign key handling
       if(_keys !== false) {
-        this.attrMap(_attr + 'Ids', _keys || '*', true) // TODO: inflector.singularize(_attr)
-            .attrDecoder(_attr + 'Ids', function(_raw) {
+        var attrIds = inflector.singularize(_attr) + 'Ids';
+        this.attrMap(attrIds, _keys || '*', true)
+            .attrDecoder(attrIds, function(_raw) {
               if(_raw) processInbound(_raw, this[_attr]);
             })
-            .attrEncoder(_attr + 'Ids', function() {
+            .attrEncoder(attrIds, function() {
               var result = [], others = this[_attr];
               for(var i = 0, l = others.length; i < l; i++) {
                 result.push(others[i].$pk);

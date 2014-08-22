@@ -287,7 +287,7 @@ describe('Restmod model relation:', function() {
     });
 
     it('should load resources after fetching host with ids', function() {
-      var bike = Bike.$buildRaw({ parts_ids: [1, 2, 3] });
+      var bike = Bike.$buildRaw({ part_ids: [1, 2, 3] });
       expect(bike.parts.length).toEqual(3);
       expect(bike.parts[0].$pk).toEqual(1);
       expect(bike.parts[1].$pk).toEqual(2);
@@ -298,11 +298,11 @@ describe('Restmod model relation:', function() {
       var bike = Bike.$new(1);
       bike.parts.push($injector.get('Part').$new(1));
       bike.parts.push($injector.get('Part').$new(2));
-      expect(bike.$encode().parts_ids).toEqual([1, 2]);
+      expect(bike.$encode().part_ids).toEqual([1, 2]);
     });
 
     it('should load references as independent resources', function() {
-      var bike = Bike.$buildRaw({ parts_ids: [1, 2, 3] });
+      var bike = Bike.$buildRaw({ part_ids: [1, 2, 3] });
       expect(bike.parts[0].$url()).toEqual('/api/parts/1');
     });
 
