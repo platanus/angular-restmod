@@ -168,10 +168,10 @@ module.exports = function(grunt) {
   grunt.registerTask('test', ['karma:build']);
 
   // Release Task
-  grunt.registerTask('release', ['bump', 'changelog', 'build'])
+  grunt.registerTask('release', ['bump', 'changelog', 'build']);
 
   // Publish Task
-  grunt.registerTask('publish', ['gitcommit:bump', 'gittag:bump', 'gitpush:bump'];
+  grunt.registerTask('publish', ['gitcommit:bump', 'gittag:bump', 'gitpush:bump']);
 
   // Provides the "bump" task.
   grunt.registerTask('bump', 'Increment version number', function() {
