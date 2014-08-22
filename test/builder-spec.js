@@ -130,5 +130,15 @@ describe('Restmod builder:', function() {
     });
   });
 
+  describe('OD model configuration format: __X__', function() {
+    it('should set a property value ', function() {
+      var Bike = restmod.model(null, {
+        '__primaryKey__': '_id'
+      });
+
+      expect(Bike.$getProperty('primaryKey')).toEqual('_id');
+    });
+  });
+
 });
 

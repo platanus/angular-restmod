@@ -28,9 +28,9 @@ RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializ
    *
    *   // MODEL CONFIGURATION
    *
-   *   '!baseUrl': 'resource',
-   *   '!name': 'resource'
-   *   '!primaryKey': '_id',
+   *   __url__: 'resource',
+   *   __name__: 'resource',
+   *   __primaryKey__: '_id',
    *
    *   // ATTRIBUTE MODIFIERS
    *
@@ -57,12 +57,20 @@ RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializ
    * });
    * ```
    *
-   * Special model configuration variables can be set using the name prefixed with the **!** character.
-   * See the {@link BuilderApi#attrAsReferenceToMany} documentation for more information.
+   * Special model configuration variables can be set by adding leading and trailing double-underscore to
+   * the variable name in the definition object, like this:
    *
-   * With the exception of properties starting with a special character (**!**, **@** or **~**),
-   * each property in the definition object asigns a behavior to the same named property
-   * in a model's record.
+   * ```javascript
+   * restmod.model({
+   *
+   *   __url__: 'resource',
+   *   __name__: 'resource',
+   *   __primaryKey__: '_id'
+   *
+   *  });
+   *
+   * With the exception of model configuration variables and properties starting with a special character (**@** or **~**),
+   * each property in the definition object asigns a behavior to the same named property in a model's record.
    *
    * To modify a property behavior assign an object with the desired modifiers to a
    * definition property with the same name. Builtin modifiers are:
@@ -184,9 +192,12 @@ RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializ
             _attr = $inflector.parameterize(_attr.substring(1));
             this.on(_attr, _desc);
             break;
-          case '=':
-            this.setProperty(_attr.substring(2), _description);
-            break;
+          case '_':
+            var match = _attr.match(/^__(.*)__$/);
+            if(match) {
+              this.setProperty(match[1], _desc);
+              break;
+            }
           default:
             if(isObject(_desc)) this.attribute(_attr, _desc);
             else if(isFunction(_desc)) this.define(_attr, _desc);
