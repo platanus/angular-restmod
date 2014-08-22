@@ -12,7 +12,7 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', 'RMUtils', 'RMSco
 
     // cache some stuff:
     var urlPrefix = _internal.urlPrefix,
-        baseUrl = _internal.baseUrl,
+        baseUrl = _internal.url,
         primaryKey = _internal.primaryKey;
 
     var extend = angular.extend;
@@ -91,9 +91,9 @@ RMModule.factory('RMModelFactory', ['$injector', '$inflector', 'RMUtils', 'RMSco
        * Gets a model's internal property value.
        *
        * Some builtin properties:
-       * * primaryKey
-       * * baseUrl
+       * * url
        * * urlPrefix
+       * * primaryKey
        *
        * @param  {string} _key Property name
        * @return {mixed} value

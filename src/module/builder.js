@@ -151,9 +151,9 @@ RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializ
   function Builder() {
 
     var vars = {
-        primaryKey: 'id',
-        baseUrl: null,
-        urlPrefix: null
+        url: null,
+        urlPrefix: null,
+        primaryKey: 'id'
       },
       defaults = [],
       serializer = buildSerializer(),
@@ -353,7 +353,7 @@ RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializ
        * The following configuration parameters are available by default:
        * * primaryKey: The model's primary key, defaults to **id**. Keys must use server naming convention!
        * * urlPrefix: Url prefix to prepend to resource url, usefull to use in a base mixin when multiples models have the same prefix.
-       * * baseUrl: The resource base url, null by default. If not given resource is considered anonymous.
+       * * url: The resource base url, null by default. If not given resource is considered anonymous.
        *
        * @param {string} _key The configuration key to set.
        * @param {mixed} _value The configuration value.

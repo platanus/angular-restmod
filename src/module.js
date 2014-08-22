@@ -116,7 +116,7 @@ RMModule.provider('restmod', [function() {
           var builder = new Builder(), chain;
           builder.loadMixinChain(BASE_CHAIN);
           builder.loadMixinChain(chain = arraySlice.call(arguments, 1));
-          builder.dsl.setProperty('baseUrl', _baseUrl);
+          builder.dsl.setProperty('url', _baseUrl);
 
           // build model
           var model = builder.buildModel();
