@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
+RMModule.factory('RMCollectionApi', ['RMUtils', 'RMPackerCache', function(Utils, packerCache) {
 
   var extend = angular.extend;
 
@@ -97,8 +97,13 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
      * @return {CollectionApi} this
      */
     $unwrap: function(_raw) {
-      _raw = this.$$unpack(_raw);
-      return this.$feed(_raw);
+      try {
+        packerCache.prepare();
+        _raw = this.$$unpack(_raw);
+        return this.$feed(_raw);
+      } finally {
+        packerCache.clear();
+      }
     },
 
     /**

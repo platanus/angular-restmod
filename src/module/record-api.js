@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
+RMModule.factory('RMRecordApi', ['RMUtils', 'RMPackerCache', function(Utils, packerCache) {
 
   /**
    * @class RelationScope
@@ -230,8 +230,13 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {RecordApi} this
      */
     $unwrap: function(_raw, _mask) {
-      _raw = this.$$unpack(_raw);
-      return this.$decode(_raw, _mask);
+      try {
+        packerCache.prepare();
+        _raw = this.$$unpack(_raw);
+        return this.$decode(_raw, _mask);
+      } finally {
+        packerCache.clear();
+      }
     },
 
     /**

@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUtils', 'restmod', function($injector, inflector, $log, Utils, restmod) {
+RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUtils', 'restmod', 'RMPackerCache', function($injector, inflector, $log, Utils, restmod, packerCache) {
 
   /**
    * @class RelationBuilderApi
@@ -209,7 +209,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
               if(!this[_attr] || this[_attr].$pk !== _value) {
                 if(_value !== null && _value !== false) {
                   loadModel();
-                  this[_attr] = _model.$new(_value);
+                  this[_attr] = packerCache.resolve(_model.$new(_value)); // resolve inmediatelly if cached
                   if(_prefetch) this[_attr].$fetch();
                 } else {
                   this[_attr] = null;
@@ -293,7 +293,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
           if(typeof _raw[i] === 'object') {
             _ref.push(_model.$buildRaw(_raw[i]));
           } else {
-            _ref.push(_model.$new(_raw[i]));
+            _ref.push(packerCache.resolve(_model.$new(_raw[i])));
           }
         }
       }
