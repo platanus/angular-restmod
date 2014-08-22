@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMBuilderExt', ['$injector', '$parse', '$inflector', '$log', 'restmod', function($injector, $parse, $inflector, $log, restmod) {
+RMModule.factory('RMBuilderExt', ['$injector', '$parse', 'inflector', '$log', 'restmod', function($injector, $parse, inflector, $log, restmod) {
 
   var bind = angular.bind,
       isFunction = angular.isFunction;
@@ -92,7 +92,7 @@ RMModule.factory('RMBuilderExt', ['$injector', '$parse', '$inflector', '$log', '
      */
     attrSerializer: function(_name, _serializer, _opt) {
       if(typeof _serializer === 'string') {
-        _serializer = $injector.get($inflector.camelize(_serializer, true) + 'Serializer');
+        _serializer = $injector.get(inflector.camelize(_serializer, true) + 'Serializer');
       }
 
       // TODO: if(!_serializer) throw $setupError

@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', 'RMUtils', function($injector, $inflector, $filter, Utils) {
+RMModule.factory('RMSerializerFactory', ['$injector', 'inflector', '$filter', 'RMUtils', function($injector, inflector, $filter, Utils) {
 
   function extract(_from, _path) {
     var node;
@@ -28,8 +28,8 @@ RMModule.factory('RMSerializerFactory', ['$injector', '$inflector', '$filter', '
         encoders = {},
         mapped = {},
         mappings = {},
-        nameDecoder = $inflector.camelize,
-        nameEncoder = function(_v) { return $inflector.parameterize(_v, '_'); };
+        nameDecoder = inflector.camelize,
+        nameEncoder = function(_v) { return inflector.parameterize(_v, '_'); };
 
     function isMasked(_name, _mask) {
       var mask = masks[_name];

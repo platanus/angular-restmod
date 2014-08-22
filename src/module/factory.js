@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMModelFactory', ['$injector', '$inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', function($injector, $inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi) {
+RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', function($injector, inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi) {
 
   return function(
     _internal,      // internal properties as an object

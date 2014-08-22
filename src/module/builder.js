@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializerFactory', 'RMModelFactory', function($injector, $inflector, Utils, buildSerializer, buildModel) {
+RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerializerFactory', 'RMModelFactory', function($injector, inflector, Utils, buildSerializer, buildModel) {
 
   // TODO: add urlPrefix option
 
@@ -189,7 +189,7 @@ RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializ
             this.classDefine(_attr.substring(1), _desc);
             break;
           case '~':
-            _attr = $inflector.parameterize(_attr.substring(1));
+            _attr = inflector.parameterize(_attr.substring(1));
             this.on(_attr, _desc);
             break;
           case '_':
@@ -338,7 +338,7 @@ RMModule.factory('RMBuilder', ['$injector', '$inflector', 'RMUtils', 'RMSerializ
        */
       setPacker: function(_packer) {
         if(typeof _packer === 'string') {
-          _packer = $injector.get($inflector.camelize(_packer, true) + 'Packer');
+          _packer = $injector.get(inflector.camelize(_packer, true) + 'Packer');
         }
 
         packer = _packer;

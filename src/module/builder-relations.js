@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMBuilderRelations', ['$injector', '$inflector', '$log', 'RMUtils', 'restmod', function($injector, $inflector, $log, Utils, restmod) {
+RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUtils', 'restmod', function($injector, inflector, $log, Utils, restmod) {
 
   /**
    * @class RelationBuilderApi
@@ -46,7 +46,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', '$inflector', '$log', 'RMUt
         }
 
         var self = this,
-            scope = this.$buildScope(_model, _url || $inflector.parameterize(_attr)),
+            scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)),
             col = _model.$collection(null, scope);
 
         // TODO: there should be a way to modify scope behavior just for this relation,
@@ -105,7 +105,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', '$inflector', '$log', 'RMUt
           }
         }
 
-        var scope = this.$buildScope(_model, _url || $inflector.parameterize(_attr)),
+        var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)),
             inst = _model.$new(null, scope);
 
         // TODO: provide a way to modify scope behavior just for this relation
@@ -306,7 +306,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', '$inflector', '$log', 'RMUt
 
       // foreign key handling
       if(_keys !== false) {
-        this.attrMap(_attr + 'Ids', _keys || '*', true) // TODO: $inflector.singularize(_attr)
+        this.attrMap(_attr + 'Ids', _keys || '*', true) // TODO: inflector.singularize(_attr)
             .attrDecoder(_attr + 'Ids', function(_raw) {
               if(_raw) processInbound(_raw, this[_attr]);
             })
