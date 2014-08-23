@@ -39,6 +39,8 @@ RMModule.factory('RMPackerCache', [function() {
       packerCache[_name] = _rawRecords; // TODO: maybe append new record to support extended scenarios.
     },
 
+    // IDEA: feedSingle: would require two step resolve many -> single
+
     /**
      * @memberof PackerCache#
      *
@@ -52,7 +54,7 @@ RMModule.factory('RMPackerCache', [function() {
       if(packerCache) { // make sure this is a packer cache enabled context.
 
         var modelType = _record.$type,
-            cache = packerCache[modelType.$getProperty('name')];
+            cache = packerCache[modelType.$name(true)];
 
         if(cache && _record.$pk) {
           for(var i = 0, l = cache.length; i < l; i++) {

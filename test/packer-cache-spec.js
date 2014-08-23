@@ -14,7 +14,7 @@ describe('RMPackerCache', function() {
       __name__: 'bike'
     });
 
-    Part = restmod.model('/api/bikes', {
+    Part = restmod.model('/api/parts', {
       __name__: 'part'
     });
   }));
@@ -31,7 +31,7 @@ describe('RMPackerCache', function() {
 
       beforeEach(function() {
         packerCache.prepare();
-        packerCache.feed('bike', [ { id: 1, model: 'Meta' }, { id: 2, model: 'Slash' } ]);
+        packerCache.feed('bikes', [ { id: 1, model: 'Meta' }, { id: 2, model: 'Slash' } ]);
       });
 
       it('should feed data if record id is found', function() {
