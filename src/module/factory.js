@@ -2,6 +2,9 @@
 
 RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', function($injector, inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi) {
 
+  var NAME_RGX = /(.*?)([^\/]+)\/?$/,
+      extend = angular.extend;
+
   return function(
     _internal,      // internal properties as an object
     _defaults,      // attribute defaults as an array of [key, value]
@@ -15,7 +18,15 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
         baseUrl = _internal.url,
         primaryKey = _internal.primaryKey;
 
-    var extend = angular.extend;
+    // make sure the resource name and plural name are available if posible:
+
+    if(!_internal.name && baseUrl) {
+      _internal.name = inflector.singularize(baseUrl.replace(NAME_RGX, '$2'));
+    }
+
+    if(!_internal.plural && _internal.name) {
+      _internal.plural = inflector.pluralize(_internal.name);
+    }
 
     // IDEA: make constructor inaccessible, use separate type for records?
     // * Will ensure proper usage.
@@ -155,14 +166,26 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       /**
        * @memberof StaticApi#
        *
-       * @description Returns the model name.
+       * @description Returns the model API name.
        *
-       * Returns the name given The name can be given when  is infered from the base url or
+       * This name should match the one used throughout the API. It's only used by some extended
+       * functionality, like the default packer.
        *
+       * By default model name is infered from the url, but for anonymous models and special cases
+       * it should be manually set by writing the name and plural properties:
+       *
+       * ```javascript
+       * restmod.model(null, {
+       *   __name__: 'resource',
+       *   __plural__: 'resourciness' // set only if inflector cant properly gess the name.
+       * });
+       * ```
+       *
+       * @return {boolean} If true, return plural name
        * @return {string} The base url.
        */
-      $name: function() {
-        return _internal.name;
+      $name: function(_plural) {
+        return _plural ? _internal.plural : _internal.name;
       },
 
       /**

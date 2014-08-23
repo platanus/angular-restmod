@@ -10,11 +10,11 @@ describe('Restmod model class:', function() {
   }));
 
   describe('model', function() {
-    it('should create a resource ', function() {
-      var Bike = restmod.model('/user/bike', {}, {});
-      expect(Bike.$url()).toEqual('/user/bike');
-      // expect(Bike.$name()).toEqual('bike');
-      // expect(Bike.$name(true)).toEqual('bikes');
+    it('should create a resource and infer names', function() {
+      var Bike = restmod.model('/user/bikes', {}, {});
+      expect(Bike.$url()).toEqual('/user/bikes');
+      expect(Bike.$name()).toEqual('bike');
+      expect(Bike.$name(true)).toEqual('bikes');
       expect(Bike.$anonymous()).toEqual(false);
       expect(Bike.$chain.length).toEqual(2);
     });
