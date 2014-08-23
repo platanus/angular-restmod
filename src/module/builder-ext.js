@@ -42,7 +42,6 @@ RMModule.factory('RMBuilderExt', ['$injector', '$parse', 'inflector', '$log', 'r
      * @return {BuilderApi} self
      */
     setUrlPrefix: function(_prefix) {
-      $log.warn('Atention: setUrlPrefix has been deprecated and will be removed on v1.0, use setConfig instead or use the $$ modifier');
       return this.setProperty('urlPrefix', _prefix);
     },
 
@@ -59,8 +58,47 @@ RMModule.factory('RMBuilderExt', ['$injector', '$parse', 'inflector', '$log', 'r
      * @return {BuilderApi} self
      */
     setPrimaryKey: function(_key) {
-      $log.warn('Atention: setPrimaryKey has been deprecated and will be removed on v1.0, use setConfig instead or use the $$ modifier');
       return this.setProperty('primaryKey', _key);
+    },
+
+    /**
+     * @memberof ExtendedBuilderApi#
+     *
+     * @description
+     *
+     * Sets the object "packer", the packer is responsable of providing the object wrapping strategy
+     * so it matches the API.
+     *
+     * The method accepts a packer name, an instance or a packer factory, if the first (preferred)
+     * option is used, then a <Name>Packer factory must be available that return an object or factory function.
+     *
+     * In case of using a factory function, the constructor will be called passing the model type object
+     * as first parameter:
+     *
+     * ```javascript
+     * // like this:
+     * var packer = packerFactory(Model);
+     * ```
+     *
+     * ### Packer structure.
+     *
+     * Custom packers must implement the following methods:
+     *
+     * * **unpack(_rawData, _record):** unwraps data belonging to a single record, must return the unpacked
+     * data to be passed to `$decode`.
+     * * **unpackMany(_rawData, _collection):** unwraps the data belonging to a collection of records,
+     * must return the unpacked data array, each array element will be passed to $decode on each new element.
+     * * **pack(_rawData, _record):** wraps the encoded data from a record before is sent to the server,
+     * must return the packed data object to be sent.
+     *
+     * Currently the following builtin strategies are provided:
+     * TODO: provide builtin strategies!
+     *
+     * @param {string|object} _mode The packer instance, constructor or name
+     * @return {BuilderApi} self
+     */
+    setPacker: function(_packer) {
+      return this.setProperty('packer', _packer);
     },
 
     /**
@@ -102,7 +140,6 @@ RMModule.factory('RMBuilderExt', ['$injector', '$parse', 'inflector', '$log', 'r
       return this;
     },
 
-
     /// Experimental modifiers
 
     /**
@@ -125,6 +162,7 @@ RMModule.factory('RMBuilderExt', ['$injector', '$parse', 'inflector', '$log', 'r
   return restmod.mixin(function() {
     this.extend('setUrlPrefix', EXT.setUrlPrefix)
         .extend('setPrimaryKey', EXT.setPrimaryKey)
+        .extend('setPacker', EXT.setPacker)
         .extend('disableRenaming', EXT.disableRenaming)
         .extend('attrSerializer', EXT.attrSerializer, ['serialize']);
   });

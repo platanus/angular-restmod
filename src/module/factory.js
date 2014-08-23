@@ -9,14 +9,14 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
     _internal,      // internal properties as an object
     _defaults,      // attribute defaults as an array of [key, value]
     _serializer,    // serializer instance
-    _packer,        // packer factory
     _meta           // atribute metadata
   ) {
 
     // cache some stuff:
     var urlPrefix = _internal.urlPrefix,
         baseUrl = _internal.url,
-        primaryKey = _internal.primaryKey;
+        primaryKey = _internal.primaryKey,
+        packer = _internal.packer;
 
     // make sure the resource name and plural name are available if posible:
 
@@ -26,6 +26,12 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
     if(!_internal.plural && _internal.name) {
       _internal.plural = inflector.pluralize(_internal.name);
+    }
+
+    // load packer if refereced as string
+
+    if(typeof packer === 'string') {
+      packer = $injector.get(inflector.camelize(packer, true) + 'Packer');
     }
 
     // IDEA: make constructor inaccessible, use separate type for records?
@@ -219,8 +225,8 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
       // packer pack adaptor used by $wrap
       $$pack: function(_raw) {
-        if(_packer) {
-          var packerInstance = (typeof _packer === 'function') ? _packer(Model) : _packer;
+        if(packer) {
+          var packerInstance = (typeof packer === 'function') ? packer(Model) : packer;
           _raw = packerInstance.pack(_raw, this);
         }
         return _raw;
@@ -228,8 +234,8 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
       // packer unpack adaptor used by $unwrap
       $$unpack: function(_raw) {
-        if(_packer) {
-          var packerInstance = (typeof _packer === 'function') ? _packer(Model) : _packer;
+        if(packer) {
+          var packerInstance = (typeof packer === 'function') ? packer(Model) : packer;
           _raw = packerInstance.unpack(_raw, this);
         }
         return _raw;
@@ -266,8 +272,8 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
       // provide unpack function
       $$unpack: function(_raw) {
-        if(_packer) {
-          var packerInstance = (typeof _packer === 'function') ? _packer(Model) : _packer;
+        if(packer) {
+          var packerInstance = (typeof packer === 'function') ? packer(Model) : packer;
           _raw = packerInstance.unpackMany(_raw, this);
         }
         return _raw;

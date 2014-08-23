@@ -153,11 +153,11 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
     var vars = {
         url: null,
         urlPrefix: null,
-        primaryKey: 'id'
+        primaryKey: 'id',
+        packer: null
       },
       defaults = [],
       serializer = buildSerializer(),
-      packer = null,
       deferred = [],
       meta = {},
       mappings = {
@@ -297,51 +297,6 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
        */
       defer: function(_fun) {
         deferred.push(_fun);
-        return this;
-      },
-
-      /**
-       * @memberof BuilderApi#
-       *
-       * @description
-       *
-       * Sets the object "packer", the packer is responsable of providing the object wrapping strategy
-       * so it matches the API.
-       *
-       * The method accepts a packer name, an instance or a packer factory, if the first (preferred)
-       * option is used, then a <Name>Packer factory must be available that return an object or factory function.
-       *
-       * In case of using a factory function, the constructor will be called passing the model type object
-       * as first parameter:
-       *
-       * ```javascript
-       * // like this:
-       * var packer = packerFactory(Model);
-       * ```
-       *
-       * ### Packer structure.
-       *
-       * Custom packers must implement the following methods:
-       *
-       * * **unpack(_rawData, _record):** unwraps data belonging to a single record, must return the unpacked
-       * data to be passed to `$decode`.
-       * * **unpackMany(_rawData, _collection):** unwraps the data belonging to a collection of records,
-       * must return the unpacked data array, each array element will be passed to $decode on each new element.
-       * * **pack(_rawData, _record):** wraps the encoded data from a record before is sent to the server,
-       * must return the packed data object to be sent.
-       *
-       * Currently the following builtin strategies are provided:
-       * TODO: provide builtin strategies!
-       *
-       * @param {string|object} _mode The packer instance, constructor or name
-       * @return {BuilderApi} self
-       */
-      setPacker: function(_packer) {
-        if(typeof _packer === 'string') {
-          _packer = $injector.get(inflector.camelize(_packer, true) + 'Packer');
-        }
-
-        packer = _packer;
         return this;
       },
 
@@ -564,7 +519,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
 
     // Generate factory function
     this.buildModel = function() {
-      var model = buildModel(vars, defaults, serializer, packer, meta);
+      var model = buildModel(vars, defaults, serializer, meta);
       forEach(deferred, function(_fun) { _fun(model); });
       return model;
     };
