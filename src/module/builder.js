@@ -8,7 +8,8 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
       isObject = angular.isObject,
       isArray = angular.isArray,
       isFunction = angular.isFunction,
-      extend = angular.extend;
+      extend = angular.extend,
+      VAR_RGX = /^[A-Z]+[A-Z_0-9]*$/;
 
   /**
    * @class BuilderApi
@@ -28,9 +29,9 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
    *
    *   // MODEL CONFIGURATION
    *
-   *   __url__: 'resource',
-   *   __name__: 'resource',
-   *   __primaryKey__: '_id',
+   *   URL: 'resource',
+   *   NAME: 'resource',
+   *   PRIMARY_KEY: '_id',
    *
    *   // ATTRIBUTE MODIFIERS
    *
@@ -57,15 +58,14 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
    * });
    * ```
    *
-   * Special model configuration variables can be set by adding leading and trailing double-underscore to
-   * the variable name in the definition object, like this:
+   * Special model configuration variables can be set by refering to the variable name in capitalized form, like this:
    *
    * ```javascript
    * restmod.model({
    *
-   *   __url__: 'resource',
-   *   __name__: 'resource',
-   *   __primaryKey__: '_id'
+   *   URL: 'resource',
+   *   NAME: 'resource',
+   *   PRIMARY_KEY: '_id'
    *
    *  });
    *
@@ -192,14 +192,9 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
             _attr = inflector.parameterize(_attr.substring(1));
             this.on(_attr, _desc);
             break;
-          case '_':
-            var match = _attr.match(/^__(.*)__$/);
-            if(match) {
-              this.setProperty(match[1], _desc);
-              break;
-            }
           default:
-            if(isObject(_desc)) this.attribute(_attr, _desc);
+            if(VAR_RGX.test(_attr)) this.setProperty(inflector.camelize(_attr.toLowerCase()), _desc);
+            else if(isObject(_desc)) this.attribute(_attr, _desc);
             else if(isFunction(_desc)) this.define(_attr, _desc);
             else this.attrDefault(_attr, _desc);
           }

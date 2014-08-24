@@ -130,10 +130,10 @@ describe('Restmod builder:', function() {
     });
   });
 
-  describe('OD model configuration format: __X__', function() {
+  describe('OD model configuration format: IM_A_VAR', function() {
     it('should set a property value ', function() {
       var Bike = restmod.model(null, {
-        '__primaryKey__': '_id'
+        'PRIMARY_KEY': '_id'
       });
 
       expect(Bike.$getProperty('primaryKey')).toEqual('_id');
