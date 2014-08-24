@@ -261,6 +261,26 @@ describe('Restmod model relation:', function() {
       expect(bike.$encode().frame_id).toEqual('XX');
       expect(bike.$encode().owner_id).toEqual('YY');
     });
+
+    it('should properly load content from packerCache', function() {
+
+      // this is more of an integration test, place it somewhere else
+
+      var model = restmod.model('/api/bikes', {
+        PACKER: 'default',
+        user: { belongsTo: 'User' }
+      });
+
+      var record = model.$new(1);
+      record.$unwrap({
+        bike: { model: 'Slash', user_id: 1 },
+        links: {
+          users: [ { id: 1, name: 'Hill' } ]
+        }
+      });
+
+      expect(record.user.name).toEqual('Hill');
+    });
   });
 
   describe('belongsToMany', function() {
@@ -314,6 +334,27 @@ describe('Restmod model relation:', function() {
       var bike = Bike.$buildRaw({ part_keys: [1, 2, 3] });
       expect(bike.parts.length).toEqual(3);
       expect(bike.$encode().part_keys.length).toEqual(3);
+    });
+
+    it('should properly load content from packerCache', function() {
+
+      // this is more of an integration test, place it somewhere else
+
+      var model = restmod.model('/api/bikes', {
+        PACKER: 'default',
+        parts: { belongsToMany: 'Part' }
+      });
+
+      var record = model.$new(1);
+      record.$unwrap({
+        bike: { model: 'Slash', part_ids: [1, 2] },
+        links: {
+          parts: [ { id: 1, name: 'headset' }, { id: 2, name: 'brake' } ]
+        }
+      });
+
+      expect(record.parts[0].name).toEqual('headset');
+      expect(record.parts[1].name).toEqual('brake');
     });
   });
 
