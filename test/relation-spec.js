@@ -274,7 +274,7 @@ describe('Restmod model relation:', function() {
       var record = model.$new(1);
       record.$unwrap({
         bike: { model: 'Slash', user_id: 1 },
-        links: {
+        linked: {
           users: [ { id: 1, name: 'Hill' } ]
         }
       });
@@ -348,7 +348,7 @@ describe('Restmod model relation:', function() {
       var record = model.$new(1);
       record.$unwrap({
         bike: { model: 'Slash', part_ids: [1, 2] },
-        links: {
+        linked: {
           parts: [ { id: 1, name: 'headset' }, { id: 2, name: 'brake' } ]
         }
       });

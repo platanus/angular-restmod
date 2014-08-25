@@ -16,7 +16,7 @@ RMModule.factory('DefaultPacker', ['inflector', 'RMPackerCache', function(inflec
    * To activate use
    *
    * ```javascript
-   * __packer__: 'default'
+   * PACKER: 'default'
    * ```
    *
    * ### Json root
@@ -24,14 +24,14 @@ RMModule.factory('DefaultPacker', ['inflector', 'RMPackerCache', function(inflec
    * By default the packer will use the singular model name as json root for single resource requests
    * and pluralized name for collection requests. Make sure the model name is correctly set.
    *
-   * To override the name used by the packer set the __jsonRootSingle__ and __jsonRootMany__ variables.
-   * Or set __jsonRoot__ to override both.
+   * To override the name used by the packer set the JSON_ROOT_SINGLE and JSON_ROOT_MANY variables.
+   * Or set JSON_ROOT to override both.
    *
    * ### Side loaded resources
    *
-   * By default the packer will look for links to other resources in the 'links' root property, you
-   * can change this by setting the __jsonLinks__ variable. To use the root element as link source
-   * use `__jsonLinks__: true`. To skip links processing, set it to false.
+   * By default the packer will look for links to other resources in the 'linked' root property, you
+   * can change this by setting the JSON_LINKS variable. To use the root element as link source
+   * use `JSON_LINKS: true`. To skip links processing, set it to false.
    *
    * Links are expected to use the pluralized version of the name for the referenced model. For example,
    * given the following response:
@@ -53,7 +53,7 @@ RMModule.factory('DefaultPacker', ['inflector', 'RMPackerCache', function(inflec
    * By default metadata is only captured if it comes in the 'meta' root property. Metadata is then
    * stored in the $meta property of the resource being unwrapped.
    *
-   * To change the metadata source property set the __jsonMeta__ property to the desired name, set
+   * To change the metadata source property set the JSON_META property to the desired name, set
    * it to '.' to capture the entire raw response or set it to false to skip metadata. It can also be set
    * to a function, for custom processsing.
    *
@@ -68,7 +68,7 @@ RMModule.factory('DefaultPacker', ['inflector', 'RMPackerCache', function(inflec
     this.plural = _model.$getProperty('jsonRootMany') || _model.$getProperty('jsonRoot') || _model.$getProperty('plural');
 
     // Special options
-    this.links = _model.$getProperty('jsonLinks', 'links');
+    this.links = _model.$getProperty('jsonLinks', 'linked');
     this.meta = _model.$getProperty('jsonMeta', 'meta');
     // TODO: use plural for single resource option.
   }

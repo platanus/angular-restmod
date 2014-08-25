@@ -134,24 +134,24 @@ describe('RMPackerCache', function() {
       packerCache.feed = jasmine.createSpy();
     });
 
-    it('should process links under "links" by default', function() {
+    it('should process links under "linked" by default', function() {
       var model = restmod.model('/api/bikes', {
         PACKER: 'default'
       });
 
       var record = model.$new(1);
-      record.$unwrap({ bike: {}, links: { users: [] } });
+      record.$unwrap({ bike: {}, linked: { users: [] } });
       expect(packerCache.feed).toHaveBeenCalledWith('users', []);
     });
 
     it('should process links under the property defined by used', function() {
       var model = restmod.model('/api/bikes', {
         PACKER: 'default',
-        JSON_LINKS: 'linked'
+        JSON_LINKS: 'links'
       });
 
       var record = model.$new(1);
-      record.$unwrap({ bike: {}, linked: { users: [] } });
+      record.$unwrap({ bike: {}, links: { users: [] } });
       expect(packerCache.feed).toHaveBeenCalledWith('users', []);
     });
 
@@ -174,7 +174,7 @@ describe('RMPackerCache', function() {
       });
 
       var record = model.$new(1);
-      record.$unwrap({ bike: {}, links: { users: [] } });
+      record.$unwrap({ bike: {}, linked: { users: [] } });
       expect(packerCache.feed).not.toHaveBeenCalledWith('users', []);
     });
 
