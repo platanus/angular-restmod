@@ -132,7 +132,7 @@ RMModule.provider('restmod', [function() {
          * model. The mixin can then be passed as argument to a call to {@link restmod#model#model}
          * to extend the model capabilities.
          *
-         * A mixin can also be passed to the {@link restmodProvider#pushModelBase} method to provide
+         * A mixin can also be passed to the {@link restmodProvider#rebase} method to provide
          * a base behavior for all generated models.
          *
          * @param {mixed} _mix One or more mixins, description objects or description blocks.

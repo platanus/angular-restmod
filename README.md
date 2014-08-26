@@ -40,7 +40,7 @@ If you are working with ruby on rails, we recommend [active_model_serializers]{@
 Restmod brings Rails ActiveRecord's ease of use to the Angular Framework. It succesfuly combines Angular's encapsulated design with Active Record's opinionated style. There are other alternatives available though:
 
 * **$resource:** Might be enough for small projects, included as an Angular opt-in. It only provides a basic model type layer, with limited features.
-* **Restangular:** very complete library, but does not propose a model layer and does not support linked resource responses as jsonapi.org proposes.
+* **Restangular:** very complete library, but does not propose a model layer and does not support linked resource responses as seen on jsonapi.org.
 * **angular-activerecord:** Nice alternative to $resource, still very limited in its functionality.
 * **ModelCore:** Inspired in angular-activerecord, provides a more complete set of features but lacks testing.
 
