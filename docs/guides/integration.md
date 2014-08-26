@@ -229,34 +229,34 @@ One last one!
 
 By design, restmod will ignore response properties that start with '$' and won't send in requests local properties that start with '$'. This cannot be disabled.
 
-To handle API's that require '$' prefixed properies you have to posibilities:
+To handle API's that require '$' prefixed properies you have two posibilities:
 
 1. Change the name decoder so it renames properties that start with '$' and gives them another prefix and then change the name encoder to detect the special prefix and change it back to '$':
 
-```javascript
-module.config(function(restmodProvider) {
-	restmodProvider.rebase(function() {
-		this.setNameDecoder(function(_name) {
-			// change prefix to '_'
-			return _name.charAt(0) == '$' ? '_' + inflector.camelize(_name.substr(1), true) : inflector.camelize(_name);
-		});
+	```javascript
+	module.config(function(restmodProvider) {
+		restmodProvider.rebase(function() {
+			this.setNameDecoder(function(_name) {
+				// change prefix to '_'
+				return _name.charAt(0) == '$' ? '_' + inflector.camelize(_name.substr(1), true) : inflector.camelize(_name);
+			});
 
-		this.setNameEncoder(function(_name) {
-			// change prefix back to '$'
-			return _name.charAt(0) == '_' ? '$' + inflector.parameterize(_name.substr(1), '_') : inflector.parameterize(_name, '_');
+			this.setNameEncoder(function(_name) {
+				// change prefix back to '$'
+				return _name.charAt(0) == '_' ? '$' + inflector.parameterize(_name.substr(1), '_') : inflector.parameterize(_name, '_');
+			});
 		});
 	});
-});
-```
+	```
 
 2. if there are only a couple of properties you need to let through, assign a special mapping to those properties:
 
-```javascript
-restmod.model(null {
-	myType: { map: '$type' },
-	myName: { map: '$name' }
-})
-```
+	```javascript
+	restmod.model(null {
+		myType: { map: '$type' },
+		myName: { map: '$name' }
+	})
+	```
 
 ### <a name="q7"></a> How can I set a common url prefix for every resource?
 
@@ -285,12 +285,3 @@ module.config(function(restmodProvider) {
 ```
 
 You can read more about hooks and object lifecycle in the [Hooks Guide](https://github.com/platanus/angular-restmod/blob/master/docs/guides/hooks.md).
-
-
-
-
-
-
-
-
-
