@@ -24,16 +24,15 @@ RMModule.provider('restmod', [function() {
      *
      * **ATTENTION** Model names should NOT be added to this chain.
      *
-     * Base model chain is by default empty, all mixins added to the chain are
-     * prepended to every generated model.
+     * All mixins added to the chain are prepended to every generated model.
      *
      * Usage:
      *
      * ```javascript
-     * $provider.pushModelBase('ChangeModel', 'LazyRelations', 'ThrottledModel')
+     * $provider.rebase('ChangeModel', 'LazyRelations', 'ThrottledModel')
      * ```
      */
-    pushModelBase: function(/* _mix_names */) {
+    rebase: function(/* _mix_names */) {
       Array.prototype.push.apply(BASE_CHAIN, arguments);
       return this;
     },

@@ -4,10 +4,10 @@ describe('Restmod builder:', function() {
 
   beforeEach(module('restmod'));
 
-  describe('pushModelBase', function() {
+  describe('rebase', function() {
 
     beforeEach(module(function(restmodProvider) {
-      restmodProvider.pushModelBase({
+      restmodProvider.rebase({
         createdAt: { init: 10 }
       });
     }));
