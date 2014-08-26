@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.17.0 - 2014-08-25
+ * @version v0.18.0 - 2014-08-26
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -140,7 +140,7 @@ RMModule.provider('restmod', [function() {
          * model. The mixin can then be passed as argument to a call to {@link restmod#model#model}
          * to extend the model capabilities.
          *
-         * A mixin can also be passed to the {@link restmodProvider#pushModelBase} method to provide
+         * A mixin can also be passed to the {@link restmodProvider#rebase} method to provide
          * a base behavior for all generated models.
          *
          * @param {mixed} _mix One or more mixins, description objects or description blocks.
@@ -417,7 +417,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
       if(_source || _url) this.attrMap(_attr, _source || _url);
 
       this.attrDecoder(_attr, function(_raw) {
-            this[_attr].$reset().$feed(_raw);
+            this[_attr].$reset().$decode(_raw);
           })
           .attrMask(_attr, Utils.WRITE_MASK)
           .attrMeta(_attr, { relation: 'has_many' });
@@ -1278,7 +1278,8 @@ RMModule.factory('RMCollectionApi', ['RMUtils', 'RMPackerCache', function(Utils,
    * * before-fetch-many
    * * before-request
    * * after-request[-error]
-   * * after-feed (only called if no errors)
+   * * after-feed (called for every record if no errors)
+   * * after-feed-many (only called if no errors)
    * * after-fetch-many[-error]
    *
    * @property {boolean} $isCollection Helper flag to separate collections from the main type
@@ -1322,20 +1323,40 @@ RMModule.factory('RMCollectionApi', ['RMUtils', 'RMPackerCache', function(Utils,
      * This method is for use in collections only.
      *
      * @param {array} _raw Data to add
+     * @param  {string} _mask 'CRU' mask
      * @return {CollectionApi} self
      */
-    $feed: function(_raw) {
-
+    $decode: function(_raw, _mask) {
       if(!_raw || !angular.isArray(_raw)) {
         throw new Error('Error in resource {0} configuration. Expected response to be array');
       }
 
       if(!this.$resolved) this.length = 0; // reset contents if not resolved.
       for(var i = 0, l = _raw.length; i < l; i++) {
-        this.$buildRaw(_raw[i]).$reveal(); // build and disclose every item.
+        this.$buildRaw(_raw[i], _mask).$reveal(); // build and disclose every item.
       }
+
+      this.$dispatch('after-feed-many', [_raw]);
       this.$resolved = true;
       return this;
+    },
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description Encodes array data into a its serialized version.
+     *
+     * @param  {string} _mask 'CRU' mask
+     * @return {CollectionApi} self
+     */
+    $encode: function(_mask) {
+      var raw = [];
+      for(var i = 0, l = this.length; i < l; i++) {
+        raw.push(this[i].$encode(_mask));
+      }
+
+      this.$dispatch('before-render-many', [raw]);
+      return raw;
     },
 
     /**
@@ -1349,16 +1370,36 @@ RMModule.factory('RMCollectionApi', ['RMUtils', 'RMPackerCache', function(Utils,
      * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
      *
      * @param  {mixed} _raw Raw server data
+     * @param  {string} _mask 'CRU' mask
      * @return {CollectionApi} this
      */
-    $unwrap: function(_raw) {
+    $unwrap: function(_raw, _mask) {
       try {
         packerCache.prepare();
         _raw = this.$$unpack(_raw);
-        return this.$feed(_raw);
+        return this.$decode(_raw, _mask);
       } finally {
         packerCache.clear();
       }
+    },
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description
+     *
+     * Encode and packs object into a server compatible structure that can be used for PUT/POST operations.
+     *
+     * ATTENTION: do not override this method to change the object wrapping strategy,
+     * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
+     *
+     * @param  {string} _mask 'CRU' mask
+     * @return {string} raw data
+     */
+    $wrap: function(_mask) {
+      var raw = this.$encode(_mask);
+      raw = this.$$pack(raw);
+      return raw;
     },
 
     /**
@@ -2005,6 +2046,10 @@ RMModule.factory('DefaultPacker', ['inflector', 'RMPackerCache', function(inflec
 
     pack: function(_raw) {
       return _raw; // no special packing
+    },
+
+    packMany: function(_raw) {
+      return _raw; // no special packing
     }
   };
 
@@ -2027,7 +2072,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
     // cache some stuff:
     var urlPrefix = _internal.urlPrefix,
-        baseUrl = _internal.url,
+        baseUrl = Utils.cleanUrl(_internal.url),
         primaryKey = _internal.primaryKey,
         packer = _internal.packer;
 
@@ -2069,6 +2114,17 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       col.$resolved = false;
       // this.$initialize();
       return col;
+    }
+
+    // packer adaptor generator
+    function adaptPacker(_fun) {
+      return function(_raw) {
+        if(packer) {
+          var packerInstance = (typeof packer === 'function') ? packer(Model) : packer;
+          _raw = packerInstance[_fun](_raw, this);
+        }
+        return _raw;
+      };
     }
 
     ///// Setup static api
@@ -2237,22 +2293,10 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       },
 
       // packer pack adaptor used by $wrap
-      $$pack: function(_raw) {
-        if(packer) {
-          var packerInstance = (typeof packer === 'function') ? packer(Model) : packer;
-          _raw = packerInstance.pack(_raw, this);
-        }
-        return _raw;
-      },
+      $$pack: adaptPacker('pack'),
 
       // packer unpack adaptor used by $unwrap
-      $$unpack: function(_raw) {
-        if(packer) {
-          var packerInstance = (typeof packer === 'function') ? packer(Model) : packer;
-          _raw = packerInstance.unpack(_raw, this);
-        }
-        return _raw;
-      },
+      $$unpack: adaptPacker('unpack'),
 
       // serializer decode adaptor used by $decode
       $$decode: function(_raw, _mask) {
@@ -2283,14 +2327,12 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
         return newCollection(_scope || this.$scope, _params);
       },
 
-      // provide unpack function
-      $$unpack: function(_raw) {
-        if(packer) {
-          var packerInstance = (typeof packer === 'function') ? packer(Model) : packer;
-          _raw = packerInstance.unpackMany(_raw, this);
-        }
-        return _raw;
-      },
+      // packer pack adaptor used by $wrap
+      $$pack: adaptPacker('packMany'),
+
+      // packer unpack adaptor used by $unwrap
+      $$unpack: adaptPacker('unpackMany')
+
     }, CollectionApi, ScopeApi, CommonApi);
 
     // expose collection prototype.
@@ -2394,7 +2436,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', 'RMPackerCache', function(Utils, pac
   var RelationScope = function(_scope, _target, _partial) {
     this.$scope = _scope;
     this.$target = _target;
-    this.$partial = _partial;
+    this.$partial = Utils.cleanUrl(_partial);
   };
 
   RelationScope.prototype = {
@@ -2842,9 +2884,9 @@ RMModule.factory('RMScopeApi', [function() {
      * @param  {object} _raw Undecoded data
      * @return {RecordApi} single record
      */
-    $buildRaw: function(_raw) {
+    $buildRaw: function(_raw, _mask) {
       var obj = this.$new(this.$$inferKey(_raw));
-      obj.$decode(_raw);
+      obj.$decode(_raw, _mask);
       return obj;
     },
 
@@ -3188,9 +3230,21 @@ RMModule.factory('RMUtils', [function() {
      */
     joinUrl: function(_head, _tail) {
       if(!_head || !_tail) return null;
-      return (_head+'').replace(/\/$/, '') + '/' + (_tail+'').replace(/(\/$|^\/)/g, '');
+      return (_head+'').replace(/\/$/, '') + '/' + (_tail+'').replace(/^\//, '');
     },
-
+    /**
+     * @memberof Utils
+     *
+     * @description
+     *
+     * Cleans trailing slashes from an url
+     *
+     * @param  {string} _url Url to clean
+     * @return {string} Resulting url
+     */
+    cleanUrl: function(_url) {
+      return _url ? _url.replace(/\/$/, '') : _url;
+    },
     /**
      * @memberof Utils
      *

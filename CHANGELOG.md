@@ -1,3 +1,21 @@
+<a name="0.18.0"></a>
+## 0.18.0 (2014-08-26)
+
+
+#### Features
+
+* removes trailing slashes from generated urls ([188a7f75](http://github.com/angular-platanus/restmod/commit/188a7f754f345f772be8b4b9a1427972631fb4b6))
+* **collection:** unifies interface with record api. ([7fa0b64c](http://github.com/angular-platanus/restmod/commit/7fa0b64ce939ce2f3c9184207e75cbf529bbe690), closes [#63](http://github.com/angular-platanus/restmod/issues/63))
+
+
+#### Breaking Changes
+
+* collection.$feed is called collection.$decode now.
+
+Closes #63
+ ([7fa0b64c](http://github.com/angular-platanus/restmod/commit/7fa0b64ce939ce2f3c9184207e75cbf529bbe690))
+
+
 <a name="0.17.0"></a>
 ## 0.17.0 (2014-08-25)
 
