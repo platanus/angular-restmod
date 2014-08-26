@@ -32,9 +32,21 @@ RMModule.factory('RMUtils', [function() {
      */
     joinUrl: function(_head, _tail) {
       if(!_head || !_tail) return null;
-      return (_head+'').replace(/\/$/, '') + '/' + (_tail+'').replace(/(\/$|^\/)/g, '');
+      return (_head+'').replace(/\/$/, '') + '/' + (_tail+'').replace(/^\//, '');
     },
-
+    /**
+     * @memberof Utils
+     *
+     * @description
+     *
+     * Cleans trailing slashes from an url
+     *
+     * @param  {string} _url Url to clean
+     * @return {string} Resulting url
+     */
+    cleanUrl: function(_url) {
+      return _url ? _url.replace(/\/$/, '') : _url;
+    },
     /**
      * @memberof Utils
      *

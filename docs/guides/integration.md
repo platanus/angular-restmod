@@ -9,7 +9,8 @@ Make sure you read all of the following Q&A before you start integrating your AP
 * [My resource properties are being automatically renamed, is this normal?](#q5)
 * [Are there any other conventions related to naming I should be aware of?](#q6)
 * [How can I set a common url prefix for every resource?](#q7)
-* [How can add a custom header or parameter to every request?](#q8)
+* [How can I add a trailing slash or extension to the url sent to server?](#q8)
+* [How can I add Ia custom header or parameter to every request?](#q9)
 
 ### <a name="q1"></a> How can I change the property used for the primary key
 
@@ -270,18 +271,33 @@ module.config(function(restmodProvider) {
 });
 ```
 
-### <a name="q8"></a> How can add a custom header or parameter to every request?
+### <a name="q8"></a> How can I add a trailing slash or extension to the url sent to server?
 
-You can hook to the `before-request` event:
+You can hook to the `before-request` event and modify the url before is sent, restmod will remove trailing slashes from generated urls before this hook is called, so slashes appended here will be sent.
 
 ```javascript
 module.config(function(restmodProvider) {
 	restmodProvider.rebase({
 		'~before-request': function(_req) {
-			_req.headers = angular.extend(_req.headers, { 'X-My-Header': 'imateapot!' }); // _requestConfig is just a $http configuration object.
+			// _req is just a $http configuration object.
+			_req.url += '.json';
 		}
 	});
 });
 ```
 
 You can read more about hooks and object lifecycle in the [Hooks Guide](https://github.com/platanus/angular-restmod/blob/master/docs/guides/hooks.md).
+
+### <a name="q9"></a> How can I add a custom header or parameter to every request?
+
+Same as before, you can hook to the `before-request` event:
+
+```javascript
+module.config(function(restmodProvider) {
+	restmodProvider.rebase({
+		'~before-request': function(_req) {
+			_req.headers = angular.extend(_req.headers, { 'X-My-Header': 'imateapot!' });
+		}
+	});
+});
+```

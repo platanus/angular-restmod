@@ -12,7 +12,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', 'RMPackerCache', function(Utils, pac
   var RelationScope = function(_scope, _target, _partial) {
     this.$scope = _scope;
     this.$target = _target;
-    this.$partial = _partial;
+    this.$partial = Utils.cleanUrl(_partial);
   };
 
   RelationScope.prototype = {

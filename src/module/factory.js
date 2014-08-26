@@ -14,7 +14,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
     // cache some stuff:
     var urlPrefix = _internal.urlPrefix,
-        baseUrl = _internal.url,
+        baseUrl = Utils.cleanUrl(_internal.url),
         primaryKey = _internal.primaryKey,
         packer = _internal.packer;
 

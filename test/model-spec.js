@@ -21,6 +21,11 @@ describe('Restmod model class:', function() {
       (new Bike());
       expect(spy).toHaveBeenCalled();
     });
+
+    it('should remove trailing slashes from url', function() {
+      var Bike = restmod.model('/api/bikes/');
+      expect(Bike.$url()).not.toMatch(/\/$/);
+    });
   });
 
   describe('$getProperty', function() {
