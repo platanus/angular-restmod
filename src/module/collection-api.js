@@ -23,7 +23,8 @@ RMModule.factory('RMCollectionApi', ['RMUtils', 'RMPackerCache', function(Utils,
    * * before-fetch-many
    * * before-request
    * * after-request[-error]
-   * * after-feed (only called if no errors)
+   * * after-feed (called for every record if no errors)
+   * * after-feed-many (only called if no errors)
    * * after-fetch-many[-error]
    *
    * @property {boolean} $isCollection Helper flag to separate collections from the main type
@@ -67,20 +68,40 @@ RMModule.factory('RMCollectionApi', ['RMUtils', 'RMPackerCache', function(Utils,
      * This method is for use in collections only.
      *
      * @param {array} _raw Data to add
+     * @param  {string} _mask 'CRU' mask
      * @return {CollectionApi} self
      */
-    $feed: function(_raw) {
-
+    $decode: function(_raw, _mask) {
       if(!_raw || !angular.isArray(_raw)) {
         throw new Error('Error in resource {0} configuration. Expected response to be array');
       }
 
       if(!this.$resolved) this.length = 0; // reset contents if not resolved.
       for(var i = 0, l = _raw.length; i < l; i++) {
-        this.$buildRaw(_raw[i]).$reveal(); // build and disclose every item.
+        this.$buildRaw(_raw[i], _mask).$reveal(); // build and disclose every item.
       }
+
+      this.$dispatch('after-feed-many', [_raw]);
       this.$resolved = true;
       return this;
+    },
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description Encodes array data into a its serialized version.
+     *
+     * @param  {string} _mask 'CRU' mask
+     * @return {CollectionApi} self
+     */
+    $encode: function(_mask) {
+      var raw = [];
+      for(var i = 0, l = this.length; i < l; i++) {
+        raw.push(this[i].$encode(_mask));
+      }
+
+      this.$dispatch('before-render-many', [raw]);
+      return raw;
     },
 
     /**
@@ -94,16 +115,36 @@ RMModule.factory('RMCollectionApi', ['RMUtils', 'RMPackerCache', function(Utils,
      * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
      *
      * @param  {mixed} _raw Raw server data
+     * @param  {string} _mask 'CRU' mask
      * @return {CollectionApi} this
      */
-    $unwrap: function(_raw) {
+    $unwrap: function(_raw, _mask) {
       try {
         packerCache.prepare();
         _raw = this.$$unpack(_raw);
-        return this.$feed(_raw);
+        return this.$decode(_raw, _mask);
       } finally {
         packerCache.clear();
       }
+    },
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description
+     *
+     * Encode and packs object into a server compatible structure that can be used for PUT/POST operations.
+     *
+     * ATTENTION: do not override this method to change the object wrapping strategy,
+     * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
+     *
+     * @param  {string} _mask 'CRU' mask
+     * @return {string} raw data
+     */
+    $wrap: function(_mask) {
+      var raw = this.$encode(_mask);
+      raw = this.$$pack(raw);
+      return raw;
     },
 
     /**

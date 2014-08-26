@@ -124,6 +124,10 @@ RMModule.factory('DefaultPacker', ['inflector', 'RMPackerCache', function(inflec
 
     pack: function(_raw) {
       return _raw; // no special packing
+    },
+
+    packMany: function(_raw) {
+      return _raw; // no special packing
     }
   };
 

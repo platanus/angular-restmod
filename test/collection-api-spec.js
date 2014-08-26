@@ -180,6 +180,46 @@ describe('Restmod collection:', function() {
 
   });
 
+  describe('$decode', function() {
+
+    it('should load the decoded contents into the collection', function() {
+      var bikes = restmod.model('/api/bikes').$collection();
+      bikes.$decode([ { brand: 'YT' } ]);
+      expect(bikes.length).toEqual(1);
+      expect(bikes.$resolved).toBeTruthy();
+      expect(bikes[0].brand).toEqual('YT');
+    });
+
+    it('should fire the after-feed-many event', function() {
+      var bikes = restmod.model('/api/bikes').$collection();
+      var spy = jasmine.createSpy();
+      bikes.$on('after-feed-many', spy);
+      bikes.$decode([ { brand: 'YT' } ]);
+      expect(spy).toHaveBeenCalled();
+    });
+
+  });
+
+  describe('$encode', function() {
+
+    it('should decode the collection contents', function() {
+      var Bike = restmod.model('/api/bikes'),
+          bikes = Bike.$collection();
+      bikes.$add(Bike.$new(1).$extend({ brand: 'YT' }));
+      expect(bikes.$encode().length).toEqual(1);
+      expect(bikes.$encode()[0].brand).toEqual('YT');
+    });
+
+    it('should fire the before-render-many event', function() {
+      var bikes = restmod.model('/api/bikes').$collection();
+      var spy = jasmine.createSpy();
+      bikes.$on('before-render-many', spy);
+      bikes.$encode();
+      expect(spy).toHaveBeenCalled();
+    });
+
+  });
+
   describe('$unwrap', function() {
 
     it('should call the packer unpackMany method if a packer is provided', function() {
@@ -195,11 +235,11 @@ describe('Restmod collection:', function() {
       expect(packer.unpackMany).toHaveBeenCalledWith(raw, bikes);
     });
 
-    it('should call $feed', function() {
+    it('should call $decode', function() {
       var bikes = Bike.$collection();
-      spyOn(bikes, '$feed');
+      spyOn(bikes, '$decode');
       bikes.$unwrap([{}]);
-      expect(bikes.$feed).toHaveBeenCalled();
+      expect(bikes.$decode).toHaveBeenCalled();
     });
 
   });

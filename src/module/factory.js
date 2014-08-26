@@ -58,6 +58,17 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       return col;
     }
 
+    // packer adaptor generator
+    function adaptPacker(_fun) {
+      return function(_raw) {
+        if(packer) {
+          var packerInstance = (typeof packer === 'function') ? packer(Model) : packer;
+          _raw = packerInstance[_fun](_raw, this);
+        }
+        return _raw;
+      };
+    }
+
     ///// Setup static api
 
     /**
@@ -224,22 +235,10 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       },
 
       // packer pack adaptor used by $wrap
-      $$pack: function(_raw) {
-        if(packer) {
-          var packerInstance = (typeof packer === 'function') ? packer(Model) : packer;
-          _raw = packerInstance.pack(_raw, this);
-        }
-        return _raw;
-      },
+      $$pack: adaptPacker('pack'),
 
       // packer unpack adaptor used by $unwrap
-      $$unpack: function(_raw) {
-        if(packer) {
-          var packerInstance = (typeof packer === 'function') ? packer(Model) : packer;
-          _raw = packerInstance.unpack(_raw, this);
-        }
-        return _raw;
-      },
+      $$unpack: adaptPacker('unpack'),
 
       // serializer decode adaptor used by $decode
       $$decode: function(_raw, _mask) {
@@ -270,14 +269,12 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
         return newCollection(_scope || this.$scope, _params);
       },
 
-      // provide unpack function
-      $$unpack: function(_raw) {
-        if(packer) {
-          var packerInstance = (typeof packer === 'function') ? packer(Model) : packer;
-          _raw = packerInstance.unpackMany(_raw, this);
-        }
-        return _raw;
-      },
+      // packer pack adaptor used by $wrap
+      $$pack: adaptPacker('packMany'),
+
+      // packer unpack adaptor used by $unwrap
+      $$unpack: adaptPacker('unpackMany')
+
     }, CollectionApi, ScopeApi, CommonApi);
 
     // expose collection prototype.

@@ -33,7 +33,7 @@ newBike.$save(); // bike is persisted sending a POST to /bikes
 It also supports collections, relations, lifecycle hooks, attribute renaming, side data loading and much more.
 Continue reading for a quick start or check the API Reference for more: http://platanus.github.io/angular-restmod
 
-If you are working with ruby on rails, we recommend [active_model_serializers]{@link https://github.com/rails-api/active_model_serializers} for seamless integration.
+If you are working with ruby on rails, we recommend [active_model_serializers](https://github.com/rails-api/active_model_serializers) for seamless integration.
 
 ## Why Restmod?
 
@@ -433,7 +433,7 @@ The example above would behave like this:
 
 <!-- before:
 	bike = restmod.model('/bikes', { parts: { hasMany: restmod.model(null) } }).$new(1);
-	bike.parts.$feed([{ id: 1 }]);
+	bike.parts.$decode([{ id: 1 }]);
 -->
 
 ```javascript

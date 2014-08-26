@@ -50,9 +50,9 @@ RMModule.factory('RMScopeApi', [function() {
      * @param  {object} _raw Undecoded data
      * @return {RecordApi} single record
      */
-    $buildRaw: function(_raw) {
+    $buildRaw: function(_raw, _mask) {
       var obj = this.$new(this.$$inferKey(_raw));
-      obj.$decode(_raw);
+      obj.$decode(_raw, _mask);
       return obj;
     },
 
