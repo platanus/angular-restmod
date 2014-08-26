@@ -18,12 +18,11 @@ Angular Restmod  [![Build Status](https://api.travis-ci.org/platanus/angular-res
 ===============
 Restmod creates objects that you can use from within Angular to interact with your RESTful API.
 
-Saving Bikes on your serverside database would be as easy as:
+Saving bikes on your serverside database would be as easy as:
 
 <!-- section: main example -->
 
 ```javascript
-var Bike = restmod.model('/bikes');
 var newBike = Bike.$build({ brand: 'Trek' });
 newBike.model = '5200';
 newBike.$save(); // bike is persisted sending a POST to /bikes
@@ -31,19 +30,19 @@ newBike.$save(); // bike is persisted sending a POST to /bikes
 
 <!-- end -->
 
-It also supports collections, relations, lifecycle hooks, attribute renaming and much more.
+It also supports collections, relations, lifecycle hooks, attribute renaming, side data loading and much more.
 Continue reading for a quick start or check the API Reference for more: http://platanus.github.io/angular-restmod
 
+If you are working with ruby on rails, we recommend [active_model_serializers]{@link https://github.com/rails-api/active_model_serializers} for seamless integration.
+
 ## Why Restmod?
+
 Restmod brings Rails ActiveRecord's ease of use to the Angular Framework. It succesfuly combines Angular's encapsulated design with Active Record's opinionated style. There are other alternatives available though:
 
-**$resource:** Might be enough for small projects, included as an Angular opt-in. It only provides a basic model type layer, with limited features.
-
-**Restangular:** very complete library, but does not propose a model layer.
-
-**angular-activerecord:** Nice alternative to $resource, still very limited in its functionality.
-
-**ModelCore:** Inspired in angular-activerecord, provides a more complete set of features but lacks testing.
+* **$resource:** Might be enough for small projects, included as an Angular opt-in. It only provides a basic model type layer, with limited features.
+* **Restangular:** very complete library, but does not propose a model layer and does not support linked resource responses as jsonapi.org proposes.
+* **angular-activerecord:** Nice alternative to $resource, still very limited in its functionality.
+* **ModelCore:** Inspired in angular-activerecord, provides a more complete set of features but lacks testing.
 
 ## Getting Started
 
@@ -79,6 +78,20 @@ module = angular.module('MyApp', ['restmod'])
 ```
 
 <!-- end -->
+
+# REST API Integration
+
+Restmod provides a series of configuration options to match your API style:
+
+* Common url prefix configuration
+* Primary key name configuration
+* Json root property configuration
+* Json metadata extraction
+* Json side data resolving for jsonapi.org style APIs (for apis using 'links')
+* Request customization
+* Url formatting options
+
+Make sure you read the [Api Integration FAQ](https://github.com/platanus/angular-restmod/blob/master/docs/guides/integration.md) before starting your API integration!
 
 # Basic usage
 
@@ -887,7 +900,7 @@ var Bike = restmod.model('/bikes', {
 });
 
 ```
-Note that a hook can be defined for a type, a collection or a record. Also, hooks can also be defined for a given execution context using $decorate. Check the [hooks advanced documentation](https://github.com/platanus/angular-restmod/blob/readme-test/docs/guides/hooks.md).
+Note that a hook can be defined for a type, a collection or a record. Also, hooks can also be defined for a given execution context using $decorate. Check the [hooks advanced documentation](https://github.com/platanus/angular-restmod/blob/master/docs/guides/hooks.md).
 
 # Mixins
 
