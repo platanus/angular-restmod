@@ -1,8 +1,8 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.16.3 - 2014-08-19
+ * @version v0.17.0 - 2014-08-25
  * @link https://github.com/angular-platanus/restmod
- * @author Ignacio Baixas <iobaixas@gmai.com>
+ * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
  */
 

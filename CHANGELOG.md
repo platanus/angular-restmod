@@ -1,3 +1,35 @@
+<a name="0.17.0"></a>
+## 0.17.0 (2014-08-25)
+
+
+#### Bug Fixes
+
+* **Gruntfile:** couple of syntax errors ([e5c3da47](http://github.com/angular-platanus/restmod/commit/e5c3da47f06158506429229f6c87833bbd6feb4f))
+* **default_packer:** changes default links property to li linked ([ad3fa2f9](http://github.com/angular-platanus/restmod/commit/ad3fa2f9b8bb754387ceee1d82710cf5cf7c2069))
+* **relations:** fixes default belongsToMany key property to use singularized attribute name ([2d474dea](http://github.com/angular-platanus/restmod/commit/2d474deaaa487d795ad1e4ba02ea0413ad76652d))
+
+
+#### Features
+
+* adds the default packer! ([e790ef0b](http://github.com/angular-platanus/restmod/commit/e790ef0be0f8c56d3ec39b3b3214e35c10f1227c), closes [#62](http://github.com/angular-platanus/restmod/issues/62))
+* adds PackerCache service. ([99d7639f](http://github.com/angular-platanus/restmod/commit/99d7639f1adaed3ae8b18810379cd08e83d0e7da))
+* **builder:**
+  * changes the __var__ format for model config to all caps VAR format ([decb21e0](http://github.com/angular-platanus/restmod/commit/decb21e07ddf4327dda9c4e753ac2dc9c0f2d578))
+  * makes packer a configuration option settable as __packer__ ([fc12bd9d](http://github.com/angular-platanus/restmod/commit/fc12bd9dd64aff9ff2200e0fca1b1863635f8f87))
+  * changes model configuration variables name format. ([b0b87e22](http://github.com/angular-platanus/restmod/commit/b0b87e22bedf686eb510f7cb409a530a18fa17a2))
+* **docs:** adds the integration guide! ([153caf8e](http://github.com/angular-platanus/restmod/commit/153caf8e6211281de63097fd7fe000747a8b9891), closes [#101](http://github.com/angular-platanus/restmod/issues/101))
+* **factory:** adds default value fallback to $getProperty ([da283132](http://github.com/angular-platanus/restmod/commit/da2831329156e8e4080e6d5c4d024cbf8ecf7a40))
+* **model:**
+  * adds model name inference from url. ([c3ab4819](http://github.com/angular-platanus/restmod/commit/c3ab4819832628733876e763e11a5e06304fe9ba))
+  * changes baseUrl property name to url ([e654176a](http://github.com/angular-platanus/restmod/commit/e654176a0811ac02b8f99b5104e5497e32074ffb))
+* **packer_cache:** changed to expect plural resource names ([59305f5f](http://github.com/angular-platanus/restmod/commit/59305f5f57119a8ab86c84873c2169214dc79194))
+
+
+#### Breaking Changes
+
+* renames restmodProvider.pushModelBase method to restmodProvider.rebase
+
+
 # 0.16.3 (2014-08-19)
 
 ## Bug fixes
