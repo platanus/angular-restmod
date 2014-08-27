@@ -14,8 +14,11 @@
 	module = $provide;
 -->
 
-Angular Restmod  [![Build Status](https://api.travis-ci.org/platanus/angular-restmod.png)](https://travis-ci.org/angular-platanus/restmod) [![Code Climate](https://codeclimate.com/github/platanus/angular-restmod/badges/gpa.svg)](https://codeclimate.com/github/platanus/angular-restmod) [![Stories in Ready](https://badge.waffle.io/platanus/angular-restmod.png?label=ready&title=Ready)](https://waffle.io/platanus/angular-restmod)
+Angular Restmod  
 ===============
+
+[![Build Status](https://api.travis-ci.org/platanus/angular-restmod.png)](https://travis-ci.org/angular-platanus/restmod) [![Code Climate](https://codeclimate.com/github/platanus/angular-restmod/badges/gpa.svg)](https://codeclimate.com/github/platanus/angular-restmod) [![Stories in Ready](https://badge.waffle.io/platanus/angular-restmod.png?label=ready&title=Ready)](https://waffle.io/platanus/angular-restmod) [![Bower version](https://badge.fury.io/bo/angular-restmod.svg)](http://badge.fury.io/bo/angular-restmod)
+
 Restmod creates objects that you can use from within Angular to interact with your RESTful API.
 
 Saving bikes on your serverside database would be as easy as:
