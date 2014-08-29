@@ -79,10 +79,7 @@ module.exports = function(config) {
     // Sauce config, requires username and accessKey to be loaded in ENV
     sauceLabs: {
       testName: 'Restmod Unit Tests',
-      startConnect: true,
-      options: {
-        'selenium-version': '2.41.0'
-      }
+      startConnect: true
     },
 
     // Custom sauce launchers
