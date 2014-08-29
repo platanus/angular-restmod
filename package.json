@@ -4,29 +4,27 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "grunt-bower": "*",
+    "grunt-bower-task": "*",
     "grunt-cli": ">= 0.1.7",
     "grunt-contrib-concat": "*",
     "grunt-contrib-jshint": "*",
     "grunt-contrib-uglify": "*",
-    "grunt-bower": "*",
-    "grunt-bower-task": "*",
-    "grunt-karma": "~0.8",
-    "karma-requirejs": "*",
-    "requirejs-text": "requirejs/text",
-    "karma-jasmine": "*",
-    "karma-chrome-launcher": "*",
-    "karma-firefox-launcher": "*",
-    "karma-osx-reporter": "*",
     "grunt-conventional-changelog": "1.1.0",
     "grunt-gh-pages": "~0.8.1",
-    "grunt-jsdoc": "~0.5.4",
     "grunt-git": "^0.2.14",
-    "karma-cli": "*",
-    "karma-jasmine": "*",
+    "grunt-jsdoc": "~0.5.4",
+    "grunt-karma": "~0.8",
     "karma-chrome-launcher": "*",
-    "karma-firefox-launcher": "*"
+    "karma-cli": "*",
+    "karma-firefox-launcher": "*",
+    "karma-jasmine": "*",
+    "karma-osx-reporter": "*",
+    "karma-requirejs": "*",
+    "karma-sauce-launcher": "^0.2.10",
+    "requirejs-text": "requirejs/text"
   },
   "scripts": {
-     "test": "./node_modules/.bin/karma start --single-run --browsers Firefox"
+    "test": "./node_modules/.bin/karma start --single-run --browsers Firefox"
   }
 }

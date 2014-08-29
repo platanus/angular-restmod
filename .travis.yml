@@ -7,3 +7,9 @@ before_script:
   - sh -e /etc/init.d/xvfb start
   - npm install -g bower
   - bower install
+
+addons:
+  sauce_connect:
+    username: "ignacio"
+    access_key:
+      secure: "QOYIzobIk293s8bAlAAgPOmHq0ZNHKV36XDPn7DR4L3uirViMdAwKbjxU3Ba2+1xmnUVe91w+K+AGd/Lx3HemKkt0DzxgYG7Ab6FBj4mBSJqORCYq+onLPCCAA8VhIjW0cMN1gHVl2a3OLd+5irHGu9Kd42HMVQNQtLsQF3dIUk="
