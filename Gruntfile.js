@@ -88,6 +88,7 @@ module.exports = function(grunt) {
         autoWatch: false
       },
       dev: {
+        singleRun: false,
         autoWatch: true
       }
     },

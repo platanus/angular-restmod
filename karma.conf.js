@@ -1,4 +1,4 @@
-var FULL_BROWSER_TEST = process.env.TRAVIS_SECURE_ENV_VARS === 'true';
+var FULL_BROWSER_TEST = (process.env.TRAVIS && process.env.TRAVIS_SECURE_ENV_VARS !== 'false');
 
 // Karma configuration
 // Generated on Fri Aug 09 2013 14:14:35 GMT-0500 (CDT)
@@ -65,7 +65,7 @@ module.exports = function(config) {
     logLevel: config.LOG_INFO,
 
     // Enable / disable watching file and executing tests whenever any file changes
-    autoWatch: true,
+    autoWatch: false,
 
     // If browser does not capture in given timeout [ms], kill it
     captureTimeout: 60000,
@@ -74,7 +74,7 @@ module.exports = function(config) {
     browserNoActivityTimeout: 60000,
 
     // Continuous Integration mode by default
-    singleRun: false,
+    singleRun: true,
 
     // Sauce config, requires username and accessKey to be loaded in ENV
     sauceLabs: {
