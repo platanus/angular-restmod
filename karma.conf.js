@@ -14,22 +14,22 @@ module.exports = function(config) {
 
     // List of files / patterns to load in the browser
     files: [
-		// libraries
-		'bower_components/angular/angular.js',
-        'bower_components/angular-inflector/dist/angular-inflector.js',
-		'bower_components/angular-mocks/angular-mocks.js',
+  		// libraries
+  		'bower_components/angular/angular.js',
+      'bower_components/angular-inflector/dist/angular-inflector.js',
+      'bower_components/angular-mocks/angular-mocks.js',
 
-		// our app
-        'src/module.js',
-        'src/module/*.js',
-        'src/plugins/*.js',
+  		// our app
+      'src/module.js',
+      'src/module/*.js',
+      'src/plugins/*.js',
 
-		// tests
-		{ pattern: 'test/**/*spec.js', included: false },
-        { pattern: 'README.md', included: false },
+  		// tests
+  		{ pattern: 'test/**/*spec.js', included: false },
+      { pattern: 'README.md', included: false },
 
-        'test/requirejs-main.js',
-        { pattern: 'node_modules/text/text.js', included: false }
+      'test/requirejs-main.js',
+      { pattern: 'node_modules/text/text.js', included: false }
     ],
 
     // Karma plugins
@@ -78,47 +78,50 @@ module.exports = function(config) {
 
     // Sauce config, requires username and accessKey to be loaded in ENV
     sauceLabs: {
-        testName: 'Restmod Unit Tests',
-        startConnect: false
+      testName: 'Restmod Unit Tests',
+      startConnect: true,
+      options: {
+        'selenium-version': '2.41.0'
+      }
     },
 
     // Custom sauce launchers
     customLaunchers:
     {
-        sl_chrome: {
-          base: 'SauceLabs',
-          browserName: 'chrome',
-          platform: 'Windows 7',
-          version: '35'
-        },
-        sl_firefox: {
-          base: 'SauceLabs',
-          browserName: 'firefox',
-          version: '30'
-        },
-        sl_firefox_4: {
-          base: 'SauceLabs',
-          browserName: 'firefox',
-          version: '4'
-        },
-        sl_ios_safari: {
-          base: 'SauceLabs',
-          browserName: 'iphone',
-          platform: 'OS X 10.9',
-          version: '7.1'
-        },
-        sl_ie_9: {
-          base: 'SauceLabs',
-          browserName: 'internet explorer',
-          platform: 'Windows 7',
-          version: '9'
-        },
-        sl_ie_11: {
-          base: 'SauceLabs',
-          browserName: 'internet explorer',
-          platform: 'Windows 8.1',
-          version: '11'
-        }
+      sl_chrome: {
+        base: 'SauceLabs',
+        browserName: 'chrome',
+        platform: 'Windows 7',
+        version: '35'
+      },
+      sl_firefox: {
+        base: 'SauceLabs',
+        browserName: 'firefox',
+        version: '30'
+      },
+      sl_firefox_4: {
+        base: 'SauceLabs',
+        browserName: 'firefox',
+        version: '4'
+      },
+      sl_ios_safari: {
+        base: 'SauceLabs',
+        browserName: 'iphone',
+        platform: 'OS X 10.9',
+        version: '7.1'
+      },
+      sl_ie_9: {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        platform: 'Windows 7',
+        version: '9'
+      },
+      sl_ie_11: {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        platform: 'Windows 8.1',
+        version: '11'
+      }
     },
 
     // Start these browsers, currently available:
@@ -129,6 +132,6 @@ module.exports = function(config) {
     // - Safari (only Mac)
     // - PhantomJS
     // - IE (only Windows)
-    browsers: FULL_BROWSER_TEST ? ['sl_ie_9', 'sl_firefox_4', 'sl_firefox', 'sl_ie_11'] : ['Chrome']
+    browsers: FULL_BROWSER_TEST ? ['sl_ie_9', 'sl_firefox_4', 'sl_firefox', 'sl_ie_11'] : ['Firefox']
   });
 };
