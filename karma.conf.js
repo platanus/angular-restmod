@@ -52,10 +52,10 @@ module.exports = function(config) {
     reporters: ['progress', 'osx', 'saucelabs'],
 
     // Web server port
-    port: 9876,
+    //port: 9876,
 
     // cli runner port
-    runnerPort: 9100,
+    //runnerPort: 9100,
 
     // Enable / disable colors in the output (reporters and logs)
     colors: true,
