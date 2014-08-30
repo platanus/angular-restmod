@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.18.1 - 2014-08-30
+ * @version v0.18.2 - 2014-08-30
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -3447,6 +3447,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', 'inflector', '$filter', 'R
 RMModule.factory('RMUtils', [function() {
 
   // determine browser support for object prototype changing
+  var IFRAME_REF = [];
   var PROTO_SETTER = (function() {
     var Test = function() {};
     if(Object.setPrototypeOf) {
@@ -3591,20 +3592,22 @@ RMModule.factory('RMUtils', [function() {
 
       } else  {
 
-        // Use iframe highjack technique
-        //
-        // I would love to remove this hack, but I'm not really sure which browsers support the proto override method above.
+        // Use iframe hijack technique for IE11<
         //
         // Based on the awesome blog post of Dean Edwards: http://dean.edwards.name/weblog/2006/11/hooray/
         //
 
-        // create an <iframe>.
+        // create a hidden <iframe>.
         var iframe = document.createElement('iframe');
         iframe.style.display = 'none';
+        iframe.height = 0;
+        iframe.width = 0;
+        iframe.border = 0;
+
         document.body.appendChild(iframe);
 
         // write a script into the <iframe> and steal its Array object.
-        frames[frames.length - 1].document.write('<script>parent.RestmodArray = Array;<\/script>');
+        window.frames[window.frames.length - 1].document.write('<script>parent.RestmodArray = Array;<\/script>');
 
         // take the array object and move it to local context.
         arrayType = window.RestmodArray;
@@ -3617,8 +3620,13 @@ RMModule.factory('RMUtils', [function() {
           }
         }
 
-        // remove iframe (need to test this a little more)
+        // remove iframe from DOM.
+        //
+        // Even though MS says that removing iframe from DOM will release it's related structures (http://msdn.microsoft.com/en-us/library/ie/gg622929(v=vs.85).aspx),
+        // actually keeping it referenced has proven to be enough to keep the structures alive. (that includes our array type)
+        //
         document.body.removeChild(iframe);
+        IFRAME_REF.push(iframe); // keep iframe reference!
       }
 
       return arrayType;

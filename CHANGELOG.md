@@ -1,3 +1,12 @@
+<a name="0.18.2"></a>
+### 0.18.2 (2014-08-30)
+
+
+#### Bug Fixes
+
+* **utils:** fixes iframe array type hijack for IE9-IE10 ([ce553426](http://github.com/angular-platanus/restmod/commit/ce55342604c8816600690a66994a5b067378f869))
+
+
 <a name="0.18.1"></a>
 ### 0.18.1 (2014-08-30)
 
