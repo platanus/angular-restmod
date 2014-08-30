@@ -90,6 +90,10 @@ module.exports = function(grunt) {
       dev: {
         singleRun: false,
         autoWatch: true
+      },
+      sauce: {
+        configFile: 'karma-sauce.conf.js',
+        singleRun: true
       }
     },
     jsdoc : {
@@ -167,6 +171,9 @@ module.exports = function(grunt) {
 
   // Test task
   grunt.registerTask('test', ['karma:build']);
+
+  // CI task
+  grunt.registerTask('ci', ['karma:dev']);
 
   // Release Task
   grunt.registerTask('release', ['bump', 'changelog', 'build']);

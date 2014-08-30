@@ -25,6 +25,6 @@
     "requirejs-text": "requirejs/text"
   },
   "scripts": {
-    "test": "./node_modules/.bin/karma start --single-run"
+    "test": "./node_modules/.bin/karma karma-sauce.conf.js start --single-run"
   }
 }
