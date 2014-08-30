@@ -67,10 +67,14 @@ module.exports = function(config) {
     // Enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
 
-    // Broser connection tolerances
+    // Broser connection tolerances (partially based on angularjs configuration)
+    captureTimeout: 0,
     browserDisconnectTolerance: 2,
     browserDisconnectTimeout: 10000,
     browserNoActivityTimeout: 60000,
+
+    // disable websocket for full browser tests
+    transports: FULL_BROWSER_TEST ? ['xhr-polling'] : ['websocket', 'xhr-polling'],
 
     // Continuous Integration mode by default
     singleRun: true,
