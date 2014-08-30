@@ -112,3 +112,8 @@ module.exports = function(config) {
     browsers: ['sl_ie_9', 'sl_firefox_4', 'sl_firefox', 'sl_ie_11']
   });
 };
+
+// set tunnel identifier for travis builds, by default it uses the job number.
+if (process.env.TRAVIS) {
+  config.sauceLabs.tunnelIdentifier = process.env.TRAVIS_JOB_NUMBER;
+}
