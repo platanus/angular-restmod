@@ -14,7 +14,7 @@
 	module = $provide;
 -->
 
-Angular Restmod  
+Angular Restmod
 ===============
 
 [![Build Status](https://api.travis-ci.org/platanus/angular-restmod.svg)](https://travis-ci.org/angular-platanus/restmod) [![Code Climate](https://codeclimate.com/github/platanus/angular-restmod/badges/gpa.svg)](https://codeclimate.com/github/platanus/angular-restmod) [![Stories in Ready](https://badge.waffle.io/platanus/angular-restmod.png?label=ready&title=Ready)](https://waffle.io/platanus/angular-restmod) [![Bower version](https://badge.fury.io/bo/angular-restmod.svg)](http://badge.fury.io/bo/angular-restmod)
@@ -46,6 +46,8 @@ Restmod brings Rails ActiveRecord's ease of use to the Angular Framework. It suc
 * **Restangular:** very complete library, but does not propose a model layer and does not support linked resource responses as seen on jsonapi.org.
 * **angular-activerecord:** Nice alternative to $resource, still very limited in its functionality.
 * **ModelCore:** Inspired in angular-activerecord, provides a more complete set of features but lacks testing.
+
+**Restmod its thoroughly tested against the same platforms as AngularJS using [SauceLabs awesome OpenSauce service!](https://saucelabs.com/opensauce)**
 
 ## Getting Started
 

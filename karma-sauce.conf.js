@@ -73,35 +73,41 @@ module.exports = function(config) {
     // Custom sauce launchers
     customLaunchers:
     {
-      sl_chrome: {
+      'SL_Chrome': {
         base: 'SauceLabs',
         browserName: 'chrome',
-        platform: 'Windows 7',
-        version: '35'
+        version: '34'
       },
-      sl_firefox: {
+      'SL_Firefox': {
         base: 'SauceLabs',
         browserName: 'firefox',
-        version: '30'
+        version: '26'
       },
-      sl_firefox_4: {
+      'SL_Safari': {
         base: 'SauceLabs',
-        browserName: 'firefox',
-        version: '4'
-      },
-      sl_ios_safari: {
-        base: 'SauceLabs',
-        browserName: 'iphone',
+        browserName: 'safari',
         platform: 'OS X 10.9',
-        version: '7.1'
+        version: '7'
       },
-      sl_ie_9: {
+      'SL_IE_8': { // TODO: fix IE8 tests, for some reason tests do not work as expected (but library does), maybe is a jasmine/angularjs issue?
         base: 'SauceLabs',
         browserName: 'internet explorer',
-        platform: 'Windows 7',
+        platform: 'Windows XP',
+        version: '8'
+      },
+      'SL_IE_9': {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        platform: 'Windows 2008',
         version: '9'
       },
-      sl_ie_11: {
+      'SL_IE_10': {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        platform: 'Windows 2012',
+        version: '10'
+      },
+      'SL_IE_11': {
         base: 'SauceLabs',
         browserName: 'internet explorer',
         platform: 'Windows 8.1',
@@ -109,7 +115,7 @@ module.exports = function(config) {
       }
     },
 
-    browsers: ['sl_ie_9', 'sl_firefox_4', 'sl_firefox', 'sl_ie_11']
+    browsers: ['SL_Chrome', 'SL_Firefox', 'SL_Safari', 'SL_IE_9', 'SL_IE_10', 'SL_IE_11']
   });
 
   // set tunnel identifier for travis builds, by default it uses the job number.
