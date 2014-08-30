@@ -1,3 +1,12 @@
+<a name="0.18.1"></a>
+### 0.18.1 (2014-08-30)
+
+#### Features
+
+* **tests:** adds separate karma configuration for sauce ([32d8f815](http://github.com/angular-platanus/restmod/commit/32d8f815271335ad195f443e8d453af934996ea6))
+* **utils:** improves array type creation, prefers prototype replacement strategy before ifra ([0b35aa04](http://github.com/angular-platanus/restmod/commit/0b35aa046c95116034a2277c38991214a18f948d), closes [#89](http://github.com/angular-platanus/restmod/issues/89))
+
+
 <a name="0.18.0"></a>
 ## 0.18.0 (2014-08-26)
 

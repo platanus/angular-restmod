@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.18.0 - 2014-08-26
+ * @version v0.18.1 - 2014-08-30
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -3208,6 +3208,20 @@ RMModule.factory('RMSerializerFactory', ['$injector', 'inflector', '$filter', 'R
  */
 RMModule.factory('RMUtils', [function() {
 
+  // determine browser support for object prototype changing
+  var PROTO_SETTER = (function() {
+    var Test = function() {};
+    if(Object.setPrototypeOf) {
+      return function(_target, _proto) {
+        Object.setPrototypeOf(_target, _proto); // Not sure about supporting this...
+      };
+    } else if((new Test).__proto__ === Test.prototype) {
+      return function(_target, _proto) {
+        _target.__proto__ = _proto;
+      };
+    }
+  })();
+
   return {
 
     // Ignore Masks
@@ -3308,18 +3322,44 @@ RMModule.factory('RMUtils', [function() {
      *
      * @description
      *
-     * Generates a new array type, handles platform specifics.
-     *
-     * Based on the awesome blog post of Dean Edwards: http://dean.edwards.name/weblog/2006/11/hooray/
+     * Generates a new array type, handles platform specifics (bag-O-hacks)
      *
      * @return {object} Independent array type.
      */
-    buildArrayType: function() {
+    buildArrayType: function(_forceIframe) {
 
-      var arrayType, ieMode = true;
+      var arrayType;
 
-      if(ieMode)
-      {
+      if(PROTO_SETTER && !_forceIframe) {
+
+        // Use object prototype override technique
+        //
+        // Very nice array subclassing analysis: http://perfectionkills.com/how-ecmascript-5-still-does-not-allow-to-subclass-an-array/#why_subclass_an_array
+        //
+
+        var SubArray = function() {
+          var arr = [ ];
+          arr.push.apply(arr, arguments);
+          PROTO_SETTER(arr, SubArray.prototype);
+          return arr;
+        };
+
+        SubArray.prototype = [];
+        SubArray.prototype.last = function() {
+          return this[this.length - 1];
+        };
+
+        arrayType = SubArray;
+
+      } else  {
+
+        // Use iframe highjack technique
+        //
+        // I would love to remove this hack, but I'm not really sure which browsers support the proto override method above.
+        //
+        // Based on the awesome blog post of Dean Edwards: http://dean.edwards.name/weblog/2006/11/hooray/
+        //
+
         // create an <iframe>.
         var iframe = document.createElement('iframe');
         iframe.style.display = 'none';
@@ -3332,12 +3372,15 @@ RMModule.factory('RMUtils', [function() {
         arrayType = window.RestmodArray;
         delete window.RestmodArray;
 
+        // copy this context Array's extensions to new array type (could be a little slow...)
+        for(var key in Array.prototype) {
+          if(typeof Array.prototype[key] === 'function' && !arrayType.prototype[key]) {
+            arrayType.prototype[key] = Array.prototype[key];
+          }
+        }
+
         // remove iframe (need to test this a little more)
         document.body.removeChild(iframe);
-
-      } else {
-        arrayType = function() {  }; // a constructor cant be provided
-        arrayType.prototype = [];
       }
 
       return arrayType;
