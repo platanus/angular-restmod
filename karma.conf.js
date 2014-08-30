@@ -1,4 +1,4 @@
-var FULL_BROWSER_TEST = (process.env.TRAVIS && process.env.TRAVIS_SECURE_ENV_VARS !== 'false');
+var FULL_BROWSER_TEST = !!process.env.SAUCE_USERNAME; // use sauce if credentials are available
 
 // Karma configuration
 // Generated on Fri Aug 09 2013 14:14:35 GMT-0500 (CDT)
