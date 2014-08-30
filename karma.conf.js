@@ -67,10 +67,9 @@ module.exports = function(config) {
     // Enable / disable watching file and executing tests whenever any file changes
     autoWatch: false,
 
-    // If browser does not capture in given timeout [ms], kill it
-    captureTimeout: 60000,
-
-    // Additional no activity timeout to work with external browsers
+    // Broser connection tolerances
+    browserDisconnectTolerance: 2,
+    browserDisconnectTimeout: 10000,
     browserNoActivityTimeout: 60000,
 
     // Continuous Integration mode by default
@@ -79,7 +78,7 @@ module.exports = function(config) {
     // Sauce config, requires username and accessKey to be loaded in ENV
     sauceLabs: {
       testName: 'Restmod Unit Tests',
-      startConnect: true
+      startConnect: false
     },
 
     // Custom sauce launchers
