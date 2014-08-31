@@ -4,11 +4,38 @@ describe('Restmod builder:', function() {
 
   beforeEach(module('restmod'));
 
-  var Utils, SubArray;
+  var Utils, SubArray, $log;
 
   beforeEach(inject(function($injector) {
     Utils = $injector.get('RMUtils');
+    $log = $injector.get('$log');
   }));
+
+  describe('format', function() {
+    it('should work with no arguments', function() {
+      expect(Utils.format('test $1')).toEqual('test $1');
+    });
+
+    it('should properly format a string', function() {
+      expect(Utils.format('im $1 $2', ['a', 'teapot'])).toEqual('im a teapot');
+    });
+  });
+
+  describe('assert', function() {
+    it('should log error and raise excepction if condition is false', function() {
+      expect(function() {
+        Utils.assert(false, 'an $1', 'error');
+      }).toThrow();
+
+      expect($log.error.logs.length).toEqual(1);
+    });
+
+    it('should do nothing if condition is true', function() {
+      expect(function() {
+        Utils.assert(true, 'an $1', 'error');
+      }).not.toThrow();
+    });
+  });
 
   describe('buildArrayType', function() {
 

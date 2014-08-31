@@ -8,7 +8,7 @@
  * Various utilities used across the library.
  *
  */
-RMModule.factory('RMUtils', [function() {
+RMModule.factory('RMUtils', ['$log', function($log) {
 
   // determine browser support for object prototype changing
   var IFRAME_REF = [];
@@ -25,7 +25,7 @@ RMModule.factory('RMUtils', [function() {
     }
   })();
 
-  return {
+  var Utils = {
 
     // Ignore Masks
     CREATE_MASK: 'C',
@@ -33,6 +33,43 @@ RMModule.factory('RMUtils', [function() {
     READ_MASK: 'R',
     WRITE_MASK: 'CU',
     FULL_MASK: 'CRU',
+
+    /**
+     * @memberof Utils
+     *
+     * @description
+     *
+     * Formats a string
+     *
+     * @param  {string} _str String to format
+     * @param  {array} _args String arguments
+     * @return {string} Formated string
+     */
+    format: function(_str, _args) {
+      for(var i = 0; _args && i < _args.length; i++) {
+        _str = _str.replace('$' + (i+1), _args[i]);
+      }
+      return _str;
+    },
+
+    /**
+     * @memberof Utils
+     *
+     * @description
+     *
+     * Test for a condition to be met, if not an exception is thrown.
+     *
+     * @param  {boolean} _condition Condition to assert
+     * @param  {string} _msg Error message
+     */
+    assert: function(_condition, _msg /*, params */) {
+      if(!_condition) {
+        var params = Array.prototype.slice.call(arguments, 2);
+        _msg = Utils.format(_msg, params);
+        $log.error(_msg); // log error message
+        throw new Error(_msg);
+      }
+    },
 
     /**
      * @memberof Utils
@@ -49,6 +86,7 @@ RMModule.factory('RMUtils', [function() {
       if(!_head || !_tail) return null;
       return (_head+'').replace(/\/$/, '') + '/' + (_tail+'').replace(/^\//, '');
     },
+
     /**
      * @memberof Utils
      *
@@ -62,6 +100,7 @@ RMModule.factory('RMUtils', [function() {
     cleanUrl: function(_url) {
       return _url ? _url.replace(/\/$/, '') : _url;
     },
+
     /**
      * @memberof Utils
      *
@@ -79,6 +118,7 @@ RMModule.factory('RMUtils', [function() {
         return _fun.call(this, _first.call(this, _value));
       };
     },
+
     /**
      * @memberof Utils
      *
@@ -103,6 +143,7 @@ RMModule.factory('RMUtils', [function() {
         }
       };
     },
+
     /**
      * @memberof Utils
      *
@@ -116,10 +157,11 @@ RMModule.factory('RMUtils', [function() {
     extendOverriden: function(_target, _other) {
       for(var key in _other) {
         if(_other.hasOwnProperty(key)) {
-          _target[key] = this.override(_target[key], _other[key]);
+          _target[key] = Utils.override(_target[key], _other[key]);
         }
       }
     },
+
     /**
      * @memberof Utils
      *
@@ -196,4 +238,6 @@ RMModule.factory('RMUtils', [function() {
       return arrayType;
     }
   };
+
+  return Utils;
 }]);

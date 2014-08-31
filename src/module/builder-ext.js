@@ -133,7 +133,6 @@ RMModule.factory('RMBuilderExt', ['$injector', '$parse', 'inflector', '$log', 'r
         _serializer = $injector.get(inflector.camelize(_serializer, true) + 'Serializer');
       }
 
-      // TODO: if(!_serializer) throw $setupError
       if(isFunction(_serializer)) _serializer = _serializer(_opt);
       if(_serializer.decode) this.attrDecoder(_name, bind(_serializer, _serializer.decode));
       if(_serializer.encode) this.attrEncoder(_name, bind(_serializer, _serializer.encode));

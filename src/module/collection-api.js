@@ -72,9 +72,8 @@ RMModule.factory('RMCollectionApi', ['RMUtils', 'RMPackerCache', function(Utils,
      * @return {CollectionApi} self
      */
     $decode: function(_raw, _mask) {
-      if(!_raw || !angular.isArray(_raw)) {
-        throw new Error('Error in resource {0} configuration. Expected response to be array');
-      }
+
+      Utils.assert(_raw && angular.isArray(_raw), 'Collection $decode expected array');
 
       if(!this.$resolved) this.length = 0; // reset contents if not resolved.
       for(var i = 0, l = _raw.length; i < l; i++) {
@@ -215,6 +214,9 @@ RMModule.factory('RMCollectionApi', ['RMUtils', 'RMPackerCache', function(Utils,
      * @return {CollectionApi} self
      */
     $add: function(_obj, _idx) {
+
+      Utils.assert(_obj.$type && _obj.$type === this.$type, 'Collection $add expects record of the same $type');
+
       // TODO: make sure object is f type Model?
       if(_obj.$position === undefined) {
         if(_idx !== undefined) {

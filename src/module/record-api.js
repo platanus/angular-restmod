@@ -269,9 +269,8 @@ RMModule.factory('RMRecordApi', ['RMUtils', 'RMPackerCache', function(Utils, pac
      * @return {RecordApi} this
      */
     $fetch: function(_params) {
-      // verify that instance has a bound url
       var url = this.$scope.$fetchUrlFor ? this.$scope.$fetchUrlFor(this.$pk) : this.$url();
-      if(!url) throw new Error('Cannot fetch an unbound resource');
+      Utils.assert(!!url, 'Cant $fetch if resource is not bound');
 
       var request = { method: 'GET', url: url, params: _params };
 
@@ -315,7 +314,8 @@ RMModule.factory('RMRecordApi', ['RMUtils', 'RMPackerCache', function(Utils, pac
       } else {
         // If not bound create.
         url = this.$scope.$createUrlFor ? this.$scope.$createUrlFor(this.$pk) : (this.$scope.$url && this.$scope.$url());
-        if(!url) throw new Error('Create is not supported by this resource');
+        Utils.assert(!!url, 'Cant $create if parent scope is not bound');
+
         request = { method: 'POST', url: url, data: this.$wrap(Utils.CREATE_MASK) };
         this.$dispatch('before-save', [request]);
         this.$dispatch('before-create', [request]);
@@ -347,7 +347,8 @@ RMModule.factory('RMRecordApi', ['RMUtils', 'RMPackerCache', function(Utils, pac
      */
     $destroy: function() {
       var url = this.$scope.$destroyUrlFor ? this.$scope.$destroyUrlFor(this.$pk) : this.$url();
-      if(!url) throw new Error('Cannot destroy an unbound resource');
+      Utils.assert(!!url, 'Cant $destroy if resource is not bound');
+
       var request = { method: 'DELETE', url: url };
 
       this.$dispatch('before-destroy', [request]);

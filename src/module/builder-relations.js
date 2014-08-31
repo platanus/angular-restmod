@@ -39,7 +39,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
           if(_inverseOf) {
             var desc = _model.$$getDescription(_inverseOf);
             if(!desc || desc.relation !== 'belongs_to') {
-              $log.error('Must define an inverse belongsTo relation for inverseOf to work');
+              $log.warn('Must define an inverse belongsTo relation for inverseOf to work');
               _inverseOf = false; // disable the inverse if no inverse relation is found.
             }
           }
@@ -99,7 +99,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
           if(_inverseOf) {
             var desc = _model.$$getDescription(_inverseOf);
             if(!desc || desc.relation !== 'belongs_to') {
-              $log.error('Must define an inverse belongsTo relation for inverseOf to work');
+              $log.warn('Must define an inverse belongsTo relation for inverseOf to work');
               _inverseOf = false; // disable the inverse if no inverse relation is found.
             }
           }

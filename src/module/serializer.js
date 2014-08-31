@@ -215,7 +215,6 @@ RMModule.factory('RMSerializerFactory', ['$injector', 'inflector', '$filter', 'R
 
         if(typeof _filter === 'string') {
           var filter = $filter(_filter);
-          // TODO: if(!_filter) throw $setupError
           _filter = function(_value) { return filter(_value, _filterParam); };
         }
 
@@ -228,7 +227,6 @@ RMModule.factory('RMSerializerFactory', ['$injector', 'inflector', '$filter', 'R
 
         if(typeof _filter === 'string') {
           var filter = $filter(_filter);
-          // TODO: if(!_filter) throw $setupError
           _filter = function(_value) { return filter(_value, _filterParam); };
         }
 
