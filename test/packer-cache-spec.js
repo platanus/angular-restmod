@@ -11,11 +11,11 @@ describe('RMPackerCache', function() {
     packerCache = $injector.get('RMPackerCache');
 
     Bike = restmod.model('/api/bikes', {
-      __name__: 'bike'
+      NAME: 'bike'
     });
 
     Part = restmod.model('/api/parts', {
-      __name__: 'part'
+      NAME: 'part'
     });
   }));
 
