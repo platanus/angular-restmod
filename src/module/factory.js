@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMModelFactory', ['inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', function(inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi) {
+RMModule.factory('RMModelFactory', ['$log', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', function($log, inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi) {
 
   var NAME_RGX = /(.*?)([^\/]+)\/?$/,
       extend = angular.extend;
@@ -17,6 +17,12 @@ RMModule.factory('RMModelFactory', ['inflector', 'RMUtils', 'RMScopeApi', 'RMCom
     var urlPrefix = _internal.urlPrefix,
         baseUrl = Utils.cleanUrl(_internal.url),
         primaryKey = _internal.primaryKey;
+
+    // make sure a style base was selected for the model
+
+    if(!_internal.style) {
+      $log.warn('No API style base was included, see the Api Integration Guide.');
+    }
 
     // make sure the resource name and plural name are available if posible:
 

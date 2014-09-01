@@ -11,6 +11,7 @@ Make sure you read all of the following Q&A before you start integrating your AP
 * [How can I set a common url prefix for every resource?](#q7)
 * [How can I add a trailing slash or extension to the url sent to server?](#q8)
 * [How can I add Ia custom header or parameter to every request?](#q9)
+* [I'm getting a 'No API style base was included' warning, what does it mean?](#q10)
 
 ### <a name="q1"></a> How can I change the property used for the primary key
 
@@ -210,16 +211,18 @@ restmod.model(null, function() {
 
 ### <a name="q5"></a> My resource properties are being automatically renamed, is this normal?
 
-Yes, by default restmod expects server response properties to be in snakecase format (lowercase and underscores) and transforms them to camelcase on decoding. The inverse behaviour is default when encoding too.
+That is probably because the api style you selected has registered a property renamer.
 
-You can disable renaming or change the rename function by using the following builder methods:
+You can disable renaming or change the renamer by using the following builder methods:
 
 ```javascript
 module.config(function(restmodProvider) {
 	restmodProvider.rebase(function() {
-		this.disableRenaming(); // there is no way of doing this using a definition object... im sory
-		this.setNameDecoder(function(_name) { return _newName; }); // change the decoder function
-		this.setNameEncoder(function(_name) { return _newName; }); // change the encoder function
+		this.setRenamer(false); // remove the current renamer
+		this.setRenamer({  // set another renamer
+			decode: function(_name) { return _newName; },
+			encode: function(_name) { return _newName; }
+		});
 	});
 });
 ```
@@ -301,3 +304,31 @@ module.config(function(restmodProvider) {
 	});
 });
 ```
+
+### <a name="q10"></a> I'm getting a 'No API style base was included' warning, what does it mean?
+
+Restmod expect you to use a base API style for your models, you should include one of the included styles or create a new one:
+
+For example to use the active_model_serializer style you should include the `/dist/styles/ams.min.js` file in your project and then:
+
+```javascript
+module.config(function(restmodProvider) {
+	restmodProvider.rebase('AMSApi');
+});
+```
+
+or to define your own style do:
+
+```javascript
+module.config(function(restmodProvider) {
+	restmodProvider.rebase({
+		STYLE: 'MyDjangoStyle', // By setting the STYLE variable the warning is disabled.
+		PRIMARY_KEY: '_id'
+		/* other style related configuration */
+	});
+});
+```
+
+To see available styles checkout the [Style listing](https://github.com/platanus/angular-restmod/blob/master/docs/guides/styles.md).
+
+

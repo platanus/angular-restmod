@@ -38,7 +38,8 @@ module.exports = function(grunt) {
           ],
           'dist/plugins/debounced.js': 'src/plugins/debounced.js',
           'dist/plugins/dirty.js': 'src/plugins/dirty.js',
-          'dist/plugins/paged.js': 'src/plugins/paged.js'
+          'dist/plugins/paged.js': 'src/plugins/paged.js',
+          'dist/styles/ams.js': 'src/styles/ams.js'
         }
       }
     },
@@ -52,7 +53,8 @@ module.exports = function(grunt) {
           'dist/<%= pkg.name %>-bundle.min.js': 'dist/<%= pkg.name %>-bundle.js',
           'dist/plugins/debounced.min.js': 'dist/plugins/debounced.js',
           'dist/plugins/dirty.min.js': 'dist/plugins/dirty.js',
-          'dist/plugins/paged.min.js': 'dist/plugins/paged.js'
+          'dist/plugins/paged.min.js': 'dist/plugins/paged.js',
+          'dist/styles/ams.min.js': 'dist/styles/ams.js'
         }
       }
     },

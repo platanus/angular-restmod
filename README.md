@@ -86,7 +86,13 @@ module = angular.module('MyApp', ['restmod'])
 
 # REST API Integration
 
-Restmod provides a series of configuration options to match your API style:
+Restmod comes bundled with various (well, just one for now) predefined API-style-mixins to choose from depending on your backend configuration.
+
+Check out the [Style listing](https://github.com/platanus/angular-restmod/blob/master/docs/guides/styles.md) for more information. **We are looking for contributors on this!!**
+
+If you dont set a base style a `'No API style base was included'` warning will be generated, see the link above for more information.
+
+If you still need to change some behaviour or if you want to create your own api style, the following configurations are available:
 
 * Common url prefix configuration
 * Primary key name configuration
