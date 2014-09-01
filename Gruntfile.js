@@ -34,7 +34,7 @@ module.exports = function(grunt) {
           'dist/<%= pkg.name %>-bundle.js': [
             'bower_components/angular-inflector/dist/angular-inflector.js',
             'src/module.js',
-            'src/module/*.js'
+            'src/module/**/*.js'
           ],
           'dist/plugins/debounced.js': 'src/plugins/debounced.js',
           'dist/plugins/dirty.js': 'src/plugins/dirty.js',
