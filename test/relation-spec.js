@@ -195,13 +195,13 @@ describe('Restmod model relation:', function() {
     it('should set resource foreign key when host object is encoded', function() {
       var bike = Bike.$new(1);
       bike.frame = $injector.get('Part').$new(2);
-      expect(bike.$encode().frame_id).toEqual(2);
+      expect(bike.$encode().frameId).toEqual(2);
     });
 
     it('should load resource after fetching id', function() {
       var bike = Bike.$new(1);
       expect(bike.frame).toBeNull();
-      bike.$decode({ frame_id: 'XX' });
+      bike.$decode({ frameId: 'XX' });
       expect(bike.frame).not.toBeNull();
       expect(bike.frame.$pk).toEqual('XX');
     });
@@ -213,18 +213,18 @@ describe('Restmod model relation:', function() {
     });
 
     it('should behave as an independent resource', function() {
-      var bike = Bike.$new(1).$decode({ frame_id: 'XX' });
+      var bike = Bike.$new(1).$decode({ frameId: 'XX' });
       expect(bike.frame.$url()).toEqual('/api/parts/XX');
     });
 
     it('should reload resource only if id changes', function() {
-      var bike = Bike.$new(1).$decode({ frame_id: 'XX' }),
+      var bike = Bike.$new(1).$decode({ frameId: 'XX' }),
           original = bike.frame;
 
-      bike.$decode({ frame_id: 'XX' });
+      bike.$decode({ frameId: 'XX' });
       expect(bike.frame).toEqual(original);
 
-      bike.$decode({ frame_id: 'XY' });
+      bike.$decode({ frameId: 'XY' });
       expect(bike.frame).not.toEqual(original);
     });
 
@@ -258,7 +258,7 @@ describe('Restmod model relation:', function() {
 
     it('should be encoded as a $pk reference', function() {
       var bike = Bike.$build({ id: 1, frame: $injector.get('Part').$new('XX'), user: $injector.get('User').$new('YY') });
-      expect(bike.$encode().frame_id).toEqual('XX');
+      expect(bike.$encode().frameId).toEqual('XX');
       expect(bike.$encode().owner_id).toEqual('YY');
     });
 
@@ -273,7 +273,7 @@ describe('Restmod model relation:', function() {
 
       var record = model.$new(1);
       record.$unwrap({
-        bike: { model: 'Slash', user_id: 1 },
+        bike: { model: 'Slash', userId: 1 },
         linked: {
           users: [ { id: 1, name: 'Hill' } ]
         }
@@ -307,7 +307,7 @@ describe('Restmod model relation:', function() {
     });
 
     it('should load resources after fetching host with ids', function() {
-      var bike = Bike.$buildRaw({ part_ids: [1, 2, 3] });
+      var bike = Bike.$buildRaw({ partIds: [1, 2, 3] });
       expect(bike.parts.length).toEqual(3);
       expect(bike.parts[0].$pk).toEqual(1);
       expect(bike.parts[1].$pk).toEqual(2);
@@ -318,11 +318,11 @@ describe('Restmod model relation:', function() {
       var bike = Bike.$new(1);
       bike.parts.push($injector.get('Part').$new(1));
       bike.parts.push($injector.get('Part').$new(2));
-      expect(bike.$encode().part_ids).toEqual([1, 2]);
+      expect(bike.$encode().partIds).toEqual([1, 2]);
     });
 
     it('should load references as independent resources', function() {
-      var bike = Bike.$buildRaw({ part_ids: [1, 2, 3] });
+      var bike = Bike.$buildRaw({ partIds: [1, 2, 3] });
       expect(bike.parts[0].$url()).toEqual('/api/parts/1');
     });
 
@@ -347,7 +347,7 @@ describe('Restmod model relation:', function() {
 
       var record = model.$new(1);
       record.$unwrap({
-        bike: { model: 'Slash', part_ids: [1, 2] },
+        bike: { model: 'Slash', partIds: [1, 2] },
         linked: {
           parts: [ { id: 1, name: 'headset' }, { id: 2, name: 'brake' } ]
         }

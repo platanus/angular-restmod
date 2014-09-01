@@ -153,11 +153,11 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
     var vars = {
         url: null,
         urlPrefix: null,
-        primaryKey: 'id',
-        packer: null
+        primaryKey: 'id'
       },
       defaults = [],
       serializer = buildSerializer(),
+      packer = null,
       deferred = [],
       meta = {},
       mappings = {
@@ -347,39 +347,79 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
         return this;
       },
 
+      /**
+       * @memberof ExtendedBuilderApi#
+       *
+       * @description
+       *
+       * Sets the object "packer", the packer is responsable of providing the object wrapping strategy
+       * so it matches the API.
+       *
+       * The method accepts a packer name, an instance or a packer factory, if the first (preferred)
+       * option is used, then a <Name>Packer factory must be available that return an object or factory function.
+       *
+       * In case of using a factory function, the constructor will be called passing the model type object
+       * as first parameter:
+       *
+       * ```javascript
+       * // like this:
+       * var packer = new packerFactory(Model);
+       * ```
+       *
+       * ### Packer structure.
+       *
+       * Custom packers must implement all of the following methods:
+       *
+       * * **unpack(_rawData, _record):** unwraps data belonging to a single record, must return the unpacked
+       * data to be passed to `$decode`.
+       * * **unpackMany(_rawData, _collection):** unwraps the data belonging to a collection of records,
+       * must return the unpacked data array, each array element will be passed to $decode on each new element.
+       * * **pack(_rawData, _record):** wraps the encoded data from a record before is sent to the server,
+       * must return the packed data object to be sent.
+       * * **packMany(_rawData, _collection):** wraps the encoded data from a collection before is sent to the server,
+       * must return the packed data object to be sent.
+       *
+       * Currently the following builtin strategies are provided:
+       * * {@link DefaultPacker} with json root, metadata and links support.
+       *
+       * @param {string|object} _mode The packer instance, constructor or name
+       * @return {BuilderApi} self
+       */
+      setPacker: function(_packer) {
+        if(typeof _packer === 'string') {
+          _packer = $injector.get(inflector.camelize(_packer, true) + 'Packer');
+        }
+
+        packer = _packer;
+        return this;
+      },
+
       // serializer forwards:
 
       /**
        * @memberof BuilderApi#
        *
-       * @description Changes the way restmod renames attributes every time a server resource is decoded.
+       * @description Changes the way restmod maps attributes names from records to json api data.
        *
        * This is intended to be used as a way of keeping property naming style consistent accross
-       * languajes. By default, property naming in js should use camelcase and property naming
-       * in JSON api should use snake case with underscores.
+       * languajes. By default, property renaming is disabled.
        *
-       * If `false` is given, then renaming is disabled
+       * As setPacker, this method accepts a renamer name, an instance or a factory, if the first (preferred)
+       * option is used, then a <Name>Renamer factory must be available that return an object or factory function.
+       *
+       * ### Renamer structure
+       *
+       * Custom renamers must implement all of the following methods:
+       *
+       * * **decode(_apiName):** transforms an api name to a record name, decoding happens before $-prefixed attribute filtering.
+       * * **encode(_recordName):** transforms a record property name to the corresponding api name.
+       *
+       * If `false` is given, then renaming is disabled.
        *
        * @param {function|false} _value decoding function
        * @return {BuilderApi} self
        */
-      setNameDecoder: serializer.setNameDecoder,
-
-      /**
-       * @memberof BuilderApi#
-       *
-       * @description Changes the way restmod renames attributes every time a local resource is encoded to be sent.
-       *
-       * This is intended to be used as a way of keeping property naming style consistent accross
-       * languajes. By default, property naming in js should use camelcase and property naming
-       * in JSON api should use snake case with underscores.
-       *
-       * If `false` is given, then renaming is disabled
-       *
-       * @param {function|false} _value encoding function
-       * @return {BuilderApi} self
-       */
-      setNameEncoder: serializer.setNameEncoder,
+      setRenamer: serializer.setRenamer,
 
       /**
        * @memberof BuilderApi#
@@ -514,7 +554,12 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
 
     // Generate factory function
     this.buildModel = function() {
-      var model = buildModel(vars, defaults, serializer, meta);
+
+      // support object definition configuration for packer/renamer
+      if(vars.packer) this.dsl.setPacker(vars.packer);
+      if(vars.renamer) this.dsl.setRenamer(vars.renamer);
+
+      var model = buildModel(vars, defaults, serializer, packer, meta);
       forEach(deferred, function(_fun) { _fun(model); });
       return model;
     };

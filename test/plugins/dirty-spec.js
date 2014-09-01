@@ -15,7 +15,7 @@ describe('Plugin: Dirty Model', function() {
 
   beforeEach(inject(function($httpBackend, Bike) {
     // generate a model instance with server loaded data:
-    $httpBackend.when('GET', '/api/bikes/1').respond(200, { model: 'Meta 2', brand_name: 'Commencal' });
+    $httpBackend.when('GET', '/api/bikes/1').respond(200, { model: 'Meta 2', brandName: 'Commencal' });
     bike = Bike.$find(1);
     $httpBackend.flush();
   }));

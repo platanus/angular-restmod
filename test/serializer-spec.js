@@ -11,22 +11,34 @@ describe('Restmod serializer', function() {
   }));
 
   describe('encode', function() {
-    it('should rename all camel case attributes by default', function() {
-      var raw = serializer.encode({ camelCase: true });
-      expect(raw.camelCase).toBeUndefined();
-      expect(raw.camel_case).toBeDefined();
-    });
 
-    it('should rename nested values', function() {
-      var raw = serializer.encode({ user: { lastName: 'Peat' } });
-      expect(raw.user.lastName).toBeUndefined();
-      expect(raw.user.last_name).toBeDefined();
+    describe('if a renamer is provided', function() {
+
+      beforeEach(function() {
+        serializer.setRenamer({
+          decode: function(_str) { return '_'+_str; },
+          encode: function(_str) { return _str.substr(1); }
+        });
+      });
+
+      it('should rename root properties', function() {
+        var raw = serializer.encode({ _lastName: true });
+        expect(raw._lastName).toBeUndefined();
+        expect(raw.lastName).toBeDefined();
+      });
+
+      it('should rename nested properties', function() {
+        var raw = serializer.encode({ _user: { _lastName: 'Peat' } });
+        expect(raw.user._lastName).toBeUndefined();
+        expect(raw.user.lastName).toBeDefined();
+      });
+
     });
 
     it('should ignore properties prefixed with $', function() {
       var raw = serializer.encode({ $ignored: true, notIgnored: false });
       expect(raw.$ignored).toBeUndefined();
-      expect(raw.not_ignored).toBeDefined();
+      expect(raw.notIgnored).toBeDefined();
     });
 
     it('should not encode objects with a toJSON implementation', function() {
@@ -42,48 +54,54 @@ describe('Restmod serializer', function() {
   });
 
   describe('decode', function() {
-    it('should rename all snake case attributes by default', function() {
-      var bike = {};
-      serializer.decode(bike, { snake_case: true }, '');
-      expect(bike.snake_case).toBeUndefined();
-      expect(bike.snakeCase).toBeDefined();
-    });
 
-    it('should rename nested values', function() {
-      var bike = {};
-      serializer.decode(bike, { nested: { snake_case: true } }, '');
-      expect(bike.nested.snake_case).toBeUndefined();
-      expect(bike.nested.snakeCase).toBeDefined();
-    });
+    describe('if a renamer is provided', function() {
 
-    it('should rename nested object arrays', function() {
-      var bike = {};
-      serializer.decode(bike, { nested: [ { snake_case: true } ] }, '');
-      expect(bike.nested[0].snake_case).toBeUndefined();
-      expect(bike.nested[0].snakeCase).toBeDefined();
+      beforeEach(function() {
+        serializer.setRenamer({
+          decode: function(_str) { return '_'+_str; },
+          encode: function(_str) { return _str.substr(1); }
+        });
+      });
+
+      it('should rename root properties', function() {
+        var bike = {};
+        serializer.decode(bike, { isNew: true }, '');
+        expect(bike.isNew).toBeUndefined();
+        expect(bike._isNew).toBeDefined();
+      });
+
+      it('should rename nested properties', function() {
+        var bike = {};
+        serializer.decode(bike, { nested: { isNew: true } }, '');
+        expect(bike._nested.isNew).toBeUndefined();
+        expect(bike._nested._isNew).toBeDefined();
+      });
+
+      it('should rename nested object arrays', function() {
+        var bike = {};
+        serializer.decode(bike, { nested: [ { isNew: true } ] }, '');
+        expect(bike._nested[0].isNew).toBeUndefined();
+        expect(bike._nested[0]._isNew).toBeDefined();
+      });
+
     });
 
     it('should ignore properties prefixed with $', function() {
       var result = {};
-      serializer.decode(result, { $ignored: true, not_ignored: false });
+      serializer.decode(result, { $ignored: true, notIgnored: false });
       expect(result.$ignored).toBeUndefined();
       expect(result.notIgnored).toBeDefined();
     });
 
     it('should ignore properties prefixed with $ AFTER rename is computed', function() {
-      serializer.setNameDecoder(function(_name) { return _name === '$mustSee' ? 'mustSee' : _name; } );
+      serializer.setRenamer({ decode: function(_name) { return _name === '$mustSee' ? 'mustSee' : _name; } });
 
       var result = {};
       serializer.decode(result, { $mustSee: true });
 
       expect(result.mustSee).toBeDefined();
     });
-  });
-
-  describe('setNameEncoder', function() {
-  });
-
-  describe('setNameDecoder', function() {
   });
 
   describe('setMask', function() {
@@ -128,7 +146,7 @@ describe('Restmod serializer', function() {
       serializer.setDecoder('frontWheel.size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
 
       var result = {};
-      serializer.decode(result, { front_wheel: { size: 'S' } });
+      serializer.decode(result, { frontWheel: { size: 'S' } });
       expect(result.frontWheel.size).toEqual('small');
     });
 
@@ -156,7 +174,7 @@ describe('Restmod serializer', function() {
       serializer.setEncoder('frontWheel.size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
 
       var raw = serializer.encode({ frontWheel: { size: 'S' } });
-      expect(raw.front_wheel.size).toEqual('small');
+      expect(raw.frontWheel.size).toEqual('small');
     });
 
     it('should apply encoders to values in nested arrays', function() {
@@ -235,7 +253,7 @@ describe('Restmod serializer', function() {
       serializer.setMapping('allParts[].brand', 'brand_name');
 
       var result = {};
-      serializer.decode(result, { all_parts: [
+      serializer.decode(result, { allParts: [
         { brand_name: 'Shimano' },
         { brand_name: 'SRAM' }
       ] }, '');
@@ -248,11 +266,11 @@ describe('Restmod serializer', function() {
       serializer.setMapping('fullBrand', '*');
 
       var result = {};
-      serializer.decode(result, { full_brand: 'Bianchi' }, '');
+      serializer.decode(result, { fullBrand: 'Bianchi' }, '');
       expect(result.fullBrand).toEqual('Bianchi');
 
       result = serializer.encode(result, '');
-      expect(result.full_brand).toEqual('Bianchi');
+      expect(result.fullBrand).toEqual('Bianchi');
     });
 
     it('should allow to set it as forced to force a property to be processed even if not set', function() {
@@ -261,7 +279,7 @@ describe('Restmod serializer', function() {
 
       var result = { calculateGearRatio: function() { return 24/36; } };
       result = serializer.encode(result, '');
-      expect(result.gear_ratio).toEqual(24/36);
+      expect(result.gearRatio).toEqual(24/36);
     });
   });
 });

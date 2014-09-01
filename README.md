@@ -152,8 +152,6 @@ If you need to pass additional parameters to `$find`, you can use the second fun
 bike = Bike.$find(1, { includeParts: true });
 ```
 
-**IMPORTANT**: RestMod will rename attributes from under_score to camelCase by default, refer to the building docs if you need to disable this feature. In the example above you should use `bike.createdAt` to refer to the value of the `created_at` returned by the API.
-
 <!-- it: $httpBackend.flush(); expect(bike.model).toEqual('Slash') -->
 <!-- end -->
 
@@ -329,7 +327,7 @@ Bike = restmod.model('api/bikes',
 
 <!-- it:
 	expect(Bike.$new().owner).toBeDefined();
-	expect(typeof Bike.$build({ createdAt: new Date() }).$encode().created_at).toEqual('string');
+	expect(typeof Bike.$build({ createdAt: new Date() }).$encode().createdAt).toEqual('string');
 -->
 
 The **definition object** allows you to:

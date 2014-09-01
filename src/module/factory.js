@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', function($injector, inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi) {
+RMModule.factory('RMModelFactory', ['inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', function(inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi) {
 
   var NAME_RGX = /(.*?)([^\/]+)\/?$/,
       extend = angular.extend;
@@ -8,15 +8,15 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
   return function(
     _internal,      // internal properties as an object
     _defaults,      // attribute defaults as an array of [key, value]
-    _serializer,    // serializer instance
+    _serializer,    // serializer or serializer factory
+    _packer,        // packer or packer factory
     _meta           // atribute metadata
   ) {
 
     // cache some stuff:
     var urlPrefix = _internal.urlPrefix,
         baseUrl = Utils.cleanUrl(_internal.url),
-        primaryKey = _internal.primaryKey,
-        packer = _internal.packer;
+        primaryKey = _internal.primaryKey;
 
     // make sure the resource name and plural name are available if posible:
 
@@ -26,12 +26,6 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
     if(!_internal.plural && _internal.name) {
       _internal.plural = inflector.pluralize(_internal.name);
-    }
-
-    // load packer if refereced as string
-
-    if(typeof packer === 'string') {
-      packer = $injector.get(inflector.camelize(packer, true) + 'Packer');
     }
 
     // IDEA: make constructor inaccessible, use separate type for records?
@@ -61,11 +55,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
     // packer adaptor generator
     function adaptPacker(_fun) {
       return function(_raw) {
-        if(packer) {
-          var packerInstance = (typeof packer === 'function') ? packer(Model) : packer;
-          _raw = packerInstance[_fun](_raw, this);
-        }
-        return _raw;
+        return _packer ? _packer[_fun](_raw, this) : _raw;
       };
     }
 
@@ -279,6 +269,10 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
     // expose collection prototype.
     Model.collectionPrototype = Collection.prototype;
+
+    // Load structures that depend on model instance:
+    // if(typeof _serializer === 'function') _serializer = new _serializer(Model); if serializer could be changed...
+    if(typeof _packer === 'function') _packer = new _packer(Model);
 
     return Model;
   };

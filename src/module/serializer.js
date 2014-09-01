@@ -28,8 +28,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', 'inflector', '$filter', 'R
         encoders = {},
         mapped = {},
         mappings = {},
-        nameDecoder = inflector.camelize,
-        nameEncoder = function(_v) { return inflector.parameterize(_v, '_'); };
+        renamer = null;
 
     function isMasked(_name, _mask) {
       var mask = masks[_name];
@@ -50,7 +49,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', 'inflector', '$filter', 'R
           if(maps[i].map) {
             value = extract(_from, maps[i].map);
           } else {
-            value = _from[nameEncoder ? nameEncoder(maps[i].path) : maps[i].path];
+            value = _from[renamer ? renamer.encode(maps[i].path) : maps[i].path];
           }
 
           if(!maps[i].forced && value === undefined) continue;
@@ -64,7 +63,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', 'inflector', '$filter', 'R
       for(key in _from) {
         if(_from.hasOwnProperty(key)) {
 
-          decodedName = nameDecoder ? nameDecoder(key) : key;
+          decodedName = renamer ? renamer.decode(key) : key;
           if(decodedName[0] === '$') continue;
 
           if(maps) {
@@ -123,7 +122,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', 'inflector', '$filter', 'R
 
           value = encodeProp(_from[key], fullName, _mask, _ctx);
           if(value !== undefined) {
-            encodedName = nameEncoder ? nameEncoder(key) : key;
+            encodedName = renamer ? renamer.encode(key) : key;
             _to[encodedName] = value;
           }
         }
@@ -144,7 +143,7 @@ RMModule.factory('RMSerializerFactory', ['$injector', 'inflector', '$filter', 'R
             if(maps[i].map) {
               insert(_to, maps[i].map, value);
             } else {
-              _to[nameEncoder ? nameEncoder(maps[i].path) : maps[i].path] = value;
+              _to[renamer ? renamer.encode(maps[i].path) : maps[i].path] = value;
             }
           }
         }
@@ -174,15 +173,14 @@ RMModule.factory('RMSerializerFactory', ['$injector', 'inflector', '$filter', 'R
 
     return {
 
-      // sets the model name decoder
-      setNameDecoder: function(_fun) {
-        nameDecoder = _fun;
-        return this;
-      },
+      // sets the property renamer
+      setRenamer: function(_renamer) {
 
-      // sets the model name encoder
-      setNameEncoder: function(_fun) {
-        nameEncoder = _fun;
+        if(typeof _packer === 'string') {
+          _renamer = $injector.get(inflector.camelize(_renamer, true) + 'Renamer');
+        }
+
+        renamer = _renamer;
         return this;
       },
 

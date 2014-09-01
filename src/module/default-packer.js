@@ -131,8 +131,6 @@ RMModule.factory('DefaultPacker', ['inflector', 'RMPackerCache', function(inflec
     }
   };
 
-  return function(_model) {
-    return new Packer(_model);
-  };
+  return Packer;
 
 }]);
