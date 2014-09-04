@@ -65,6 +65,11 @@ RMModule.factory('RMModelFactory', ['$log', 'inflector', 'RMUtils', 'RMScopeApi'
       };
     }
 
+    // Infer key adaptor.
+    function inferKey(_raw) {
+      return Model.$inferKey(_raw);
+    }
+
     ///// Setup static api
 
     /**
@@ -86,11 +91,8 @@ RMModule.factory('RMModelFactory', ['$log', 'inflector', 'RMUtils', 'RMScopeApi'
      */
     extend(Model, {
 
-      // extracts the primary key from a raw data record
-      $$inferKey: function(_rawData) {
-        if(!_rawData || typeof _rawData[primaryKey] === 'undefined') return null;
-        return _rawData[primaryKey];
-      },
+      // infer key adaptor
+      $$inferKey: inferKey,
 
       // creates a new model bound by default to the static scope
       $$new: function(_pk, _scope) {
@@ -105,6 +107,28 @@ RMModule.factory('RMModelFactory', ['$log', 'inflector', 'RMUtils', 'RMScopeApi'
       // gets an attribute description (metadata)
       $$getDescription: function(_attribute) {
         return _meta[_attribute];
+      },
+
+      /**
+       * @memberof StaticApi#
+       *
+       * @description
+       *
+       * Extracts the primary key from raw record data.
+       *
+       * Uses the key configured in the PRIMARY_KEY variable or 'id' by default.
+       *
+       * Some considerations:
+       * * This method can be overriden to handle other scenarios.
+       * * This method should not change the raw data passed to it.
+       * * The primary key value extracted by this method should be comparable using the == operator.
+       *
+       * @param  {string} _rawData Raw object data (before it goes into decode)
+       * @return {mixed} The primary key value.
+       */
+      $inferKey: function(_rawData) {
+        if(!_rawData || typeof _rawData[primaryKey] === 'undefined') return null;
+        return _rawData[primaryKey];
       },
 
       /**
@@ -219,8 +243,8 @@ RMModule.factory('RMModelFactory', ['$log', 'inflector', 'RMUtils', 'RMScopeApi'
 
     extend(Model.prototype, {
 
-      // provide key inferenc
-      $$inferKey: Model.$$inferKey,
+      // infer key adaptor
+      $$inferKey: inferKey,
 
       // loads the default parameter values
       $$loadDefaults: function() {
@@ -251,8 +275,8 @@ RMModule.factory('RMModelFactory', ['$log', 'inflector', 'RMUtils', 'RMScopeApi'
 
     extend(Collection.prototype, {
 
-      // provide key inference
-      $$inferKey: Model.$$inferKey,
+      // infer key adaptor
+      $$inferKey: inferKey,
 
       // provide record contructor
       $$new: function(_pk, _scope) {
