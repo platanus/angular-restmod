@@ -207,6 +207,27 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
 
     // Promise API
 
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Returns this object last promise.
+     *
+     * If promise does not exist, then a new one is generated that resolves to the object itsef. The
+     * new promise is not set as the current object promise, for that use `$then`.
+     *
+     * Usage:
+     *
+     * ```javascript
+     * col.$fetch().$asPromise();
+     * ```
+     *
+     * @return {promise} $q promise
+     */
+    $asPromise: function() {
+      return this.$promise || $q.when(this);
+    },
+
     /**
      * @memberof CommonApi#
      *
@@ -225,8 +246,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
      * @return {CommonApi} self
      */
     $then: function(_success, _error) {
-      if(!this.$promise) this.$promise = $q.when(this);
-      this.$promise = this.$promise.then(_success, _error);
+      this.$promise = this.$asPromise().then(_success, _error);
       return this;
     },
 
@@ -247,8 +267,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', function($http, $q) {
      * @return {CommonApi} self
      */
     $finally: function(_cb) {
-      if(!this.$promise) this.$promise = $q.when(this);
-      this.$promise = this.$promise['finally'](_cb);
+      this.$promise = this.$asPromise()['finally'](_cb);
       return this;
     },
 

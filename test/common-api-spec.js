@@ -2,7 +2,7 @@
 
 describe('Restmod model class:', function() {
 
-  var $httpBackend, restmod, $rootScope, Bike, query;
+  var $httpBackend, restmod, $rootScope, $q, Bike, query;
 
   beforeEach(module('restmod'));
 
@@ -10,9 +10,31 @@ describe('Restmod model class:', function() {
     $httpBackend = $injector.get('$httpBackend');
     restmod = $injector.get('restmod');
     $rootScope = $injector.get('$rootScope');
+    $q = $injector.get('$q');
     Bike = restmod.model({ PATH: '/api/bikes' });
     query = Bike.$collection();
   }));
+
+  describe('$asPromise', function() {
+
+    it('should return current promise if available', function() {
+      var $bike = Bike.$new();
+      var promise = $bike.$promise = $q.when(true);
+      expect($bike.$asPromise()).toBe(promise);
+    });
+
+    it('should not update internal promise if new promise is generated', function() {
+      var $bike = Bike.$new();
+      $bike.$asPromise();
+      expect($bike.$promise).toBeUndefined();
+    });
+
+    it('should return a new promise if no promise available', function() {
+      var $bike = Bike.$new();
+      expect($bike.$asPromise()).not.toBe(null);
+    });
+
+  });
 
   describe('$send', function() {
 
