@@ -7,7 +7,7 @@ describe('Plugin: Debounced Model', function() {
   beforeEach(module(function($provide, restmodProvider) {
     restmodProvider.rebase('DebouncedModel');
     $provide.factory('Bike', function(restmod) {
-      return restmod.model('/api/bikes');
+      return restmod.model({ PATH: '/api/bikes' });
     });
   }));
 

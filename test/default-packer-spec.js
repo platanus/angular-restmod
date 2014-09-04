@@ -9,14 +9,15 @@ describe('RMPackerCache', function() {
   beforeEach(inject(function($injector) {
     restmod = $injector.get('restmod');
     packerCache = $injector.get('RMPackerCache');
-    User = restmod.model('/api/users');
-    Part = restmod.model('/api/parts');
+    User = restmod.model({ PATH: '/api/users' });
+    Part = restmod.model({ PATH: '/api/parts' });
   }));
 
   describe('extractRoot', function() {
 
     it('should extract single resource using singular name by default', function() {
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default'
       });
 
@@ -26,7 +27,8 @@ describe('RMPackerCache', function() {
     });
 
     it('should extract collection using plural name by default', function() {
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default'
       });
 
@@ -36,7 +38,8 @@ describe('RMPackerCache', function() {
     });
 
     it('should let the single and plural keys to be overriden separately', function() {
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default',
         JSON_ROOT_SINGLE: 'one_bike',
         JSON_ROOT_MANY: 'many_bikes'
@@ -52,7 +55,8 @@ describe('RMPackerCache', function() {
     });
 
     it('should let the single and plural keys to be overriden using jsonRoot', function() {
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default',
         JSON_ROOT: 'the_root'
       });
@@ -71,7 +75,8 @@ describe('RMPackerCache', function() {
   describe('processMeta', function() {
 
     it('should extract metadata from meta property by default', function() {
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default',
       });
 
@@ -82,7 +87,8 @@ describe('RMPackerCache', function() {
     });
 
     it('should extract metadata from specified property', function() {
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default',
         JSON_META: 'extra'
       });
@@ -94,7 +100,8 @@ describe('RMPackerCache', function() {
     });
 
     it('should not fail if property is not found', function() {
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default'
       });
 
@@ -104,7 +111,8 @@ describe('RMPackerCache', function() {
     });
 
     it('should extract metadata from root if set to dot', function() {
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default',
         JSON_META: '.'
       });
@@ -116,7 +124,8 @@ describe('RMPackerCache', function() {
     });
 
     it('should skip metadata extraction if set to false', function() {
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default',
         JSON_META: false
       });
@@ -135,7 +144,8 @@ describe('RMPackerCache', function() {
     });
 
     it('should process links under "linked" by default', function() {
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default'
       });
 
@@ -145,7 +155,8 @@ describe('RMPackerCache', function() {
     });
 
     it('should process links under the property defined by used', function() {
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default',
         JSON_LINKS: 'links'
       });
@@ -156,7 +167,8 @@ describe('RMPackerCache', function() {
     });
 
     it('should process links from root if set to dot', function() {
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default',
         JSON_LINKS: '.'
       });
@@ -168,7 +180,8 @@ describe('RMPackerCache', function() {
     });
 
     it('should not process links if set to false', function() {
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default',
         JSON_LINKS: false
       });

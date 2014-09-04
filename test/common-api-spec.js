@@ -10,7 +10,7 @@ describe('Restmod model class:', function() {
     $httpBackend = $injector.get('$httpBackend');
     restmod = $injector.get('restmod');
     $rootScope = $injector.get('$rootScope');
-    Bike = restmod.model('/api/bikes');
+    Bike = restmod.model({ PATH: '/api/bikes' });
     query = Bike.$collection();
   }));
 

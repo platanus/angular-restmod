@@ -106,11 +106,11 @@ Make sure you read the [Api Integration FAQ](https://github.com/platanus/angular
 
 # Basic usage
 
-You begin by creating a new model using the `restmod.model` method. We recommend you to put each model on a separate factory. The first argument for `model` is the resource URL.
+You begin by creating a new model using the `restmod.model` method. We recommend you to put each model on a separate factory. The model method accepts one or more definition objects or functions as parameters. To set the resource url use the PATH configuration in the definition.
 
 ```javascript
 module.factory('Bike', function(restmod) {
-	return restmod.model('/bikes');
+	return restmod.model({ PATH: '/bikes' });
 });
 ```
 
@@ -322,11 +322,13 @@ bike.$fetch().$promise.then(function(_bike) {
 When defining a model, you can pass a **definition object**
 
 ```javascript
-Bike = restmod.model('api/bikes',
-// This is the definition object:
-{
-	createdAt: { encode: 'date' },
-	owner: { belongsTo: 'User' }
+Bike = restmod.model({
+	// This is the definition object:
+
+	PATH: 'api/bikes', 				// Configuration variable are set using upercase keys
+
+	createdAt: { encode: 'date' }, 	// This tells restmod to decode createdAt as a date.
+	owner: { belongsTo: 'User' } 	// This builds a relation with the User model
 }
 );
 ```
@@ -337,11 +339,11 @@ Bike = restmod.model('api/bikes',
 -->
 
 The **definition object** allows you to:
+* Configure your model behaviour
 * Define **relations** between models
 * Customize an attribute's **serialization** and **default values**
 * Add **custom methods**
 * Add lifecycle **hooks**
-
 
 ## Relations
 
@@ -355,7 +357,8 @@ Relations are defined like this:
 -->
 
 ```javascript
-Bike = restmod.model('/bikes', {
+Bike = restmod.model({
+	PATH: '/bikes',
 	parts: { hasMany: 'Part' },
 	owner: { belongsTo: 'User' }
 });
@@ -374,14 +377,15 @@ Let's say you have the following 'Part' model:
 
 ```javascript
 module.factory('Part', function() {
-	return restmod.model('/parts');
+	return restmod.model({ PATH: '/parts' });
 });
 ```
 
 The HasMany relation allows you to access parts of a specific bike directly from a bike object. In other words, HasMany is a hirearchical relation between a model instance (bike) and a model collection (parts).
 
 ```javascript
-Bike = restmod.model('/bikes', {
+Bike = restmod.model({
+	PATH: '/bikes',
 	parts: { hasMany: 'Part' }
 });
 
@@ -428,12 +432,12 @@ var part = bike.parts.$create({ serialNo: 'XX123', category: 'wheels' }); // sen
 
 <!-- section: anonymous -->
 
-If the child collection model is anonymous (no url given to `model`) then all CRUD routes for the collection items are bound to the parent.
+If the child collection model is anonymous (no PATH given to `model`) then all CRUD routes for the collection items are bound to the parent.
 
 So if 'Part' was defined like:
 
 ```javascript
-restmod.model(null);
+restmod.model();
 ```
 
 <!-- section: $fetch -->
@@ -441,7 +445,7 @@ restmod.model(null);
 The example above would behave like this:
 
 <!-- before:
-	bike = restmod.model('/bikes', { parts: { hasMany: restmod.model(null) } }).$new(1);
+	bike = restmod.model({ PATH: '/bikes', parts: { hasMany: restmod.model() } }).$new(1);
 	bike.parts.$decode([{ id: 1 }]);
 -->
 
@@ -471,14 +475,15 @@ Let's say you have the following 'User' model:
 
 ```javascript
 module.factory('User', function() {
-	return restmod.model('/users');
+	return restmod.model({ PATH: '/users' });
 });
 ```
 
 That relates to a 'Bike' through a *hasOne* relation:
 
 ```javascript
-Bike = restmod.model('/bikes', {
+Bike = restmod.model({
+	PATH: '/bikes',
 	owner: { hasOne: 'User' }
 });
 ```
@@ -526,12 +531,12 @@ If 'User' was to be defined like an anonymous resource:
 
 ```javascript
 module.factory('User', function() {
-	return restmod.model(null); // note that the url is null
+	return restmod.model(); // note that not PATH is given
 });
 ```
 
 <!-- before:
-	owner = restmod.model('/bikes', { owner: { hasOne: 'User' } }).$new(1).owner;
+	owner = restmod.model({ PATH: '/bikes', owner: { hasOne: 'User' } }).$new(1).owner;
 -->
 
 Then calling:
@@ -585,14 +590,15 @@ Let's say you have the same 'User' model as before:
 
 ```javascript
 module.factory('User', function() {
-	return restmod.model('/users');
+	return restmod.model({ PATH: '/users' });
 });
 ```
 
 That relates to a 'Bike' through a *belongsTo* relation this time:
 
 ```javascript
-Bike = restmod.model('/bikes', {
+Bike = restmod.model({
+	PATH: '/bikes',
 	owner: { belongsTo: 'User', key: 'last_owner_id' } // default key would be 'owner_id'
 });
 ```
@@ -631,7 +637,8 @@ The inline property name can be optionally selected using the `map` attribute.
 Lets redefine the `Bike` model as:
 
 ```javascript
-var Bike = restmod.model('/bikes', {
+var Bike = restmod.model({
+	PATH: '/bikes',
 	owner: { belongsTo: 'User', map: 'last_owner' } // map would default to *owner*
 });
 ```
@@ -710,14 +717,15 @@ Let's say you have the following 'Part' definition:
 
 ```javascript
 module.factory('Part', function() {
-	return restmod.model('/parts');
+	return restmod.model({ PATH: '/parts' });
 });
 ```
 
 That relates to a 'Bike' through a *belongsToMany* relation this time:
 
 ```javascript
-Bike = restmod.model('/bikes', {
+Bike = restmod.model({
+	PATH: '/bikes',
 	parts: { belongsToMany: 'Part', keys: 'part_keys' } // default key would be 'parts_ids'
 });
 ```
@@ -814,7 +822,8 @@ Angular.factory('DateParseFilter', function() {
 then you use it as a standard decoder like this:
 
 ```javascript
-var Bike = restmod.model('/bikes', {
+var Bike = restmod.model({
+	PATH: '/bikes',
 	createdAt: {decode:'date_parse'}
 });
 ```
@@ -825,7 +834,8 @@ var Bike = restmod.model('/bikes', {
 Just as with the previous example (decode), you use an Angular Filter. In this example we use the built in 'date' filter.
 
 ```javascript
-var Bike = restmod.model('/bikes', {
+var Bike = restmod.model({
+	PATH: '/bikes',
 	createdAt: {encode:'date', param:'yyyy-MM-dd'}
 });
 ```
@@ -837,7 +847,8 @@ On both **encode** and **decode** you can use an inline function instead of the 
 Following the Angular conventions, attributes that start with a '$' symbol are considered private and never sent to the server. Furthermore, you can define a mask that allows you to specify a more advanced behaviour for other attributes:
 
 ```javascript
-var Bike = restmod.model('/bikes', {
+var Bike = restmod.model({
+	PATH: '/bikes',
 	createdAt: {mask:'CU'}, // won't send this attribute on Create or Update
 	viewCount: {mask:'R'}, // won't load this attribute on Read (fetch)
 	opened: {mask:true}, // will ignore this attribute in relation to the API
@@ -849,7 +860,8 @@ var Bike = restmod.model('/bikes', {
 You can define default values for your attributes, both static and dynamic. Dynamic defaults are defined using a function that will be called on record creation.
 
 ```javascript
-var Bike = restmod.model('/bikes', {
+var Bike = restmod.model({
+	PATH: '/bikes',
 	wheels: { init: 2 }, // every new bike will have 2 wheels by default
 	createdAt: { init: function() {
 	 return new Date();
@@ -862,7 +874,8 @@ var Bike = restmod.model('/bikes', {
 You can explicitly tell restmod to map a given server attribute to one of the model's attributs:
 
 ```javascript
-var Bike = restmod.model('/bikes', {
+var Bike = restmod.model({
+	PATH: '/bikes',
 	created: { map: 'stats.created_at' }
 });
 ```
@@ -872,7 +885,8 @@ var Bike = restmod.model('/bikes', {
 You can add a custom instance method to a Model
 
 ```javascript
-var Bike = restmod.model('/bikes', {
+var Bike = restmod.model({
+	PATH: '/bikes',
 	pedal: function() {
 	 this.strokes += 1;
 	}
@@ -882,7 +896,8 @@ var Bike = restmod.model('/bikes', {
 You can also add a class method to the Model type
 
 ```javascript
-var Bike = restmod.model('/bikes', {
+var Bike = restmod.model({
+	PATH: '/bikes',
 	'@searchByBrand': function(_brand) {
 	 return this.$search({ brand: _brand });
 	}
@@ -902,7 +917,8 @@ xc_treks = xc_bikes.searchByBrand('Trek');
 Just like you do with ActiveRecord, you can add triggers on certain steps of the object lifecycle
 
 ```javascript
-var Bike = restmod.model('/bikes', {
+var Bike = restmod.model({
+	PATH: '/bikes',
 	'~beforeSave': function() {
 		this.partCount = this.parts.length;
 	}
@@ -917,7 +933,8 @@ To ease up the definition of models, and keep thing DRY, Restmod provides you wi
 
 ```javascript
 Angular.factory('Vehicle', function() {
-	return restmod.model('/vehicle', {
+	return restmod.model({
+	PATH: '/vehicle',
 	createdAt: {encode:'date', param:'yyyy-MM-dd'}
 	});
 })
@@ -926,7 +943,8 @@ Angular.factory('Vehicle', function() {
 You can then define your Bike model that inherits from the Vehicle model, and also sets additional functionality.
 
 ```javascript
-var Bike = restmod.model('/bikes', 'Vehicle', {
+var Bike = restmod.model('Vehicle', {
+	PATH: '/bikes',
 	pedal: function (){
 		alert('pedaling')
 	}

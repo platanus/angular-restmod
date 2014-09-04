@@ -157,7 +157,8 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
      * You should define the following model:
      *
      * ```javascript
-     * restmod.model('/bikes', {
+     * restmod.model({
+     *   PATH: '/bikes',
      *   user: { belongsTo: 'User' } // works for both cases detailed above
      * })
      * ```
@@ -256,7 +257,8 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
      * You should define the following model:
      *
      * ```javascript
-     * restmod.model('/bikes', {
+     * restmod.model({
+     *   PATH: '/bikes',
      *   users: { belongsToMany: 'User' } // works for both cases detailed above
      * })
      * ```

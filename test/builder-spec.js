@@ -13,11 +13,25 @@ describe('Restmod builder:', function() {
     $httpBackend.when('GET', '/api/bikes/1').respond(200, { 'dropper_seat': true });
   }));
 
+  describe('setProperty', function() {
+    beforeEach(function() {
+      Bike = restmod.model(function() {
+        this.setProperty('path', '/bikes')
+            .setProperty('test', 'test');
+      });
+    });
+
+    it('should set the internal model property', function() {
+      expect(Bike.$getProperty('test')).toEqual('test');
+    });
+  });
+
   describe('setUrlPrefix', function() {
 
     beforeEach(function() {
-      Bike = restmod.model('/bikes', function() {
-        this.setUrlPrefix('/api');
+      Bike = restmod.model(function() {
+        this.setProperty('path', '/bikes')
+            .setUrlPrefix('/api');
       });
     });
 
@@ -33,8 +47,9 @@ describe('Restmod builder:', function() {
 
   describe('setPrimaryKey', function() {
     beforeEach(function() {
-      Bike = restmod.model('/bikes', function() {
-        this.setPrimaryKey('my_id');
+      Bike = restmod.model(function() {
+        this.setProperty('path', '/bikes')
+            .setPrimaryKey('my_id');
       });
     });
 
@@ -44,23 +59,11 @@ describe('Restmod builder:', function() {
     });
   });
 
-  describe('setProperty', function() {
-    beforeEach(function() {
-      Bike = restmod.model('/bikes', function() {
-        this.setProperty('test', 'test');
-      });
-    });
-
-    it('should set the internal model property', function() {
-      expect(Bike.$getProperty('test')).toEqual('test');
-    });
-  });
-
   // Object definition spec
 
   describe('OD prefix: @', function() {
     it('should register a new class ', function() {
-      var Bike = restmod.model(null, {
+      var Bike = restmod.model({
         '@classMethod': function() {
           return 'teapot';
         }
@@ -72,7 +75,7 @@ describe('Restmod builder:', function() {
 
   describe('OD prefix: ~', function() {
     it('should register a new hook callback ', function() {
-      var Bike = restmod.model(null, {
+      var Bike = restmod.model({
         '~afterFeed': function() {
           this.teapot = true;
         }
@@ -85,7 +88,7 @@ describe('Restmod builder:', function() {
 
   describe('OD model configuration format: IM_A_VAR', function() {
     it('should set a property value ', function() {
-      var Bike = restmod.model(null, {
+      var Bike = restmod.model({
         'PRIMARY_KEY': '_id'
       });
 

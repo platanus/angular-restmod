@@ -9,21 +9,21 @@ describe('Restmod model relation:', function() {
   // generate a dummy module
   beforeEach(module(function($provide) {
     $provide.factory('Part', function(restmod) {
-      return restmod.model('/api/parts');
+      return restmod.model({ PATH: '/api/parts' });
     });
 
     $provide.factory('BikeRide', function(restmod) {
-      return restmod.model(null, {
+      return restmod.model({
         bike: { belongsTo: 'Bike' }
       });
     });
 
     $provide.factory('User', function(restmod) {
-      return restmod.model('/api/users');
+      return restmod.model({ PATH: '/api/users' });
     });
 
     $provide.factory('SerialNo', function(restmod) {
-      return restmod.model(null, {
+      return restmod.model({
         bike: { belongsTo: 'Bike' }
       });
     });
@@ -39,7 +39,8 @@ describe('Restmod model relation:', function() {
   describe('hasMany', function() {
 
     beforeEach(function() {
-      Bike = restmod.model('/api/bikes', {
+      Bike = restmod.model({
+        PATH: '/api/bikes',
         allParts: { hasMany: 'Part' },
         activity: { hasMany: 'BikeRide', path: 'rides', inverseOf: 'bike' }
       });
@@ -103,7 +104,8 @@ describe('Restmod model relation:', function() {
   describe('hasOne', function() {
 
     beforeEach(function() {
-      Bike = restmod.model('/api/bikes', {
+      Bike = restmod.model({
+        PATH: '/api/bikes',
         owner: { hasOne: 'User' },
         activity: { hasMany: 'BikeRide' },
         serialNo: { hasOne: 'SerialNo', path: 'serial', inverseOf: 'bike' }
@@ -181,7 +183,8 @@ describe('Restmod model relation:', function() {
   describe('belongsTo', function() {
 
     beforeEach(function() {
-      Bike = restmod.model('/api/bikes', {
+      Bike = restmod.model({
+        PATH: '/api/bikes',
         frame: { belongsTo: 'Part' },
         user: { belongsTo: 'User', key: 'owner_id', map: 'owner' }
       });
@@ -266,7 +269,8 @@ describe('Restmod model relation:', function() {
 
       // this is more of an integration test, place it somewhere else
 
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default',
         user: { belongsTo: 'User' }
       });
@@ -286,7 +290,9 @@ describe('Restmod model relation:', function() {
   describe('belongsToMany', function() {
 
     beforeEach(function() {
-      Bike = restmod.model('/api/bikes', {
+      Bike = restmod.model({
+        PATH: '/api/bikes',
+
         parts: { belongsToMany: 'Part' }
       });
     });
@@ -327,7 +333,8 @@ describe('Restmod model relation:', function() {
     });
 
     it('should load keys to/from the property specified in \'keys\'', function() {
-      Bike = restmod.model('/api/bikes', {
+      Bike = restmod.model({
+        PATH: '/api/bikes',
         parts: { belongsToMany: 'Part', keys: 'part_keys' }
       });
 
@@ -340,7 +347,8 @@ describe('Restmod model relation:', function() {
 
       // this is more of an integration test, place it somewhere else
 
-      var model = restmod.model('/api/bikes', {
+      var model = restmod.model({
+        PATH: '/api/bikes',
         PACKER: 'default',
         parts: { belongsToMany: 'Part' }
       });

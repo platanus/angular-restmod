@@ -4,13 +4,16 @@ Just like ActiveRecord in Rails, RestMod lets you modify a model's behavior usin
 
 ##### 1. Hooks that apply to every record and collection of a given Model
 This is the most ActiveRecord'ish approach
+
 ```javascript
-var Bike = $restmod.model('/bikes', {
-  '~beforeSave': function() {
-    this.partCount = this.parts.length;
-  }
+var Bike = $restmod.model({
+	PATH: '/bikes',
+	'~beforeSave': function() {
+		this.partCount = this.parts.length;
+	}
 });
 ```
+
 ##### 2. Hooks that apply only to a particular record
 
 It's also possible to modify only a single record's (model instance) behavior.
