@@ -59,10 +59,53 @@ describe('Restmod builder:', function() {
     });
   });
 
+  describe('define', function() {
+    it('should add a method to the model record prototype by default', function() {
+      var Bike = restmod.model(function() {
+        this.define('test', function() { return 'ok'; });
+      });
+
+      expect(Bike.$new().test).toBeDefined();
+      expect(Bike.$new().test()).toEqual('ok');
+    });
+
+    it('should add a method to the desired prototypes if an object is provided', function() {
+
+      var Bike = restmod.model(function() {
+        this.define('test', {
+          record: function() { return 'record'; },
+          type: function() { return 'type'; },
+          collection: function() { return 'collection'; }
+        });
+      });
+
+      expect(Bike.test).toBeDefined();
+      expect(Bike.test()).toEqual('type');
+      expect(Bike.$new().test).toBeDefined();
+      expect(Bike.$new().test()).toEqual('record');
+      expect(Bike.$collection().test).toBeDefined();
+      expect(Bike.$collection().test()).toEqual('collection');
+    });
+  });
+
+  describe('classDefine', function() {
+    it('should extend the scope (type and collection)', function() {
+      var Bike = restmod.model(function() {
+        this.classDefine('test', function() { return 'ok'; });
+      });
+
+      expect(Bike.$new().test).toBeUndefined();
+      expect(Bike.test).toBeDefined();
+      expect(Bike.test()).toEqual('ok');
+      expect(Bike.$collection().test).toBeDefined();
+      expect(Bike.$collection().test()).toEqual('ok');
+    });
+  });
+
   // Object definition spec
 
   describe('OD prefix: @', function() {
-    it('should register a new class ', function() {
+    it('should register a new class method', function() {
       var Bike = restmod.model({
         '@classMethod': function() {
           return 'teapot';

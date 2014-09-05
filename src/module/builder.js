@@ -186,7 +186,9 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
         forEach(_description, function(_desc, _attr) {
           switch(_attr.charAt(0)) {
           case '@':
-            this.classDefine(_attr.substring(1), _desc);
+            _attr = _attr.substring(1);
+            if(isFunction(_desc)) this.classDefine(_attr, _desc); // set type and collection by default
+            else this.define(_attr, _desc);
             break;
           case '~':
             _attr = inflector.parameterize(_attr.substring(1));
@@ -501,19 +503,31 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
       /**
        * @memberof BuilderApi#
        *
-       * @description Registers an instance method
+       * @description Adds methods to the model
+       *
+       * By default this method adds **record** methods. If called with an object
+       * instead of a function it can be used to extend the collection and the type with
+       * specific implementations.
        *
        * Usage:
-       *    builder.define(function(_super) {
-       *      return $fetch()
-       *    });
+       *
+       * ```javascript
+       * restmod.mixin(function() {
+       *   this.define('myMethod', function() {})
+       *       .define('myMethod', {
+       *         record: function() {}, // called when record.myMethod is called.
+       *         collection: function() {}, // called when collection.myMethod is called.
+       *         type: function() {} // called when Model.myMethod is called.
+       *       });
+       * });
+       * ```
        *
        * It is posible to override an existing method using define,
        * if overriden, the old method can be called using `this.$super`
        * inside de new method.
        *
        * @param {string} _name Method name
-       * @param {function} _fun Function to define
+       * @param {function} _fun Function to define or object with particular implementations
        * @return {BuilderApi} self
        */
       define: defineImpl,
@@ -521,11 +535,10 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
       /**
        * @memberof BuilderApi#
        *
-       * @description Registers a class method
+       * @description Registers a scope method
        *
-       * It is posible to override an existing method using define,
-       * if overriden, the old method can be called using `this.$super`
-       * inside de new method.
+       * Same as calling `define('name', { type: fun, collection: fun })`.
+       * See {@link BuilderApi#define} for more information.
        *
        * @param {string} _name Method name
        * @param {function} _fun Function to define
@@ -568,25 +581,19 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
   // dsl.define implementation
   var defineImpl = function(_name, _fun) {
     return this.defer(function(_model) {
-      if(typeof _name === 'object') {
-        Utils.extendOverriden(_model.prototype, _name);
-      } else {
+      if(typeof _fun === 'function') {
         _model.prototype[_name] = Utils.override(_model.prototype[_name], _fun);
+      } else {
+        if(_fun.type) _model[_name] = Utils.override(_model[_name], _fun.type);
+        if(_fun.collection) _model.Collection.prototype[_name] = Utils.override(_model.Collection.prototype[_name], _fun.collection);
+        if(_fun.record) _model.prototype[_name] = Utils.override(_model.prototype[_name], _fun.record);
       }
     });
   };
 
   // dsl.classDefine implementation
   var classDefineImpl = function(_name, _fun) {
-    return this.defer(function(_model) {
-      if(typeof _name === 'object') {
-        Utils.extendOverriden(_model, _name);
-        Utils.extendOverriden(_model.collectionPrototype, _name);
-      } else {
-        _model[_name] = Utils.override(_model[_name], _fun);
-        _model.collectionPrototype[_name] = Utils.override(_model.collectionPrototype[_name], _fun);
-      }
-    });
+    this.define(_name, { type: _fun, collection: _fun });
   };
 
   // dsl.on implementation

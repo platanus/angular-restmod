@@ -66,8 +66,13 @@ RMModule.factory('RMModelFactory', ['$log', 'inflector', 'RMUtils', 'RMScopeApi'
     }
 
     // Infer key adaptor.
-    function inferKey(_raw) {
-      return Model.$inferKey(_raw);
+    function inferKey() {
+      return Model.$inferKey.apply(Model, arguments);
+    }
+
+    // Get property adaptor.
+    function getProperty() {
+      return Model.$getProperty.apply(Model, arguments);
     }
 
     ///// Setup static api
@@ -268,7 +273,10 @@ RMModule.factory('RMModelFactory', ['$log', 'inflector', 'RMUtils', 'RMScopeApi'
       // serializer encode adaptor used by $encode
       $$encode: function(_mask) {
         return _serializer.encode(this, _mask);
-      }
+      },
+
+      // expose getProperty in records
+      $getProperty: getProperty
     }, RecordApi, CommonApi);
 
     ///// Setup collection api
@@ -293,12 +301,15 @@ RMModule.factory('RMModelFactory', ['$log', 'inflector', 'RMUtils', 'RMScopeApi'
       $$pack: adaptPacker('packMany'),
 
       // packer unpack adaptor used by $unwrap
-      $$unpack: adaptPacker('unpackMany')
+      $$unpack: adaptPacker('unpackMany'),
+
+      // expose getProperty in collection
+      $getProperty: getProperty
 
     }, CollectionApi, ScopeApi, CommonApi);
 
     // expose collection prototype.
-    Model.collectionPrototype = Collection.prototype;
+    Model.Collection = Collection;
 
     // Load structures that depend on model instance:
     // if(typeof _serializer === 'function') _serializer = new _serializer(Model); if serializer could be changed...
