@@ -19,8 +19,8 @@ describe('Plugin: Paged Model', function() {
 
     it('should provide the proper page and pageCount', inject(function($httpBackend, Bike) {
       var bikes = Bike.$search();
-      expect(bikes.$pageHeader).toEqual('X-Page');
-      expect(bikes.$pageCountHeader).toEqual('X-Page-Total');
+      expect(bikes.$getProperty('pageHeader')).toEqual('X-Page');
+      expect(bikes.$getProperty('pageCountHeader')).toEqual('X-Page-Total');
       $httpBackend.flush();
       expect(bikes.$page).toEqual(2);
       expect(bikes.$pageCount).toEqual(5);
