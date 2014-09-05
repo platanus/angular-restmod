@@ -5,10 +5,15 @@
  *
  * Usage:
  *
- * First add mixin to a model's mixin chain
+ * First add mixin to a model's mixin chain, the following config variables are available:
+ * * DM_TIMEOUT: sets the debounce timeout, if 0 then debouncing is deactivated. Defaults to 500
+ * * DM_ADJOURN: if true, then save operation is rescheduled on every $save call. Default to false
  *
  * ```javascript
- * var Bike = restmod.model('api/bikes', 'DebouncedModel'),
+ * var Bike = restmod.model('api/bikes', 'DebouncedModel', {
+ *       // This is optional.
+ *       DM_TIMEOUT: 100 // change timeout!
+ *     }),
  *     bike = Bike.build({ id: 1, brand: 'Yeti' });
  * ```
  *
@@ -62,33 +67,8 @@ angular.module('restmod').factory('DebouncedModel', ['restmod', '$timeout', '$q'
   }
 
   return restmod.mixin(function() {
-    this.define('$dmTimeout', 500)
-        .define('$dmAdjourn', true)
-
-        /**
-         * @method setDebounceOptions
-         * @memberOf DebouncedModel
-         *
-         * @description ModelBuilder extension that allows model debounce configuration.
-         *
-         * ```javascript
-         * restmod.model(null, function() {
-         *   // Sets 1000ms timeout and no rescheduling for this and child models
-         *   this.setDebounceOptions({ timeout: 1000, adjourn: false });
-         * });
-         * ```
-         *
-         * @param  {object} _opt Debouncing options:
-         * * timeout: sets the debounce timeout, if 0 then debouncing is deactivated.
-         * * adjourn: if true, then save operation is rescheduled on every $save call.
-         *
-         * @return {ModelBuilder} self
-         */
-        .extend('setDebounceOptions', function(_opt) {
-          if(_opt.timeout !== undefined) this.define('$dmTimeout', _opt.timeout);
-          if(_opt.adjourn !== undefined) this.define('$dmAdjourn', _opt.adjourn);
-          return this;
-        })
+    this.setProperty('dmTimeout', 500)
+        .setProperty('dmAdjourn', true)
 
         /**
          * @method $save
@@ -109,8 +89,8 @@ angular.module('restmod').factory('DebouncedModel', ['restmod', '$timeout', '$q'
          */
         .define('$save', function(_opt) {
 
-          var timeout = this.$dmTimeout,
-              adjourn = this.$dmAdjourn,
+          var timeout = this.$getProperty('dmTimeout'),
+              adjourn = this.$getProperty('dmAdjourn'),
               status = this.$dmStatus;
 
           // apply configuration overrides
