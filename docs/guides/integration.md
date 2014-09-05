@@ -20,8 +20,7 @@ The primary key is just a model configuration property and by default is set to 
 To change it for a particular model use the configuration property:
 
 ```javascript
-restmod.model({
-	PATH: '/bikes',
+restmod.model('/bikes', {
 	PRIMARY_KEY: '_id'
 });
 ```
@@ -56,7 +55,7 @@ This will enable json root wrapping and by default it will use the resource's na
 So doing:
 
 ```javascript
-restmod.model({ PATH: '/api/bikes' }).$search();
+restmod.model('/api/bikes').$search();
 ```
 
 Will expect:
@@ -71,7 +70,7 @@ And doing:
 
 
 ```javascript
-restmod.model({ PATH: '/api/bikes' }).$find(1);
+restmod.model('/api/bikes').$find(1);
 ```
 
 Will expect:
@@ -82,10 +81,10 @@ Will expect:
 }
 ```
 
-The resoure's name is extracted from the resource PATH, if no PATH is given (anonymous resource) or if PATH does not match the resource's name, then you can change it's name and plural name by setting the `NAME` and `PLURAL` configuration variables:
+The resoure's name is extracted from the resource url, if no url is given (anonymous resource) or if url does not match the resource's name, then you can change it's name and plural name by setting the `NAME` and `PLURAL` configuration variables:
 
 ```javascript
-restmod.model(function() {
+restmod.model(null, function() {
 	NAME: 'mouse', // if you only set NAME, then plural is infered from it using the inflector.
 	PLURAL: 'mice'
 });
@@ -129,8 +128,7 @@ To change the property from where the packer extracts the metadata set the `JSON
 ```
 
 ```javascript
-var Bike = restmod.model({
-	PATH: '/api/bikes',
+var Bike = restmod.model('/api/bikes', {
 	PACKER: 'default',
 	JSON_META: '.'
 });
@@ -178,11 +176,10 @@ var Base = restmod.mixin({
 	PACKER: 'default' // remember to enable the default packer.
 });
 
-var User = restmod.model(Base, { PATH: '/api/users' });
-var Part = restmod.model(Base, { PATH: '/api/parts' });
+var User = restmod.model('/api/users', Base);
+var Part = restmod.model('/api/parts', Base);
 
-var Bike = restmod.model(Base, {
-	PATH: '/api/bikes',
+var Bike = restmod.model('/api/bikes', Base, {
 	user: { belongsTo: User },
 	parts: { belongsToMany: Part }
 })
@@ -206,7 +203,7 @@ module.config(function(restmodProvider) {
 Take a look at the default naming stardards, inlined resources are expected to use the **pluralized** names for their respective model names. See. By default the name is extracted from the url, you can change a model's name and plural name by setting the `NAME` and `PLURAL` configuration variables:
 
 ```javascript
-restmod.model(function() {
+restmod.model(null, function() {
 	NAME: 'mouse', // if you only set NAME, then plural is infered from it.
 	PLURAL: 'mice'
 });
@@ -259,7 +256,7 @@ To handle API's that require '$' prefixed properies you have two posibilities:
 2. if there are only a couple of properties you need to let through, assign a special mapping to those properties:
 
 	```javascript
-	restmod.model({
+	restmod.model(null {
 		myType: { map: '$type' },
 		myName: { map: '$name' }
 	})

@@ -9,7 +9,7 @@ describe('Plugin: Dirty Model', function() {
   beforeEach(module(function($provide, restmodProvider) {
     restmodProvider.rebase('DirtyModel');
     $provide.factory('Bike', function(restmod) {
-      return restmod.model({ PATH: '/api/bikes' });
+      return restmod.model('/api/bikes');
     });
   }));
 

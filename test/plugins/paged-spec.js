@@ -7,7 +7,7 @@ describe('Plugin: Paged Model', function() {
   beforeEach(module(function($provide, restmodProvider) {
     restmodProvider.rebase('PagedModel');
     $provide.factory('Bike', function(restmod) {
-      return restmod.model({ PATH: '/api/bikes' });
+      return restmod.model('/api/bikes');
     });
   }));
 

@@ -9,7 +9,7 @@ describe('Restmod model class:', function() {
   beforeEach(inject(function($injector) {
     $httpBackend = $injector.get('$httpBackend');
     restmod = $injector.get('restmod');
-    Bike = restmod.model({ PATH: '/api/bikes' });
+    Bike = restmod.model('/api/bikes');
     query = Bike.$collection();
   }));
 
@@ -23,7 +23,7 @@ describe('Restmod model class:', function() {
     });
 
     it('should remove trailing slashes from url', function() {
-      var Bike = restmod.model({ PATH: '/api/bikes/' });
+      var Bike = restmod.model('/api/bikes/');
       expect(Bike.$url()).not.toMatch(/\/$/);
     });
   });
@@ -31,7 +31,7 @@ describe('Restmod model class:', function() {
   describe('$getProperty', function() {
 
     it('should retrieve an internal property', function() {
-      expect(Bike.$getProperty('path')).toEqual('/api/bikes');
+      expect(Bike.$getProperty('url')).toEqual('/api/bikes');
     });
 
     it('should return default value if requested property is not set', function() {
@@ -180,7 +180,7 @@ describe('Restmod model class:', function() {
 
     it('should call the packer unpack method if a packer is provided', function() {
       var spy = jasmine.createSpy();
-      var bike = restmod.model({ PATH: '/api/bikes' }, function() {
+      var bike = restmod.model('/api/bikes', function() {
         this.setPacker({
           unpack: spy
         });
@@ -204,7 +204,7 @@ describe('Restmod model class:', function() {
 
     it('should call the packer pack method if a packer is provided', function() {
       var spy = jasmine.createSpy();
-      var bike = restmod.model({ PATH: '/api/bikes' }, function() {
+      var bike = restmod.model('/api/bikes', function() {
         this.setPacker({
           pack: spy
         });

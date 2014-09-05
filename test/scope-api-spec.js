@@ -9,7 +9,7 @@ describe('Restmod scope api:', function() {
   beforeEach(inject(function($injector) {
     restmod = $injector.get('restmod');
     $httpBackend = $injector.get('$httpBackend');
-    Bike = restmod.model({ PATH: '/api/bikes' });
+    Bike = restmod.model('/api/bikes');
   }));
 
   describe('$collection', function() {

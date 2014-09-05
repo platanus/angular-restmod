@@ -13,25 +13,11 @@ describe('Restmod builder:', function() {
     $httpBackend.when('GET', '/api/bikes/1').respond(200, { 'dropper_seat': true });
   }));
 
-  describe('setProperty', function() {
-    beforeEach(function() {
-      Bike = restmod.model(function() {
-        this.setProperty('path', '/bikes')
-            .setProperty('test', 'test');
-      });
-    });
-
-    it('should set the internal model property', function() {
-      expect(Bike.$getProperty('test')).toEqual('test');
-    });
-  });
-
   describe('setUrlPrefix', function() {
 
     beforeEach(function() {
-      Bike = restmod.model(function() {
-        this.setProperty('path', '/bikes')
-            .setUrlPrefix('/api');
+      Bike = restmod.model('/bikes', function() {
+        this.setUrlPrefix('/api');
       });
     });
 
@@ -47,9 +33,8 @@ describe('Restmod builder:', function() {
 
   describe('setPrimaryKey', function() {
     beforeEach(function() {
-      Bike = restmod.model(function() {
-        this.setProperty('path', '/bikes')
-            .setPrimaryKey('my_id');
+      Bike = restmod.model('/bikes', function() {
+        this.setPrimaryKey('my_id');
       });
     });
 
@@ -61,7 +46,7 @@ describe('Restmod builder:', function() {
 
   describe('define', function() {
     it('should add a method to the model record prototype by default', function() {
-      var Bike = restmod.model(function() {
+      var Bike = restmod.model(null, function() {
         this.define('test', function() { return 'ok'; });
       });
 
@@ -71,7 +56,7 @@ describe('Restmod builder:', function() {
 
     it('should add a method to the desired prototypes if an object is provided', function() {
 
-      var Bike = restmod.model(function() {
+      var Bike = restmod.model(null, function() {
         this.define('test', {
           record: function() { return 'record'; },
           type: function() { return 'type'; },
@@ -90,7 +75,7 @@ describe('Restmod builder:', function() {
 
   describe('classDefine', function() {
     it('should extend the scope (type and collection)', function() {
-      var Bike = restmod.model(function() {
+      var Bike = restmod.model(null, function() {
         this.classDefine('test', function() { return 'ok'; });
       });
 
@@ -102,11 +87,24 @@ describe('Restmod builder:', function() {
     });
   });
 
+  describe('setProperty', function() {
+    beforeEach(function() {
+      Bike = restmod.model('/bikes', function() {
+        this.setProperty('test', 'test');
+      });
+    });
+
+    it('should set the internal model property', function() {
+      expect(Bike.$getProperty('test')).toEqual('test');
+    });
+  });
+
   // Object definition spec
 
   describe('OD prefix: @', function() {
-    it('should register a new class method', function() {
-      var Bike = restmod.model({
+
+    it('should register a new class ', function() {
+      var Bike = restmod.model(null, {
         '@classMethod': function() {
           return 'teapot';
         }
@@ -118,7 +116,7 @@ describe('Restmod builder:', function() {
 
   describe('OD prefix: ~', function() {
     it('should register a new hook callback ', function() {
-      var Bike = restmod.model({
+      var Bike = restmod.model(null, {
         '~afterFeed': function() {
           this.teapot = true;
         }
@@ -131,7 +129,7 @@ describe('Restmod builder:', function() {
 
   describe('OD model configuration format: IM_A_VAR', function() {
     it('should set a property value ', function() {
-      var Bike = restmod.model({
+      var Bike = restmod.model(null, {
         'PRIMARY_KEY': '_id'
       });
 

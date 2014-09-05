@@ -27,7 +27,7 @@ module.config(function(restmodProvider) {
 You can also use the style in a single model:
 
 ```javascript
-restmod.model('MyStyleApi', {
+restmod.model('url', 'MyStyleApi', {
 	// rest of definition.
 })
 ```

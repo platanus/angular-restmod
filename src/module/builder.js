@@ -29,7 +29,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
    *
    *   // MODEL CONFIGURATION
    *
-   *   PATH: 'resource',
+   *   URL: 'resource',
    *   NAME: 'resource',
    *   PRIMARY_KEY: '_id',
    *
@@ -63,7 +63,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
    * ```javascript
    * restmod.model({
    *
-   *   PATH: 'resource',
+   *   URL: 'resource',
    *   NAME: 'resource',
    *   PRIMARY_KEY: '_id'
    *
@@ -87,7 +87,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
    * description properties:
    *
    * ```javascript
-   * var Model = restmod.model({
+   * var Model = restmod.model('/', {
    *   sayHello: function() { alert('hello!'); }
    * })
    *
@@ -99,7 +99,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
    * then it is considered to be a default value. (same as calling {@link BuilderApi#define} at a definition function)
    *
    * ```javascript
-   * var Model = restmod.model({
+   * var Model = restmod.model('/', {
    *   im20: 20 // same as { init: 20 }
    * })
    *
@@ -111,7 +111,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
    * (same as calling {@link BuilderApi#classDefine} at a definition function).
    *
    * ```javascript
-   * var Model = restmod.model({
+   * var Model = restmod.model('/', {
    *   '@sayHello': function() { alert('hello!'); }
    * })
    *
@@ -124,7 +124,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
    * property name matches the event name (same as calling {@link BuilderApi#on} at a definition function).
    *
    * ```javascript
-   * var Model = restmod.model({
+   * var Model = restmod.model('/', {
    *   '~afterInit': function() { alert('hello!'); }
    * })
    *
@@ -138,7 +138,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
    * in this page can be called from the definition function by referencing *this*.
    *
    * ```javascript
-   * restmod.model(function() {
+   * restmod.model('', function() {
    *   this.attrDefault('propWithDefault', 20)
    *       .attrAsCollection('hasManyRelation', 'ModelName')
    *       .on('after-create', function() {
@@ -151,7 +151,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
   function Builder() {
 
     var vars = {
-        path: null,
+        url: null,
         urlPrefix: null,
         primaryKey: 'id'
       },
@@ -305,7 +305,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
        * The following configuration parameters are available by default:
        * * primaryKey: The model's primary key, defaults to **id**. Keys must use server naming convention!
        * * urlPrefix: Url prefix to prepend to resource url, usefull to use in a base mixin when multiples models have the same prefix.
-       * * path: The resource base url, null by default. If not given resource is considered anonymous.
+       * * url: The resource base url, null by default. If not given resource is considered anonymous.
        *
        * @param {string} _key The configuration key to set.
        * @param {mixed} _value The configuration value.
@@ -605,18 +605,18 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', 'RMSerialize
 
   Builder.prototype = {
     // use the builder to process a mixin chain
-    chain: function(_chain) {
+    loadMixinChain: function(_chain) {
       for(var i = 0, l = _chain.length; i < l; i++) {
-        this.mixin(_chain[i]);
+        this.loadMixin(_chain[i]);
       }
     },
 
     // use the builder to process a single mixin
-    mixin: function(_mix) {
+    loadMixin: function(_mix) {
       if(_mix.$chain) {
-        this.chain(_mix.$chain);
+        this.loadMixinChain(_mix.$chain);
       } else if(typeof _mix === 'string') {
-        this.mixin($injector.get(_mix));
+        this.loadMixin($injector.get(_mix));
       } else if(isArray(_mix) || isFunction(_mix)) {
         // TODO: maybe invoke should only be called for BASE_CHAIN functions
         $injector.invoke(_mix, this.dsl, { $builder: this.dsl });

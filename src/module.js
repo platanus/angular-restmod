@@ -105,19 +105,21 @@ RMModule.provider('restmod', [function() {
          * restmod.model('/bikes', BaseModel, PagedModel);
          * ```
          *
-         * @param {mixed} _mixins One or more mixins, description objects or description blocks.
+         * @param {string} _url Resource url.
+         * @param {mixed} _mix One or more mixins, description objects or description blocks.
          * @return {StaticApi} The new model.
          */
-        model: function(/* _mixins */) {
+        model: function(_baseUrl/* , _mix */) {
 
           // Load builder and execute it.
-          var builder = new Builder();
-          builder.chain(BASE_CHAIN);
-          builder.chain(arguments);
+          var builder = new Builder(), chain;
+          builder.loadMixinChain(BASE_CHAIN);
+          builder.loadMixinChain(chain = arraySlice.call(arguments, 1));
+          builder.dsl.setProperty('url', _baseUrl);
 
           // build model
           var model = builder.buildModel();
-          model.$chain = arguments;
+          model.$chain = chain;
           return model;
         },
 
@@ -156,7 +158,7 @@ RMModule.provider('restmod', [function() {
          * @return {RecordApi} New resource instance.
          */
         singleton: function(_url/*, _mix */) {
-          return restmod.model.apply(this, arraySlice.call(arguments, 1)).$single(_url);
+          return restmod.model.apply(this, arguments).$single(_url);
         }
       };
 

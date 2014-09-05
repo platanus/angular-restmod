@@ -34,7 +34,7 @@ RMModule.factory('RMBuilderExt', ['$injector', '$parse', 'inflector', '$log', 'r
      *   this.setUrlPrefix('/api');
      * })
      *
-     * var bike = restmod.model(BaseModel, { PATH: '/bikes' }).$build({ id: 1 });
+     * var bike = restmod.model('/bikes', BaseModel).$build({ id: 1 });
      * console.log(bike.$url()) // outputs '/api/bikes/1'
      * ```
      *

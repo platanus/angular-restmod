@@ -15,7 +15,7 @@ RMModule.factory('RMModelFactory', ['$log', 'inflector', 'RMUtils', 'RMScopeApi'
 
     // cache some stuff:
     var urlPrefix = _internal.urlPrefix,
-        baseUrl = Utils.cleanUrl(_internal.path),
+        baseUrl = Utils.cleanUrl(_internal.url),
         primaryKey = _internal.primaryKey;
 
     // make sure a style base was selected for the model
@@ -179,7 +179,7 @@ RMModule.factory('RMModelFactory', ['$log', 'inflector', 'RMUtils', 'RMScopeApi'
        *
        * ```javascript
        * module('BikeShop', []).factory('Status', function(restmod) {
-       *   return restmod.model().$single('/api/status');
+       *   return restmod.model(null).$single('/api/status');
        * };)
        * ```
        *
@@ -217,9 +217,9 @@ RMModule.factory('RMModelFactory', ['$log', 'inflector', 'RMUtils', 'RMScopeApi'
        * it should be manually set by writing the name and plural properties:
        *
        * ```javascript
-       * restmod.model({
-       *   NAME: 'resource',
-       *   PLURAL: 'resourciness' // set only if inflector cant properly gess the name.
+       * restmod.model(null, {
+       *   __name__: 'resource',
+       *   __plural__: 'resourciness' // set only if inflector cant properly gess the name.
        * });
        * ```
        *

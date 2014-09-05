@@ -10,13 +10,11 @@ describe('RMPackerCache', function() {
     restmod = $injector.get('restmod');
     packerCache = $injector.get('RMPackerCache');
 
-    Bike = restmod.model({
-      PATH: '/api/bikes',
+    Bike = restmod.model('/api/bikes', {
       NAME: 'bike'
     });
 
-    Part = restmod.model({
-      PATH: '/api/parts',
+    Part = restmod.model('/api/parts', {
       NAME: 'part'
     });
   }));

@@ -9,7 +9,7 @@ describe('Restmod collection:', function() {
   beforeEach(inject(function($injector) {
     restmod = $injector.get('restmod');
 
-    Bike = restmod.model({ PATH: '/api/bikes' });
+    Bike = restmod.model('/api/bikes');
     query = Bike.$collection({ brand: 'trek' });
 
     // mock api
@@ -183,7 +183,7 @@ describe('Restmod collection:', function() {
   describe('$decode', function() {
 
     it('should load the decoded contents into the collection', function() {
-      var bikes = restmod.model({ PATH: '/api/bikes' }).$collection();
+      var bikes = restmod.model('/api/bikes').$collection();
       bikes.$decode([ { brand: 'YT' } ]);
       expect(bikes.length).toEqual(1);
       expect(bikes.$resolved).toBeTruthy();
@@ -191,7 +191,7 @@ describe('Restmod collection:', function() {
     });
 
     it('should fire the after-feed-many event', function() {
-      var bikes = restmod.model({ PATH: '/api/bikes' }).$collection();
+      var bikes = restmod.model('/api/bikes').$collection();
       var spy = jasmine.createSpy();
       bikes.$on('after-feed-many', spy);
       bikes.$decode([ { brand: 'YT' } ]);
@@ -203,7 +203,7 @@ describe('Restmod collection:', function() {
   describe('$encode', function() {
 
     it('should decode the collection contents', function() {
-      var Bike = restmod.model({ PATH: '/api/bikes' }),
+      var Bike = restmod.model('/api/bikes'),
           bikes = Bike.$collection();
       bikes.$add(Bike.$new(1).$extend({ brand: 'YT' }));
       expect(bikes.$encode().length).toEqual(1);
@@ -211,7 +211,7 @@ describe('Restmod collection:', function() {
     });
 
     it('should fire the before-render-many event', function() {
-      var bikes = restmod.model({ PATH: '/api/bikes' }).$collection();
+      var bikes = restmod.model('/api/bikes').$collection();
       var spy = jasmine.createSpy();
       bikes.$on('before-render-many', spy);
       bikes.$encode();
@@ -226,7 +226,7 @@ describe('Restmod collection:', function() {
       var packer = { unpackMany: null };
       spyOn(packer, 'unpackMany').andReturn([]);
 
-      var bikes = restmod.model({ PATH: '/api/bikes' }, function() {
+      var bikes = restmod.model('/api/bikes', function() {
         this.setPacker(packer);
       }).$collection();
 
