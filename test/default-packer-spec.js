@@ -1,6 +1,6 @@
 'use strict';
 
-describe('RMPackerCache', function() {
+describe('DefaultPacker', function() {
 
   var restmod, packerCache, User, Part;
 

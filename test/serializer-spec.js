@@ -7,7 +7,7 @@ describe('Restmod serializer', function() {
   beforeEach(module('restmod'));
 
   beforeEach(inject(function($injector) {
-    serializer = $injector.get('RMSerializerFactory')();
+    serializer = $injector.get('RMSerializer')();
   }));
 
   describe('encode', function() {
@@ -15,7 +15,7 @@ describe('Restmod serializer', function() {
     describe('if a renamer is provided', function() {
 
       beforeEach(function() {
-        serializer.setRenamer({
+        serializer.dsl().setRenamer({
           decode: function(_str) { return '_'+_str; },
           encode: function(_str) { return _str.substr(1); }
         });
@@ -58,7 +58,7 @@ describe('Restmod serializer', function() {
     describe('if a renamer is provided', function() {
 
       beforeEach(function() {
-        serializer.setRenamer({
+        serializer.dsl().setRenamer({
           decode: function(_str) { return '_'+_str; },
           encode: function(_str) { return _str.substr(1); }
         });
@@ -95,7 +95,7 @@ describe('Restmod serializer', function() {
     });
 
     it('should ignore properties prefixed with $ AFTER rename is computed', function() {
-      serializer.setRenamer({ decode: function(_name) { return _name === '$mustSee' ? 'mustSee' : _name; } });
+      serializer.dsl().setRenamer({ decode: function(_name) { return _name === '$mustSee' ? 'mustSee' : _name; } });
 
       var result = {};
       serializer.decode(result, { $mustSee: true });
@@ -104,9 +104,9 @@ describe('Restmod serializer', function() {
     });
   });
 
-  describe('setMask', function() {
+  describe('attrMask', function() {
     it('should mask a property from every operation if true is used', function() {
-      serializer.setMask('brand', true);
+      serializer.dsl().attrMask('brand', true);
 
       var result = {};
       serializer.decode(result, { brand: 'Canyon' });
@@ -118,7 +118,7 @@ describe('Restmod serializer', function() {
     });
 
     it('should mask a property from the desired operations only', function() {
-      serializer.setMask('brand', 'RU');
+      serializer.dsl().attrMask('brand', 'RU');
 
       var result = {};
       serializer.decode(result, { brand: 'Canyon' }, 'R');
@@ -133,9 +133,9 @@ describe('Restmod serializer', function() {
     });
   });
 
-  describe('setDecoder', function() {
+  describe('attrDecoder', function() {
     it('should apply registered decoders', function() {
-      serializer.setDecoder('size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
+      serializer.dsl().attrDecoder('size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
 
       var result = {};
       serializer.decode(result, { size: 'S' });
@@ -143,7 +143,7 @@ describe('Restmod serializer', function() {
     });
 
     it('should apply decoders to nested values', function() {
-      serializer.setDecoder('frontWheel.size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
+      serializer.dsl().attrDecoder('frontWheel.size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
 
       var result = {};
       serializer.decode(result, { frontWheel: { size: 'S' } });
@@ -151,7 +151,7 @@ describe('Restmod serializer', function() {
     });
 
     it('should apply decoders to values in nested arrays', function() {
-      serializer.setDecoder('wheels[].size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
+      serializer.dsl().attrDecoder('wheels[].size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
 
       var result = {};
       serializer.decode(result, { wheels: [{ size: 'S' }, { size: 'M' }] });
@@ -162,23 +162,23 @@ describe('Restmod serializer', function() {
     // TODO: test chaining and filter injection
   });
 
-  describe('setEncoder', function() {
+  describe('attrEncoder', function() {
     it('should apply registered encoders', function() {
-      serializer.setEncoder('size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
+      serializer.dsl().attrEncoder('size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
 
       var raw = serializer.encode({ size: 'S' });
       expect(raw.size).toEqual('small');
     });
 
     it('should apply encoders to nested values', function() {
-      serializer.setEncoder('frontWheel.size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
+      serializer.dsl().attrEncoder('frontWheel.size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
 
       var raw = serializer.encode({ frontWheel: { size: 'S' } });
       expect(raw.frontWheel.size).toEqual('small');
     });
 
     it('should apply encoders to values in nested arrays', function() {
-      serializer.setEncoder('wheels[].size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
+      serializer.dsl().attrEncoder('wheels[].size', function(_val) { return _val === 'S' ? 'small' : 'regular'; });
 
       var raw = serializer.encode({ wheels: [{ size: 'S' }, { size: 'M' }] });
       expect(raw.wheels[0].size).toEqual('small');
@@ -186,9 +186,9 @@ describe('Restmod serializer', function() {
     });
   });
 
-  describe('setMapping', function() {
+  describe('attrMap', function() {
     it('should add an explicit mapping that maps a server response property to a model property and viceversa', function() {
-      serializer.setMapping('brand', 'full_brand');
+      serializer.dsl().attrMap('brand', 'full_brand');
 
       var result = {};
       serializer.decode(result, { full_brand: 'Trek SA' }, '');
@@ -201,9 +201,9 @@ describe('Restmod serializer', function() {
     });
 
     it('should properly run property decoders and encoders', function() {
-      serializer.setMapping('brand', 'full_brand');
-      serializer.setDecoder('brand', function(_v) { return _v.split('.'); });
-      serializer.setEncoder('brand', function(_v) { return _v.join('.'); });
+      serializer.dsl().attrMap('brand', 'full_brand');
+      serializer.dsl().attrDecoder('brand', function(_v) { return _v.split('.'); });
+      serializer.dsl().attrEncoder('brand', function(_v) { return _v.join('.'); });
 
       var result = {};
       serializer.decode(result, { full_brand: 'MainGroup.Bicicles.Trek' }, '');
@@ -214,8 +214,8 @@ describe('Restmod serializer', function() {
     });
 
     it('should consider masks', function() {
-      serializer.setMapping('brand', 'full_brand');
-      serializer.setMask('brand', 'R');
+      serializer.dsl().attrMap('brand', 'full_brand');
+      serializer.dsl().attrMask('brand', 'R');
 
       var result = {};
       serializer.decode(result, { full_brand: 'Trek SA' }, 'R');
@@ -227,7 +227,7 @@ describe('Restmod serializer', function() {
     });
 
     it('should allow nested server properties', function() {
-      serializer.setMapping('brand', 'brand.full_name');
+      serializer.dsl().attrMap('brand', 'brand.full_name');
 
       var result = {};
       serializer.decode(result, { brand: { full_name: 'Giant' } }, '');
@@ -238,8 +238,8 @@ describe('Restmod serializer', function() {
     });
 
     it('should allow mapping to a server property inside an ignored property', function() {
-      serializer.setMapping('brandName', 'brand.full_name');
-      serializer.setMask('brand', true);
+      serializer.dsl().attrMap('brandName', 'brand.full_name');
+      serializer.dsl().attrMask('brand', true);
 
       var result = {};
       serializer.decode(result, { brand: { full_name: 'Giant' } }, '');
@@ -250,7 +250,7 @@ describe('Restmod serializer', function() {
     });
 
     it('should work on array properties', function() {
-      serializer.setMapping('allParts[].brand', 'brand_name');
+      serializer.dsl().attrMap('allParts[].brand', 'brand_name');
 
       var result = {};
       serializer.decode(result, { allParts: [
@@ -263,7 +263,7 @@ describe('Restmod serializer', function() {
     });
 
     it('should allow for a wildcard as server name to use encoded attribute name', function() {
-      serializer.setMapping('fullBrand', '*');
+      serializer.dsl().attrMap('fullBrand', '*');
 
       var result = {};
       serializer.decode(result, { fullBrand: 'Bianchi' }, '');
@@ -274,8 +274,8 @@ describe('Restmod serializer', function() {
     });
 
     it('should allow to set it as forced to force a property to be processed even if not set', function() {
-      serializer.setMapping('gearRatio', '*', true);
-      serializer.setEncoder('gearRatio', function() { return this.calculateGearRatio(); });
+      serializer.dsl().attrMap('gearRatio', '*', true);
+      serializer.dsl().attrEncoder('gearRatio', function() { return this.calculateGearRatio(); });
 
       var result = { calculateGearRatio: function() { return 24/36; } };
       result = serializer.encode(result, '');

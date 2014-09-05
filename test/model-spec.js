@@ -31,7 +31,7 @@ describe('Restmod model class:', function() {
   describe('$getProperty', function() {
 
     it('should retrieve an internal property', function() {
-      expect(Bike.$getProperty('url')).toEqual('/api/bikes');
+      expect(Bike.$getProperty('primaryKey')).toEqual('id');
     });
 
     it('should return default value if requested property is not set', function() {

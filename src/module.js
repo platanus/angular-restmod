@@ -12,7 +12,13 @@ var RMModule = angular.module('restmod', ['ng', 'platanus.inflector']);
  */
 RMModule.provider('restmod', [function() {
 
-  var BASE_CHAIN = ['RMBuilderExt', 'RMBuilderRelations']; // The base mixin chain
+  var BASE_CHAIN = ['RMBuilderExt', 'RMBuilderRelations'];
+
+  function wrapInInvoke(_mixin) {
+    return function(_injector) {
+      _injector.invoke(_mixin, this, { $builder: this });
+    };
+  }
 
   return {
     /**
@@ -33,7 +39,14 @@ RMModule.provider('restmod', [function() {
      * ```
      */
     rebase: function(/* _mix_names */) {
-      Array.prototype.push.apply(BASE_CHAIN, arguments);
+      var mixin, i, l = arguments.length;
+      for(i = 0; i < l; i++) {
+        mixin = arguments[i];
+        if(angular.isArray(mixin) || angular.isFunction(mixin)) {
+          mixin = wrapInInvoke(mixin);
+        }
+        BASE_CHAIN.push(mixin);
+      }
       return this;
     },
 
@@ -44,7 +57,7 @@ RMModule.provider('restmod', [function() {
      *
      * The restmod service provides factory methods for the different restmod consumables.
      */
-    $get: ['RMBuilder', function(Builder) {
+    $get: ['RMModelFactory', function(buildModel) {
 
       var arraySlice = Array.prototype.slice;
 
@@ -110,17 +123,7 @@ RMModule.provider('restmod', [function() {
          * @return {StaticApi} The new model.
          */
         model: function(_baseUrl/* , _mix */) {
-
-          // Load builder and execute it.
-          var builder = new Builder(), chain;
-          builder.loadMixinChain(BASE_CHAIN);
-          builder.loadMixinChain(chain = arraySlice.call(arguments, 1));
-          builder.dsl.setProperty('url', _baseUrl);
-
-          // build model
-          var model = builder.buildModel();
-          model.$chain = chain;
-          return model;
+          return buildModel(_baseUrl, BASE_CHAIN).$mix(arraySlice.call(arguments, 1));
         },
 
         /**
@@ -139,7 +142,7 @@ RMModule.provider('restmod', [function() {
          * @return {object} The mixin
          */
         mixin: function(/* _mix */) {
-          return { $isAbstract: true, $chain: arraySlice.call(arguments, 0) };
+          return { $isAbstract: true, $$chain: arraySlice.call(arguments, 0) };
         },
 
         /**
