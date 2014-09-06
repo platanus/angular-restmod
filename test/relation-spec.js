@@ -94,7 +94,7 @@ describe('Restmod model relation:', function() {
 
     it('should bubble child events to child type', function() {
       var spy = jasmine.createSpy();
-      $injector.get('BikeRide').$on('after-init', spy);
+      $injector.get('BikeRide').$mix({ '~after-init': spy });
       Bike.$new(1).$decode({ rides: [{ id: 1 }] });
       expect(spy).toHaveBeenCalled();
     });
@@ -167,7 +167,7 @@ describe('Restmod model relation:', function() {
 
     it('should bubble child events to child type', function() {
       var spy = jasmine.createSpy();
-      $injector.get('SerialNo').$on('after-init', spy);
+      $injector.get('SerialNo').$mix({ '~after-init': spy });
       Bike.$new(1).$decode({ serial: { value: 'SERIAL' } });
       expect(spy).toHaveBeenCalled();
     });

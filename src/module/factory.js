@@ -18,6 +18,7 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
       packer = null,
       defaults = [],                    // attribute defaults as an array of [key, value]
       meta = {},                        // atribute metadata
+      hooks = {},
       builder;                          // the model builder
 
     // make sure a style base was selected for the model
@@ -266,9 +267,30 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
         builder.chain(arguments);
         this.$$chain.push.apply(this.$$chain, arguments);
         return this;
+      },
+
+      /**
+       * @memberof StaticApi#
+       *
+       * @description Simple $dispatch implementation for CommonApi compat.
+       *
+       * @param  {string} _hook Hook name
+       * @param  {array} _args Hook arguments
+       * @param  {object} _ctx Hook execution context override
+       *
+       * @return {Model} The model
+       */
+      $dispatch: function(_hook, _args, _ctx) {
+        var cbs = hooks[_hook], i, cb;
+        if(cbs) {
+          for(i = 0; !!(cb = cbs[i]); i++) {
+            cb.apply(_ctx || this, _args || []);
+          }
+        }
+        return this;
       }
 
-    }, ScopeApi, CommonApi);
+    }, ScopeApi);
 
     ///// Setup record api
 
@@ -522,7 +544,7 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
        * @return {BuilderApi} self
        */
       on: function(_hook, _do) {
-        Model.$on(_hook, _do);
+        (hooks[_hook] || (hooks[_hook] = [])).push(_do);
         return this;
       }
     }));

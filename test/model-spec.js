@@ -17,7 +17,9 @@ describe('Restmod model class:', function() {
 
     it('should fire the after-init hook', function() {
       var spy = jasmine.createSpy('hook');
-      Bike.$on('after-init', spy);
+      Bike = restmod.model('/api/bikes', {
+        '~after-init': spy
+      });
       (new Bike());
       expect(spy).toHaveBeenCalled();
     });
