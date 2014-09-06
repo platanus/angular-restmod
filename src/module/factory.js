@@ -4,7 +4,7 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
   function($injector, $log, inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi, Serializer, Builder) {
 
   var NAME_RGX = /(.*?)([^\/]+)\/?$/,
-      extend = angular.extend;
+      extend = Utils.extendOverriden;
 
   return function(_baseUrl, _baseChain) {
 
@@ -112,12 +112,12 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
       $$inferKey: inferKey,
 
       // creates a new model bound by default to the static scope
-      $$new: function(_pk, _scope) {
+      $new: function(_pk, _scope) {
         return new Model(_scope || Model, _pk);
       },
 
       // creates a new collection bound by default to the static scope
-      $$collection: function(_params, _scope) {
+      $collection: function(_params, _scope) {
         return newCollection(_scope || Model, _params);
       },
 
@@ -300,7 +300,7 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
       $$inferKey: inferKey,
 
       // loads the default parameter values
-      $$loadDefaults: function() {
+      $initialize: function() {
         var tmp;
         for(var i = 0; (tmp = defaults[i]); i++) {
           this[tmp[0]] = (typeof tmp[1] === 'function') ? tmp[1].apply(this) : tmp[1];
@@ -314,12 +314,12 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
       $$unpack: adaptPacker('unpack'),
 
       // serializer decode adaptor used by $decode
-      $$decode: function(_raw, _mask) {
-        return serializer.decode(this, _raw, _mask);
+      $decode: function(_raw, _mask) {
+        serializer.decode(this, _raw, _mask);
       },
 
       // serializer encode adaptor used by $encode
-      $$encode: function(_mask) {
+      $encode: function(_mask) {
         return serializer.encode(this, _mask);
       },
 
@@ -335,13 +335,13 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
       $$inferKey: inferKey,
 
       // provide record contructor
-      $$new: function(_pk, _scope) {
+      $new: function(_pk, _scope) {
         return new Model(_scope || this, _pk);
       },
 
       // provide collection constructor
-      $$collection: function(_params, _scope) {
-        _params = this.$params ? extend({}, this.$params, _params) : _params;
+      $collection: function(_params, _scope) {
+        _params = this.$params ? angular.extend({}, this.$params, _params) : _params;
         return newCollection(_scope || this.$scope, _params);
       },
 
@@ -369,7 +369,7 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
      * Provides an isolated set of methods to customize the serializer behaviour.
      *
      */
-    builder = new Builder(extend(serializer.dsl(), {
+    builder = new Builder(angular.extend(serializer.dsl(), {
 
       /**
        * @memberof BuilderApi#

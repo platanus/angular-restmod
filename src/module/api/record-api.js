@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMRecordApi', ['RMUtils', 'RMPackerCache', function(Utils, packerCache) {
+RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
 
   /**
    * @class RelationScope
@@ -107,7 +107,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', 'RMPackerCache', function(Utils, pac
      */
     $initialize: function() {
       // apply defaults
-      this.$$loadDefaults();
+      this.$super();
 
       // after initialization hook
       // TODO: put this on $new so it can use stacked DSP?
@@ -195,7 +195,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', 'RMPackerCache', function(Utils, pac
      */
     $decode: function(_raw, _mask) {
       // IDEA: let user override serializer
-      this.$$decode(_raw, _mask || Utils.READ_MASK);
+      this.$super(_raw, _mask || Utils.READ_MASK);
       if(!this.$pk) this.$pk = this.$$inferKey(_raw); // TODO: warn if key changes
       this.$dispatch('after-feed', [_raw]);
       return this;
@@ -210,51 +210,8 @@ RMModule.factory('RMRecordApi', ['RMUtils', 'RMPackerCache', function(Utils, pac
      * @return {string} raw data
      */
     $encode: function(_mask) {
-      var raw = this.$$encode(_mask || Utils.CREATE_MASK);
+      var raw = this.$super(_mask || Utils.CREATE_MASK);
       this.$dispatch('before-render', [raw]);
-      return raw;
-    },
-
-    /**
-     * @memberof RecordApi#
-     *
-     * @description
-     *
-     * Unpacks and decode raw data from a server generated structure.
-     *
-     * ATTENTION: do not override this method to change the object wrapping strategy,
-     * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
-     *
-     * @param  {mixed} _raw Raw server data
-     * @param  {string} _mask 'CRU' mask
-     * @return {RecordApi} this
-     */
-    $unwrap: function(_raw, _mask) {
-      try {
-        packerCache.prepare();
-        _raw = this.$$unpack(_raw);
-        return this.$decode(_raw, _mask);
-      } finally {
-        packerCache.clear();
-      }
-    },
-
-    /**
-     * @memberof RecordApi#
-     *
-     * @description
-     *
-     * Encode and packs object into a server compatible structure that can be used for PUT/POST operations.
-     *
-     * ATTENTION: do not override this method to change the object wrapping strategy,
-     * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
-     *
-     * @param  {string} _mask 'CRU' mask
-     * @return {string} raw data
-     */
-    $wrap: function(_mask) {
-      var raw = this.$encode(_mask);
-      raw = this.$$pack(raw);
       return raw;
     },
 
@@ -275,12 +232,14 @@ RMModule.factory('RMRecordApi', ['RMUtils', 'RMPackerCache', function(Utils, pac
       var request = { method: 'GET', url: url, params: _params };
 
       this.$dispatch('before-fetch', [request]);
-      return this.$send(request, function(_response) {
+      this.$send(request, function(_response) {
         this.$unwrap(_response.data);
         this.$dispatch('after-fetch', [_response]);
       }, function(_response) {
         this.$dispatch('after-fetch-error', [_response]);
       });
+
+      return this;
     },
 
     /**

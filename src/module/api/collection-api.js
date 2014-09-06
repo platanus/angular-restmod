@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMCollectionApi', ['RMUtils', 'RMPackerCache', function(Utils, packerCache) {
+RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
 
   var extend = angular.extend;
 
@@ -100,49 +100,6 @@ RMModule.factory('RMCollectionApi', ['RMUtils', 'RMPackerCache', function(Utils,
       }
 
       this.$dispatch('before-render-many', [raw]);
-      return raw;
-    },
-
-    /**
-     * @memberof CollectionApi#
-     *
-     * @description
-     *
-     * Unpacks and decode raw data from a server generated structure into this collection.
-     *
-     * ATTENTION: do not override this method to change the object wrapping strategy,
-     * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
-     *
-     * @param  {mixed} _raw Raw server data
-     * @param  {string} _mask 'CRU' mask
-     * @return {CollectionApi} this
-     */
-    $unwrap: function(_raw, _mask) {
-      try {
-        packerCache.prepare();
-        _raw = this.$$unpack(_raw);
-        return this.$decode(_raw, _mask);
-      } finally {
-        packerCache.clear();
-      }
-    },
-
-    /**
-     * @memberof CollectionApi#
-     *
-     * @description
-     *
-     * Encode and packs object into a server compatible structure that can be used for PUT/POST operations.
-     *
-     * ATTENTION: do not override this method to change the object wrapping strategy,
-     * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
-     *
-     * @param  {string} _mask 'CRU' mask
-     * @return {string} raw data
-     */
-    $wrap: function(_mask) {
-      var raw = this.$encode(_mask);
-      raw = this.$$pack(raw);
       return raw;
     },
 

@@ -23,7 +23,7 @@ RMModule.factory('RMScopeApi', [function() {
      * @return {RecordApi} New model instance
      */
     $new: function(_pk, _scope) {
-      return this.$$new(_pk, _scope);
+      return this.$super(_pk, _scope);
     },
 
     /**
@@ -95,7 +95,7 @@ RMModule.factory('RMScopeApi', [function() {
      * @return {CollectionApi} Model Collection
      */
     $collection: function(_params, _scope) {
-      return this.$$collection(_params, _scope);
+      return this.$super(_params, _scope);
     },
 
     /**
