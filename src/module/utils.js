@@ -154,12 +154,17 @@ RMModule.factory('RMUtils', ['$log', function($log) {
      * @param  {object} _target Object to be extended
      * @param  {object} _other  Source object
      */
-    extendOverriden: function(_target, _other) {
-      for(var key in _other) {
-        if(_other.hasOwnProperty(key)) {
-          _target[key] = Utils.override(_target[key], _other[key]);
+    extendOverriden: function(_target) {
+      for(var i = 1; i < arguments.length; i++) {
+        var other = arguments[i];
+        for(var key in other) {
+          if(other.hasOwnProperty(key)) {
+            _target[key] = _target[key] && typeof _target[key] === 'function' ? Utils.override(_target[key], other[key]) : other[key];
+          }
         }
       }
+
+      return _target;
     },
 
     /**
