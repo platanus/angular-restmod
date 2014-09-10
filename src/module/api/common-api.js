@@ -4,6 +4,22 @@ RMModule.factory('RMCommonApi', ['$http', '$q', 'RMPackerCache', function($http,
 
   var EMPTY_ARRAY = [];
 
+  function wrapPromise(_ctx, _fun) {
+    var dsp = _ctx.$dispatcher();
+    return function(_last) {
+      // save and reset promise
+      var oldPromise = _ctx.$promise;
+      _ctx.$promise = undefined;
+      try {
+        _ctx.$last = _last;
+        var result = dsp ? _ctx.$decorate(dsp, _fun, [_ctx]) : _fun.call(_ctx, _ctx);
+        return result === undefined ? _ctx.$promise : result;
+      } finally {
+        _ctx.$promise = oldPromise; // restore old promise
+      }
+    };
+  }
+
   /**
    * @class CommonApi
    *
@@ -150,7 +166,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', 'RMPackerCache', function($http,
      * @param {function} _fun Function to be executed in with decorated context, this function is executed in the callee object context.
      * @return {CommonApi} self
      */
-    $decorate: function(_hooks, _fun) {
+    $decorate: function(_hooks, _fun, _args) {
 
       var oldDispatcher = this.$$dsp;
 
@@ -162,7 +178,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', 'RMPackerCache', function($http,
       };
 
       try {
-        return _fun.call(this);
+        return _fun.apply(this, _args);
       } finally {
         // reset dispatcher with old value
         this.$$dsp = oldDispatcher;
@@ -224,7 +240,11 @@ RMModule.factory('RMCommonApi', ['$http', '$q', 'RMPackerCache', function($http,
      * @return {promise} $q promise
      */
     $asPromise: function() {
-      return this.$promise || $q.when(this);
+      var _this = this;
+      return this.$promise ? this.$promise.then(
+        function() { return _this; },
+        function() { return $q.reject(_this); }
+      ) : $q.when(this);
     },
 
     /**
@@ -246,13 +266,17 @@ RMModule.factory('RMCommonApi', ['$http', '$q', 'RMPackerCache', function($http,
      */
     $then: function(_success, _error) {
 
-      if(!this.$promise) {
+      if(!this.$promise) { // TODO: $promise is resolved...
         // if there is no pending promise, just execute success callback,
         // if callback returns a promise, then set it as the current promise.
-        var promise = _success(this);
-        if(promise && typeof promise.then === 'function') this.$promise = promise;
+        this.$last = null;
+        var result = _success.call(this, this);
+        if(result !== undefined) this.$promise = $q.when(result);
       } else {
-        this.$promise = this.$promise.then(_success, _error);
+        this.$promise = this.$promise.then(
+          _success ? wrapPromise(this, _success) : _success,
+          _error ? wrapPromise(this, _error) : _error
+        );
       }
 
       return this;
@@ -299,32 +323,28 @@ RMModule.factory('RMCommonApi', ['$http', '$q', 'RMPackerCache', function($http,
      */
     $send: function(_options, _success, _error) {
 
-      var self = this, dsp = this.$dispatcher();
-
       this.$pending = (this.$pending || []);
       this.$pending.push(_options);
 
-      function performRequest() {
+      return this.$then(function() {
 
         // if request was canceled, then just return a resolved promise
         if(_options.canceled) {
-          self.$pending.splice(0, 1);
-          self.$status = 'canceled';
-          return $q.when(self); // it is necesary to return a promise to be consistent.
+          this.$pending.splice(0, 1);
+          this.$status = 'canceled';
+          return;
         }
 
-        self.$decorate(dsp, function() {
-          this.$response = null;
-          this.$status = 'pending';
-          this.$dispatch('before-request', [_options]);
-        });
+        this.$response = null;
+        this.$status = 'pending';
+        this.$dispatch('before-request', [_options]);
 
-        var $promise = $http(_options).then(function(_response) {
+        var dsp = this.$dispatcher(), _this = this;
+        return $http(_options).then(function(_response) {
 
-          return self.$decorate(dsp, function() {
+          return _this.$decorate(dsp, function() {
 
             this.$pending.splice(0, 1);
-            if(this.$promise === $promise) this.$promise = undefined; // reset promise to avoid unnecessary waiting
 
             if(_options.canceled) {
               // if request was canceled during request, ignore post request actions.
@@ -336,16 +356,13 @@ RMModule.factory('RMCommonApi', ['$http', '$q', 'RMPackerCache', function($http,
               this.$dispatch('after-request', [_response]);
               if(_success) _success.call(this, _response);
             }
-
-            return this;
           });
 
         }, function(_response) {
 
-          return self.$decorate(dsp, function() {
+          return _this.$decorate(dsp, function() {
 
             this.$pending.splice(0, 1);
-            if(this.$promise === $promise) this.$promise = undefined; // reset promise to avoid unnecessary waiting
 
             if(_options.canceled) {
               // if request was canceled during request, ignore error handling
@@ -364,20 +381,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', 'RMPackerCache', function($http,
             }
           });
         });
-
-        return $promise;
-      }
-
-      // chain requests, do not allow parallel request per resource.
-      // IDEA: allow various request modes: parallel, serial, just one (discard), etc
-
-      if(this.$promise) {
-        this.$promise = this.$promise.then(performRequest, performRequest);
-      } else {
-        this.$promise = performRequest();
-      }
-
-      return this;
+      });
     },
 
     /**

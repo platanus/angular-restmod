@@ -17,10 +17,17 @@ describe('Restmod model class:', function() {
 
   describe('$asPromise', function() {
 
-    it('should return current promise if available', function() {
-      var $bike = Bike.$new();
-      var promise = $bike.$promise = $q.when(true);
-      expect($bike.$asPromise()).toBe(promise);
+    it('should always resolve to the resource instance', function() {
+      var defered = $q.defer(), bike = Bike.$new(), spy = jasmine.createSpy();
+
+      bike.$then(function() {
+        return defered.promise;
+      });
+
+      bike.$asPromise().then(spy);
+      defered.resolve('notabike');
+      $rootScope.$apply();
+      expect(spy).toHaveBeenCalledWith(bike);
     });
 
     it('should not update internal promise if new promise is generated', function() {
@@ -130,11 +137,137 @@ describe('Restmod model class:', function() {
         return defered.promise;
       }).$then(spy);
 
+      $rootScope.$apply();
       expect(spy).not.toHaveBeenCalled();
       defered.resolve(bike);
-      $rootScope.$digest();
+      $rootScope.$apply();
       expect(spy).toHaveBeenCalled();
     });
+
+    it('should properly handle nested calls', function() {
+      var bike = Bike.$new(), defered = $q.defer(), spy = jasmine.createSpy();
+      bike.$then(function() {
+        this.$then(function() {
+          return defered.promise;
+        });
+      }).$then(spy);
+
+      expect(spy).not.toHaveBeenCalled();
+      defered.resolve();
+      $rootScope.$apply();
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('should give callback return value priority over nested calls', function() {
+      var bike = Bike.$new(), defered = $q.defer(), spy = jasmine.createSpy();
+      bike.$then(function() {
+        this.$then(function() {
+          return defered.promise;
+        });
+        return 'resolved';
+      }).$then(spy);
+
+      expect(spy).not.toHaveBeenCalled();
+      $rootScope.$apply();
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('should execute callbacks in the resource context', function() {
+      var bike = Bike.$new(), test;
+      bike.$then(function() { test = this; });
+      expect(test).toEqual(bike);
+    });
+
+    it('should honor decorated contexts', function() {
+      var bike = Bike.$new(), spy = jasmine.createSpy();
+
+      bike.$decorate({
+        'test': spy,
+      }, function() {
+        this.$then(function() { this.$dispatch('test'); });
+      });
+
+      expect(spy).toHaveBeenCalled();
+    });
+
+    describe('when there is an unresolved promise', function() {
+      var bike, defered;
+
+      beforeEach(function() {
+        bike = Bike.$new();
+        defered = $q.defer();
+
+        bike.$then(function() {
+          return defered.promise;
+        });
+      });
+
+      it('should execute callbacks in the resource context', function() {
+        var test;
+        bike.$then(function() { test = this; });
+        defered.resolve();
+        $rootScope.$apply();
+        expect(test).toEqual(bike);
+      });
+
+      it('should properly handle nested calls', function() {
+        var defered2 = $q.defer(), spy = jasmine.createSpy();
+        bike.$then(function() {
+          this.$then(function() {
+            return defered2.promise;
+          });
+        }).$then(spy);
+
+        defered.resolve();
+        $rootScope.$apply();
+        expect(spy).not.toHaveBeenCalled();
+        defered2.resolve();
+        $rootScope.$apply();
+        expect(spy).toHaveBeenCalled();
+      });
+
+      it('should give callback return value priority over nested calls', function() {
+        var defered2 = $q.defer(), spy = jasmine.createSpy();
+        bike.$then(function() {
+          this.$then(function() {
+            return defered2.promise;
+          });
+          return 'teapot';
+        }).$then(spy);
+
+        expect(spy).not.toHaveBeenCalled();
+        defered.resolve();
+        $rootScope.$apply();
+        expect(spy).toHaveBeenCalled();
+      });
+
+      it('should pass error information in $last property', function() {
+        var test;
+        bike.$then(null, function(_bike) {
+          test = _bike.$last;
+        });
+
+        defered.reject('reason');
+        $rootScope.$apply();
+        expect(test).toEqual('reason');
+      });
+
+      it('should honor decorated contexts', function() {
+        var spy = jasmine.createSpy();
+
+        bike.$decorate({
+          'test': spy,
+        }, function() {
+          this.$then(function() { this.$dispatch('test'); });
+        });
+
+        expect(spy).not.toHaveBeenCalled();
+        defered.resolve();
+        $rootScope.$apply();
+        expect(spy).toHaveBeenCalled();
+      });
+    });
+
   });
 
   describe('$finally', function() {

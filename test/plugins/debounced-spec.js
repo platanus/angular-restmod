@@ -53,7 +53,7 @@ describe('Plugin: Debounced Model', function() {
       });
 
       $timeout.flush();
-      expect(spy).toHaveBeenCalledWith('hello');
+      expect(spy).toHaveBeenCalledWith(bike);
     }));
 
     it('should leave the $promise property in a valid state', inject(function($timeout, $httpBackend, $q, Bike) {
@@ -73,7 +73,7 @@ describe('Plugin: Debounced Model', function() {
       });
 
       $timeout.flush();
-      expect(spy).toHaveBeenCalledWith('hello');
+      expect(spy).toHaveBeenCalledWith(bike);
     }));
   });
 

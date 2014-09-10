@@ -52,15 +52,9 @@ RMModule.factory('RMExtendedApi', ['$q', function($q) {
      * @return {promise} Promise that resolves to the resource.
      */
     $resolve: function(_params) {
-      var _this = this;
       return this.$then(function() { // chain resolution in request promise chain
-        _this.$dispatch('before-resolve', []);
-        if(_this.$resolved) {
-          return _this;
-        } else {
-          _this.$promise = null; // force fetch to run (this could use a separate function)
-          return _this.$fetch(_params).$promise;
-        }
+        this.$dispatch('before-resolve', []);
+        if(!this.$resolved) this.$fetch(_params);
       });
     },
 
