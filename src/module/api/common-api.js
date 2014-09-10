@@ -245,7 +245,16 @@ RMModule.factory('RMCommonApi', ['$http', '$q', 'RMPackerCache', function($http,
      * @return {CommonApi} self
      */
     $then: function(_success, _error) {
-      this.$promise = this.$asPromise().then(_success, _error);
+
+      if(!this.$promise) {
+        // if there is no pending promise, just execute success callback,
+        // if callback returns a promise, then set it as the current promise.
+        var promise = _success(this);
+        if(promise && typeof promise.then === 'function') this.$promise = promise;
+      } else {
+        this.$promise = this.$promise.then(_success, _error);
+      }
+
       return this;
     },
 

@@ -122,7 +122,19 @@ describe('Restmod model class:', function() {
   });
 
   describe('$then', function() {
-    // TODO!
+
+    it('should resolve promise returned by success callback before executing next success callback', function() {
+      var bike = Bike.$new(), defered = $q.defer(), spy = jasmine.createSpy();
+
+      bike.$then(function() {
+        return defered.promise;
+      }).$then(spy);
+
+      expect(spy).not.toHaveBeenCalled();
+      defered.resolve(bike);
+      $rootScope.$digest();
+      expect(spy).toHaveBeenCalled();
+    });
   });
 
   describe('$finally', function() {
