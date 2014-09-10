@@ -23,7 +23,7 @@ describe('Restmod collection:', function() {
     it('should retrieve a collection of items of same type', function() {
       query.$fetch();
       expect(query.length).toEqual(0);
-      expect(query.$resolved).toBe(false);
+      expect(query.$resolved).toBeFalsy();
       $httpBackend.flush();
       expect(query.length).toEqual(2);
       expect(query.$resolved).toBe(true);
@@ -42,35 +42,14 @@ describe('Restmod collection:', function() {
 
   });
 
-  describe('$reset', function() {
+  describe('$clear', function() {
 
-    it('should make the next call to $fetch clear old items', function() {
+    it('should remove every item on the collection', function() {
       query.$fetch();
       $httpBackend.flush();
       expect(query.length).toEqual(2);
-      query.$reset().$fetch({ brand: 'giant' });
-      $httpBackend.flush();
-      expect(query.length).toEqual(1);
-    });
-
-  });
-
-  describe('$refresh', function() {
-
-    it('should clear old items on resolve', function() {
-      query.$fetch();
-      $httpBackend.flush();
-      expect(query.length).toEqual(2);
-      query.$refresh({ brand: 'giant' });
-      $httpBackend.flush();
-      expect(query.length).toEqual(1);
-    });
-
-    it('should clear old items on resolve when called consecutivelly', function() {
-      query.$refresh({ brand: 'giant' });
-      query.$refresh({ brand: 'giant' });
-      $httpBackend.flush();
-      expect(query.length).toEqual(1);
+      query.$clear();
+      expect(query.length).toEqual(0);
     });
 
   });

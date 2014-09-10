@@ -66,7 +66,7 @@ RMModule.factory('RMScopeApi', [function() {
      * @return {RecordApi} single record
      */
     $find: function(_pk, _params) {
-      return this.$new(_pk).$fetch(_params);
+      return this.$new(_pk).$resolve(_params);
     },
 
     /**

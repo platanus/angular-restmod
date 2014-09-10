@@ -1,7 +1,7 @@
 'use strict';
 
-RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', 'RMSerializer', 'RMBuilder',
-  function($injector, $log, inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi, Serializer, Builder) {
+RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', 'RMExtendedApi', 'RMSerializer', 'RMBuilder',
+  function($injector, $log, inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi, ExtendedApi, Serializer, Builder) {
 
   var NAME_RGX = /(.*?)([^\/]+)\/?$/,
       extend = Utils.extendOverriden;
@@ -52,12 +52,10 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
     // Collection factory (since a constructor cant be provided...)
     function newCollection(_scope, _params) {
       var col = new Collection();
-      col.$isCollection = true;
       col.$type = Model;
       col.$scope = _scope;
       col.$params = _params;
-      col.$resolved = false;
-      // this.$initialize();
+      col.$initialize();
       return col;
     }
 
@@ -299,7 +297,7 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
       // infer key adaptor
       $$inferKey: inferKey,
 
-      // loads the default parameter values
+      // default initialize: loads the default parameter values
       $initialize: function() {
         var tmp;
         for(var i = 0; (tmp = defaults[i]); i++) {
@@ -325,7 +323,7 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
 
       // expose getProperty in records
       $getProperty: getProperty
-    }, RecordApi, CommonApi);
+    }, CommonApi, RecordApi, ExtendedApi);
 
     ///// Setup collection api
 
@@ -354,10 +352,7 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
       // expose getProperty in collection
       $getProperty: getProperty
 
-    }, CollectionApi, ScopeApi, CommonApi);
-
-    // expose collection type.
-    Model.Collection = Collection;
+    }, ScopeApi, CommonApi, CollectionApi, ExtendedApi);
 
     ///// Setup builder
 

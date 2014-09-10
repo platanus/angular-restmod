@@ -30,10 +30,23 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
    * @property {boolean} $isCollection Helper flag to separate collections from the main type
    * @property {object} $scope The collection scope (hierarchical scope, not angular scope)
    * @property {object} $params The collection query parameters
-   * @property {boolean} $resolved The collection resolve status
    *
    */
   return {
+
+    $isCollection: true,
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description Called by collection constructor on initialization.
+     *
+     * Note: Is better to add a hook on after-init than overriding this method.
+     */
+    $initialize: function() {
+      // after initialization hook
+      this.$dispatch('after-collection-init');
+    },
 
     /**
      * @memberof CollectionApi#
@@ -63,7 +76,7 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
     /**
      * @memberof CollectionApi#
      *
-     * @description Feeds raw collection data into the collection, marks collection as $resolved
+     * @description Feeds raw collection data into the collection.
      *
      * This method is for use in collections only.
      *
@@ -75,13 +88,11 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
 
       Utils.assert(_raw && angular.isArray(_raw), 'Collection $decode expected array');
 
-      if(!this.$resolved) this.length = 0; // reset contents if not resolved.
       for(var i = 0, l = _raw.length; i < l; i++) {
         this.$buildRaw(_raw[i], _mask).$reveal(); // build and disclose every item.
       }
 
       this.$dispatch('after-feed-many', [_raw]);
-      this.$resolved = true;
       return this;
     },
 
@@ -106,15 +117,12 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
     /**
      * @memberof CollectionApi#
      *
-     * @description Resets the collection's resolve status.
-     *
-     * This method is for use in collections only.
+     * @description Resets the collection's contents
      *
      * @return {CollectionApi} self
      */
-    $reset: function() {
-      this.$cancel(); // cancel pending requests.
-      this.$resolved = false;
+    $clear: function() {
+      this.length = 0; // reset the collection contents
       return this;
     },
 
@@ -122,7 +130,7 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
      * @memberof CollectionApi#
      *
      * @description Begin a server request to populate collection. This method does not
-     * clear the collection contents, use `$refresh` to reset and fetch.
+     * clear the collection contents by default, use `$refresh` to reset and fetch.
      *
      * This method is for use in collections only.
      *
@@ -145,18 +153,6 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
       }, function(_response) {
         this.$dispatch('after-fetch-many-error', [_response]);
       });
-    },
-
-    /**
-     * @memberof CollectionApi#
-     *
-     * @description Resets and fetches content.
-     *
-     * @param  {object} _params `$fetch` params
-     * @return {CollectionApi} self
-     */
-    $refresh: function(_params) {
-      return this.$reset().$fetch(_params);
     },
 
     /**
