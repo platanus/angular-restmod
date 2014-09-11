@@ -220,7 +220,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      *
      * @description Begin a server request for updated resource data.
      *
-     * The request's promise is provided as the $promise property.
+     * The request's promise can be accessed using the `$asPromise` method.
      *
      * @param {object} _params Optional list of params to be passed to object request.
      * @return {RecordApi} this
@@ -249,7 +249,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      *
      * If resource is new and it belongs to a collection and it hasnt been revealed, then it will be revealed.
      *
-     * The request's promise is provided as the $promise property.
+     * The request's promise can be accessed using the `$asPromise` method.
      *
      * @return {RecordApi} this
      */
@@ -300,7 +300,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      *
      * @description Begin a server request to destroy the resource.
      *
-     * The request's promise is provided as the $promise property.
+     * The request's promise can be accessed using the `$asPromise` method.
      *
      * @return {RecordApi} this
      */

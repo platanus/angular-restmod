@@ -299,17 +299,20 @@ As with $create, calling `$destroy` on a record bound to a collection will remov
 <!-- before: bike = Bike.$new(1); -->
 <!-- before: doSomething = jasmine.createSpy(); -->
 
-All operations described above will set the `$promise` property. This property is a regular `$q` promise that is resolved when operation succeds or fail. It can be used directly or using the `$then` method.
+All REST operations described above generate `$q` promises that are fulfilled when the operation succeds or fail. To access this promises for something like a **resolve handler in ui-router** you can use the `$asPromise` method. Its also posible to use the `$then` method to chain additional logic to the last operation.
 
 ```javascript
-bike.$fetch().$then(function(_bike) {
+bike.$fetch().$asPromise().then(function(_bike) {
 	doSomething(_bike.brand);
 });
-// same as:
-bike.$fetch().$promise.then(function(_bike) {
+// similar to:
+bike.$fetch().$then(function(_bike) {
+	// if this function returns a promise, then other calls to $then (or REST operations) will wait until returned promise is resolved.
 	doSomething(_bike.brand);
 });
 ```
+
+The difference between the `$asPromise` and the `$then` methods is that the first will just return the last promise and the second one will chain a new promise to the internal promise queue used to execute REST operations. That means that other calls to `$next` and REST operations will wait until logic injected using `$then` finish before running.
 
 <!-- it: $httpBackend.flush(); expect(doSomething).toHaveBeenCalled(); -->
 <!-- end -->
