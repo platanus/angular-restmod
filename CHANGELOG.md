@@ -1,3 +1,12 @@
+<a name="1.0.1"></a>
+### 1.0.1 (2014-09-11)
+
+
+#### Bug Fixes
+
+* **gruntfile:** fixes non bundled library distributable ([2ca6bfb6](http://github.com/angular-platanus/restmod/commit/2ca6bfb6a222ff65fba05f28f6ee175dc8671530), closes [#125](http://github.com/angular-platanus/restmod/issues/125))
+
+
 <a name="1.0.0"></a>
 ## 1.0.0 (2014-09-10)
 

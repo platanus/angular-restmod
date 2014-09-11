@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.0.0 - 2014-09-10
+ * @version v1.0.1 - 2014-09-11
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -191,6 +191,1261 @@ RMModule.provider('restmod', [function() {
   return restmod.mixin;
 }]);
 
+RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
+
+  var extend = angular.extend;
+
+  /**
+   * @class CollectionApi
+   *
+   * @extends ScopeApi
+   * @extends CommonApi
+   *
+   * @description
+   *
+   * A restmod collection is an extended array type bound REST resource route.
+   *
+   * Every time a new restmod model is created, an associated collection type is created too.
+   *
+   * TODO: talk about fetch/refresh behaviour, lifecycles, collection scopes, adding/removing
+   *
+   * For `$fetch` on a collection:
+   *
+   * * before-fetch-many
+   * * before-request
+   * * after-request[-error]
+   * * after-feed (called for every record if no errors)
+   * * after-feed-many (only called if no errors)
+   * * after-fetch-many[-error]
+   *
+   * @property {boolean} $isCollection Helper flag to separate collections from the main type
+   * @property {object} $scope The collection scope (hierarchical scope, not angular scope)
+   * @property {object} $params The collection query parameters
+   *
+   */
+  return {
+
+    $isCollection: true,
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description Called by collection constructor on initialization.
+     *
+     * Note: Is better to add a hook on after-init than overriding this method.
+     */
+    $initialize: function() {
+      // after initialization hook
+      this.$dispatch('after-collection-init');
+    },
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description Gets this collection url without query string.
+     *
+     * @return {string} The collection url.
+     */
+    $url: function() {
+      return this.$scope.$url();
+    },
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description Part of the scope interface, provides urls for collection's items.
+     *
+     * @param {RecordApi} _pk Item key to provide the url to.
+     * @return {string|null} The url or nill if item does not meet the url requirements.
+     */
+    $urlFor: function(_pk) {
+      // force item unscoping if model is not nested (maybe make this optional)
+      var baseUrl = this.$type.$url();
+      return Utils.joinUrl(baseUrl ? baseUrl : this.$url(), _pk);
+    },
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description Feeds raw collection data into the collection.
+     *
+     * This method is for use in collections only.
+     *
+     * @param {array} _raw Data to add
+     * @param  {string} _mask 'CRU' mask
+     * @return {CollectionApi} self
+     */
+    $decode: function(_raw, _mask) {
+
+      Utils.assert(_raw && angular.isArray(_raw), 'Collection $decode expected array');
+
+      for(var i = 0, l = _raw.length; i < l; i++) {
+        this.$buildRaw(_raw[i], _mask).$reveal(); // build and disclose every item.
+      }
+
+      this.$dispatch('after-feed-many', [_raw]);
+      return this;
+    },
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description Encodes array data into a its serialized version.
+     *
+     * @param  {string} _mask 'CRU' mask
+     * @return {CollectionApi} self
+     */
+    $encode: function(_mask) {
+      var raw = [];
+      for(var i = 0, l = this.length; i < l; i++) {
+        raw.push(this[i].$encode(_mask));
+      }
+
+      this.$dispatch('before-render-many', [raw]);
+      return raw;
+    },
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description Resets the collection's contents
+     *
+     * @return {CollectionApi} self
+     */
+    $clear: function() {
+      this.length = 0; // reset the collection contents
+      return this;
+    },
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description Begin a server request to populate collection. This method does not
+     * clear the collection contents by default, use `$refresh` to reset and fetch.
+     *
+     * This method is for use in collections only.
+     *
+     * @param {object|function} _params Additional request parameters, not stored in collection,
+     * if a function is given, then it will be called with the request object to allow requet customization.
+     * @return {CollectionApi} self
+     */
+    $fetch: function(_params) {
+      var request = { method: 'GET', url: this.$url(), params: this.$params };
+
+      if(_params) {
+        request.params = request.params ? extend(request.params, _params) : _params;
+      }
+
+      // TODO: check that collection is bound.
+      this.$dispatch('before-fetch-many', [request]);
+      return this.$send(request, function(_response) {
+        this.$unwrap(_response.data); // feed retrieved data.
+        this.$dispatch('after-fetch-many', [_response]);
+      }, function(_response) {
+        this.$dispatch('after-fetch-many-error', [_response]);
+      });
+    },
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description Adds an item to the back of the collection. This method does not attempt to send changes
+     * to the server. To create a new item and add it use $create or $build.
+     *
+     * Triggers after-add callbacks.
+     *
+     * @param {RecordApi} _obj Item to be added
+     * @return {CollectionApi} self
+     */
+    $add: function(_obj, _idx) {
+
+      Utils.assert(_obj.$type && _obj.$type === this.$type, 'Collection $add expects record of the same $type');
+
+      // TODO: make sure object is f type Model?
+      if(_obj.$position === undefined) {
+        if(_idx !== undefined) {
+          this.splice(_idx, 0, _obj);
+        } else {
+          this.push(_obj);
+        }
+        _obj.$position = true; // use true for now, keeping position updated can be expensive
+        this.$dispatch('after-add', [_obj]);
+      }
+      return this;
+    },
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description  Removes an item from the collection.
+     *
+     * This method does not send a DELETE request to the server, it just removes the
+     * item locally. To remove an item AND send a DELETE use the item's $destroy method.
+     *
+     * Triggers after-remove callbacks.
+     *
+     * @param {RecordApi} _obj Item to be removed
+     * @return {CollectionApi} self
+     */
+    $remove: function(_obj) {
+      var idx = this.$indexOf(_obj);
+      if(idx !== -1) {
+        this.splice(idx, 1);
+        _obj.$position = undefined;
+        this.$dispatch('after-remove', [_obj]);
+      }
+      return this;
+    },
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description Finds the location of an object in the array.
+     *
+     * If a function is provided then the index of the first item for which the function returns true is returned.
+     *
+     * @param {RecordApi|function} _obj Object to find
+     * @return {number} Object index or -1 if not found
+     */
+    $indexOf: function(_obj) {
+      var accept = typeof _obj === 'function' ? _obj : false;
+      for(var i = 0, l = this.length; i < l; i++) {
+        if(accept ? accept(this[i]) : this[i] === _obj) return i;
+      }
+      return -1;
+    }
+  };
+
+}]);
+RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', function($http, $q, $log, packerCache) {
+
+  var EMPTY_ARRAY = [];
+
+  function wrapPromise(_ctx, _fun) {
+    var dsp = _ctx.$dispatcher();
+    return function(_last) {
+      // save and reset promise
+      var oldPromise = _ctx.$promise;
+      _ctx.$promise = undefined;
+      try {
+        _ctx.$last = _last;
+        var result = dsp ? _ctx.$decorate(dsp, _fun, [_ctx]) : _fun.call(_ctx, _ctx);
+        return result === undefined ? _ctx.$promise : result;
+      } finally {
+        _ctx.$promise = oldPromise; // restore old promise
+      }
+    };
+  }
+
+  /**
+   * @class CommonApi
+   *
+   * @description
+   *
+   * Provides a common framework for other restmod components.
+   *
+   * This API is included in {@link RecordApi} and {@link CollectionApi}.
+   * making its methods available in every structure generated by restmod.
+   *
+   * TODO: Describe hook mechanism, promise mechanism and send lifecycle.
+   *
+   * @property {promise} $promise The last operation promise (undefined if no promise has been created yet)
+   * @property {array} $pending Pending requests associated to this resource (undefined if no request has been initiated)
+   * @property {object} $$cb Scope call backs (undefined if no callbacks have been defined, private api)
+   * @property {function} $$dsp The current event dispatcher (private api)
+   */
+  var CommonApi = {
+
+    // Hooks API
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Executes a given hook callbacks using the current dispatcher context.
+     *
+     * This method can be used to provide custom object lifecycle hooks.
+     *
+     * Usage:
+     *
+     * ```javascript
+     * var mixin = restmod.mixin({
+     *   triggerDummy: function(_param) {
+     *     this.$dispatch('dummy-hook', _param);
+     *   }
+     * });
+     *
+     * // Then hook can be used at model definition to provide type-level customization:
+     * var Bike $resmod.model('/api/bikes', mixin, {
+     *   '~dummy-hook': function() {
+     *     alert('This is called for every bike');
+     *   }
+     * };
+     *
+     * // or at instance level:
+     * var myBike = Bike.$build();
+     * myBike.$on('dummy-hook', function() {
+     *   alert('This is called for myBike only');
+     * });
+     *
+     * // or event at decorated context level
+     * myBike.$decorate({
+     *   'dummy-hook': function() {
+     *     alert('This is called for myBike only inside the decorated context');
+     *   }
+     * }, fuction() {
+     *  // decorated context
+     * });
+     * ```
+     *
+     * @param  {string} _hook Hook name
+     * @param  {array} _args Hook arguments
+     * @param  {object} _ctx Hook execution context override
+     *
+     * @return {CommonApi} self
+     */
+    $dispatch: function(_hook, _args, _ctx) {
+      var cbs, i, cb, dsp = this.$$dsp;
+
+      if(!_ctx) _ctx = this;
+
+      // context callbacks
+      if(dsp) {
+        this.$$dsp = undefined; // disable dsp for hooks
+        dsp(_hook, _args, _ctx);
+      }
+
+      // instance callbacks
+      if(this.$$cb && (cbs = this.$$cb[_hook])) {
+        for(i = 0; !!(cb = cbs[i]); i++) {
+          cb.apply(_ctx, _args || EMPTY_ARRAY);
+        }
+      }
+
+      // bubble up the object scope, bubble to type only if there isnt a viable parent scope.
+      if(this.$scope && this.$scope.$dispatch) {
+        this.$scope.$dispatch(_hook, _args, _ctx);
+      } else if(this.$type) {
+        this.$type.$dispatch(_hook, _args, _ctx);
+      }
+
+      this.$$dsp = dsp; // reenable dsp.
+
+      return this;
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Registers an instance hook.
+     *
+     * An instance hook is called only for events generated by the calling object.
+     *
+     * ```javascript
+     * var bike = Model.$build(), bike2 = Model.$build();
+     * bike.$on('before-save', function() { alert('saved!'); });
+     *
+     * bike.$save(); // 'saved!' alert is shown after bike is saved
+     * bike2.$save(); // no alert is shown after bike2 is saved
+     * ```
+     *
+     * @param {string} _hook Hook name
+     * @param {function} _fun Callback
+     * @return {CommonApi} self
+     */
+    $on: function(_hook, _fun) {
+      var hooks = (this.$$cb || (this.$$cb = {}))[_hook] || (this.$$cb[_hook] = []);
+      hooks.push(_fun);
+      return this;
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Registers hooks to be used only inside the given function (decorated context).
+     *
+     * ```javascript
+     * // special fetch method that sends a special token header.
+     * restmod.mixin({
+     *   $fetchWithToken: function(_token) {
+     *     return this.$decorate({
+     *       'before-fetch': function(_req) {
+     *         _req.headers = _req.headers || {};
+     *         _req.headers['Token'] = _token;
+     *       }
+     *     ), function() {
+     *       return this.$fetch();
+     *     })
+     *   }
+     * });
+     * ```
+     *
+     * @param {object|function} _hooks Hook mapping object or hook execution method.
+     * @param {function} _fun Function to be executed in with decorated context, this function is executed in the callee object context.
+     * @return {CommonApi} self
+     */
+    $decorate: function(_hooks, _fun, _args) {
+
+      var oldDispatcher = this.$$dsp;
+
+      // set new dispatcher
+      this.$$dsp = (typeof _hooks === 'function' || !_hooks) ? _hooks : function(_hook, _args, _ctx) {
+        if(oldDispatcher) oldDispatcher.apply(null, arguments);
+        var extraCb = _hooks[_hook];
+        if(extraCb) extraCb.apply(_ctx, _args || EMPTY_ARRAY);
+      };
+
+      try {
+        return _fun.apply(this, _args);
+      } finally {
+        // reset dispatcher with old value
+        this.$$dsp = oldDispatcher;
+      }
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Retrieves the current object's event dispatcher function.
+     *
+     * This method can be used in conjuction with `$decorate` to provide a consistent hook context
+     * during async operations. This is important when building extensions that want to support the
+     * contextual hook system in asynchronic operations.
+     *
+     * For more information aboout contextual hooks, see the {@link CommonApi#decorate} documentation.
+     *
+     * Usage:
+     *
+     * ```javascript
+     * restmod.mixin({
+     *   $saveAndTrack: function() {
+     *     var dsp = this.$dispatcher(), // capture the current dispatcher function.
+     *         self = this;
+     *     this.$save().$then(function() {
+     *       this.$send({ path: '/traces', data: 'ble' }, function() {
+     *         this.$decorate(dsp, function() {
+     *           // the event is dispatched using the dispatcher function available when $saveAndTrack was called.
+     *           this.$dispatch('trace-stored');
+     *         });
+     *       });
+     *     });
+     *   }
+     * })
+     * ```
+     *
+     * @return {function} Dispatcher evaluator
+     */
+    $dispatcher: function() {
+      return this.$$dsp;
+    },
+
+    // Promise API
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Returns this object last promise.
+     *
+     * If promise does not exist, then a new one is generated that resolves to the object itsef. The
+     * new promise is not set as the current object promise, for that use `$then`.
+     *
+     * Usage:
+     *
+     * ```javascript
+     * col.$fetch().$asPromise();
+     * ```
+     *
+     * @return {promise} $q promise
+     */
+    $asPromise: function() {
+      var _this = this;
+      return this.$promise ? this.$promise.then(
+        function() { return _this; },
+        function() { return $q.reject(_this); }
+      ) : $q.when(this);
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Promise chaining method, keeps the model instance as the chain context.
+     *
+     * Calls `$q.then` on the model's last promise.
+     *
+     * Usage:
+     *
+     * ```javascript
+     * col.$fetch().$then(function() { });
+     * ```
+     *
+     * @param {function} _success success callback
+     * @param {function} _error error callback
+     * @return {CommonApi} self
+     */
+    $then: function(_success, _error) {
+
+      if(!this.$promise) { // TODO: $promise is resolved...
+        // if there is no pending promise, just execute success callback,
+        // if callback returns a promise, then set it as the current promise.
+        this.$last = null;
+        var result = _success.call(this, this);
+        if(result !== undefined) this.$promise = $q.when(result);
+      } else {
+        this.$promise = this.$promise.then(
+          _success ? wrapPromise(this, _success) : _success,
+          _error ? wrapPromise(this, _error) : _error
+        );
+      }
+
+      return this;
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Promise chaining, keeps the model instance as the chain context.
+     *
+     * Calls ´$q.finally´ on the collection's last promise, updates last promise with finally result.
+     *
+     * Usage:
+     *
+     * ```javascript
+     * col.$fetch().$finally(function() { });
+     * ```
+     *
+     * @param {function} _cb callback
+     * @return {CommonApi} self
+     */
+    $finally: function(_cb) {
+      this.$promise = this.$asPromise()['finally'](_cb);
+      return this;
+    },
+
+    // Communication API
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Low level communication method, wraps the $http api.
+     *
+     * * You can access last request promise using the `$asPromise` method.
+     * * Pending requests will be available at the $pending property (array).
+     * * Current request execution status can be queried using the $status property (current request, not last).
+     * * The $status property refers to the current request inside $send `_success` and `_error` callbacks.
+     *
+     * @param {object} _options $http options
+     * @param {function} _success sucess callback (sync)
+     * @param {function} _error error callback (sync)
+     * @return {CommonApi} self
+     */
+    $send: function(_options, _success, _error) {
+
+      // make sure a style base was selected for the model
+      if(!this.$getProperty('style')) {
+        $log.warn('No API style base was selected, see the Api Integration FAQ for more information on this warning');
+      }
+
+      this.$pending = (this.$pending || []);
+      this.$pending.push(_options);
+
+      return this.$then(function() {
+
+        // if request was canceled, then just return a resolved promise
+        if(_options.canceled) {
+          this.$pending.splice(0, 1);
+          this.$status = 'canceled';
+          return;
+        }
+
+        this.$response = null;
+        this.$status = 'pending';
+        this.$dispatch('before-request', [_options]);
+
+        var dsp = this.$dispatcher(), _this = this;
+        return $http(_options).then(function(_response) {
+
+          return _this.$decorate(dsp, function() {
+
+            this.$pending.splice(0, 1);
+
+            if(_options.canceled) {
+              // if request was canceled during request, ignore post request actions.
+              this.$status =  'canceled';
+            } else {
+              this.$status = 'ok';
+              this.$response = _response;
+
+              this.$dispatch('after-request', [_response]);
+              if(_success) _success.call(this, _response);
+            }
+          });
+
+        }, function(_response) {
+
+          return _this.$decorate(dsp, function() {
+
+            this.$pending.splice(0, 1);
+
+            if(_options.canceled) {
+              // if request was canceled during request, ignore error handling
+              this.$status = 'canceled';
+              return this;
+            } else {
+              this.$status = 'error';
+              this.$response = _response;
+
+              // IDEA: Consider flushing pending request in case of an error. Also continue ignoring requests
+              // until the error flag is reset by user.
+
+              this.$dispatch('after-request-error', [_response]);
+              if(_error) _error.call(this, _response);
+              return $q.reject(this);
+            }
+          });
+        });
+      });
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Cancels all pending requests initiated with $send.
+     *
+     * @return {CommonApi} self
+     */
+    $cancel: function() {
+      // cancel every pending request.
+      if(this.$pending) {
+        angular.forEach(this.$pending, function(_config) {
+          _config.canceled = true;
+        });
+      }
+
+      return this;
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Returns true if object has queued pending request
+     *
+     * @return {Boolean} Object request pending status.
+     */
+    $hasPendingRequests: function() {
+      var pendingCount = 0;
+
+      if(this.$pending) {
+        angular.forEach(this.$pending, function(_config) {
+          if(!_config.canceled) pendingCount++;
+        });
+      }
+
+      return pendingCount > 0;
+    },
+
+    /// Misc common methods
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description
+     *
+     * Unpacks and decode raw data from a server generated structure.
+     *
+     * ATTENTION: do not override this method to change the object wrapping strategy,
+     * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
+     *
+     * @param  {mixed} _raw Raw server data
+     * @param  {string} _mask 'CRU' mask
+     * @return {CommonApi} this
+     */
+    $unwrap: function(_raw, _mask) {
+      try {
+        packerCache.prepare();
+        _raw = this.$$unpack(_raw);
+        return this.$decode(_raw, _mask);
+      } finally {
+        packerCache.clear();
+      }
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description
+     *
+     * Encode and packs object into a server compatible structure that can be used for PUT/POST operations.
+     *
+     * ATTENTION: do not override this method to change the object wrapping strategy,
+     * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
+     *
+     * @param  {string} _mask 'CRU' mask
+     * @return {string} raw data
+     */
+    $wrap: function(_mask) {
+      var raw = this.$encode(_mask);
+      raw = this.$$pack(raw);
+      return raw;
+    }
+  };
+
+  return CommonApi;
+
+}]);
+RMModule.factory('RMExtendedApi', ['$q', function($q) {
+
+  /**
+   * @class ExtendedApi
+   *
+   * @description
+   *
+   * Provides a common framework **on top** of the {@link RecordApi} and {@link CollectionApi}.
+   *
+   * @property {boolean} $resolved The collection resolve status, is undefined on intialization
+   */
+  return {
+
+    // override decode to detect resolution of resource
+    $decode: function(_raw, _mask) {
+      if(this.$resolved === false && this.$clear) this.$clear(); // clear if not resolved.
+      this.$super(_raw, _mask);
+      this.$resolved = true;
+      return this;
+    },
+
+    /**
+     * @memberof ExtendedApi#
+     *
+     * @description Resets the resource's $resolved status.
+     *
+     * After being reset, calls to `$resolve` will execute a new $fetch.
+     *
+     * Also, if reset, resource will be cleared on new data.
+     *
+     * @return {ExtendedApi} self
+     */
+    $reset: function() {
+      this.$cancel(); // TODO: find another way of ignoring pending requests that will lead to resolution
+      this.$resolved = false;
+      return this;
+    },
+
+    /**
+     * @memberof ExtendedApi#
+     *
+     * @description Resolves the resource's contents.
+     *
+     * If already resolved then this method will return a resolved promise, if not then
+     * it will initiate a `$fetch` operation and return the operation promise.
+     *
+     * This method will trigger a `before-resolve` event before checking the resolve status.
+     *
+     * @param  {object} _params `$fetch` params
+     * @return {promise} Promise that resolves to the resource.
+     */
+    $resolve: function(_params) {
+      return this.$then(function() { // chain resolution in request promise chain
+        this.$dispatch('before-resolve', []);
+        if(!this.$resolved) this.$fetch(_params);
+      });
+    },
+
+    /**
+     * @memberof ExtendedApi#
+     *
+     * @description Resets and fetches the resource contents.
+     *
+     * @param  {object} _params `$fetch` params
+     * @return {ExtendedApi} self
+     */
+    $refresh: function(_params) {
+      return this.$reset().$fetch(_params);
+    }
+  };
+
+}]);
+RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
+
+  /**
+   * @class RelationScope
+   *
+   * @description
+   *
+   * Special scope a record provides to resources related via hasMany or hasOne relation.
+   */
+  var RelationScope = function(_scope, _target, _partial) {
+    this.$scope = _scope;
+    this.$target = _target;
+    this.$partial = Utils.cleanUrl(_partial);
+  };
+
+  RelationScope.prototype = {
+    // nest collection url
+    $url: function() {
+      return Utils.joinUrl(this.$scope.$url(), this.$partial);
+    },
+
+    // record url is nested only for nested resources
+    $urlFor: function(_pk) {
+      if(this.$target.$isNested()) {
+        return this.$fetchUrlFor();
+      } else {
+        return this.$target.$urlFor(_pk);
+      }
+    },
+
+    // fetch url is nested
+    $fetchUrlFor: function(/* _pk */) {
+      return Utils.joinUrl(this.$scope.$url(), this.$partial);
+    },
+
+    // create is not posible in nested members
+    $createUrlFor: function() {
+      return null;
+    }
+  };
+
+  /**
+   * @class RecordApi
+   * @extends CommonApi
+   *
+   * @property {object} $scope The record's scope (see {@link ScopeApi})
+   * @property {mixed} $pk The record's primary key
+   *
+   * @description
+   *
+   * Provides record synchronization and manipulation methods. This is the base API for every restmod record.
+   *
+   * TODO: Talk about the object lifecycle.
+   *
+   * ### Object lifecycle hooks
+   *
+   * For `$fetch`:
+   *
+   * * before-fetch
+   * * before-request
+   * * after-request[-error]
+   * * after-feed (only called if no errors)
+   * * after-fetch[-error]
+   *
+   * For `$save` when creating:
+   *
+   * * before-render
+   * * before-save
+   * * before-create
+   * * before-request
+   * * after-request[-error]
+   * * after-feed (only called if no errors)
+   * * after-create[-error]
+   * * after-save[-error]
+   *
+   * For `$save` when updating:
+   *
+   * * before-render
+   * * before-save
+   * * before-update
+   * * before-request
+   * * after-request[-error]
+   * * after-feed (only called if no errors)
+   * * after-update[-error]
+   * * after-save[-error]
+   *
+   * For `$destroy`:
+   *
+   * * before-destroy
+   * * before-request
+   * * after-request[-error]
+   * * after-destroy[-error]
+   *
+   * @property {mixed} $pk The record primary key
+   * @property {object} $scope The collection scope (hierarchical scope, not angular scope)
+   */
+	return {
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Called by record constructor on initialization.
+     *
+     * Note: Is better to add a hook to after-init than overriding this method.
+     */
+    $initialize: function() {
+      // apply defaults
+      this.$super();
+
+      // after initialization hook
+      // TODO: put this on $new so it can use stacked DSP?
+      this.$dispatch('after-init');
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Returns the url this object is bound to.
+     *
+     * This is the url used by fetch to retrieve the resource related data.
+     *
+     * @return {string} bound url.
+     */
+    $url: function() {
+      return this.$scope.$urlFor(this.$pk);
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Default item child scope factory.
+     *
+     * By default, no create url is provided and the update/destroy url providers
+     * attempt to first use the unscoped resource url.
+     *
+     * // TODO: create special api to hold scope (so it is not necessary to recreate the whole object every time.)
+     *
+     * @param {mixed} _for Scope target type, accepts any model class.
+     * @param {string} _partial Partial route.
+     * @return {RelationScope} New scope.
+     */
+    $buildScope: function(_for, _partial) {
+      if(_for.$buildOwnScope) {
+        // TODO
+      } else {
+        return new RelationScope(this, _for, _partial);
+      }
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Copyies another object's non-private properties.
+     *
+     * @param {object} _other Object to merge.
+     * @return {RecordApi} self
+     */
+    $extend: function(_other) {
+      for(var tmp in _other) {
+        if (_other.hasOwnProperty(tmp) && tmp[0] !== '$') {
+          this[tmp] = _other[tmp];
+        }
+      }
+      return this;
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Iterates over the object non-private properties
+     *
+     * @param {function} _fun Function to call for each
+     * @return {RecordApi} self
+     */
+    $each: function(_fun, _ctx) {
+      for(var key in this) {
+        if(this.hasOwnProperty(key) && key[0] !== '$') {
+          _fun.call(_ctx || this[key], this[key], key);
+        }
+      }
+
+      return this;
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Feed raw data to this instance.
+     *
+     * @param {object} _raw Raw data to be fed
+     * @param {string} _mask 'CRU' mask
+     * @return {RecordApi} this
+     */
+    $decode: function(_raw, _mask) {
+      // IDEA: let user override serializer
+      this.$super(_raw, _mask || Utils.READ_MASK);
+      if(!this.$pk) this.$pk = this.$$inferKey(_raw); // TODO: warn if key changes
+      this.$dispatch('after-feed', [_raw]);
+      return this;
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Generate data to be sent to the server when creating/updating the resource.
+     *
+     * @param {string} _mask 'CRU' mask
+     * @return {string} raw data
+     */
+    $encode: function(_mask) {
+      var raw = this.$super(_mask || Utils.CREATE_MASK);
+      this.$dispatch('before-render', [raw]);
+      return raw;
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Begin a server request for updated resource data.
+     *
+     * The request's promise can be accessed using the `$asPromise` method.
+     *
+     * @param {object} _params Optional list of params to be passed to object request.
+     * @return {RecordApi} this
+     */
+    $fetch: function(_params) {
+      var url = this.$scope.$fetchUrlFor ? this.$scope.$fetchUrlFor(this.$pk) : this.$url();
+      Utils.assert(!!url, 'Cant $fetch if resource is not bound');
+
+      var request = { method: 'GET', url: url, params: _params };
+
+      this.$dispatch('before-fetch', [request]);
+      this.$send(request, function(_response) {
+        this.$unwrap(_response.data);
+        this.$dispatch('after-fetch', [_response]);
+      }, function(_response) {
+        this.$dispatch('after-fetch-error', [_response]);
+      });
+
+      return this;
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Begin a server request to create/update resource.
+     *
+     * If resource is new and it belongs to a collection and it hasnt been revealed, then it will be revealed.
+     *
+     * The request's promise can be accessed using the `$asPromise` method.
+     *
+     * @return {RecordApi} this
+     */
+    $save: function() {
+
+      var url = this.$scope.$updateUrlFor ? this.$scope.$updateUrlFor(this.$pk) : this.$url(), request;
+
+      if(url) {
+        // If bound, update
+        request = { method: 'PUT', url: url, data: this.$wrap(Utils.UPDATE_MASK) };
+        this.$dispatch('before-update', [request]);
+        this.$dispatch('before-save', [request]);
+        return this.$send(request, function(_response) {
+          this.$unwrap(_response.data);
+          this.$dispatch('after-update', [_response]);
+          this.$dispatch('after-save', [_response]);
+        }, function(_response) {
+          this.$dispatch('after-update-error', [_response]);
+          this.$dispatch('after-save-error', [_response]);
+        });
+      } else {
+        // If not bound create.
+        url = this.$scope.$createUrlFor ? this.$scope.$createUrlFor(this.$pk) : (this.$scope.$url && this.$scope.$url());
+        Utils.assert(!!url, 'Cant $create if parent scope is not bound');
+
+        request = { method: 'POST', url: url, data: this.$wrap(Utils.CREATE_MASK) };
+        this.$dispatch('before-save', [request]);
+        this.$dispatch('before-create', [request]);
+        return this.$send(request, function(_response) {
+          this.$unwrap(_response.data);
+
+          // reveal item (if not yet positioned)
+          if(this.$scope.$isCollection && this.$position === undefined && !this.$preventReveal) {
+            this.$scope.$add(this, this.$revealAt);
+          }
+
+          this.$dispatch('after-create', [_response]);
+          this.$dispatch('after-save', [_response]);
+        }, function(_response) {
+          this.$dispatch('after-create-error', [_response]);
+          this.$dispatch('after-save-error', [_response]);
+        });
+      }
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Begin a server request to destroy the resource.
+     *
+     * The request's promise can be accessed using the `$asPromise` method.
+     *
+     * @return {RecordApi} this
+     */
+    $destroy: function() {
+      var url = this.$scope.$destroyUrlFor ? this.$scope.$destroyUrlFor(this.$pk) : this.$url();
+      Utils.assert(!!url, 'Cant $destroy if resource is not bound');
+
+      var request = { method: 'DELETE', url: url };
+
+      this.$dispatch('before-destroy', [request]);
+      return this.$send(request, function(_response) {
+
+        // call scope callback
+        if(this.$scope.$remove) {
+          this.$scope.$remove(this);
+        }
+
+        this.$dispatch('after-destroy', [_response]);
+      }, function(_response) {
+        this.$dispatch('after-destroy-error', [_response]);
+      });
+    },
+
+    // Collection related methods.
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Changes the location of the object in the bound collection.
+     *
+     * If object hasn't been revealed, then this method will change the index where object will be revealed at.
+     *
+     * @param  {integer} _to New object position (index)
+     * @return {RecordApi} this
+     */
+    $moveTo: function(_to) {
+      if(this.$position !== undefined) {
+        // TODO: move item to given index.
+        // TODO: callback
+      } else {
+        this.$revealAt = _to;
+      }
+      return this;
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Reveal in collection
+     *
+     * If instance is bound to a collection and it hasnt been revealed (because it's new and hasn't been saved),
+     * then calling this method without parameters will force the object to be added to the collection.
+     *
+     * If this method is called with **_show** set to `false`, then the object wont be revealed by a save operation.
+     *
+     * @param  {boolean} _show Whether to reveal inmediatelly or prevent automatic reveal.
+     * @return {RecordApi} this
+     */
+    $reveal: function(_show) {
+      if(_show === undefined || _show) {
+        this.$scope.$add(this, this.$revealAt);
+      } else {
+        this.$preventReveal = true;
+      }
+      return this;
+    }
+  };
+
+}]);
+RMModule.factory('RMScopeApi', [function() {
+
+  /**
+   * @class ScopeApi
+   *
+   * @description Common behaviour for record scopes.
+   *
+   * Record scopes are starting points for record operations (like base type or a collection)
+   *
+   * TODO: Talk about record building here
+   */
+  return {
+
+    /**
+     * @memberof ScopeApi#
+     *
+     * @description Builds a new instance of this model, bound to this instance scope, sets its primary key.
+     *
+     * @param {mixed} _pk object private key
+     * @param {object} _scope scope override (optional)
+     * @return {RecordApi} New model instance
+     */
+    $new: function(_pk, _scope) {
+      return this.$super(_pk, _scope);
+    },
+
+    /**
+     * @memberof ScopeApi#
+     *
+     * @description Builds a new instance of this model, does not assign a pk to the created object.
+     *
+     * ATTENTION: item will not show in collection until `$save` is called. To reveal item before than call `$reveal`.
+     *
+     * @param  {object} _init Initial values
+     * @return {RecordApi} single record
+     */
+    $build: function(_init) {
+      return this.$new().$extend(_init);
+    },
+
+    /**
+     * @memberof ScopeApi#
+     *
+     * @description Builds a new instance of this model using undecoded data.
+     *
+     * ATTENTION: does not automatically reveal item in collection, chain a call to $reveal to do so.
+     *
+     * @param  {object} _raw Undecoded data
+     * @return {RecordApi} single record
+     */
+    $buildRaw: function(_raw, _mask) {
+      var obj = this.$new(this.$$inferKey(_raw));
+      obj.$decode(_raw, _mask);
+      return obj;
+    },
+
+    /**
+     * @memberof ScopeApi#
+     *
+     * @description Attempts to resolve a resource using provided private key.
+     *
+     * @param {mixed} _pk Private key
+     * @param {object} _params Additional query parameters
+     * @return {RecordApi} single record
+     */
+    $find: function(_pk, _params) {
+      return this.$new(_pk).$resolve(_params);
+    },
+
+    /**
+     * @memberof ScopeApi#
+     *
+     * @description Builds and saves a new instance of this model
+     *
+     * @param  {object} _attr Data to be saved
+     * @return {RecordApi} single record
+     */
+    $create: function(_attr) {
+      return this.$build(_attr).$save();
+    },
+
+    /**
+     * @memberof ScopeApi#
+     *
+     * @description Builds a new collection bound to this scope.
+     *
+     * If scope is another collection then it will inherit its parameters
+     *
+     * Collections are bound to an api resource.
+     *
+     * @param  {object} _params  Additional query string parameters
+     * @param  {object} _scope  Scope override (optional)
+     * @return {CollectionApi} Model Collection
+     */
+    $collection: function(_params, _scope) {
+      return this.$super(_params, _scope);
+    },
+
+    /**
+     * @memberof ScopeApi#
+     *
+     * @description Generates a new collection bound to this context and url and calls $fetch on it.
+     *
+     * @param {object} _params Collection parameters
+     * @return {CollectionApi} record collection
+     */
+    $search: function(_params) {
+      return this.$collection(_params).$fetch();
+    }
+
+  };
+
+}]);
 RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', function($injector, inflector, Utils) {
 
   // TODO: add urlPrefix option
@@ -498,6 +1753,449 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', function($in
   };
 
   return Builder;
+
+}]);
+RMModule.factory('RMBuilderExt', ['$injector', '$parse', 'inflector', '$log', 'restmod', function($injector, $parse, inflector, $log, restmod) {
+
+  var bind = angular.bind,
+      isFunction = angular.isFunction;
+
+  /**
+   * @class ExtendedBuilderApi
+   *
+   * @description
+   *
+   * Non-core builder extensions
+   *
+   * Adds the following property modifiers:
+   * * `serialize` sets the encoder and decoder beaviour for an attribute, maps to {@link BuilderApi#attrSerializer}
+   *
+   */
+  var EXT = {
+    /**
+     * @memberof ExtendedBuilderApi#
+     *
+     * @description Sets an url prefix to be added to every url generated by the model.
+     *
+     * This applies even to objects generated by the `$single` method.
+     *
+     * This method is intended to be used in a base model mixin so everymodel that extends from it
+     * gets the same url prefix.
+     *
+     * Usage:
+     *
+     * ```javascript
+     * var BaseModel = restmod.mixin(function() {
+     *   this.setUrlPrefix('/api');
+     * })
+     *
+     * var bike = restmod.model('/bikes', BaseModel).$build({ id: 1 });
+     * console.log(bike.$url()) // outputs '/api/bikes/1'
+     * ```
+     *
+     * @param {string} _prefix url portion
+     * @return {BuilderApi} self
+     */
+    setUrlPrefix: function(_prefix) {
+      return this.setProperty('urlPrefix', _prefix);
+    },
+
+    /**
+     * @memberof ExtendedBuilderApi#
+     *
+     * @description Changes the model's primary key.
+     *
+     * Primary keys are passed to scope's url methods to generate urls. The default primary key is 'id'.
+     *
+     * **ATTENTION** Primary keys are extracted from raw data, so _key must use raw api naming.
+     *
+     * @param {string|function} _key New primary key.
+     * @return {BuilderApi} self
+     */
+    setPrimaryKey: function(_key) {
+      return this.setProperty('primaryKey', _key);
+    },
+
+    /**
+     * @memberof ExtendedBuilderApi#
+     *
+     * @description Assigns a serializer to a given attribute.
+     *
+     * A _serializer is:
+     * * an object that defines both a `decode` and a `encode` method
+     * * a function that when called returns an object that matches the above description.
+     * * a string that represents an injectable that matches any of the above descriptions.
+     *
+     * @param {string} _name Attribute name
+     * @param {string|object|function} _serializer The serializer
+     * @return {BuilderApi} self
+     */
+    attrSerializer: function(_name, _serializer, _opt) {
+      if(typeof _serializer === 'string') {
+        _serializer = $injector.get(inflector.camelize(_serializer, true) + 'Serializer');
+      }
+
+      if(isFunction(_serializer)) _serializer = _serializer(_opt);
+      if(_serializer.decode) this.attrDecoder(_name, bind(_serializer, _serializer.decode));
+      if(_serializer.encode) this.attrEncoder(_name, bind(_serializer, _serializer.encode));
+      return this;
+    },
+
+    /// Experimental modifiers
+
+    /**
+     * @memberof ExtendedBuilderApi#
+     *
+     * @description Expression attributes are evaluated every time new data is fed to the model.
+     *
+     * @param {string}  _name Attribute name
+     * @param {string} _expr Angular expression to evaluate
+     * @return {BuilderApi} self
+     */
+    attrExpression: function(_name, _expr) {
+      var filter = $parse(_expr);
+      return this.on('after-feed', function() {
+        this[_name] = filter(this);
+      });
+    }
+  };
+
+  return restmod.mixin(function() {
+    this.extend('setUrlPrefix', EXT.setUrlPrefix)
+        .extend('setPrimaryKey', EXT.setPrimaryKey)
+        .extend('attrSerializer', EXT.attrSerializer, ['serialize']);
+  });
+}]);
+RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUtils', 'restmod', 'RMPackerCache', function($injector, inflector, $log, Utils, restmod, packerCache) {
+
+  /**
+   * @class RelationBuilderApi
+   *
+   * @description
+   *
+   * Builder DSL extension to build model relations
+   *
+   * Adds the following property modifiers:
+   * * `hasMany` sets a one to many hierarchical relation under the attribute name, maps to {@link RelationBuilderApi#attrAsCollection}
+   * * `hasOne` sets a one to one hierarchical relation under the attribute name, maps to {@link RelationBuilderApi#attrAsResource}
+   * * `belongsTo` sets a one to one reference relation under the attribute name, maps to {@link RelationBuilderApi#attrAsReference}
+   * * `belongsToMany` sets a one to many reference relation under the attribute name, maps to {@link RelationBuilderApi#attrAsReferenceToMany}
+   *
+   */
+  var EXT = {
+    /**
+     * @memberof RelationBuilderApi#
+     *
+     * @description Registers a model **resources** relation
+     *
+     * @param {string}  _name Attribute name
+     * @param {string|object} _model Other model, supports a model name or a direct reference.
+     * @param {string} _url Partial url
+     * @param {string} _source Inline resource alias (optional)
+     * @param {string} _inverseOf Inverse property name (optional)
+     * @return {BuilderApi} self
+     */
+    attrAsCollection: function(_attr, _model, _url, _source, _inverseOf) {
+
+      this.attrDefault(_attr, function() {
+
+        if(typeof _model === 'string') {
+          _model = $injector.get(_model);
+
+          if(_inverseOf) {
+            var desc = _model.$$getDescription(_inverseOf);
+            if(!desc || desc.relation !== 'belongs_to') {
+              $log.warn('Must define an inverse belongsTo relation for inverseOf to work');
+              _inverseOf = false; // disable the inverse if no inverse relation is found.
+            }
+          }
+        }
+
+        var self = this,
+            scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)),
+            col = _model.$collection(null, scope);
+
+        // TODO: there should be a way to modify scope behavior just for this relation,
+        // since relation item scope IS the collection, then the collection should
+        // be extended to provide a modified scope. For this an additional _extensions
+        // parameters could be added to collection, then these 'extensions' are inherited
+        // by child collections, the other alternative is to enable full property inheritance ...
+
+        // set inverse property if required.
+        if(_inverseOf) {
+          col.$on('after-add', function(_obj) {
+            _obj[_inverseOf] = self;
+          });
+        }
+
+        return col;
+      // simple support for inline data, TODO: maybe deprecate this.
+      });
+
+      if(_source || _url) this.attrMap(_attr, _source || _url);
+
+      this.attrDecoder(_attr, function(_raw) {
+            this[_attr].$reset().$decode(_raw);
+          })
+          .attrMask(_attr, Utils.WRITE_MASK)
+          .attrMeta(_attr, { relation: 'has_many' });
+
+      return this;
+    },
+
+    /**
+     * @memberof RelationBuilderApi#
+     *
+     * @description Registers a model **resource** relation
+     *
+     * @param {string}  _name Attribute name
+     * @param {string|object} _model Other model, supports a model name or a direct reference.
+     * @param {string} _url Partial url (optional)
+     * @param {string} _source Inline resource alias (optional)
+     * @param {string} _inverseOf Inverse property name (optional)
+     * @return {BuilderApi} self
+     */
+    attrAsResource: function(_attr, _model, _url, _source, _inverseOf) {
+
+      this.attrDefault(_attr, function() {
+
+        if(typeof _model === 'string') {
+          _model = $injector.get(_model);
+
+          if(_inverseOf) {
+            var desc = _model.$$getDescription(_inverseOf);
+            if(!desc || desc.relation !== 'belongs_to') {
+              $log.warn('Must define an inverse belongsTo relation for inverseOf to work');
+              _inverseOf = false; // disable the inverse if no inverse relation is found.
+            }
+          }
+        }
+
+        var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)),
+            inst = _model.$new(null, scope);
+
+        // TODO: provide a way to modify scope behavior just for this relation
+
+        if(_inverseOf) {
+          inst[_inverseOf] = this;
+        }
+
+        return inst;
+      });
+
+      if(_source || _url) this.attrMap(_attr, _source || _url);
+
+      this.attrDecoder(_attr, function(_raw) {
+            this[_attr].$decode(_raw);
+          })
+          .attrMask(_attr, Utils.WRITE_MASK)
+          .attrMeta(_attr, { relation: 'has_one' });
+
+      return this;
+    },
+
+    /**
+     * @memberof RelationBuilderApi#
+     *
+     * @description Registers a model **reference** relation.
+     *
+     * A reference relation expects the host object to provide the primary key of the referenced object or the referenced object itself (including its key).
+     *
+     * For example, given the following resource structure with a foreign key:
+     *
+     * ```json
+     * {
+     *   user_id: 20
+     * }
+     * ```
+     *
+     * Or this other structure with inlined data:
+     *
+     * ```json
+     * {
+     *   user: {
+     *     id: 30,
+     *     name: 'Steve'
+     *   }
+     * }
+     * ```
+     *
+     * You should define the following model:
+     *
+     * ```javascript
+     * restmod.model('/bikes', {
+     *   user: { belongsTo: 'User' } // works for both cases detailed above
+     * })
+     * ```
+     *
+     * The object generated by the relation is not scoped to the host object, but to it's base class instead (not like hasOne),
+     * so the type should not be nested.
+     *
+     * Its also posible to override the **foreign key name**.
+     *
+     * When a object containing a belongsTo reference is encoded for a server request, only the primary key value is sent using the
+     * same **foreign key name** that was using on decoding. (`user_id` in the above example).
+     *
+     * @param {string}  _name Attribute name
+     * @param {string|object} _model Other model, supports a model name or a direct reference.
+     * @param {string} _key foreign key property name (optional, defaults to _attr + '_id').
+     * @param {bool} _prefetch if set to true, $fetch will be automatically called on relation object load.
+     * @return {BuilderApi} self
+     */
+    attrAsReference: function(_attr, _model, _key, _prefetch) {
+
+      this.attrDefault(_attr, null)
+          .attrMask(_attr, Utils.WRITE_MASK)
+          .attrMeta(_attr, { relation: 'belongs_to' });
+
+      function loadModel() {
+        if(typeof _model === 'string') {
+          _model = $injector.get(_model);
+        }
+      }
+
+      // TODO: the following code assumes that attribute is at root level! (when uses this[_attr] or this[_attr + 'Id'])
+
+      // inline data handling
+      this.attrDecoder(_attr, function(_raw) {
+        if(_raw === null) return null;
+        loadModel();
+        if(!this[_attr] || this[_attr].$pk !== _model.$$inferKey(_raw)) {
+          this[_attr] = _model.$buildRaw(_raw);
+        } else {
+          this[_attr].$decode(_raw);
+        }
+      });
+
+      // foreign key handling
+      if(_key !== false) {
+        this.attrMap(_attr + 'Id', _key || '*', true) // set a forced mapping to always generate key
+            .attrDecoder(_attr + 'Id', function(_value) {
+              if(_value === undefined) return;
+              if(!this[_attr] || this[_attr].$pk !== _value) {
+                if(_value !== null && _value !== false) {
+                  loadModel();
+                  this[_attr] = packerCache.resolve(_model.$new(_value)); // resolve inmediatelly if cached
+                  if(_prefetch) this[_attr].$fetch();
+                } else {
+                  this[_attr] = null;
+                }
+              }
+            })
+            .attrEncoder(_attr + 'Id', function() {
+              return this[_attr] ? this[_attr].$pk : null;
+            });
+      }
+
+      return this;
+    },
+
+    /**
+     * @memberof RelationBuilderApi#
+     *
+     * @description Registers a model **reference** relation.
+     *
+     * A reference relation expects the host object to provide the primary key of the referenced objects or the referenced objects themselves (including its key).
+     *
+     * For example, given the following resource structure with a foreign key array:
+     *
+     * ```json
+     * {
+     *   users_ids: [20, 30]
+     * }
+     * ```
+     *
+     * Or this other structure with inlined data:
+     *
+     * ```json
+     * {
+     *   users: [{
+     *     id: 20,
+     *     name: 'Steve'
+     *   },{
+     *     id: 30,
+     *     name: 'Pili'
+     *   }]
+     * }
+     * ```
+     *
+     * You should define the following model:
+     *
+     * ```javascript
+     * restmod.model('/bikes', {
+     *   users: { belongsToMany: 'User' } // works for both cases detailed above
+     * })
+     * ```
+     *
+     * The object generated by the relation is not scoped to the host object, but to it's base class instead (unlike hasMany),
+     * so the referenced type should not be nested.
+     *
+     * When a object containing a belongsToMany reference is encoded for a server request, only the primary key value is sent for each object.
+     *
+     * @param {string}  _name Attribute name
+     * @param {string|object} _model Other model, supports a model name or a direct reference.
+     * @param {string} _keys Server name for the property that holds the referenced keys in response and request.
+     * @return {BuilderApi} self
+     */
+    attrAsReferenceToMany: function(_attr, _model, _keys) {
+
+      this.attrDefault(_attr, function() { return []; })
+          .attrMask(_attr, Utils.WRITE_MASK)
+          .attrMeta(_attr, { relation: 'belongs_to_many' });
+
+      // TODO: the following code assumes that attribute is at root level! (when uses this[_attr])
+
+      function loadModel() {
+        if(typeof _model === 'string') {
+          _model = $injector.get(_model);
+        }
+      }
+
+      function processInbound(_raw, _ref) {
+        loadModel();
+        _ref.length = 0;
+        // TODO: reuse objects that do not change (compare $pks)
+        for(var i = 0, l = _raw.length; i < l; i++) {
+          if(typeof _raw[i] === 'object') {
+            _ref.push(_model.$buildRaw(_raw[i]));
+          } else {
+            _ref.push(packerCache.resolve(_model.$new(_raw[i])));
+          }
+        }
+      }
+
+      // inline data handling
+      this.attrDecoder(_attr, function(_raw) {
+        // TODO: if _keys == _attr then inbound data will be processed twice!
+        if(_raw) processInbound(_raw, this[_attr]);
+      });
+
+      // foreign key handling
+      if(_keys !== false) {
+        var attrIds = inflector.singularize(_attr) + 'Ids';
+        this.attrMap(attrIds, _keys || '*', true)
+            .attrDecoder(attrIds, function(_raw) {
+              if(_raw) processInbound(_raw, this[_attr]);
+            })
+            .attrEncoder(attrIds, function() {
+              var result = [], others = this[_attr];
+              for(var i = 0, l = others.length; i < l; i++) {
+                result.push(others[i].$pk);
+              }
+              return result;
+            });
+      }
+
+      return this;
+    }
+  };
+
+  return restmod.mixin(function() {
+    this.extend('attrAsCollection', EXT.attrAsCollection, ['hasMany', 'path', 'source', 'inverseOf']) // TODO: rename source to map, but disable attrMap if map is used here...
+        .extend('attrAsResource', EXT.attrAsResource, ['hasOne', 'path', 'source', 'inverseOf'])
+        .extend('attrAsReference', EXT.attrAsReference, ['belongsTo', 'key', 'prefetch'])
+        .extend('attrAsReferenceToMany', EXT.attrAsReferenceToMany, ['belongsToMany', 'keys']);
+  });
 
 }]);
 RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', 'RMExtendedApi', 'RMSerializer', 'RMBuilder',
@@ -1472,6 +3170,140 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
       }
     };
   };
+
+}]);
+RMModule.factory('DefaultPacker', ['inflector', 'RMPackerCache', function(inflector, packerCache) {
+
+  /**
+   * @class DefaultPacker
+   *
+   * @description
+   *
+   * Simple packer implementation that attempts to cover the standard proposed by
+   * [active_model_serializers]{@link https://github.com/rails-api/active_model_serializers}.
+   *
+   * This is a simplified version of the wrapping structure recommented by the jsonapi.org standard,
+   * it supports side loaded associated resources (via supporting relations) and metadata extraction.
+   *
+   * To activate use
+   *
+   * ```javascript
+   * PACKER: 'default'
+   * ```
+   *
+   * ### Json root
+   *
+   * By default the packer will use the singular model name as json root for single resource requests
+   * and pluralized name for collection requests. Make sure the model name is correctly set.
+   *
+   * To override the name used by the packer set the JSON_ROOT_SINGLE and JSON_ROOT_MANY variables.
+   * Or set JSON_ROOT to override both.
+   *
+   * ### Side loaded resources
+   *
+   * By default the packer will look for links to other resources in the 'linked' root property, you
+   * can change this by setting the JSON_LINKS variable. To use the root element as link source
+   * use `JSON_LINKS: true`. To skip links processing, set it to false.
+   *
+   * Links are expected to use the pluralized version of the name for the referenced model. For example,
+   * given the following response:
+   *
+   * ```json
+   * {
+   *   bikes: [...],
+   *   links {
+   *     parts: [...]
+   *   }
+   * }
+   * ```
+   *
+   * Restmod will expect that the Part model plural name is correctly set parts. Only properties declared
+   * as reference relations (belongsTo and belongsToMany) will be correctly resolved.
+   *
+   * ### Metadata
+   *
+   * By default metadata is only captured if it comes in the 'meta' root property. Metadata is then
+   * stored in the $meta property of the resource being unwrapped.
+   *
+   * To change the metadata source property set the JSON_META property to the desired name, set
+   * it to '.' to capture the entire raw response or set it to false to skip metadata. It can also be set
+   * to a function, for custom processsing.
+   *
+   * @property {mixed} single The expected single resource wrapper property name
+   * @property {object} plural The expected collection wrapper property name
+   * @property {mixed} links The links repository property name
+   * @property {object} meta The metadata repository property name
+   *
+   */
+  function Packer(_model) {
+    this.single = _model.$getProperty('jsonRootSingle') || _model.$getProperty('jsonRoot') || _model.$getProperty('name');
+    this.plural = _model.$getProperty('jsonRootMany') || _model.$getProperty('jsonRoot') || _model.$getProperty('plural');
+
+    // Special options
+    this.links = _model.$getProperty('jsonLinks', 'linked');
+    this.meta = _model.$getProperty('jsonMeta', 'meta');
+    // TODO: use plural for single resource option.
+  }
+
+  // process metadata
+  function processMeta(_packer, _raw, _skip) {
+    var metaDef = _packer.meta;
+    if(typeof metaDef === 'string') {
+      if(metaDef === '.') {
+        var meta = {};
+        for(var key in _raw) {
+          if(_raw.hasOwnProperty(key) && key !== _skip && key !== _packer.links) { // skip links and object root if extracting from root.
+            meta[key] = _raw[key];
+          }
+        }
+        return meta;
+      } else {
+        return _raw[metaDef];
+      }
+    } else if(typeof metaDef === 'function') {
+      return metaDef(_raw);
+    }
+  }
+
+  // process links and stores them in the packer cache
+	function processLinks(_packer, _raw, _skip) {
+    var source = _packer.links === '.' ? _raw : _raw[_packer.links];
+    if(!source) return;
+
+    // feed packer cache
+    for(var key in source) {
+      if(source.hasOwnProperty(key) && key !== _skip) {
+        var cache = source[key];
+        // TODO: check that cache is an array.
+        packerCache.feed(key, cache);
+      }
+    }
+  }
+
+  Packer.prototype = {
+
+    unpack: function(_unpackedRaw, _record) {
+      if(this.meta) _record.$metadata = processMeta(this, _unpackedRaw, this.single);
+      if(this.links) processLinks(this, _unpackedRaw, this.single);
+      return _unpackedRaw[this.single];
+    },
+
+    unpackMany: function(_unpackedRaw, _collection) {
+      if(this.meta) _collection.$metadata = processMeta(this, _unpackedRaw, this.plural);
+      if(this.links) processLinks(this, _unpackedRaw, this.plural);
+      return _unpackedRaw[this.plural];
+    },
+
+    pack: function(_raw) {
+      return _raw; // no special packing
+    },
+
+    packMany: function(_raw) {
+      return _raw; // no special packing
+    }
+  };
+
+  return Packer;
 
 }]);
 /**
