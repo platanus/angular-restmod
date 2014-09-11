@@ -11,7 +11,7 @@
     "type": "git",
     "url": "git://github.com/angular-platanus/restmod.git"
   },
-  "main": "./dist/angular-restmod.min.js",
+  "main": "./dist/angular-restmod-bundle.min.js",
   "ignore": [
     "**/.*",
     "Gruntfile.js",
