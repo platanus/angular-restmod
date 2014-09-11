@@ -57,7 +57,7 @@ RMModule.provider('restmod', [function() {
      *
      * The restmod service provides factory methods for the different restmod consumables.
      */
-    $get: ['RMModelFactory', function(buildModel) {
+    $get: ['RMModelFactory', '$log', function(buildModel, $log) {
 
       var arraySlice = Array.prototype.slice;
 
@@ -80,7 +80,7 @@ RMModule.provider('restmod', [function() {
          *```
          *
          * The `_url` parameter is the resource url the generated model will be bound to, if `null` is given then
-         * the model is *anonymous* and can only be used in another model context.
+         * the model is *nested* and can only be used in another model context.
          *
          * The model also accepts one or more definition providers as one or more arguments after the _url parameter,
          * posible definition providers are:
@@ -123,7 +123,14 @@ RMModule.provider('restmod', [function() {
          * @return {StaticApi} The new model.
          */
         model: function(_baseUrl/* , _mix */) {
-          return buildModel(_baseUrl, BASE_CHAIN).$mix(arraySlice.call(arguments, 1));
+          var model = buildModel(_baseUrl, BASE_CHAIN);
+
+          if(arguments.length > 1) {
+            model.$mix(arraySlice.call(arguments, 1));
+            $log.warn('Passing mixins and difinitions in the model method will be deprecated in restmod 1.1, use restmod.model().$mix() instead.');
+          }
+
+          return model;
         },
 
         /**
