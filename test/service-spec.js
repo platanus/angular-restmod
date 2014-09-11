@@ -15,7 +15,7 @@ describe('Restmod model class:', function() {
       expect(Bike.$url()).toEqual('/user/bikes');
       expect(Bike.$name()).toEqual('bike');
       expect(Bike.$name(true)).toEqual('bikes');
-      expect(Bike.$anonymous()).toEqual(false);
+      expect(Bike.$isNested()).toEqual(false);
       expect(Bike.$$chain.length).toEqual(1);
     });
 

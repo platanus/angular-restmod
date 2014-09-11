@@ -21,9 +21,9 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
       return Utils.joinUrl(this.$scope.$url(), this.$partial);
     },
 
-    // record url is nested only for anonymous resources
+    // record url is nested only for nested resources
     $urlFor: function(_pk) {
-      if(this.$target.$anonymous()) {
+      if(this.$target.$isNested()) {
         return this.$fetchUrlFor();
       } else {
         return this.$target.$urlFor(_pk);

@@ -170,13 +170,13 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
       /**
        * @memberof StaticApi#
        *
-       * @description Returns true if model is anonymous.
+       * @description Returns true if model is nested.
        *
-       * An anonymous model can only be used as a nested resource (using relations)
+       * An nested model can only be used as a nested resource (using hasMany or hasOne relations)
        *
-       * @return {boolean} true if model is anonymous.
+       * @return {boolean} true if model is nested.
        */
-      $anonymous: function() {
+      $isNested: function() {
         return !_baseUrl;
       },
 
@@ -223,7 +223,7 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
        * This name should match the one used throughout the API. It's only used by some extended
        * functionality, like the default packer.
        *
-       * By default model name is infered from the url, but for anonymous models and special cases
+       * By default model name is infered from the url, but for nested models and special cases
        * it should be manually set by writing the name and plural properties:
        *
        * ```javascript
@@ -374,7 +374,7 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
        * The following configuration parameters are available by default:
        * * primaryKey: The model's primary key, defaults to **id**. Keys must use server naming convention!
        * * urlPrefix: Url prefix to prepend to resource url, usefull to use in a base mixin when multiples models have the same prefix.
-       * * url: The resource base url, null by default. If not given resource is considered anonymous.
+       * * url: The resource base url, null by default. If not given resource is considered nested.
        *
        * @param {string} _key The configuration key to set.
        * @param {mixed} _value The configuration value.

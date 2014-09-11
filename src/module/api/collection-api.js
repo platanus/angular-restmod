@@ -68,7 +68,7 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
      * @return {string|null} The url or nill if item does not meet the url requirements.
      */
     $urlFor: function(_pk) {
-      // force item unscoping if model is not anonymous (maybe make this optional)
+      // force item unscoping if model is not nested (maybe make this optional)
       var baseUrl = this.$type.$url();
       return Utils.joinUrl(baseUrl ? baseUrl : this.$url(), _pk);
     },
