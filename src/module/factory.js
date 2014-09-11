@@ -1,7 +1,7 @@
 'use strict';
 
-RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', 'RMExtendedApi', 'RMSerializer', 'RMBuilder',
-  function($injector, $log, inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi, ExtendedApi, Serializer, Builder) {
+RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', 'RMExtendedApi', 'RMSerializer', 'RMBuilder',
+  function($injector, inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi, ExtendedApi, Serializer, Builder) {
 
   var NAME_RGX = /(.*?)([^\/]+)\/?$/,
       extend = Utils.extendOverriden;
@@ -20,12 +20,6 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
       meta = {},                        // atribute metadata
       hooks = {},
       builder;                          // the model builder
-
-    // make sure a style base was selected for the model
-
-    // if(!internal.style) {
-    //   $log.warn('No API style base was included, see the Api Integration Guide.');
-    // }
 
     // make sure the resource name and plural name are available if posible:
 

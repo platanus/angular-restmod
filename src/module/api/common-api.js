@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMCommonApi', ['$http', '$q', 'RMPackerCache', function($http, $q, packerCache) {
+RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', function($http, $q, $log, packerCache) {
 
   var EMPTY_ARRAY = [];
 
@@ -321,6 +321,11 @@ RMModule.factory('RMCommonApi', ['$http', '$q', 'RMPackerCache', function($http,
      * @return {CommonApi} self
      */
     $send: function(_options, _success, _error) {
+
+      // make sure a style base was selected for the model
+      if(!this.$getProperty('style')) {
+        $log.warn('No API style base was selected, see the Api Integration FAQ for more information on this warning');
+      }
 
       this.$pending = (this.$pending || []);
       this.$pending.push(_options);
