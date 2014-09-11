@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v0.18.2 - 2014-08-30
+ * @version v1.0.0 - 2014-09-10
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -44,11 +44,12 @@
 angular.module('restmod').factory('PagedModel', ['restmod', function(restmod) {
 
   return restmod.mixin({
-    '@$pageHeader': 'X-Page',
-    '@$pageCountHeader': 'X-Page-Total',
+    PAGE_HEADER: 'X-Page',
+    PAGE_COUNT_HEADER: 'X-Page-Total',
+
     '~afterFetchMany': function(_response) {
-      var page = _response.headers(this.$pageHeader),
-          pageCount = _response.headers(this.$pageCountHeader);
+      var page = _response.headers(this.$getProperty('pageHeader')),
+          pageCount = _response.headers(this.$getProperty('pageCountHeader'));
 
       this.$page = (page !== undefined ? parseInt(page, 10) : 1);
       this.$pageCount = (pageCount !== undefined ? parseInt(pageCount, 10) : 1);

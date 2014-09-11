@@ -1,3 +1,67 @@
+<a name="1.0.0"></a>
+## 1.0.0 (2014-09-10)
+
+
+#### Bug Fixes
+
+* **common:** removes promise clearing in `$cancel` ([7cb4ad5b](http://github.com/angular-platanus/restmod/commit/7cb4ad5b0156ec9188d1f7913411c378a69e8867))
+* **tests:** changes old notation ([8c4c9d48](http://github.com/angular-platanus/restmod/commit/8c4c9d48fe07817f87179c77159d660505024ddd), closes [#33](http://github.com/angular-platanus/restmod/issues/33))
+
+
+#### Features
+
+* creates the extended api module that is included in collections and records. ([c05a7b3c](http://github.com/angular-platanus/restmod/commit/c05a7b3c50d764ef57338f3c96d056ac0f354ce7), closes [#78](http://github.com/angular-platanus/restmod/issues/78), [#115](http://github.com/angular-platanus/restmod/issues/115))
+* **builder:**
+  * define accepts individual implementations for record/collection/type. ([2966a46d](http://github.com/angular-platanus/restmod/commit/2966a46dfdd97555d5dba63f3c68d2d53a087df0))
+  * changes the way property renaming is configured, adds the setRenamer method. ([91ab4a33](http://github.com/angular-platanus/restmod/commit/91ab4a339ee7f2c360177bf2cb46d1362d7e37e0), closes [#111](http://github.com/angular-platanus/restmod/issues/111))
+* **common:**
+  * improves promise chaining using the `$then` method. ([aab2e309](http://github.com/angular-platanus/restmod/commit/aab2e30940553cf49c427dae85126d4547aaabbc))
+  * adds the $asPromise method ([3e0dc98d](http://github.com/angular-platanus/restmod/commit/3e0dc98d1dee4e7f7d5e2c7e11a66359738c61aa))
+* **factory:** Adds style warning. ([e43bed52](http://github.com/angular-platanus/restmod/commit/e43bed52797b689b8b83e243298e16e3c614ef80))
+* **model:**
+  * adds $mix method to extend a model after being created ([8fce2ec9](http://github.com/angular-platanus/restmod/commit/8fce2ec9399daaf38bb5a719c071ce28d0553deb))
+  * makes $inferKey public so it can be overriden. ([22900b4d](http://github.com/angular-platanus/restmod/commit/22900b4dd177c6df6bce32261dcc855bc8ef56c5), closes [#113](http://github.com/angular-platanus/restmod/issues/113))
+* **plugins.debounced:** changes use of classDefine variables by configuration variables ([14f76cff](http://github.com/angular-platanus/restmod/commit/14f76cff1d8b3853138589c8116e2c398f7f8fe1))
+* **plugins.paged:** changes use of classDefine variables by configuration variables ([5ddc1904](http://github.com/angular-platanus/restmod/commit/5ddc1904a4be7de4c9fcbc55de7980ee99eebff9))
+* **utils:**
+  * overhaul extendOverriden to be used in factory ([7b309652](http://github.com/angular-platanus/restmod/commit/7b3096523ca5e5418bcb89c308e61edb76bca175))
+  * adds assertion method and integrates it ([badc381a](http://github.com/angular-platanus/restmod/commit/badc381a4ccfa1465a1c5d42bbe38f9099af856e))
+
+
+#### Breaking Changes
+
+* `$then` and `$asPromise` callbacks arguments have changed, `$promise` as public property is deprecated.
+
+$then and $asPromise callbacks will now always receive the related resource as first parameter. Last promise result/rejection reason
+will be located in the `$last` property of the resource.
+
+Replace references to `$promise` by calls to `$asPromise()`.
+ ([aab2e309](http://github.com/angular-platanus/restmod/commit/aab2e30940553cf49c427dae85126d4547aaabbc))
+* CommonApi methods are no longer available at static (class) level
+ ([52b2591f](http://github.com/angular-platanus/restmod/commit/52b2591f9bba0084defa6f07f28def3975bff760))
+* define and classDefine no longer accept types other than functions.
+
+Replace calls to `define({ /* various methods */ })` by various calls to `define`, same for classDefine.
+
+Replace usage of `classDefine` for type level config variables by proper configuration variables set
+using `setProperty`.
+ ([2966a46d](http://github.com/angular-platanus/restmod/commit/2966a46dfdd97555d5dba63f3c68d2d53a087df0))
+* restmod.model no longer accepts the resource url as it first parameter, use the PATH variable instead.
+
+To migrate change call to `restmod.model('url', { /* ... */ })` to `restmod.model({ PATH: 'url', /* ... */ })`, and calls to `restmod.model(null, { /* ... */ })` to `restmod.model({ /* ... */ })`.
+
+Closes #116
+ ([4db475ce](http://github.com/angular-platanus/restmod/commit/4db475ce4f3cf1c5d9dbb6b30b822e388013165a))
+* Renaming has been disabled by default, removed setNameEncoder/setNameDecoder/disableRenaming methods
+
+You must provide a custom renamer if you need renaming now, the idea is use a **style**.
+
+Replace setNameEncoder/setNameDecoder/disableRenaming methods usage setRenamer method.
+
+Closes #111
+ ([91ab4a33](http://github.com/angular-platanus/restmod/commit/91ab4a339ee7f2c360177bf2cb46d1362d7e37e0))
+
+
 <a name="0.18.2"></a>
 ### 0.18.2 (2014-08-30)
 
