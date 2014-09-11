@@ -310,9 +310,8 @@ RMModule.factory('RMCommonApi', ['$http', '$q', 'RMPackerCache', function($http,
      *
      * @description Low level communication method, wraps the $http api.
      *
-     * This method is responsible for request queuing and lifecycle. This method guaraties that:
-     * * The $promise property will always contain the last request promise right after calling the method.
-     * * Pending requests will be available at the $pending property (array)
+     * * You can access last request promise using the `$asPromise` method.
+     * * Pending requests will be available at the $pending property (array).
      * * Current request execution status can be queried using the $status property (current request, not last).
      * * The $status property refers to the current request inside $send `_success` and `_error` callbacks.
      *
@@ -399,8 +398,6 @@ RMModule.factory('RMCommonApi', ['$http', '$q', 'RMPackerCache', function($http,
         });
       }
 
-      // reset request
-      this.$promise = null;
       return this;
     },
 
