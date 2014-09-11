@@ -7,10 +7,6 @@ the undelying backend, so for example, since rails is usually programmed in snak
 the active_model_serializer style will enable the property renaming to convert every
 property to camelcase on arrival.
 
-**Api styles contributions are welcomed!!, some ideas:**
-* django style APIs
-* .NET style APIs
-
 To use a style first make sure style script file is being loaded:
 
 ```html
@@ -44,3 +40,17 @@ Mixin Name: `AMSApi`
 * Json metadata expected in 'meta' property
 * Json links expected in 'links' property
 * Default primary key: id
+
+## Contributions
+
+**Api styles contributions are welcomed!!, some ideas:**
+* django style APIs
+* .NET style APIs
+
+To contribute with a new style just:Pcom
+* Clone restmod repo
+* Create new style mixin file in the `src/styles` dir
+* Add tests for additional components (like packers, renamers, etc)
+* Make sure the build process generates the new style script
+* Add it to this listing, with some reference to where the style is described.
+* PR it!
