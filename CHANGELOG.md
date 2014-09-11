@@ -17,7 +17,6 @@
 * **common:**
   * improves promise chaining using the `$then` method. ([aab2e309](http://github.com/angular-platanus/restmod/commit/aab2e30940553cf49c427dae85126d4547aaabbc))
   * adds the $asPromise method ([3e0dc98d](http://github.com/angular-platanus/restmod/commit/3e0dc98d1dee4e7f7d5e2c7e11a66359738c61aa))
-* **factory:** Adds style warning. ([e43bed52](http://github.com/angular-platanus/restmod/commit/e43bed52797b689b8b83e243298e16e3c614ef80))
 * **model:**
   * adds $mix method to extend a model after being created ([8fce2ec9](http://github.com/angular-platanus/restmod/commit/8fce2ec9399daaf38bb5a719c071ce28d0553deb))
   * makes $inferKey public so it can be overriden. ([22900b4d](http://github.com/angular-platanus/restmod/commit/22900b4dd177c6df6bce32261dcc855bc8ef56c5), closes [#113](http://github.com/angular-platanus/restmod/issues/113))
@@ -46,12 +45,6 @@ Replace calls to `define({ /* various methods */ })` by various calls to `define
 Replace usage of `classDefine` for type level config variables by proper configuration variables set
 using `setProperty`.
  ([2966a46d](http://github.com/angular-platanus/restmod/commit/2966a46dfdd97555d5dba63f3c68d2d53a087df0))
-* restmod.model no longer accepts the resource url as it first parameter, use the PATH variable instead.
-
-To migrate change call to `restmod.model('url', { /* ... */ })` to `restmod.model({ PATH: 'url', /* ... */ })`, and calls to `restmod.model(null, { /* ... */ })` to `restmod.model({ /* ... */ })`.
-
-Closes #116
- ([4db475ce](http://github.com/angular-platanus/restmod/commit/4db475ce4f3cf1c5d9dbb6b30b822e388013165a))
 * Renaming has been disabled by default, removed setNameEncoder/setNameDecoder/disableRenaming methods
 
 You must provide a custom renamer if you need renaming now, the idea is use a **style**.
