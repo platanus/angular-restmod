@@ -1,3 +1,10 @@
+<a name="1.0.2"></a>
+### 1.0.2 (2014-09-12)
+
+#### Bug fixes
+
+* **ams:** fixes call to setPacker.
+
 <a name="1.0.1"></a>
 ### 1.0.1 (2014-09-11)
 
