@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>$restmod Class: StaticApi</title>
+	<title>restmod Class: StaticApi</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -19,7 +19,7 @@
 <div class="container-fluid">
 	<div class="navbar navbar-fixed-top ">
 		<div class="navbar-inner">
-			<a class="brand" href="index.html">$restmod</a>
+			<a class="brand" href="index.html">restmod</a>
 			<ul class="nav">
 				
 				<li class="dropdown">
@@ -41,7 +41,27 @@
 						</li>
 						
 						<li>
+							<a href="DefaultPacker.html">DefaultPacker</a>
+						</li>
+						
+						<li>
+							<a href="ExtendedApi.html">ExtendedApi</a>
+						</li>
+						
+						<li>
+							<a href="ExtendedBuilderApi.html">ExtendedBuilderApi</a>
+						</li>
+						
+						<li>
+							<a href="PackerCache.html">PackerCache</a>
+						</li>
+						
+						<li>
 							<a href="RecordApi.html">RecordApi</a>
+						</li>
+						
+						<li>
+							<a href="RelationBuilderApi.html">RelationBuilderApi</a>
 						</li>
 						
 						<li>
@@ -58,6 +78,10 @@
 						
 						<li>
 							<a href="ScopeApi.html">ScopeApi</a>
+						</li>
+						
+						<li>
+							<a href="SerializerBuilderApi.html">SerializerBuilderApi</a>
 						</li>
 						
 						<li>
@@ -90,6 +114,10 @@
 							<a href="PagedModel.html">PagedModel</a>
 						</li>
 						
+						<li>
+							<a href="SharedModel.html">SharedModel</a>
+						</li>
+						
 
 					</ul>
 				</li>
@@ -109,7 +137,15 @@
 						</li>
 						
 						<li>
+							<a href="tutorial-integration.html">integration</a>
+						</li>
+						
+						<li>
 							<a href="tutorial-model.html">model</a>
+						</li>
+						
+						<li>
+							<a href="tutorial-styles.html">styles</a>
 						</li>
 						
 
@@ -243,7 +279,7 @@ read the ModelCollection documentation.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/factory.js, line 60
+        module/factory.js, line 81
     </li></ul></dd>
     
 
@@ -297,7 +333,7 @@ read the ModelCollection documentation.</p></td>
         <dl>
             
 <dt>
-    <h4 class="name" id="$anonymous"><span class="type-signature"></span>$anonymous<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    <h4 class="name" id="$asPromise"><span class="type-signature"></span>$asPromise<span class="signature">()</span><span class="type-signature"> &rarr; {promise}</span></h4>
     
     
 </dt>
@@ -305,8 +341,11 @@ read the ModelCollection documentation.</p></td>
     
     
     <div class="description">
-        <p>Returns true if model is anonymous.</p>
-<p>An anonymous model can only be used as a nested resource (using relations)</p>
+        <p>Returns this object last promise.</p>
+<p>If promise does not exist, then a new one is generated that resolves to the object itsef. The
+new promise is not set as the current object promise, for that use <code>$then</code>.</p>
+<p>Usage:</p>
+<pre><code class="lang-javascript">col.$fetch().$asPromise();</code></pre>
     </div>
     
 
@@ -325,6 +364,11 @@ read the ModelCollection documentation.</p></td>
     
 
     
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="CommonApi.html#$asPromise">CommonApi#$asPromise</a>
+    </li></dd>
+    
 
     
 
@@ -339,7 +383,7 @@ read the ModelCollection documentation.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/factory.js, line 161
+        module/api/common-api.js, line 242
     </li></ul></dd>
     
 
@@ -364,7 +408,7 @@ read the ModelCollection documentation.</p></td>
     
             
 <div class="param-desc">
-    <p>true if model is anonymous.</p>
+    <p>$q promise</p>
 </div>
 
 
@@ -375,7 +419,7 @@ read the ModelCollection documentation.</p></td>
 	</dt>
 	<dd>
 		
-<span class="param-type">boolean</span>
+<span class="param-type">promise</span>
 
 
 	</dd>
@@ -486,7 +530,7 @@ read the ModelCollection documentation.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/scope-api.js, line 39
+        module/api/scope-api.js, line 39
     </li></ul></dd>
     
 
@@ -633,7 +677,7 @@ read the ModelCollection documentation.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/scope-api.js, line 53
+        module/api/scope-api.js, line 53
     </li></ul></dd>
     
 
@@ -730,7 +774,7 @@ read the ModelCollection documentation.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/common-api.js, line 363
+        module/api/common-api.js, line 398
     </li></ul></dd>
     
 
@@ -901,7 +945,7 @@ read the ModelCollection documentation.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/scope-api.js, line 97
+        module/api/scope-api.js, line 97
     </li></ul></dd>
     
 
@@ -1047,7 +1091,7 @@ read the ModelCollection documentation.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/scope-api.js, line 80
+        module/api/scope-api.js, line 80
     </li></ul></dd>
     
 
@@ -1232,7 +1276,7 @@ restmod.mixin({
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/common-api.js, line 153
+        module/api/common-api.js, line 169
     </li></ul></dd>
     
 
@@ -1283,7 +1327,7 @@ restmod.mixin({
         
             
 <dt>
-    <h4 class="name" id="$dispatch"><span class="type-signature"></span>$dispatch<span class="signature">(_hook, _args, _ctx)</span><span class="type-signature"> &rarr; {<a href="CommonApi.html">CommonApi</a>}</span></h4>
+    <h4 class="name" id="$dispatch"><span class="type-signature"></span>$dispatch<span class="signature">(_hook, _args, _ctx)</span><span class="type-signature"> &rarr; {Model}</span></h4>
     
     
 </dt>
@@ -1291,36 +1335,7 @@ restmod.mixin({
     
     
     <div class="description">
-        <p>Executes a given hook callbacks using the current dispatcher context.</p>
-<p>This method can be used to provide custom object lifecycle hooks.</p>
-<p>Usage:</p>
-<pre><code class="lang-javascript">var mixin = restmod.mixin({
-  triggerDummy: function(_param) {
-    this.$dispatch('dummy-hook', _param);
-  }
-});
-
-// Then hook can be used at model definition to provide type-level customization:
-var Bike $resmod.model('/api/bikes', mixin, {
-  '~dummy-hook': function() {
-    alert('This is called for every bike');
-  }
-};
-
-// or at instance level:
-var myBike = Bike.$build();
-myBike.$on('dummy-hook', function() {
-  alert('This is called for myBike only');
-});
-
-// or event at decorated context level
-myBike.$decorate({
-  'dummy-hook': function() {
-    alert('This is called for myBike only inside the decorated context');
-  }
-}, fuction() {
- // decorated context
-});</code></pre>
+        <p>Simple $dispatch implementation for CommonApi compat.</p>
     </div>
     
 
@@ -1434,11 +1449,6 @@ myBike.$decorate({
     
 
     
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="CommonApi.html#$dispatch">CommonApi#$dispatch</a>
-    </li></dd>
-    
 
     
 
@@ -1453,7 +1463,7 @@ myBike.$decorate({
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/common-api.js, line 73
+        module/factory.js, line 275
     </li></ul></dd>
     
 
@@ -1478,7 +1488,7 @@ myBike.$decorate({
     
             
 <div class="param-desc">
-    <p>self</p>
+    <p>The model</p>
 </div>
 
 
@@ -1489,7 +1499,7 @@ myBike.$decorate({
 	</dt>
 	<dd>
 		
-<span class="param-type"><a href="CommonApi.html">CommonApi</a></span>
+<span class="param-type">Model</span>
 
 
 	</dd>
@@ -1569,7 +1579,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/common-api.js, line 204
+        module/api/common-api.js, line 220
     </li></ul></dd>
     
 
@@ -1718,7 +1728,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/common-api.js, line 249
+        module/api/common-api.js, line 301
     </li></ul></dd>
     
 
@@ -1887,7 +1897,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/scope-api.js, line 68
+        module/api/scope-api.js, line 68
     </li></ul></dd>
     
 
@@ -1938,7 +1948,7 @@ contextual hook system in asynchronic operations.</p>
         
             
 <dt>
-    <h4 class="name" id="$getPrimaryKey"><span class="type-signature"></span>$getPrimaryKey<span class="signature">()</span><span class="type-signature"> &rarr; {mixed}</span></h4>
+    <h4 class="name" id="$getProperty"><span class="type-signature"></span>$getProperty<span class="signature">(_key, _default)</span><span class="type-signature"> &rarr; {mixed}</span></h4>
     
     
 </dt>
@@ -1946,7 +1956,11 @@ contextual hook system in asynchronic operations.</p>
     
     
     <div class="description">
-        <p>Gets the model primary key</p>
+        <p>Gets a model's internal property value.</p>
+<p>Some builtin properties:
+<em> url
+</em> urlPrefix
+* primaryKey</p>
     </div>
     
 
@@ -1954,6 +1968,78 @@ contextual hook system in asynchronic operations.</p>
     
     
     
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Property name</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_default</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">mixed</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Value to return if property is not defined</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
     
     
     
@@ -1979,7 +2065,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/factory.js, line 148
+        module/factory.js, line 159
     </li></ul></dd>
     
 
@@ -2004,7 +2090,7 @@ contextual hook system in asynchronic operations.</p>
     
             
 <div class="param-desc">
-    <p>model primary key</p>
+    <p>value</p>
 </div>
 
 
@@ -2076,7 +2162,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/common-api.js, line 383
+        module/api/common-api.js, line 416
     </li></ul></dd>
     
 
@@ -2127,7 +2213,7 @@ contextual hook system in asynchronic operations.</p>
         
             
 <dt>
-    <h4 class="name" id="$name"><span class="type-signature"></span>$name<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    <h4 class="name" id="$inferKey"><span class="type-signature"></span>$inferKey<span class="signature">(_rawData)</span><span class="type-signature"> &rarr; {mixed}</span></h4>
     
     
 </dt>
@@ -2135,8 +2221,154 @@ contextual hook system in asynchronic operations.</p>
     
     
     <div class="description">
-        <p>Returns the model name.</p>
-<p>Returns the name given The name can be given when  is infered from the base url or</p>
+        <p>Extracts the primary key from raw record data.</p>
+<p>Uses the key configured in the PRIMARY_KEY variable or 'id' by default.</p>
+<p>Some considerations:
+<em> This method can be overriden to handle other scenarios.
+</em> This method should not change the raw data passed to it.
+* The primary key value extracted by this method should be comparable using the == operator.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_rawData</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Raw object data (before it goes into decode)</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/factory.js, line 138
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>The primary key value.</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">mixed</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$isNested"><span class="type-signature"></span>$isNested<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Returns true if model is nested.</p>
+<p>An nested model can only be used as a nested resource (using hasMany or hasOne relations)</p>
     </div>
     
 
@@ -2169,7 +2401,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/factory.js, line 209
+        module/factory.js, line 173
     </li></ul></dd>
     
 
@@ -2194,6 +2426,219 @@ contextual hook system in asynchronic operations.</p>
     
             
 <div class="param-desc">
+    <p>true if model is nested.</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">boolean</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$mix"><span class="type-signature"></span>$mix<span class="signature">()</span><span class="type-signature"> &rarr; {Model}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Modifies model behavior.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/factory.js, line 258
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>The model</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Model</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$name"><span class="type-signature"></span>$name<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Returns the model API name.</p>
+<p>This name should match the one used throughout the API. It's only used by some extended
+functionality, like the default packer.</p>
+<p>By default model name is infered from the url, but for nested models and special cases
+it should be manually set by writing the name and plural properties:</p>
+<pre><code class="lang-javascript">restmod.model(null, {
+  __name__: 'resource',
+  __plural__: 'resourciness' // set only if inflector cant properly gess the name.
+});</code></pre>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/factory.js, line 233
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    <ul>
+            <li>
+<div class="param-desc">
+    <p>If true, return plural name</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">boolean</span>
+
+
+	</dd>
+</dl>
+
+</li>
+        
+            <li>
+<div class="param-desc">
     <p>The base url.</p>
 </div>
 
@@ -2211,8 +2656,8 @@ contextual hook system in asynchronic operations.</p>
 	</dd>
 </dl>
 
-
-        
+</li>
+        </ul>
     
     
 </dd>
@@ -2338,7 +2783,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/scope-api.js, line 25
+        module/api/scope-api.js, line 25
     </li></ul></dd>
     
 
@@ -2513,7 +2958,7 @@ bike2.$save(); // no alert is shown after bike2 is saved</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/common-api.js, line 122
+        module/api/common-api.js, line 138
     </li></ul></dd>
     
 
@@ -2659,7 +3104,7 @@ bike2.$save(); // no alert is shown after bike2 is saved</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/scope-api.js, line 109
+        module/api/scope-api.js, line 109
     </li></ul></dd>
     
 
@@ -2719,11 +3164,12 @@ bike2.$save(); // no alert is shown after bike2 is saved</code></pre>
     
     <div class="description">
         <p>Low level communication method, wraps the $http api.</p>
-<p>This method is responsible for request queuing and lifecycle. This method guaraties that:
-<em> The $promise property will always contain the last request promise right after calling the method.
-</em> Pending requests will be available at the $pending property (array)
-<em> Current request execution status can be queried using the $status property (current request, not last).
-</em> The $status property refers to the current request inside $send <code>_success</code> and <code>_error</code> callbacks.</p>
+<ul>
+<li>You can access last request promise using the <code>$asPromise</code> method.</li>
+<li>Pending requests will be available at the $pending property (array).</li>
+<li>Current request execution status can be queried using the $status property (current request, not last).</li>
+<li>The $status property refers to the current request inside $send <code>_success</code> and <code>_error</code> callbacks.</li>
+</ul>
     </div>
     
 
@@ -2856,7 +3302,7 @@ bike2.$save(); // no alert is shown after bike2 is saved</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/common-api.js, line 273
+        module/api/common-api.js, line 323
     </li></ul></dd>
     
 
@@ -3001,7 +3447,7 @@ bike2.$save(); // no alert is shown after bike2 is saved</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/factory.js, line 181
+        module/factory.js, line 193
     </li></ul></dd>
     
 
@@ -3173,7 +3619,7 @@ bike2.$save(); // no alert is shown after bike2 is saved</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/common-api.js, line 227
+        module/api/common-api.js, line 267
     </li></ul></dd>
     
 
@@ -3199,6 +3645,177 @@ bike2.$save(); // no alert is shown after bike2 is saved</code></pre>
             
 <div class="param-desc">
     <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="CommonApi.html">CommonApi</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$unwrap"><span class="type-signature"></span>$unwrap<span class="signature">(_raw, _mask)</span><span class="type-signature"> &rarr; {<a href="CommonApi.html">CommonApi</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Unpacks and decode raw data from a server generated structure.</p>
+<p>ATTENTION: do not override this method to change the object wrapping strategy,
+instead, check BuilderApi#setPacker for instruction about loading a new packer.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_raw</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">mixed</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Raw server data</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_mask</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>'CRU' mask</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="CommonApi.html#$unwrap">CommonApi#$unwrap</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/api/common-api.js, line 444
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>this</p>
 </div>
 
 
@@ -3265,7 +3882,7 @@ bike2.$save(); // no alert is shown after bike2 is saved</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/factory.js, line 196
+        module/factory.js, line 208
     </li></ul></dd>
     
 
@@ -3406,7 +4023,7 @@ bike2.$save(); // no alert is shown after bike2 is saved</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/factory.js, line 221
+        module/factory.js, line 245
     </li></ul></dd>
     
 
@@ -3457,6 +4074,154 @@ bike2.$save(); // no alert is shown after bike2 is saved</code></pre>
     
 </dd>
 
+        
+            
+<dt>
+    <h4 class="name" id="$wrap"><span class="type-signature"></span>$wrap<span class="signature">(_mask)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Encode and packs object into a server compatible structure that can be used for PUT/POST operations.</p>
+<p>ATTENTION: do not override this method to change the object wrapping strategy,
+instead, check BuilderApi#setPacker for instruction about loading a new packer.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_mask</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>'CRU' mask</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="CommonApi.html#$wrap">CommonApi#$wrap</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/api/common-api.js, line 467
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>raw data</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">string</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
         </dl>
     
 
@@ -3478,7 +4243,7 @@ bike2.$save(); // no alert is shown after bike2 is saved</code></pre>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on Thu Aug 14 2014 17:34:55 GMT-0400 (CLT) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Fri Sep 12 2014 11:56:33 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>$restmod Class: BuilderApi</title>
+	<title>restmod Class: BuilderApi</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -19,7 +19,7 @@
 <div class="container-fluid">
 	<div class="navbar navbar-fixed-top ">
 		<div class="navbar-inner">
-			<a class="brand" href="index.html">$restmod</a>
+			<a class="brand" href="index.html">restmod</a>
 			<ul class="nav">
 				
 				<li class="dropdown">
@@ -41,7 +41,27 @@
 						</li>
 						
 						<li>
+							<a href="DefaultPacker.html">DefaultPacker</a>
+						</li>
+						
+						<li>
+							<a href="ExtendedApi.html">ExtendedApi</a>
+						</li>
+						
+						<li>
+							<a href="ExtendedBuilderApi.html">ExtendedBuilderApi</a>
+						</li>
+						
+						<li>
+							<a href="PackerCache.html">PackerCache</a>
+						</li>
+						
+						<li>
 							<a href="RecordApi.html">RecordApi</a>
+						</li>
+						
+						<li>
+							<a href="RelationBuilderApi.html">RelationBuilderApi</a>
 						</li>
 						
 						<li>
@@ -58,6 +78,10 @@
 						
 						<li>
 							<a href="ScopeApi.html">ScopeApi</a>
+						</li>
+						
+						<li>
+							<a href="SerializerBuilderApi.html">SerializerBuilderApi</a>
 						</li>
 						
 						<li>
@@ -90,6 +114,10 @@
 							<a href="PagedModel.html">PagedModel</a>
 						</li>
 						
+						<li>
+							<a href="SharedModel.html">SharedModel</a>
+						</li>
+						
 
 					</ul>
 				</li>
@@ -109,7 +137,15 @@
 						</li>
 						
 						<li>
+							<a href="tutorial-integration.html">integration</a>
+						</li>
+						
+						<li>
 							<a href="tutorial-model.html">model</a>
+						</li>
+						
+						<li>
+							<a href="tutorial-styles.html">styles</a>
 						</li>
 						
 
@@ -158,7 +194,13 @@
 <h2>Definition object</h2>
 <p>This is the preferred way of describing a model behavior.</p>
 <p>A model description object looks like this:</p>
-<pre><code class="lang-javascript">restmod.model('', {
+<pre><code class="lang-javascript">restmod.model({
+
+  // MODEL CONFIGURATION
+
+  URL: 'resource',
+  NAME: 'resource',
+  PRIMARY_KEY: '_id',
 
   // ATTRIBUTE MODIFIERS
 
@@ -172,10 +214,10 @@
 
   // METHODS
 
-  '@classMethod': function() {
+  instanceMethod: function() {
   },
 
-  instanceMethod: function() {
+  '@classMethod': function() {
   },
 
   // HOOKS
@@ -183,26 +225,34 @@
   '~afterCreate': function() {
   }
 });</code></pre>
-<p>With the exception of properties starting with a special character (<strong>@</strong> or <strong>~</strong>),
-each property in the definition object asigns a behavior to the same named property
-in a model's record.</p>
-<p>To modify a property behavior assign an object with the desired modifiers to a
-definition property with the same name. Builtin modifiers are:</p>
-<p>The following built in property modifiers are provided (see each mapped-method docs for usage information):</p>
-<ul>
-<li><code>init</code> sets an attribute default value, see <a href="BuilderApi.html#attrDefault">BuilderApi#attrDefault</a></li>
-<li><code>mask</code> and <code>ignore</code> sets an attribute mask, see <a href="BuilderApi.html#attrMask">BuilderApi#attrMask</a></li>
-<li><code>map</code> sets an explicit server attribute mapping, see <a href="BuilderApi.html#attrMap">BuilderApi#attrMap</a></li>
-<li><code>decode</code> sets how an attribute is decoded after being fetch, maps to <a href="BuilderApi.html#attrDecoder">BuilderApi#attrDecoder</a></li>
-<li><code>encode</code> sets how an attribute is encoded before being sent, maps to <a href="BuilderApi.html#attrEncoder">BuilderApi#attrEncoder</a></li>
-<li><code>serialize</code> sets the encoder and decoder beaviour for an attribute, maps to <a href="BuilderApi.html#attrSerializer">BuilderApi#attrSerializer</a></li>
-<li><code>hasMany</code> sets a one to many hierarchical relation under the attribute name, maps to <a href="BuilderApi.html#attrAsCollection">BuilderApi#attrAsCollection</a></li>
-<li><code>hasOne</code> sets a one to one hierarchical relation under the attribute name, maps to <a href="BuilderApi.html#attrAsResource">BuilderApi#attrAsResource</a></li>
-<li><code>belongsTo</code> sets a one to one reference relation under the attribute name, maps to <a href="BuilderApi.html#attrAsReference">BuilderApi#attrAsReference</a></li>
-</ul>
-<p>To add/override methods from the record api, a function can be passed to one of the
-description properties:</p>
-<pre><code class="lang-javascript">var Model = restmod.model('/', {
+<p>Special model configuration variables can be set by refering to the variable name in capitalized form, like this:</p>
+<pre><code class="lang-javascript">restmod.model({
+
+  URL: 'resource',
+  NAME: 'resource',
+  PRIMARY_KEY: '_id'
+
+ });
+
+With the exception of model configuration variables and properties starting with a special character (**@** or **~**),
+each property in the definition object asigns a behavior to the same named property in a model's record.
+
+To modify a property behavior assign an object with the desired modifiers to a
+definition property with the same name. Builtin modifiers are:
+
+The following built in property modifiers are provided (see each mapped-method docs for usage information):
+
+* `init` sets an attribute default value, see <a href="BuilderApi.html#attrDefault">BuilderApi#attrDefault</a>
+* `mask` and `ignore` sets an attribute mask, see BuilderApi#attrMask
+* `map` sets an explicit server attribute mapping, see BuilderApi#attrMap
+* `decode` sets how an attribute is decoded after being fetch, maps to BuilderApi#attrDecoder
+* `encode` sets how an attribute is encoded before being sent, maps to BuilderApi#attrEncoder
+
+To add/override methods from the record api, a function can be passed to one of the
+description properties:
+
+```javascript
+var Model = restmod.model('/', {
   sayHello: function() { alert('hello!'); }
 })
 
@@ -275,7 +325,7 @@ in this page can be called from the definition function by referencing <em>this<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 13
+        module/builder.js, line 14
     </li></ul></dd>
     
 
@@ -319,928 +369,6 @@ in this page can be called from the definition function by referencing <em>this<
         <h3 class="subsection-title">Methods</h3>
 
         <dl>
-            
-<dt>
-    <h4 class="name" id="attrAsCollection"><span class="type-signature"></span>attrAsCollection<span class="signature">(_name, _model, _url, _source, _inverseOf)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Registers a model <strong>resources</strong> relation</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Attribute name</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_model</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-|
-
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Other model, supports a model name or a direct reference.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_url</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Partial url</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_source</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Inline resource alias (optional)</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_inverseOf</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Inverse property name (optional)</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 547
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="attrAsReference"><span class="type-signature"></span>attrAsReference<span class="signature">(_name, _model, _inline, _key, _prefetch)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Registers a model <strong>reference</strong> relation.</p>
-<p>A reference relation</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Attribute name</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_model</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-|
-
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Other model, supports a model name or a direct reference.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_inline</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">bool</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>If true, model data is expected to be inlined in parent response.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_key</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>reference id property name (optional, defaults to _attr + 'Id')</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_prefetch</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">bool</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>if set to true, $fetch will be automatically called on relation object load.</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 647
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="attrAsResource"><span class="type-signature"></span>attrAsResource<span class="signature">(_name, _model, _url, _source, _inverseOf)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Registers a model <strong>resource</strong> relation</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Attribute name</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_model</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-|
-
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Other model, supports a model name or a direct reference.</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_url</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Partial url (optional)</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_source</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Inline resource alias (optional)</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_inverseOf</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Inverse property name (optional)</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 600
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="attrDecoder"><span class="type-signature"></span>attrDecoder<span class="signature">(_name, _filter, _filterParam, _chain)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Assigns a decoding function/filter to a given attribute.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Attribute name</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_filter</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-|
-
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>filter or function to register</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_filterParam</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">mixed</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Misc filter parameter</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_chain</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>If true, filter is chained to the current attribute filter.</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 514
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
             
 <dt>
     <h4 class="name" id="attrDefault"><span class="type-signature"></span>attrDefault<span class="signature">(_attr, _init)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
@@ -1359,384 +487,7 @@ default value is required.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 420
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="attrEncoder"><span class="type-signature"></span>attrEncoder<span class="signature">(_name, _filter, _filterParam, _chain)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Assigns a encoding function/filter to a given attribute.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Attribute name</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_filter</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-|
-
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>filter or function to register</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_filterParam</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">mixed</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Misc filter parameter</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_chain</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>If true, filter is chained to the current attribute filter.</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 530
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="attrExpression"><span class="type-signature"></span>attrExpression<span class="signature">(_name, _expr)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Expression attributes are evaluated every time new data is fed to the model.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Attribute name</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_expr</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Angular expression to evaluate</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 758
+        module/factory.js, line 396
     </li></ul></dd>
     
 
@@ -1906,7 +657,7 @@ modifiers on the argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 388
+        module/builder.js, line 264
     </li></ul></dd>
     
 
@@ -1957,7 +708,7 @@ modifiers on the argument.</p>
         
             
 <dt>
-    <h4 class="name" id="attrMap"><span class="type-signature"></span>attrMap<span class="signature">(_attr, _serverName)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
+    <h4 class="name" id="attrMeta"><span class="type-signature"></span>attrMeta<span class="signature">(_name, _metadata)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
     
     
 </dt>
@@ -1965,354 +716,7 @@ modifiers on the argument.</p>
     
     
     <div class="description">
-        <p>Sets an attribute mapping.</p>
-<p>Allows a explicit server to model property mapping to be defined.</p>
-<p>For example, to map the response property <code>stats.created_at</code> to model's <code>created</code> property.</p>
-<pre><code class="lang-javascript">builder.attrMap('created', 'stats.created_at');</code></pre>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_attr</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Attribute name</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_serverName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Server (request/response) property name</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 472
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="attrMask"><span class="type-signature"></span>attrMask<span class="signature">(_attr, _mask)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Sets an attribute mask.</p>
-<p>An attribute mask prevents the attribute to be loaded from or sent to the server on certain operations.</p>
-<p>The attribute mask is a string composed by:
-<em> C: To prevent attribute from being sent on create
-</em> R: To prevent attribute from being loaded from server
-* U: To prevent attribute from being sent on update</p>
-<p>For example, the following will prevent an attribute to be send on create or update:</p>
-<pre><code class="lang-javascript">builder.attrMask('readOnly', 'CU');</code></pre>
-<p>If a true boolean value is passed as mask, then 'CRU' will be used
-If a false boolean valus is passed as mask, then mask will be removed</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_attr</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Attribute name</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_mask</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-|
-
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Attribute mask</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 450
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="attrSerializer"><span class="type-signature"></span>attrSerializer<span class="signature">(_name, _serializer)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Assigns a serializer to a given attribute.</p>
-<p>A _serializer is:
-<em> an object that defines both a <code>decode</code> and a <code>encode</code> method
-</em> a function that when called returns an object that matches the above description.
-* a string that represents an injectable that matches any of the above descriptions.</p>
+        <p>Registers attribute metadata.</p>
     </div>
     
 
@@ -2369,19 +773,13 @@ If a false boolean valus is passed as mask, then mask will be removed</p>
 
         <tr>
             
-                <td class="name"><code>_serializer</code></td>
+                <td class="name"><code>_metadata</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
-|
-
 <span class="param-type">object</span>
-|
-
-<span class="param-type">function</span>
 
 
             
@@ -2391,7 +789,7 @@ If a false boolean valus is passed as mask, then mask will be removed</p>
 
             
 
-            <td class="description last"><p>The serializer</p></td>
+            <td class="description last"><p>Attribute metadata</p></td>
         </tr>
 
 	
@@ -2423,7 +821,7 @@ If a false boolean valus is passed as mask, then mask will be removed</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 491
+        module/factory.js, line 410
     </li></ul></dd>
     
 
@@ -2482,10 +880,9 @@ If a false boolean valus is passed as mask, then mask will be removed</p>
     
     
     <div class="description">
-        <p>Registers a class method</p>
-<p>It is posible to override an existing method using define,
-if overriden, the old method can be called using <code>this.$super</code>
-inside de new method.</p>
+        <p>Registers a scope method</p>
+<p>Same as calling <code>define('name', { type: fun, collection: fun })</code>.
+See <a href="BuilderApi.html#define">BuilderApi#define</a> for more information.</p>
     </div>
     
 
@@ -2590,7 +987,7 @@ inside de new method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 722
+        module/factory.js, line 516
     </li></ul></dd>
     
 
@@ -2649,11 +1046,19 @@ inside de new method.</p>
     
     
     <div class="description">
-        <p>Registers an instance method</p>
-<p>Usage:
-   builder.define(function(_super) {
-     return $fetch()
-   });</p>
+        <p>Adds methods to the model</p>
+<p>By default this method adds <strong>record</strong> methods. If called with an object
+instead of a function it can be used to extend the collection and the type with
+specific implementations.</p>
+<p>Usage:</p>
+<pre><code class="lang-javascript">restmod.mixin(function() {
+  this.define('myMethod', function() {})
+      .define('myMethod', {
+        record: function() {}, // called when record.myMethod is called.
+        collection: function() {}, // called when collection.myMethod is called.
+        type: function() {} // called when Model.myMethod is called.
+      });
+});</code></pre>
 <p>It is posible to override an existing method using define,
 if overriden, the old method can be called using <code>this.$super</code>
 inside de new method.</p>
@@ -2729,7 +1134,7 @@ inside de new method.</p>
 
             
 
-            <td class="description last"><p>Function to define</p></td>
+            <td class="description last"><p>Function to define or object with particular implementations</p></td>
         </tr>
 
 	
@@ -2761,7 +1166,7 @@ inside de new method.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 700
+        module/factory.js, line 493
     </li></ul></dd>
     
 
@@ -2903,99 +1308,7 @@ on each property description type.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 349
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="disableRenaming"><span class="type-signature"></span>disableRenaming<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Disables renaming alltogether</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 253
+        module/builder.js, line 175
     </li></ul></dd>
     
 
@@ -3198,7 +1511,7 @@ attribute definition keyword that can be later used when calling
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 329
+        module/builder.js, line 233
     </li></ul></dd>
     
 
@@ -3366,763 +1679,7 @@ make different parameters available to callbacks.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 742
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="setNameDecoder"><span class="type-signature"></span>setNameDecoder<span class="signature">(_value)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Changes the way restmod renames attributes every time a server resource is decoded.</p>
-<p>This is intended to be used as a way of keeping property naming style consistent accross
-languajes. By default, property naming in js should use camelcase and property naming
-in JSON api should use snake case with underscores.</p>
-<p>If <code>false</code> is given, then renaming is disabled</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_value</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-|
-
-<span class="param-type">false</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>decoding function</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 222
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="setNameEncoder"><span class="type-signature"></span>setNameEncoder<span class="signature">(_value)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Changes the way restmod renames attributes every time a local resource is encoded to be sent.</p>
-<p>This is intended to be used as a way of keeping property naming style consistent accross
-languajes. By default, property naming in js should use camelcase and property naming
-in JSON api should use snake case with underscores.</p>
-<p>If <code>false</code> is given, then renaming is disabled</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_value</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-|
-
-<span class="param-type">false</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>encoding function</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 241
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="setPacker"><span class="type-signature"></span>setPacker<span class="signature">(_mode)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Sets the object &quot;packer&quot;, the packer is responsable of providing the object wrapping strategy
-so it matches the API.</p>
-<p>The method accepts a packer name, an instance or a packer contructor, if the first (preferred)
-option is used, then a <Name>Packer factory must be available that return an object or a constructor.</p>
-<p>In case of using a constructor function, the constructor will be called passing the model type
-as first parameter:</p>
-<pre><code class="lang-javascript">// like this:
-var packer = new MyPacker(theModelType);</code></pre>
-<h3>Packer structure.</h3>
-<p>Custom packers must implement the following methods:</p>
-<ul>
-<li><strong>unpack(_rawData, _record):</strong> unwraps data belonging to a single record, must return the unpacked
-data to be passed to <code>$decode</code>.</li>
-<li><strong>unpackMany(_rawData, _collection):</strong> unwraps the data belonging to a collection of records,
-must return the unpacked data array, each array element will be passed to $decode on each new element.</li>
-<li><strong>pack(_rawData, _record):</strong> wraps the encoded data from a record before is sent to the server,
-must return the packed data object to be sent.</li>
-</ul>
-<p>Currently the following builtin strategies are provided:
-TODO: provide builtin strategies!</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_mode</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-|
-
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The packer instance, constructor or name</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 295
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="setPrimaryKey"><span class="type-signature"></span>setPrimaryKey<span class="signature">(_key)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Changes the model's primary key.</p>
-<p>Primary keys are passed to scope's url methods to generate urls. The default primary key is 'id'.</p>
-<p><strong>ATTENTION</strong> Primary keys are extracted from raw data, so _key must use raw api naming.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_key</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-|
-
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>New primary key.</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 203
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>self</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="setUrlPrefix"><span class="type-signature"></span>setUrlPrefix<span class="signature">(_prefix)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Sets an url prefix to be added to every url generated by the model.</p>
-<p>This applies even to objects generated by the <code>$single</code> method.</p>
-<p>This method is intended to be used in a base model mixin so everymodel that extends from it
-gets the same url prefix.</p>
-<p>Usage:</p>
-<pre><code class="lang-javascript">var BaseModel = restmod.mixin(function() {
-  this.setUrlPrefix('/api');
-})
-
-var bike = restmod.model('/bikes', BaseModel).$build({ id: 1 });
-console.log(bike.$url()) // outputs '/api/bikes/1'</code></pre>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_prefix</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>url portion</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/builder.js, line 186
+        module/factory.js, line 535
     </li></ul></dd>
     
 
@@ -4191,7 +1748,7 @@ console.log(bike.$url()) // outputs '/api/bikes/1'</code></pre>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on Thu Aug 14 2014 17:34:55 GMT-0400 (CLT) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Fri Sep 12 2014 11:56:32 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

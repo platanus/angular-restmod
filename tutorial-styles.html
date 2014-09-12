@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>restmod Class: RelationScope</title>
+	<title>restmod tutorialstyles</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -159,121 +159,62 @@
 	<div class="row-fluid">
 
 		
-		<div class="span8">
-			
+			<div class="span12">
+				
 				<div id="main">
-					
-
-
-	<h1 class="page-title">Class: RelationScope</h1>
-<section>
-
-<header>
-    <h2>
-    RelationScope
-    </h2>
+					<section>
     
-</header>
+<header>
+    
+
+    <h2>styles</h2>
+</header>  
 
 <article>
-    <div class="container-overview">
-    
+    <h1>Restmod Style listing</h1>
+<p>This is a list of all api style adaptors provided by restmod (just one for now)</p>
+<p>The idea is to have adaptors that make sensible assumptions about the API given
+the undelying backend, so for example, since rails is usually programmed in snake case,
+the active_model_serializer style will enable the property renaming to convert every
+property to camelcase on arrival.</p>
+<p>To use a style first make sure style script file is being loaded:</p>
+<pre><code class="lang-html"><script type=&quot;text/javascript&quot; src=&quot;js/angular-restmod/dist/styles/my-style.min.js&quot;></script></code></pre>
+<p>Then to set the style for every model:</p>
+<pre><code class="lang-javascript">module.config(function(restmodProvider) {
+    restmodProvider.rebase('MyStyleApi'); // given the mixin is called MyStyleApi
+});
 
-    
-        
-<dt>
-    <h4 class="name" id="RelationScope"><span class="type-signature"></span>new RelationScope<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Special scope a record provides to resources related via hasMany or hasOne relation.</p>
-    </div>
-    
+You can also use the style in a single model:
 
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 5
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
+```javascript
+restmod.model('url', 'MyStyleApi', {
+    // rest of definition.
+})</code></pre>
+<p>These are the api styles currently bundled with restmod:</p>
+<h3>Active Model Serializer</h3>
+<p>File: <code>styles/ams.js</code>
+Mixin Name: <code>AMSApi</code></p>
+<ul>
+<li>Automatic snakecase to camelcase renaming</li>
+<li>Json root enabled</li>
+<li>Json metadata expected in 'meta' property</li>
+<li>Json links expected in 'links' property</li>
+<li>Default primary key: id</li>
+</ul>
+<h2>Contributions</h2>
+<p><strong>Api styles contributions are welcomed!!, some ideas:</strong>
+<em> django style APIs
+</em> .NET style APIs</p>
+<p>To contribute with a new style just:Pcom
+<em> Clone restmod repo
+</em> Create new style mixin file in the <code>src/styles</code> dir
+<em> Add tests for additional components (like packers, renamers, etc)
+</em> Make sure the build process generates the new style script
+<em> Add it to this listing, with some reference to where the style is described.
+</em> PR it!</p>
 </article>
 
-</section>
-
-
-
+</section>  
 
 				</div>
 
@@ -288,10 +229,6 @@
 				</footer>
 			</div>
 
-			
-			<div class="span3">
-				<div id="toc"></div>
-			</div>
 			
 			<br clear="both">
 		</div>

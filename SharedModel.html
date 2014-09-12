@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>restmod Class: RelationScope</title>
+	<title>restmod Mixin: SharedModel</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -165,12 +165,12 @@
 					
 
 
-	<h1 class="page-title">Class: RelationScope</h1>
+	<h1 class="page-title">Mixin: SharedModel</h1>
 <section>
 
 <header>
     <h2>
-    RelationScope
+    SharedModel
     </h2>
     
 </header>
@@ -181,26 +181,11 @@
 
     
         
-<dt>
-    <h4 class="name" id="RelationScope"><span class="type-signature"></span>new RelationScope<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Special scope a record provides to resources related via hasMany or hasOne relation.</p>
-    </div>
-    
+            <div class="description"><p>Enables caching instances by primary key so separate calls to $find will retrieve the same record instance.</p>
+<p><strong>This plugin is a work in progress and has not been tested</strong></p></div>
+        
 
-    
-    
-    
-    
-    
-    
-    
+        
 <dl class="details">
     
 
@@ -223,7 +208,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 5
+        plugins/shared.js, line 1
     </li></ul></dd>
     
 
@@ -234,20 +219,8 @@
     
 </dl>
 
-    
-    
 
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
+        
     
     </div>
 

@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>restmod Class: RelationScope</title>
+	<title>restmod Class: DefaultPacker</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -165,12 +165,12 @@
 					
 
 
-	<h1 class="page-title">Class: RelationScope</h1>
+	<h1 class="page-title">Class: DefaultPacker</h1>
 <section>
 
 <header>
     <h2>
-    RelationScope
+    DefaultPacker
     </h2>
     
 </header>
@@ -182,7 +182,7 @@
     
         
 <dt>
-    <h4 class="name" id="RelationScope"><span class="type-signature"></span>new RelationScope<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="DefaultPacker"><span class="type-signature"></span>new DefaultPacker<span class="signature">()</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -190,7 +190,37 @@
     
     
     <div class="description">
-        <p>Special scope a record provides to resources related via hasMany or hasOne relation.</p>
+        <p>Simple packer implementation that attempts to cover the standard proposed by
+<a href="https://github.com/rails-api/active_model_serializers">active_model_serializers</a>.</p>
+<p>This is a simplified version of the wrapping structure recommented by the jsonapi.org standard,
+it supports side loaded associated resources (via supporting relations) and metadata extraction.</p>
+<p>To activate use</p>
+<pre><code class="lang-javascript">PACKER: 'default'</code></pre>
+<h3>Json root</h3>
+<p>By default the packer will use the singular model name as json root for single resource requests
+and pluralized name for collection requests. Make sure the model name is correctly set.</p>
+<p>To override the name used by the packer set the JSON_ROOT_SINGLE and JSON_ROOT_MANY variables.
+Or set JSON_ROOT to override both.</p>
+<h3>Side loaded resources</h3>
+<p>By default the packer will look for links to other resources in the 'linked' root property, you
+can change this by setting the JSON_LINKS variable. To use the root element as link source
+use <code>JSON_LINKS: true</code>. To skip links processing, set it to false.</p>
+<p>Links are expected to use the pluralized version of the name for the referenced model. For example,
+given the following response:</p>
+<pre><code class="lang-json">{
+  bikes: [...],
+  links {
+    parts: [...]
+  }
+}</code></pre>
+<p>Restmod will expect that the Part model plural name is correctly set parts. Only properties declared
+as reference relations (belongsTo and belongsToMany) will be correctly resolved.</p>
+<h3>Metadata</h3>
+<p>By default metadata is only captured if it comes in the 'meta' root property. Metadata is then
+stored in the $meta property of the resource being unwrapped.</p>
+<p>To change the metadata source property set the JSON_META property to the desired name, set
+it to '.' to capture the entire raw response or set it to false to skip metadata. It can also be set
+to a function, for custom processsing.</p>
     </div>
     
 
@@ -202,6 +232,127 @@
     
     
 <dl class="details">
+    
+
+        <h5 class="subsection-title">Properties:</h5>
+
+        <dl>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>single</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">mixed</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The expected single resource wrapper property name</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>plural</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The expected collection wrapper property name</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>links</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">mixed</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The links repository property name</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>meta</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The metadata repository property name</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+</dl>
+
     
 
     
@@ -223,7 +374,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 5
+        module/support/default-packer.js, line 5
     </li></ul></dd>
     
 

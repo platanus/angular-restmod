@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>restmod Class: ScopeApi</title>
+	<title>restmod Class: RelationBuilderApi</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -165,12 +165,12 @@
 					
 
 
-	<h1 class="page-title">Class: ScopeApi</h1>
+	<h1 class="page-title">Class: RelationBuilderApi</h1>
 <section>
 
 <header>
     <h2>
-    ScopeApi
+    RelationBuilderApi
     </h2>
     
 </header>
@@ -182,7 +182,7 @@
     
         
 <dt>
-    <h4 class="name" id="ScopeApi"><span class="type-signature"></span>new ScopeApi<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="RelationBuilderApi"><span class="type-signature"></span>new RelationBuilderApi<span class="signature">()</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -190,9 +190,12 @@
     
     
     <div class="description">
-        <p>Common behaviour for record scopes.</p>
-<p>Record scopes are starting points for record operations (like base type or a collection)</p>
-<p>TODO: Talk about record building here</p>
+        <p>Builder DSL extension to build model relations</p>
+<p>Adds the following property modifiers:
+<em> <code>hasMany</code> sets a one to many hierarchical relation under the attribute name, maps to <a href="RelationBuilderApi.html#attrAsCollection">RelationBuilderApi#attrAsCollection</a>
+</em> <code>hasOne</code> sets a one to one hierarchical relation under the attribute name, maps to <a href="RelationBuilderApi.html#attrAsResource">RelationBuilderApi#attrAsResource</a>
+<em> <code>belongsTo</code> sets a one to one reference relation under the attribute name, maps to <a href="RelationBuilderApi.html#attrAsReference">RelationBuilderApi#attrAsReference</a>
+</em> <code>belongsToMany</code> sets a one to many reference relation under the attribute name, maps to <a href="RelationBuilderApi.html#attrAsReferenceToMany">RelationBuilderApi#attrAsReferenceToMany</a></p>
     </div>
     
 
@@ -225,7 +228,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/scope-api.js, line 5
+        module/extended/builder-relations.js, line 5
     </li></ul></dd>
     
 
@@ -271,7 +274,7 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="$build"><span class="type-signature"></span>$build<span class="signature">(_init)</span><span class="type-signature"> &rarr; {<a href="RecordApi.html">RecordApi</a>}</span></h4>
+    <h4 class="name" id="attrAsCollection"><span class="type-signature"></span>attrAsCollection<span class="signature">(_name, _model, _url, _source, _inverseOf)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
     
     
 </dt>
@@ -279,8 +282,7 @@
     
     
     <div class="description">
-        <p>Builds a new instance of this model, does not assign a pk to the created object.</p>
-<p>ATTENTION: item will not show in collection until <code>$save</code> is called. To reveal item before than call <code>$reveal</code>.</p>
+        <p>Registers a model <strong>resources</strong> relation</p>
     </div>
     
 
@@ -314,12 +316,38 @@
 
         <tr>
             
-                <td class="name"><code>_init</code></td>
+                <td class="name"><code>_name</code></td>
             
 
             <td class="type">
             
                 
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Attribute name</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_model</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
 <span class="param-type">object</span>
 
 
@@ -330,7 +358,76 @@
 
             
 
-            <td class="description last"><p>Initial values</p></td>
+            <td class="description last"><p>Other model, supports a model name or a direct reference.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Partial url</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_source</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Inline resource alias (optional)</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_inverseOf</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Inverse property name (optional)</p></td>
         </tr>
 
 	
@@ -362,7 +459,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/scope-api.js, line 39
+        module/extended/builder-relations.js, line 32
     </li></ul></dd>
     
 
@@ -387,7 +484,7 @@
     
             
 <div class="param-desc">
-    <p>single record</p>
+    <p>self</p>
 </div>
 
 
@@ -398,7 +495,7 @@
 	</dt>
 	<dd>
 		
-<span class="param-type"><a href="RecordApi.html">RecordApi</a></span>
+<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
 
 
 	</dd>
@@ -413,7 +510,7 @@
         
             
 <dt>
-    <h4 class="name" id="$buildRaw"><span class="type-signature"></span>$buildRaw<span class="signature">(_raw)</span><span class="type-signature"> &rarr; {<a href="RecordApi.html">RecordApi</a>}</span></h4>
+    <h4 class="name" id="attrAsReference"><span class="type-signature"></span>attrAsReference<span class="signature">(_name, _model, _key, _prefetch)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
     
     
 </dt>
@@ -421,8 +518,28 @@
     
     
     <div class="description">
-        <p>Builds a new instance of this model using undecoded data.</p>
-<p>ATTENTION: does not automatically reveal item in collection, chain a call to $reveal to do so.</p>
+        <p>Registers a model <strong>reference</strong> relation.</p>
+<p>A reference relation expects the host object to provide the primary key of the referenced object or the referenced object itself (including its key).</p>
+<p>For example, given the following resource structure with a foreign key:</p>
+<pre><code class="lang-json">{
+  user_id: 20
+}</code></pre>
+<p>Or this other structure with inlined data:</p>
+<pre><code class="lang-json">{
+  user: {
+    id: 30,
+    name: 'Steve'
+  }
+}</code></pre>
+<p>You should define the following model:</p>
+<pre><code class="lang-javascript">restmod.model('/bikes', {
+  user: { belongsTo: 'User' } // works for both cases detailed above
+})</code></pre>
+<p>The object generated by the relation is not scoped to the host object, but to it's base class instead (not like hasOne),
+so the type should not be nested.</p>
+<p>Its also posible to override the <strong>foreign key name</strong>.</p>
+<p>When a object containing a belongsTo reference is encoded for a server request, only the primary key value is sent using the
+same <strong>foreign key name</strong> that was using on decoding. (<code>user_id</code> in the above example).</p>
     </div>
     
 
@@ -456,12 +573,38 @@
 
         <tr>
             
-                <td class="name"><code>_raw</code></td>
+                <td class="name"><code>_name</code></td>
             
 
             <td class="type">
             
                 
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Attribute name</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_model</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
 <span class="param-type">object</span>
 
 
@@ -472,7 +615,53 @@
 
             
 
-            <td class="description last"><p>Undecoded data</p></td>
+            <td class="description last"><p>Other model, supports a model name or a direct reference.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>foreign key property name (optional, defaults to _attr + '_id').</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_prefetch</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>if set to true, $fetch will be automatically called on relation object load.</p></td>
         </tr>
 
 	
@@ -504,7 +693,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/scope-api.js, line 53
+        module/extended/builder-relations.js, line 179
     </li></ul></dd>
     
 
@@ -529,7 +718,7 @@
     
             
 <div class="param-desc">
-    <p>single record</p>
+    <p>self</p>
 </div>
 
 
@@ -540,7 +729,7 @@
 	</dt>
 	<dd>
 		
-<span class="param-type"><a href="RecordApi.html">RecordApi</a></span>
+<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
 
 
 	</dd>
@@ -555,7 +744,7 @@
         
             
 <dt>
-    <h4 class="name" id="$collection"><span class="type-signature"></span>$collection<span class="signature">(_params, _scope)</span><span class="type-signature"> &rarr; {<a href="CollectionApi.html">CollectionApi</a>}</span></h4>
+    <h4 class="name" id="attrAsReferenceToMany"><span class="type-signature"></span>attrAsReferenceToMany<span class="signature">(_name, _model, _keys)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
     
     
 </dt>
@@ -563,9 +752,29 @@
     
     
     <div class="description">
-        <p>Builds a new collection bound to this scope.</p>
-<p>If scope is another collection then it will inherit its parameters</p>
-<p>Collections are bound to an api resource.</p>
+        <p>Registers a model <strong>reference</strong> relation.</p>
+<p>A reference relation expects the host object to provide the primary key of the referenced objects or the referenced objects themselves (including its key).</p>
+<p>For example, given the following resource structure with a foreign key array:</p>
+<pre><code class="lang-json">{
+  users_ids: [20, 30]
+}</code></pre>
+<p>Or this other structure with inlined data:</p>
+<pre><code class="lang-json">{
+  users: [{
+    id: 20,
+    name: 'Steve'
+  },{
+    id: 30,
+    name: 'Pili'
+  }]
+}</code></pre>
+<p>You should define the following model:</p>
+<pre><code class="lang-javascript">restmod.model('/bikes', {
+  users: { belongsToMany: 'User' } // works for both cases detailed above
+})</code></pre>
+<p>The object generated by the relation is not scoped to the host object, but to it's base class instead (unlike hasMany),
+so the referenced type should not be nested.</p>
+<p>When a object containing a belongsToMany reference is encoded for a server request, only the primary key value is sent for each object.</p>
     </div>
     
 
@@ -599,13 +808,13 @@
 
         <tr>
             
-                <td class="name"><code>_params</code></td>
+                <td class="name"><code>_name</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">string</span>
 
 
             
@@ -615,19 +824,22 @@
 
             
 
-            <td class="description last"><p>Additional query string parameters</p></td>
+            <td class="description last"><p>Attribute name</p></td>
         </tr>
 
 	
 
         <tr>
             
-                <td class="name"><code>_scope</code></td>
+                <td class="name"><code>_model</code></td>
             
 
             <td class="type">
             
                 
+<span class="param-type">string</span>
+|
+
 <span class="param-type">object</span>
 
 
@@ -638,7 +850,30 @@
 
             
 
-            <td class="description last"><p>Scope override (optional)</p></td>
+            <td class="description last"><p>Other model, supports a model name or a direct reference.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_keys</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Server name for the property that holds the referenced keys in response and request.</p></td>
         </tr>
 
 	
@@ -670,7 +905,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/scope-api.js, line 97
+        module/extended/builder-relations.js, line 274
     </li></ul></dd>
     
 
@@ -695,7 +930,7 @@
     
             
 <div class="param-desc">
-    <p>Model Collection</p>
+    <p>self</p>
 </div>
 
 
@@ -706,7 +941,7 @@
 	</dt>
 	<dd>
 		
-<span class="param-type"><a href="CollectionApi.html">CollectionApi</a></span>
+<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
 
 
 	</dd>
@@ -721,7 +956,7 @@
         
             
 <dt>
-    <h4 class="name" id="$create"><span class="type-signature"></span>$create<span class="signature">(_attr)</span><span class="type-signature"> &rarr; {<a href="RecordApi.html">RecordApi</a>}</span></h4>
+    <h4 class="name" id="attrAsResource"><span class="type-signature"></span>attrAsResource<span class="signature">(_name, _model, _url, _source, _inverseOf)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
     
     
 </dt>
@@ -729,7 +964,7 @@
     
     
     <div class="description">
-        <p>Builds and saves a new instance of this model</p>
+        <p>Registers a model <strong>resource</strong> relation</p>
     </div>
     
 
@@ -763,12 +998,38 @@
 
         <tr>
             
-                <td class="name"><code>_attr</code></td>
+                <td class="name"><code>_name</code></td>
             
 
             <td class="type">
             
                 
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Attribute name</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_model</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
 <span class="param-type">object</span>
 
 
@@ -779,7 +1040,76 @@
 
             
 
-            <td class="description last"><p>Data to be saved</p></td>
+            <td class="description last"><p>Other model, supports a model name or a direct reference.</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Partial url (optional)</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_source</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Inline resource alias (optional)</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_inverseOf</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Inverse property name (optional)</p></td>
         </tr>
 
 	
@@ -811,7 +1141,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/scope-api.js, line 80
+        module/extended/builder-relations.js, line 92
     </li></ul></dd>
     
 
@@ -836,7 +1166,7 @@
     
             
 <div class="param-desc">
-    <p>single record</p>
+    <p>self</p>
 </div>
 
 
@@ -847,476 +1177,7 @@
 	</dt>
 	<dd>
 		
-<span class="param-type"><a href="RecordApi.html">RecordApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="$find"><span class="type-signature"></span>$find<span class="signature">(_pk, _params)</span><span class="type-signature"> &rarr; {<a href="RecordApi.html">RecordApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Attempts to resolve a resource using provided private key.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_pk</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">mixed</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Private key</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_params</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Additional query parameters</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/api/scope-api.js, line 68
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>single record</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="RecordApi.html">RecordApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="$new"><span class="type-signature"></span>$new<span class="signature">(_pk, _scope)</span><span class="type-signature"> &rarr; {<a href="RecordApi.html">RecordApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Builds a new instance of this model, bound to this instance scope, sets its primary key.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_pk</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">mixed</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>object private key</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_scope</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>scope override (optional)</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/api/scope-api.js, line 25
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>New model instance</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="RecordApi.html">RecordApi</a></span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="$search"><span class="type-signature"></span>$search<span class="signature">(_params)</span><span class="type-signature"> &rarr; {<a href="CollectionApi.html">CollectionApi</a>}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Generates a new collection bound to this context and url and calls $fetch on it.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_params</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Collection parameters</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/api/scope-api.js, line 109
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>record collection</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type"><a href="CollectionApi.html">CollectionApi</a></span>
+<span class="param-type"><a href="BuilderApi.html">BuilderApi</a></span>
 
 
 	</dd>

@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>restmod Mixin: DebouncedModel</title>
+	<title>restmod Class: ExtendedApi</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -165,12 +165,12 @@
 					
 
 
-	<h1 class="page-title">Mixin: DebouncedModel</h1>
+	<h1 class="page-title">Class: ExtendedApi</h1>
 <section>
 
 <header>
     <h2>
-    DebouncedModel
+    ExtendedApi
     </h2>
     
 </header>
@@ -181,29 +181,79 @@
 
     
         
-            <div class="description"><p>Adds debouncing to <code>$save</code> operations so rapid consecutive calls result in only one server request.</p>
-<p>Usage:</p>
-<p>First add mixin to a model's mixin chain, the following config variables are available:
-<em> DM_TIMEOUT: sets the debounce timeout, if 0 then debouncing is deactivated. Defaults to 500
-</em> DM_ADJOURN: if true, then save operation is rescheduled on every $save call. Default to false</p>
-<pre><code class="lang-javascript">var Bike = restmod.model('api/bikes', 'DebouncedModel', {
-      // This is optional.
-      DM_TIMEOUT: 100 // change timeout!
-    }),
-    bike = Bike.build({ id: 1, brand: 'Yeti' });</code></pre>
-<p>Then use <code>$save</code> as always</p>
-<pre><code class="lang-javascript">// The following code will just generate 1 request
-bike.$save();
-bike.$save();
-bike.$save();</code></pre>
-<p>Or with options</p>
-<pre><code class="lang-javascript">bike.$save({ timeout: 0, adjourn: false });
-// same as
-bike.$saveNow();</code></pre></div>
-        
+<dt>
+    <h4 class="name" id="ExtendedApi"><span class="type-signature"></span>new ExtendedApi<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Provides a common framework <strong>on top</strong> of the <a href="RecordApi.html">RecordApi</a> and <a href="CollectionApi.html">CollectionApi</a>.</p>
+    </div>
+    
 
-        
+    
+    
+    
+    
+    
+    
+    
 <dl class="details">
+    
+
+        <h5 class="subsection-title">Properties:</h5>
+
+        <dl>
+
+<table class="props table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>$resolved</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The collection resolve status, is undefined on intialization</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+</dl>
+
     
 
     
@@ -225,7 +275,7 @@ bike.$saveNow();</code></pre></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        plugins/debounced.js, line 1
+        module/api/extended-api.js, line 5
     </li></ul></dd>
     
 
@@ -236,8 +286,20 @@ bike.$saveNow();</code></pre></div>
     
 </dl>
 
+    
+    
 
-        
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
     
     </div>
 
@@ -259,7 +321,7 @@ bike.$saveNow();</code></pre></div>
         <dl>
             
 <dt>
-    <h4 class="name" id="$save"><span class="type-signature">&lt;static> </span>$save<span class="signature">(_opt)</span><span class="type-signature"> &rarr; {Model}</span></h4>
+    <h4 class="name" id="$refresh"><span class="type-signature"></span>$refresh<span class="signature">(_params)</span><span class="type-signature"> &rarr; {<a href="ExtendedApi.html">ExtendedApi</a>}</span></h4>
     
     
 </dt>
@@ -267,12 +329,7 @@ bike.$saveNow();</code></pre></div>
     
     
     <div class="description">
-        <p>Debounced <code>$save</code> implementation</p>
-<p>IDEA: think of a way of separating the scheduling-rescheduling logic from
-the async save implementation, this way it can be used for other actions.
-Something like:</p>
-<p>   this.$debounce('$save', fun, timeout, adjourn);</p>
-<p>This would call fun with a promise in the model context.</p>
+        <p>Resets and fetches the resource contents.</p>
     </div>
     
 
@@ -306,7 +363,7 @@ Something like:</p>
 
         <tr>
             
-                <td class="name"><code>_opt</code></td>
+                <td class="name"><code>_params</code></td>
             
 
             <td class="type">
@@ -322,7 +379,7 @@ Something like:</p>
 
             
 
-            <td class="description last"><p>Same as <code>setDebounceOptions</code> options.</p></td>
+            <td class="description last"><p><code>$fetch</code> params</p></td>
         </tr>
 
 	
@@ -354,7 +411,7 @@ Something like:</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        plugins/debounced.js, line 73
+        module/api/extended-api.js, line 69
     </li></ul></dd>
     
 
@@ -390,7 +447,7 @@ Something like:</p>
 	</dt>
 	<dd>
 		
-<span class="param-type">Model</span>
+<span class="param-type"><a href="ExtendedApi.html">ExtendedApi</a></span>
 
 
 	</dd>
@@ -405,7 +462,7 @@ Something like:</p>
         
             
 <dt>
-    <h4 class="name" id="$saveNow"><span class="type-signature">&lt;static> </span>$saveNow<span class="signature">()</span><span class="type-signature"> &rarr; {Model}</span></h4>
+    <h4 class="name" id="$reset"><span class="type-signature"></span>$reset<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="ExtendedApi.html">ExtendedApi</a>}</span></h4>
     
     
 </dt>
@@ -413,7 +470,9 @@ Something like:</p>
     
     
     <div class="description">
-        <p>Convenience method that will cancel any pending save and save inmediatelly.</p>
+        <p>Resets the resource's $resolved status.</p>
+<p>After being reset, calls to <code>$resolve</code> will execute a new $fetch.</p>
+<p>Also, if reset, resource will be cleared on new data.</p>
     </div>
     
 
@@ -446,7 +505,7 @@ Something like:</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        plugins/debounced.js, line 141
+        module/api/extended-api.js, line 35
     </li></ul></dd>
     
 
@@ -482,7 +541,151 @@ Something like:</p>
 	</dt>
 	<dd>
 		
-<span class="param-type">Model</span>
+<span class="param-type"><a href="ExtendedApi.html">ExtendedApi</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$resolve"><span class="type-signature"></span>$resolve<span class="signature">(_params)</span><span class="type-signature"> &rarr; {promise}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Resolves the resource's contents.</p>
+<p>If already resolved then this method will return a resolved promise, if not then
+it will initiate a <code>$fetch</code> operation and return the operation promise.</p>
+<p>This method will trigger a <code>before-resolve</code> event before checking the resolve status.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p><code>$fetch</code> params</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/api/extended-api.js, line 54
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>Promise that resolves to the resource.</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">promise</span>
 
 
 	</dd>

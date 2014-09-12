@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>$restmod Class: Utils</title>
+	<title>restmod Class: Utils</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -19,7 +19,7 @@
 <div class="container-fluid">
 	<div class="navbar navbar-fixed-top ">
 		<div class="navbar-inner">
-			<a class="brand" href="index.html">$restmod</a>
+			<a class="brand" href="index.html">restmod</a>
 			<ul class="nav">
 				
 				<li class="dropdown">
@@ -41,7 +41,27 @@
 						</li>
 						
 						<li>
+							<a href="DefaultPacker.html">DefaultPacker</a>
+						</li>
+						
+						<li>
+							<a href="ExtendedApi.html">ExtendedApi</a>
+						</li>
+						
+						<li>
+							<a href="ExtendedBuilderApi.html">ExtendedBuilderApi</a>
+						</li>
+						
+						<li>
+							<a href="PackerCache.html">PackerCache</a>
+						</li>
+						
+						<li>
 							<a href="RecordApi.html">RecordApi</a>
+						</li>
+						
+						<li>
+							<a href="RelationBuilderApi.html">RelationBuilderApi</a>
 						</li>
 						
 						<li>
@@ -58,6 +78,10 @@
 						
 						<li>
 							<a href="ScopeApi.html">ScopeApi</a>
+						</li>
+						
+						<li>
+							<a href="SerializerBuilderApi.html">SerializerBuilderApi</a>
 						</li>
 						
 						<li>
@@ -90,6 +114,10 @@
 							<a href="PagedModel.html">PagedModel</a>
 						</li>
 						
+						<li>
+							<a href="SharedModel.html">SharedModel</a>
+						</li>
+						
 
 					</ul>
 				</li>
@@ -109,7 +137,15 @@
 						</li>
 						
 						<li>
+							<a href="tutorial-integration.html">integration</a>
+						</li>
+						
+						<li>
 							<a href="tutorial-model.html">model</a>
+						</li>
+						
+						<li>
+							<a href="tutorial-styles.html">styles</a>
 						</li>
 						
 
@@ -233,6 +269,147 @@
         <dl>
             
 <dt>
+    <h4 class="name" id="assert"><span class="type-signature">&lt;static> </span>assert<span class="signature">(_condition, _msg)</span><span class="type-signature"></span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Test for a condition to be met, if not an exception is thrown.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_condition</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Condition to assert</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_msg</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Error message</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/utils.js, line 65
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
     <h4 class="name" id="buildArrayType"><span class="type-signature">&lt;static> </span>buildArrayType<span class="signature">()</span><span class="type-signature"> &rarr; {object}</span></h4>
     
     
@@ -241,8 +418,7 @@
     
     
     <div class="description">
-        <p>Generates a new array type, handles platform specifics.</p>
-<p>Based on the awesome blog post of Dean Edwards: <a href="http://dean.edwards.name/weblog/2006/11/hooray/">http://dean.edwards.name/weblog/2006/11/hooray/</a></p>
+        <p>Generates a new array type, handles platform specifics (bag-O-hacks)</p>
     </div>
     
 
@@ -275,7 +451,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/utils.js, line 107
+        module/utils.js, line 179
     </li></ul></dd>
     
 
@@ -439,7 +615,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/utils.js, line 49
+        module/utils.js, line 115
     </li></ul></dd>
     
 
@@ -476,6 +652,147 @@
 	<dd>
 		
 <span class="param-type">mixed</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="cleanUrl"><span class="type-signature">&lt;static> </span>cleanUrl<span class="signature">(_url)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Cleans trailing slashes from an url</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Url to clean</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/utils.js, line 100
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>Resulting url</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">string</span>
 
 
 	</dd>
@@ -603,7 +920,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/utils.js, line 89
+        module/utils.js, line 157
     </li></ul></dd>
     
 
@@ -624,6 +941,170 @@
     
     
     
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="format"><span class="type-signature">&lt;static> </span>format<span class="signature">(_str, _args)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Formats a string</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_str</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>String to format</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_args</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>String arguments</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/utils.js, line 48
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>Formated string</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">string</span>
+
+
+	</dd>
+</dl>
+
+
+        
     
     
 </dd>
@@ -744,7 +1225,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/utils.js, line 33
+        module/utils.js, line 85
     </li></ul></dd>
     
 
@@ -908,7 +1389,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/utils.js, line 66
+        module/utils.js, line 133
     </li></ul></dd>
     
 
@@ -977,7 +1458,7 @@
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on Thu Aug 14 2014 17:34:55 GMT-0400 (CLT) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Fri Sep 12 2014 11:56:33 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
