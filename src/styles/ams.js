@@ -13,7 +13,7 @@ angular.module('restmod').factory('AMSApi', ['restmod', 'inflector', 'DefaultPac
 		this.setProperty('style', 'AMS')
 			.setProperty('primaryKey', 'id') // just to make sure
 			.setRenamer(amsRenamer)
-			.setPacker('packer', DefaultPacker)
+			.setPacker(DefaultPacker)
 			.setProperty('jsonMeta', 'meta')
 			.setProperty('jsonLinks', 'links');
 	});
