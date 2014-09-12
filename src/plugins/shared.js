@@ -3,37 +3,9 @@
  *
  * @description
  *
- * Usage:
+ * Enables caching instances by primary key so separate calls to $find will retrieve the same record instance.
  *
- * First add mixin to a model's mixin chain, the following config variables are available:
- * * DM_TIMEOUT: sets the debounce timeout, if 0 then debouncing is deactivated. Defaults to 500
- * * DM_ADJOURN: if true, then save operation is rescheduled on every $save call. Default to false
- *
- * ```javascript
- * var Bike = restmod.model('api/bikes', 'DebouncedModel', {
- *       // This is optional.
- *       DM_TIMEOUT: 100 // change timeout!
- *     }),
- *     bike = Bike.build({ id: 1, brand: 'Yeti' });
- * ```
- *
- * Then use `$save` as always
- *
- * ```javascript
- * // The following code will just generate 1 request
- * bike.$save();
- * bike.$save();
- * bike.$save();
- * ```
- *
- * Or with options
- *
- * ```javascript
- * bike.$save({ timeout: 0, adjourn: false });
- * // same as
- * bike.$saveNow();
- * ```
- *
+ * **This plugin is a work in progress and has not been tested**
  */
 
 'use strict';

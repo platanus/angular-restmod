@@ -8,7 +8,7 @@ RMModule.factory('DefaultPacker', ['inflector', 'RMPackerCache', function(inflec
    * @description
    *
    * Simple packer implementation that attempts to cover the standard proposed by
-   * [active_model_serializers]{@link https://github.com/rails-api/active_model_serializers}.
+   * [active_model_serializers](https://github.com/rails-api/active_model_serializers).
    *
    * This is a simplified version of the wrapping structure recommented by the jsonapi.org standard,
    * it supports side loaded associated resources (via supporting relations) and metadata extraction.

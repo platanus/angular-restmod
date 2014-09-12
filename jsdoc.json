@@ -1,6 +1,6 @@
 {
 	"templates": {
-	    "systemName"      : "$restmod",
+	    "systemName"      : "restmod",
 	    "footer"          : "",
 	    "copyright"       : "",
 	    "navType"         : "vertical",
