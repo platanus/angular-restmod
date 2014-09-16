@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.0.2 - 2014-09-12
+ * @version v1.0.3 - 2014-09-16
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -702,6 +702,24 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', functio
     /**
      * @memberof CommonApi#
      *
+     * @description Promise chaining method, similar to then but executes same callback in success or error.
+     *
+     * Usage:
+     *
+     * ```javascript
+     * col.$fetch().$always(function() { });
+     * ```
+     *
+     * @param {function} _fun success/error callback
+     * @return {CommonApi} self
+     */
+    $always: function(_fun) {
+      return this.$then(_fun, _fun);
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
      * @description Promise chaining, keeps the model instance as the chain context.
      *
      * Calls ´$q.finally´ on the collection's last promise, updates last promise with finally result.
@@ -747,7 +765,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', functio
       this.$pending = (this.$pending || []);
       this.$pending.push(_options);
 
-      return this.$then(function() {
+      return this.$always(function() {
 
         // if request was canceled, then just return a resolved promise
         if(_options.canceled) {
@@ -3180,7 +3198,7 @@ RMModule.factory('DefaultPacker', ['inflector', 'RMPackerCache', function(inflec
    * @description
    *
    * Simple packer implementation that attempts to cover the standard proposed by
-   * [active_model_serializers]{@link https://github.com/rails-api/active_model_serializers}.
+   * [active_model_serializers](https://github.com/rails-api/active_model_serializers).
    *
    * This is a simplified version of the wrapping structure recommented by the jsonapi.org standard,
    * it supports side loaded associated resources (via supporting relations) and metadata extraction.

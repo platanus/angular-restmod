@@ -1,3 +1,12 @@
+<a name="1.0.3"></a>
+### 1.0.3 (2014-09-16)
+
+
+#### Bug Fixes
+
+* **common:** fixes $send registering callback only to previous promise success. ([4a4c6bc1](http://github.com/angular-platanus/restmod/commit/4a4c6bc196a1885efedc2ddfbf0d284cf4f03937), closes [#135](http://github.com/angular-platanus/restmod/issues/135))
+
+
 <a name="1.0.2"></a>
 ### 1.0.2 (2014-09-12)
 
