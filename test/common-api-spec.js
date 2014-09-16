@@ -61,6 +61,15 @@ describe('Restmod model class:', function() {
       expect(bike.$response.data.last).toEqual(true);
     });
 
+    it('should execute request event if last request failed', function() {
+      var bike = Bike.$new();
+      bike.$send({ method: 'GET', url: '/api/bikes/3' });
+      bike.$send({ method: 'GET', url: '/api/bikes/2' });
+      $httpBackend.flush();
+
+      expect(bike.$response.data.last).toEqual(true);
+    });
+
     it('should properly update the $status property', function() {
       var bike = Bike.$new();
       expect(bike.$status).toBeUndefined();
