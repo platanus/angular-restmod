@@ -39,7 +39,11 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       config.plural = inflector.pluralize(config.name);
     }
 
-    var Collection = Utils.buildArrayType();
+    var Collection = Utils.buildArrayType(),
+        Dummy = function(_asCollection) {
+          this.$isCollection = _asCollection;
+          this.$initialize();
+        };
 
     // Collection factory (since a constructor cant be provided...)
     function newCollection(_scope, _params) {
@@ -192,6 +196,16 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
             return config.urlPrefix ? Utils.joinUrl(config.urlPrefix, _url) : _url;
           }
         }, '');
+      },
+
+      /**
+       * Builds a new dummy resource, the dummy resource can be used to execute random queries
+       * using the same infrastructure as records and collections.
+       *
+       * @return {Dummy} the dummy object
+       */
+      dummy: function(_asCollection) {
+        return new Dummy(_asCollection);
       },
 
       /**
@@ -350,12 +364,25 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
     }, ScopeApi, CommonApi, CollectionApi, ExtendedApi);
 
+    ///// Setup dummy api
+
+    extend(Dummy.prototype, {
+
+      $type: Model,
+
+      $initialize: function() {
+        // Nothing by default
+      }
+
+    }, CommonApi);
+
     ///// Setup builder
 
     var APIS = {
       Model: Model,
       Record: Model.prototype,
-      Collection: Collection.prototype
+      Collection: Collection.prototype,
+      Dummy: Dummy.prototype
     };
 
     // helper used to extend api's
@@ -498,6 +525,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
         case 'Resource':
           helpDefine('Record', name, _fun);
           helpDefine('Collection', name, _fun);
+          helpDefine('Dummy', name, _fun);
           break;
         default:
           helpDefine(api, name, _fun);

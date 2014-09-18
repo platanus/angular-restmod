@@ -51,6 +51,33 @@ describe('Restmod model class:', function() {
     });
   });
 
+  describe('dummy', function() {
+
+    it('should create a new dummy resource with common api infrastructure', function() {
+      var dummy = Bike.dummy();
+      expect(dummy.$send).toBeDefined();
+      expect(dummy.$then).toBeDefined();
+      expect(dummy.$always).toBeDefined();
+      expect(dummy.$dispatch).toBeDefined();
+    });
+
+    it('should accept a first argument true to cahnge the dummy arity', function() {
+      var dummy = Bike.dummy();
+      expect(dummy.$isCollection).toBeFalsy();
+      dummy = Bike.dummy(true);
+      expect(dummy.$isCollection).toBeTruthy();
+    });
+
+    it('should create a new dummy that dispatches events to model', function() {
+      var spy = jasmine.createSpy();
+      Bike = restmod.model('/api/bikes', {
+        $hooks: { 'on-event': spy }
+      });
+      Bike.dummy().$dispatch('on-event');
+      expect(spy).toHaveBeenCalled();
+    });
+  });
+
   describe('$fetch', function() {
 
     it('should call callbacks in proper order', function() {

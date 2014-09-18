@@ -64,9 +64,10 @@ describe('Restmod builder:', function() {
         this.define('Model.test3', fun);
         this.define('Collection.test4', fun);
         this.define('Scope.test5', fun);
-        this.define('Record', {
+        this.define('Resource', {
           test6: fun
         });
+        this.define('Dummy.test7', fun);
       });
 
       expect(Bike.$new().test1).toBeDefined();
@@ -79,6 +80,8 @@ describe('Restmod builder:', function() {
       expect(Bike.$collection().test5).toBeDefined();
       expect(Bike.$new().test5).not.toBeDefined();
       expect(Bike.$new().test6).toBeDefined();
+      expect(Bike.dummy().test6).toBeDefined();
+      expect(Bike.dummy().test7).toBeDefined();
     });
   });
 
