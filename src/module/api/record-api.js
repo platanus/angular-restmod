@@ -23,7 +23,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
 
     // record url is nested only for nested resources
     $urlFor: function(_pk) {
-      if(this.$target.$isNested()) {
+      if(this.$target.isNested()) {
         return this.$fetchUrlFor();
       } else {
         return this.$target.$urlFor(_pk);
@@ -195,8 +195,8 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      */
     $decode: function(_raw, _mask) {
       // IDEA: let user override serializer
-      this.$super(_raw, _mask || Utils.READ_MASK);
-      if(!this.$pk) this.$pk = this.$$inferKey(_raw); // TODO: warn if key changes
+      this.$type.decode(this, _raw, _mask || Utils.READ_MASK);
+      if(!this.$pk) this.$pk = this.$type.inferKey(_raw); // TODO: warn if key changes
       this.$dispatch('after-feed', [_raw]);
       return this;
     },
@@ -210,7 +210,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {string} raw data
      */
     $encode: function(_mask) {
-      var raw = this.$super(_mask || Utils.CREATE_MASK);
+      var raw = this.$type.encode(this, _mask || Utils.CREATE_MASK);
       this.$dispatch('before-render', [raw]);
       return raw;
     },

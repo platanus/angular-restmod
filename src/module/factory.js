@@ -8,14 +8,22 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
   return function(_baseUrl, _baseChain) {
 
+    // IDEA: make constructor inaccessible, use separate type for records?
+    // * Will ensure proper usage.
+    // * Will lose type checking
+    function Model(_scope, _pk) {
+      this.$scope = _scope || Model;
+      this.$pk = _pk;
+      this.$initialize();
+    }
+
     _baseUrl = Utils.cleanUrl(_baseUrl);
 
     var config = {
         primaryKey: 'id',
         urlPrefix: null
       },
-      serializer = new Serializer(),
-      packer = null,
+      serializer = new Serializer(Model),
       defaults = [],                    // attribute defaults as an array of [key, value]
       meta = {},                        // atribute metadata
       hooks = {},
@@ -31,49 +39,15 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       config.plural = inflector.pluralize(config.name);
     }
 
-    // IDEA: make constructor inaccessible, use separate type for records?
-    // * Will ensure proper usage.
-    // * Will lose type checking
-    function Model(_scope, _pk) {
-      this.$type = Model;
-      this.$scope = _scope || Model;
-      this.$pk = _pk;
-      this.$initialize();
-    }
-
     var Collection = Utils.buildArrayType();
 
     // Collection factory (since a constructor cant be provided...)
     function newCollection(_scope, _params) {
       var col = new Collection();
-      col.$type = Model;
       col.$scope = _scope;
       col.$params = _params;
       col.$initialize();
       return col;
-    }
-
-    // packer adaptor generator
-    function adaptPacker(_fun) {
-      return function(_raw) {
-        if(packer) {
-          // a packer instance must be built every time.
-          var inst = typeof packer === 'function' ? new packer(Model) : packer;
-          return inst[_fun](_raw, this);
-        }
-
-        return _raw;
-      };
-    }
-
-    // Infer key adaptor.
-    function inferKey() {
-      return Model.$inferKey.apply(Model, arguments);
-    }
-
-    // Get property adaptor.
-    function getProperty() {
-      return Model.$getProperty.apply(Model, arguments);
     }
 
     ///// Setup static api
@@ -97,11 +71,16 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
      */
     extend(Model, {
 
+      // gets an attribute description (metadata)
+      $$getDescription: function(_attribute) {
+        return meta[_attribute];
+      },
+
       // definition chain
       $$chain: [],
 
-      // infer key adaptor
-      $$inferKey: inferKey,
+      // keep a reference to type itself for scope api compatibility
+      $type: Model,
 
       // creates a new model bound by default to the static scope
       $new: function(_pk, _scope) {
@@ -113,9 +92,26 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
         return newCollection(_scope || Model, _params);
       },
 
-      // gets an attribute description (metadata)
-      $$getDescription: function(_attribute) {
-        return meta[_attribute];
+      // gets scope url
+      $url: function() {
+        return config.urlPrefix ? Utils.joinUrl(config.urlPrefix, _baseUrl) : _baseUrl;
+      },
+
+      // gets the url for a scope member
+      $urlFor: function(_pk) {
+        // TODO: move to scope api, unify with collection
+        return Utils.joinUrl(this.$url(), _pk);
+      },
+
+      // bubbles events comming from related resources
+      $dispatch: function(_hook, _args, _ctx) {
+        var cbs = hooks[_hook], i, cb;
+        if(cbs) {
+          for(i = 0; !!(cb = cbs[i]); i++) {
+            cb.apply(_ctx || this, _args || []);
+          }
+        }
+        return this;
       },
 
       /**
@@ -135,7 +131,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        * @param  {string} _rawData Raw object data (before it goes into decode)
        * @return {mixed} The primary key value.
        */
-      $inferKey: function(_rawData) {
+      inferKey: function(_rawData) {
         if(!_rawData || typeof _rawData[config.primaryKey] === 'undefined') return null;
         return _rawData[config.primaryKey];
       },
@@ -156,7 +152,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        * @param  {mixed} _default Value to return if property is not defined
        * @return {mixed} value
        */
-      $getProperty: function(_key, _default) {
+      getProperty: function(_key, _default) {
         var val = config[_key];
         return val !== undefined ? val : _default;
       },
@@ -170,7 +166,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        *
        * @return {boolean} true if model is nested.
        */
-      $isNested: function() {
+      isNested: function() {
         return !_baseUrl;
       },
 
@@ -190,23 +186,12 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        * @param {string} _url Url to bound resource to.
        * @return {Model} new resource instance.
        */
-      $single: function(_url) {
+      single: function(_url) {
         return new Model({
           $urlFor: function() {
             return config.urlPrefix ? Utils.joinUrl(config.urlPrefix, _url) : _url;
           }
         }, '');
-      },
-
-      /**
-       * @memberof StaticApi#
-       *
-       * @description Returns the model base url.
-       *
-       * @return {string} The base url.
-       */
-      $url: function() {
-        return config.urlPrefix ? Utils.joinUrl(config.urlPrefix, _baseUrl) : _baseUrl;
       },
 
       /**
@@ -230,21 +215,8 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        * @return {boolean} If true, return plural name
        * @return {string} The base url.
        */
-      $name: function(_plural) {
+      identity: function(_plural) {
         return _plural ? config.plural : config.name;
-      },
-
-      /**
-       * @memberof StaticApi#
-       *
-       * @description Part of the scope interface, provides urls for collection's items.
-       *
-       * @param {Model} _pk Item key to provide the url to.
-       * @return {string|null} The url or nill if item does not meet the url requirements.
-       */
-      $urlFor: function(_pk) {
-        // TODO: move to scope api, unify with collection
-        return Utils.joinUrl(this.$url(), _pk);
       },
 
       /**
@@ -255,32 +227,91 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        * @params {mixed} _mixins One or more mixins or model definitions.
        * @return {Model} The model
        */
-      $mix: function(/* mixins */) {
+      mix: function(/* mixins */) {
         builder.chain(arguments);
         this.$$chain.push.apply(this.$$chain, arguments);
         return this;
       },
 
+      // Strategies
+
       /**
        * @memberof StaticApi#
        *
-       * @description Simple $dispatch implementation for CommonApi compat.
+       * @description The model unpacking strategy
        *
-       * @param  {string} _hook Hook name
-       * @param  {array} _args Hook arguments
-       * @param  {object} _ctx Hook execution context override
+       * This method is called to extract record data from a request response, its also
+       * responsible of handling the response metadata.
        *
-       * @return {Model} The model
+       * Override this method to change the metadata processing strategy, by default its a noop
+       *
+       * @params {mixed} _resource Related resource instance
+       * @params {mixed} _raw Response raw data
+       * @return {mixed} Resource raw data
        */
-      $dispatch: function(_hook, _args, _ctx) {
-        var cbs = hooks[_hook], i, cb;
-        if(cbs) {
-          for(i = 0; !!(cb = cbs[i]); i++) {
-            cb.apply(_ctx || this, _args || []);
-          }
-        }
-        return this;
-      }
+      unpack: function(_resource, _raw) { return _raw; },
+
+      /**
+       * @memberof StaticApi#
+       *
+       * @description The model packing strategy
+       *
+       * This method is called to wrap raw record data to be sent in a request.
+       *
+       * Override this method to change the request packing strategy, by default its a noop
+       *
+       * @params {mixed} _resource Related resource instance
+       * @params {mixed} _raw Record data to be sent (can be an array if resource is collection)
+       * @return {mixed} Wrapped data
+       */
+      pack: function(_record, _raw) { return _raw; },
+
+      /**
+       * @memberof StaticApi#
+       *
+       * @description The model decoding strategy
+       *
+       * This method is called to populate a record from raw data (unppacked)
+       */
+      decode: serializer.decode,
+
+      /**
+       * @memberof StaticApi#
+       *
+       * @description The model encoding strategy
+       *
+       * This method is called to extract raw data from a record to be sent to server (before packing)
+       */
+      encode: serializer.encode,
+
+      /**
+       * @memberof StaticApi#
+       *
+       * @description The model name decoding strategy
+       *
+       * This method is called on every raw record data property to rename it, by default is not defined.
+       *
+       * Override this method to change the property renaming strategy.
+       *
+       * @params {string} _name Response (raw) name
+       * @return {string} Record name
+       */
+      decodeName: null,
+
+      /**
+       * @memberof StaticApi#
+       *
+       * @description The model name encoding strategy
+       *
+       * This method is called when encoding a record to rename the record properties into the raw data properties,
+       * by default is not defined.
+       *
+       * Override this method to change the property renaming strategy
+       *
+       * @params {string} _name Record name
+       * @return {string} Response (raw) name
+       */
+      encodeName: null
 
     }, ScopeApi);
 
@@ -288,43 +319,23 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
     extend(Model.prototype, {
 
-      // infer key adaptor
-      $$inferKey: inferKey,
+      $type: Model,
 
-      // default initialize: loads the default parameter values
+      // default initializer: loads the default parameter values
       $initialize: function() {
         var tmp;
         for(var i = 0; (tmp = defaults[i]); i++) {
           this[tmp[0]] = (typeof tmp[1] === 'function') ? tmp[1].apply(this) : tmp[1];
         }
-      },
+      }
 
-      // packer pack adaptor used by $wrap
-      $$pack: adaptPacker('pack'),
-
-      // packer unpack adaptor used by $unwrap
-      $$unpack: adaptPacker('unpack'),
-
-      // serializer decode adaptor used by $decode
-      $decode: function(_raw, _mask) {
-        serializer.decode(this, _raw, _mask);
-      },
-
-      // serializer encode adaptor used by $encode
-      $encode: function(_mask) {
-        return serializer.encode(this, _mask);
-      },
-
-      // expose getProperty in records
-      $getProperty: getProperty
     }, CommonApi, RecordApi, ExtendedApi);
 
     ///// Setup collection api
 
     extend(Collection.prototype, {
 
-      // infer key adaptor
-      $$inferKey: inferKey,
+      $type: Model,
 
       // provide record contructor
       $new: function(_pk, _scope) {
@@ -335,20 +346,30 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       $collection: function(_params, _scope) {
         _params = this.$params ? angular.extend({}, this.$params, _params) : _params;
         return newCollection(_scope || this.$scope, _params);
-      },
-
-      // packer pack adaptor used by $wrap
-      $$pack: adaptPacker('packMany'),
-
-      // packer unpack adaptor used by $unwrap
-      $$unpack: adaptPacker('unpackMany'),
-
-      // expose getProperty in collection
-      $getProperty: getProperty
+      }
 
     }, ScopeApi, CommonApi, CollectionApi, ExtendedApi);
 
     ///// Setup builder
+
+    var APIS = {
+      Model: Model,
+      Record: Model.prototype,
+      Collection: Collection.prototype
+    };
+
+    // helper used to extend api's
+    function helpDefine(_api, _name, _fun) {
+      var api = APIS[_api];
+
+      Utils.assert(!!api, 'Invalid api name $1', _api);
+
+      if(_name) {
+        api[_name] = Utils.override(api[_name], _fun);
+      } else {
+        Utils.extendOverriden(api, _fun);
+      }
+    }
 
     /**
      * @class SerializerBuilderApi
@@ -413,59 +434,25 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       },
 
       /**
-       * @memberof ExtendedBuilderApi#
-       *
-       * @description
-       *
-       * Sets the object "packer", the packer is responsable of providing the object wrapping strategy
-       * so it matches the API.
-       *
-       * The method accepts a packer name, an instance or a packer factory, if the first (preferred)
-       * option is used, then a <Name>Packer factory must be available that return an object or factory function.
-       *
-       * In case of using a factory function, the constructor will be called passing the model type object
-       * as first parameter:
-       *
-       * ```javascript
-       * // like this:
-       * var packer = new packerFactory(Model);
-       * ```
-       *
-       * ### Packer structure.
-       *
-       * Custom packers must implement all of the following methods:
-       *
-       * * **unpack(_rawData, _record):** unwraps data belonging to a single record, must return the unpacked
-       * data to be passed to `$decode`.
-       * * **unpackMany(_rawData, _collection):** unwraps the data belonging to a collection of records,
-       * must return the unpacked data array, each array element will be passed to $decode on each new element.
-       * * **pack(_rawData, _record):** wraps the encoded data from a record before is sent to the server,
-       * must return the packed data object to be sent.
-       * * **packMany(_rawData, _collection):** wraps the encoded data from a collection before is sent to the server,
-       * must return the packed data object to be sent.
-       *
-       * Currently the following builtin strategies are provided:
-       * * {@link DefaultPacker} with json root, metadata and links support.
-       *
-       * @param {string|object} _mode The packer instance, constructor or name
-       * @return {BuilderApi} self
-       */
-      setPacker: function(_packer) {
-
-        if(typeof _packer === 'string') {
-          _packer = $injector.get(inflector.camelize(_packer, true) + 'Packer');
-        }
-
-        packer = _packer;
-        return this;
-      },
-
-      /**
        * @memberof BuilderApi#
        *
        * @description Adds methods to the model
        *
-       * By default this method adds **record** methods. If called with an object
+       * This method allows to extend the different model API's.
+       *
+       * The following API's can be extended using this method:
+       * * Model: The static API, affects the Model object itself.
+       * * Record: Affects each record generated by the model.
+       * * Collection: Affects each collection generated by the model.
+       * * Scope: Affects both the static API and collections.
+       * * Resource: Affects records and collections.
+       *
+       * If no api is given
+       *
+       *
+       * If no scope is given,
+       * By default this method extends the **Record** prototype.
+       * If called with an object
        * instead of a function it can be used to extend the collection and the type with
        * specific implementations.
        *
@@ -473,48 +460,50 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        *
        * ```javascript
        * restmod.mixin(function() {
-       *   this.define('myMethod', function() {})
-       *       .define('myMethod', {
-       *         record: function() {}, // called when record.myMethod is called.
-       *         collection: function() {}, // called when collection.myMethod is called.
-       *         type: function() {} // called when Model.myMethod is called.
-       *       });
+       *   this.define('myRecordMethod', function() {})
+       *       .define('Model.myStaticMethod', function() {})
+       *       .define('Collection', { }); // object to extend collection api with
        * });
        * ```
        *
-       * It is posible to override an existing method using define,
-       * if overriden, the old method can be called using `this.$super`
-       * inside de new method.
+       * It is posible to override an existing method using define, if overriden,
+       * the old method can be called using `this.$super` inside de new method.
        *
-       * @param {string} _name Method name
+       * @param {string} _where
        * @param {function} _fun Function to define or object with particular implementations
+       * @param {string} _api One of the api names listed above, if not given defaults to 'Record'
        * @return {BuilderApi} self
        */
-      define: function(_name, _fun) {
-        if(typeof _fun === 'function') {
-          Model.prototype[_name] = Utils.override(Model.prototype[_name], _fun);
-        } else {
-          if(_fun.type) Model[_name] = Utils.override(Model[_name], _fun.type);
-          if(_fun.collection) Collection.prototype[_name] = Utils.override(Collection.prototype[_name], _fun.collection);
-          if(_fun.record) Model.prototype[_name] = Utils.override(Model.prototype[_name], _fun.record);
-        }
-        return this;
-      },
+      define: function(_where, _fun) {
 
-      /**
-       * @memberof BuilderApi#
-       *
-       * @description Registers a scope method
-       *
-       * Same as calling `define('name', { type: fun, collection: fun })`.
-       * See {@link BuilderApi#define} for more information.
-       *
-       * @param {string} _name Method name
-       * @param {function} _fun Function to define
-       * @return {BuilderApi} self
-       */
-      classDefine:  function(_name, _fun) {
-        this.define(_name, { type: _fun, collection: _fun });
+        var name = false, api = 'Record';
+        if(typeof _fun === 'object' && _fun) {
+          api = _where;
+        } else {
+          name = _where.split('.');
+          if(name.length === 1) {
+            name = name[0];
+          } else {
+            api = name[0];
+            name = name[1];
+          }
+        }
+
+        switch(api) {
+        // Virtual API's
+        case 'Scope':
+          helpDefine('Model', name, _fun);
+          helpDefine('Collection', name, _fun);
+          break;
+        case 'Resource':
+          helpDefine('Record', name, _fun);
+          helpDefine('Collection', name, _fun);
+          break;
+        default:
+          helpDefine(api, name, _fun);
+        }
+
+        return this;
       },
 
       /**

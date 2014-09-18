@@ -89,8 +89,8 @@ angular.module('restmod').factory('DebouncedModel', ['restmod', '$timeout', '$q'
          */
         .define('$save', function(_opt) {
 
-          var timeout = this.$getProperty('dmTimeout'),
-              adjourn = this.$getProperty('dmAdjourn'),
+          var timeout = this.$type.getProperty('dmTimeout'),
+              adjourn = this.$type.getProperty('dmAdjourn'),
               status = this.$dmStatus;
 
           // apply configuration overrides

@@ -48,7 +48,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', function($in
    *   instanceMethod: function() {
    *   },
    *
-   *   '@classMethod': function() {
+   *   '@scopeMethod': function() {
    *   },
    *
    *   // HOOKS
@@ -107,8 +107,9 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', function($in
    * Model.$new().im20; // 20
    * ```
    *
-   * To add static/collection methods to the Model, prefix the definition property name with **@**
-   * (same as calling {@link BuilderApi#classDefine} at a definition function).
+   * To add a method to the model type, prefix the definition key with **^**, to add it to the model collection prototype,
+   * prefix it with ***** static/collection methods to the Model, prefix the definition property name with **@**
+   * (same as calling {@link BuilderApi#scopeDefine} at a definition function).
    *
    * ```javascript
    * var Model = restmod.model('/', {
@@ -176,22 +177,28 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', function($in
         forEach(_description, function(_desc, _attr) {
           switch(_attr.charAt(0)) {
           case '@':
-            _attr = _attr.substring(1);
-            if(isFunction(_desc)) this.classDefine(_attr, _desc); // set type and collection by default
-            else this.define(_attr, _desc);
+            this.define('Scope.' + _attr.substring(1), _desc); // set static method
             break;
           case '~':
             _attr = inflector.parameterize(_attr.substring(1));
             this.on(_attr, _desc);
             break;
           default:
-            if(VAR_RGX.test(_attr)) {
+            if(_attr === '$config') { // configuration block
+              for(var key in _desc) {
+                if(_desc.hasOwnProperty(key)) this.setProperty(key, _desc[key]);
+              }
+            } else if(_attr === '$extend') { // extension block
+              for(var key in _desc) {
+                if(_desc.hasOwnProperty(key)) this.define(key, _desc[key]);
+              }
+            } else if(_attr === '$hooks') { // hooks block
+              for(var key in _desc) {
+                if(_desc.hasOwnProperty(key)) this.on(key, _desc[key]);
+              }
+            } else if(VAR_RGX.test(_attr)) {
               _attr = inflector.camelize(_attr.toLowerCase());
-
-              // allow packer and renamer to be set as configuration variables
-              if(_attr === 'packer') this.setPacker(_desc);
-              else if(_attr === 'renamer') this.setRenamer(_desc);
-              else this.setProperty(_attr, _desc);
+              this.setProperty(_attr, _desc);
             }
             else if(isObject(_desc)) this.attribute(_attr, _desc);
             else if(isFunction(_desc)) this.define(_attr, _desc);

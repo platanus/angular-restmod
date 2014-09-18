@@ -18,7 +18,9 @@ describe('Restmod model class:', function() {
     it('should fire the after-init hook', function() {
       var spy = jasmine.createSpy('hook');
       Bike = restmod.model('/api/bikes', {
-        '~after-init': spy
+        $hooks: {
+          'after-init': spy
+        }
       });
       (new Bike());
       expect(spy).toHaveBeenCalled();
@@ -30,21 +32,21 @@ describe('Restmod model class:', function() {
     });
   });
 
-  describe('$getProperty', function() {
+  describe('getProperty', function() {
 
     it('should retrieve an internal property', function() {
-      expect(Bike.$getProperty('primaryKey')).toEqual('id');
+      expect(Bike.getProperty('primaryKey')).toEqual('id');
     });
 
     it('should return default value if requested property is not set', function() {
-      expect(Bike.$getProperty('teapot', 'banzai')).toEqual('banzai');
+      expect(Bike.getProperty('teapot', 'banzai')).toEqual('banzai');
     });
   });
 
-  describe('$single', function() {
+  describe('single', function() {
 
     it('should create a resource bound to a given url', function() {
-      var bike = Bike.$single('/user/bike');
+      var bike = Bike.single('/user/bike');
       expect(bike.$url()).toEqual('/user/bike');
     });
   });
@@ -180,17 +182,15 @@ describe('Restmod model class:', function() {
 
   describe('$unwrap', function() {
 
-    it('should call the packer unpack method if a packer is provided', function() {
+    it('should call the type\'s unpack method', function() {
       var spy = jasmine.createSpy();
-      var bike = restmod.model('/api/bikes', function() {
-        this.setPacker({
-          unpack: spy
-        });
+      var bike = restmod.model('/api/bikes', {
+        'Model.unpack': spy
       }).$build();
 
       var raw = {};
       bike.$unwrap(raw);
-      expect(spy).toHaveBeenCalledWith(raw, bike);
+      expect(spy).toHaveBeenCalledWith(bike, raw);
     });
 
     it('should call $decode', function() {
@@ -204,12 +204,10 @@ describe('Restmod model class:', function() {
 
   describe('$wrap', function() {
 
-    it('should call the packer pack method if a packer is provided', function() {
+    it('should call the the type\'s pack method', function() {
       var spy = jasmine.createSpy();
-      var bike = restmod.model('/api/bikes', function() {
-        this.setPacker({
-          pack: spy
-        });
+      var bike = restmod.model('/api/bikes', {
+        'Model.pack': spy
       }).$build();
 
       bike.$wrap();

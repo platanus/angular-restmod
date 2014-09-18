@@ -9,7 +9,7 @@ RMModule.factory('RMPackerCache', [function() {
    *
    * @description
    *
-   * The packer cache service enables packers to register raw object data that can be then used by
+   * The packer cache service enables packing strategies to register raw object data that can be then used by
    * supporting relations during the decoding process to preload other related resources.
    *
    * This is specially useful for apis that include linked objects data in external metadata.
@@ -17,7 +17,7 @@ RMModule.factory('RMPackerCache', [function() {
    * The packer cache is reset on every response unwrapping so it's not supposed to be used as an
    * application wide cache.
    *
-   * ### For packer developers:
+   * ### For extension developers:
    *
    * Use the `feed` method to add new raw data to cache.
    *
@@ -54,11 +54,11 @@ RMModule.factory('RMPackerCache', [function() {
       if(packerCache) { // make sure this is a packer cache enabled context.
 
         var modelType = _record.$type,
-            cache = packerCache[modelType.$name(true)];
+            cache = packerCache[modelType.identity(true)];
 
         if(cache && _record.$pk) {
           for(var i = 0, l = cache.length; i < l; i++) {
-            if(_record.$pk === modelType.$$inferKey(cache[i])) { // this could be sort of slow? nah
+            if(_record.$pk === modelType.inferKey(cache[i])) { // this could be sort of slow? nah
               _record.$decode(cache[i]);
               break;
             }

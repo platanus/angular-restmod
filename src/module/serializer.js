@@ -18,7 +18,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
     _into[_path[_path.length-1]] = _value;
   }
 
-  return function() {
+  return function(_strategies) {
 
     var isArray = angular.isArray;
 
@@ -27,8 +27,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
         decoders = {},
         encoders = {},
         mapped = {},
-        mappings = {},
-        renamer = null;
+        mappings = {};
 
     function isMasked(_name, _mask) {
       var mask = masks[_name];
@@ -49,7 +48,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
           if(maps[i].map) {
             value = extract(_from, maps[i].map);
           } else {
-            value = _from[renamer ? renamer.encode(maps[i].path) : maps[i].path];
+            value = _from[_strategies.encodeName ? _strategies.encodeName(maps[i].path) : maps[i].path];
           }
 
           if(!maps[i].forced && value === undefined) continue;
@@ -63,7 +62,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
       for(key in _from) {
         if(_from.hasOwnProperty(key)) {
 
-          decodedName = renamer ? renamer.decode(key) : key;
+          decodedName = _strategies.decodeName ? _strategies.decodeName(key) : key;
           if(decodedName[0] === '$') continue;
 
           if(maps) {
@@ -122,7 +121,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
 
           value = encodeProp(_from[key], fullName, _mask, _ctx);
           if(value !== undefined) {
-            encodedName = renamer ? renamer.encode(key) : key;
+            encodedName = _strategies.encodeName ? _strategies.encodeName(key) : key;
             _to[encodedName] = value;
           }
         }
@@ -143,7 +142,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
             if(maps[i].map) {
               insert(_to, maps[i].map, value);
             } else {
-              _to[renamer ? renamer.encode(maps[i].path) : maps[i].path] = value;
+              _to[_strategies.encodeName ? _strategies.encodeName(maps[i].path) : maps[i].path] = value;
             }
           }
         }
@@ -197,38 +196,6 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
          *
          */
         return {
-          /**
-           * @memberof SerializerBuilderApi#
-           *
-           * @description Changes the way restmod maps attributes names from records to json api data.
-           *
-           * This is intended to be used as a way of keeping property naming style consistent accross
-           * languajes. By default, property renaming is disabled.
-           *
-           * As setPacker, this method accepts a renamer name, an instance or a factory, if the first (preferred)
-           * option is used, then a <Name>Renamer factory must be available that return an object or factory function.
-           *
-           * ### Renamer structure
-           *
-           * Custom renamers must implement all of the following methods:
-           *
-           * * **decode(_apiName):** transforms an api name to a record name, decoding happens before $-prefixed attribute filtering.
-           * * **encode(_recordName):** transforms a record property name to the corresponding api name.
-           *
-           * If `false` is given, then renaming is disabled.
-           *
-           * @param {function|false} _value decoding function
-           * @return {SerializerBuilderApi} self
-           */
-          setRenamer: function(_renamer) {
-
-            if(typeof _packer === 'string') {
-              _renamer = $injector.get(inflector.camelize(_renamer, true) + 'Renamer');
-            }
-
-            renamer = _renamer;
-            return this;
-          },
 
           /**
            * @memberof SerializerBuilderApi#

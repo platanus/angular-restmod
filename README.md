@@ -325,7 +325,7 @@ The difference between the `$asPromise` and the `$then` methods is that the firs
 When defining a model, you can pass a **definition object**
 
 ```javascript
-Bike = restmod.model('api/bikes').$mix(
+Bike = restmod.model('api/bikes').mix(
 // This is the definition object:
 {
 	createdAt: { encode: 'date' },
@@ -342,6 +342,7 @@ Bike = restmod.model('api/bikes').$mix(
 The **definition object** allows you to:
 * Define **relations** between models
 * Customize an attribute's **serialization** and **default values**
+* Set model configuration variables.
 * Add **custom methods**
 * Add lifecycle **hooks**
 
@@ -358,7 +359,7 @@ Relations are defined like this:
 -->
 
 ```javascript
-Bike = restmod.model('/bikes').$mix({
+Bike = restmod.model('/bikes').mix({
 	parts: { hasMany: 'Part' },
 	owner: { belongsTo: 'User' }
 });
@@ -384,7 +385,7 @@ module.factory('Part', function() {
 The HasMany relation allows you to access parts of a specific bike directly from a bike object. In other words, HasMany is a hirearchical relation between a model instance (bike) and a model collection (parts).
 
 ```javascript
-Bike = restmod.model('/bikes').$mix({
+Bike = restmod.model('/bikes').mix({
 	parts: { hasMany: 'Part' }
 });
 
@@ -444,7 +445,7 @@ restmod.model();
 The example above would behave like this:
 
 <!-- before:
-	bike = restmod.model('/bikes').$mix({ parts: { hasMany: restmod.model() } }).$new(1);
+	bike = restmod.model('/bikes').mix({ parts: { hasMany: restmod.model() } }).$new(1);
 	bike.parts.$decode([{ id: 1 }]);
 -->
 
@@ -481,7 +482,7 @@ module.factory('User', function() {
 That relates to a 'Bike' through a *hasOne* relation:
 
 ```javascript
-Bike = restmod.model('/bikes').$mix({
+Bike = restmod.model('/bikes').mix({
 	owner: { hasOne: 'User' }
 });
 ```
@@ -534,7 +535,7 @@ module.factory('User', function() {
 ```
 
 <!-- before:
-	owner = restmod.model('/bikes').$mix({ owner: { hasOne: 'User' } }).$new(1).owner;
+	owner = restmod.model('/bikes').mix({ owner: { hasOne: 'User' } }).$new(1).owner;
 -->
 
 Then calling:
@@ -595,7 +596,7 @@ module.factory('User', function() {
 That relates to a 'Bike' through a *belongsTo* relation this time:
 
 ```javascript
-Bike = restmod.model('/bikes').$mix({
+Bike = restmod.model('/bikes').mix({
 	owner: { belongsTo: 'User', key: 'last_owner_id' } // default key would be 'owner_id'
 });
 ```
@@ -634,7 +635,7 @@ The inline property name can be optionally selected using the `map` attribute.
 Lets redefine the `Bike` model as:
 
 ```javascript
-var Bike = restmod.model('/bikes').$mix({
+var Bike = restmod.model('/bikes').mix({
 	owner: { belongsTo: 'User', map: 'last_owner' } // map would default to *owner*
 });
 ```
@@ -720,7 +721,7 @@ module.factory('Part', function() {
 That relates to a 'Bike' through a *belongsToMany* relation this time:
 
 ```javascript
-Bike = restmod.model('/bikes').$mix({
+Bike = restmod.model('/bikes').mix({
 	parts: { belongsToMany: 'Part', keys: 'part_keys' } // default key would be 'parts_ids'
 });
 ```
@@ -817,7 +818,7 @@ Angular.factory('DateParseFilter', function() {
 then you use it as a standard decoder like this:
 
 ```javascript
-var Bike = restmod.model('/bikes').$mix({
+var Bike = restmod.model('/bikes').mix({
 	createdAt: {decode:'date_parse'}
 });
 ```
@@ -828,7 +829,7 @@ var Bike = restmod.model('/bikes').$mix({
 Just as with the previous example (decode), you use an Angular Filter. In this example we use the built in 'date' filter.
 
 ```javascript
-var Bike = restmod.model('/bikes').$mix({
+var Bike = restmod.model('/bikes').mix({
 	createdAt: {encode:'date', param:'yyyy-MM-dd'}
 });
 ```
@@ -840,7 +841,7 @@ On both **encode** and **decode** you can use an inline function instead of the 
 Following the Angular conventions, attributes that start with a '$' symbol are considered private and never sent to the server. Furthermore, you can define a mask that allows you to specify a more advanced behaviour for other attributes:
 
 ```javascript
-var Bike = restmod.model('/bikes').$mix({
+var Bike = restmod.model('/bikes').mix({
 	createdAt: {mask:'CU'}, // won't send this attribute on Create or Update
 	viewCount: {mask:'R'}, // won't load this attribute on Read (fetch)
 	opened: {mask:true}, // will ignore this attribute in relation to the API
@@ -852,7 +853,7 @@ var Bike = restmod.model('/bikes').$mix({
 You can define default values for your attributes, both static and dynamic. Dynamic defaults are defined using a function that will be called on record creation.
 
 ```javascript
-var Bike = restmod.model('/bikes').$mix({
+var Bike = restmod.model('/bikes').mix({
 	wheels: { init: 2 }, // every new bike will have 2 wheels by default
 	createdAt: { init: function() {
 	 return new Date();
@@ -865,49 +866,89 @@ var Bike = restmod.model('/bikes').$mix({
 You can explicitly tell restmod to map a given server attribute to one of the model's attributs:
 
 ```javascript
-var Bike = restmod.model('/bikes').$mix({
+var Bike = restmod.model('/bikes').mix({
 	created: { map: 'stats.created_at' }
 });
 ```
 
 ## Custom methods
 
-You can add a custom instance method to a Model
+A restmod object is composed of three main APIs, the Model statis API, the record API and the collection API.
+
+Each one of these APis can be extended using the `$extend` block in the object definition:
+
+For example, the following will add the `pedal` method to every record.
 
 ```javascript
-var Bike = restmod.model('/bikes').$mix({
-	pedal: function() {
-	 this.strokes += 1;
+var Bike = restmod.model('/bikes').mix({
+	$extend: {
+		Record: {
+			pedal: function() {
+			 	this.strokes += 1;
+			}
+		}
 	}
 });
 ```
 
-You can also add a class method to the Model type
+Even though the `$extend` block is the preferred method to extend a model, for small models it is also posible to
+directly define the method in the definition object:
 
 ```javascript
-var Bike = restmod.model('/bikes').$mix({
-	'@searchByBrand': function(_brand) {
-	 return this.$search({ brand: _brand });
+var Bike = restmod.model('/bikes').mix({
+	'Record.pedal': function() {
+	 	this.strokes += 1;
 	}
 });
 ```
 
-Methods added to the class are available to the Model's collections.
+In the last example the 'Record.' prefix could be omitted because by default methods are added to the record api.
+
+The following API's are available for extension:
+* Model: the static api.
+* Record: model instances api.
+* Collection: model collection instance api.
+* Scope: Same as extending Model and Collection
+* Resource: Same as extending Record and+ Collection
+
+So, to add a static method we would use:
 
 ```javascript
-var xc_bikes = Bike.$search({category:'xc'}); //$search returns a collection
-xc_treks = xc_bikes.searchByBrand('Trek');
+var Bike = restmod.model('/bikes').mix({
+	$extend: {
+		Model: {
+			$searchByTeam: function(_team) {
+			 	return this.$search({ team: _team });
+			}
+		}
+	}
+});
 ```
 
+It is also posible to override an existing method, to refer to the overriden function use `this.$super`:
+
+```javascript
+var Bike = restmod.model('/bikes').mix({
+	$extend: {
+		Scope: {
+			$search: function(_params) {
+			 	return this.$super(angular.extend({ time: SomeService.currentTime() }, _params);
+			}
+		}
+	}
+});
+```
 
 ## Hooks (callbacks)
 
-Just like you do with ActiveRecord, you can add triggers on certain steps of the object lifecycle
+Just like you do with ActiveRecord, you can add hooks on certain steps of the object lifecycle, hooks are added in the `$hooks` block of the object definition.
 
 ```javascript
-var Bike = restmod.model('/bikes').$mix({
-	'~beforeSave': function() {
-		this.partCount = this.parts.length;
+var Bike = restmod.model('/bikes').mix({
+	$hooks: {
+		'before-save': function() {
+			this.partCount = this.parts.length;
+		}
 	}
 });
 
@@ -920,8 +961,8 @@ To ease up the definition of models, and keep thing DRY, Restmod provides you wi
 
 ```javascript
 Angular.factory('Vehicle', function() {
-	return restmod.model('/vehicle').$mix({
-	createdAt: {encode:'date', param:'yyyy-MM-dd'}
+	return restmod.model('/vehicle').mix({
+		createdAt: {encode:'date', param:'yyyy-MM-dd'}
 	});
 })
 ```
@@ -929,7 +970,7 @@ Angular.factory('Vehicle', function() {
 You can then define your Bike model that inherits from the Vehicle model, and also sets additional functionality.
 
 ```javascript
-var Bike = restmod.model('/bikes').$mix('Vehicle', {
+var Bike = restmod.model('/bikes').mix('Vehicle', {
 	pedal: function (){
 		alert('pedaling')
 	}

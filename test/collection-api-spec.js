@@ -201,17 +201,13 @@ describe('Restmod collection:', function() {
 
   describe('$unwrap', function() {
 
-    it('should call the packer unpackMany method if a packer is provided', function() {
-      var packer = { unpackMany: null };
-      spyOn(packer, 'unpackMany').andReturn([]);
-
-      var bikes = restmod.model('/api/bikes', function() {
-        this.setPacker(packer);
-      }).$collection();
+    it('should call the type\'s unpack method', function() {
+      spyOn(Bike, 'unpack').andReturn([]);
+      var bikes = Bike.$collection();
 
       var raw = [{}];
       bikes.$unwrap(raw);
-      expect(packer.unpackMany).toHaveBeenCalledWith(raw, bikes);
+      expect(Bike.unpack).toHaveBeenCalledWith(bikes, raw);
     });
 
     it('should call $decode', function() {

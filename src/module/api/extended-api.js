@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMExtendedApi', ['$q', function($q) {
+RMModule.factory('RMExtendedApi', ['$q', 'RMPackerCache', function($q, packerCache) {
 
   /**
    * @class ExtendedApi
@@ -19,6 +19,51 @@ RMModule.factory('RMExtendedApi', ['$q', function($q) {
       this.$super(_raw, _mask);
       this.$resolved = true;
       return this;
+    },
+
+    /// Misc common methods
+
+    /**
+     * @memberof ExtendedApi#
+     *
+     * @description
+     *
+     * Unpacks and decode raw data from a server generated structure.
+     *
+     * ATTENTION: do not override this method to change the object wrapping strategy,
+     * instead, override the static {@link Model.$unpack} method.
+     *
+     * @param  {mixed} _raw Raw server data
+     * @param  {string} _mask 'CRU' mask
+     * @return {ExtendedApi} this
+     */
+    $unwrap: function(_raw, _mask) {
+      try {
+        packerCache.prepare();
+        _raw = this.$type.unpack(this, _raw);
+        return this.$decode(_raw, _mask);
+      } finally {
+        packerCache.clear();
+      }
+    },
+
+    /**
+     * @memberof ExtendedApi#
+     *
+     * @description
+     *
+     * Encode and packs object into a server compatible structure that can be used for PUT/POST operations.
+     *
+     * ATTENTION: do not override this method to change the object wrapping strategy,
+     * instead, override the static {@link Model.$pack} method.
+     *
+     * @param  {string} _mask 'CRU' mask
+     * @return {string} raw data
+     */
+    $wrap: function(_mask) {
+      var raw = this.$encode(_mask);
+      raw = this.$type.pack(this, raw);
+      return raw;
     },
 
     /**

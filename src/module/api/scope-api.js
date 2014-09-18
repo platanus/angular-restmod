@@ -51,7 +51,7 @@ RMModule.factory('RMScopeApi', [function() {
      * @return {RecordApi} single record
      */
     $buildRaw: function(_raw, _mask) {
-      var obj = this.$new(this.$$inferKey(_raw));
+      var obj = this.$new(this.$type.inferKey(_raw));
       obj.$decode(_raw, _mask);
       return obj;
     },

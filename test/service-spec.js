@@ -13,9 +13,9 @@ describe('Restmod model class:', function() {
     it('should create a resource and infer names', function() {
       var Bike = restmod.model('/user/bikes', {}, {});
       expect(Bike.$url()).toEqual('/user/bikes');
-      expect(Bike.$name()).toEqual('bike');
-      expect(Bike.$name(true)).toEqual('bikes');
-      expect(Bike.$isNested()).toEqual(false);
+      expect(Bike.identity()).toEqual('bike');
+      expect(Bike.identity(true)).toEqual('bikes');
+      expect(Bike.isNested()).toEqual(false);
       expect(Bike.$$chain.length).toEqual(1);
     });
 

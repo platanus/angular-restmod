@@ -17,11 +17,11 @@ Make sure you read all of the following Q&A before you start integrating your AP
 
 The primary key is just a model configuration property and by default is set to 'id'.
 
-To change it for a particular model use the configuration property:
+To change it for a particular model use the `$config` block:
 
 ```javascript
 restmod.model('/bikes').$mix({
-	PRIMARY_KEY: '_id'
+	$config: { primaryKey: '_id' }
 });
 ```
 
@@ -31,22 +31,22 @@ Or for every model, just set a base model definition using `rebase`:
 ```javascript
 module.config(function(restmodProvider) {
 	restmodProvider.rebase({
-		PRIMARY_KEY: '_id'
+		$config: {
+			primaryKey: '_id'
+		}
 	});
 });
 ```
 
 ### <a name="q2"></a> How do I handle a wrapped response object? (json root object)
 
-In restmod response wrapping is handled by the configured **packer**, by default no packer is configured so records and collections are expected at response root level.
+In restmod response wrapping is handled by the model's `unpack` and `pack` static methods, by default this methods do nothing so records and collections are expected at response root level.
 
-Restmod comes with a default packer that should handle most situations, to enable the default packer set the `PACKER` configuration property:
+Restmod comes with a default packer mixin that should handle most situations, to enable the default packer just add the `DefaultPacker` mixin:
 
 ```javascript
 module.config(function(restmodProvider) {
-	restmodProvider.rebase({
-		PACKER: 'default'
-	});
+	restmodProvider.rebase('DefaultPacker');
 });
 ```
 
@@ -81,22 +81,24 @@ Will expect:
 }
 ```
 
-The resoure's name is extracted from the resource url, if no url is given (nested resource) or if url does not match the resource's name, then you can change it's name and plural name by setting the `NAME` and `PLURAL` configuration variables:
+The resoure's name is extracted from the resource url, if no url is given (nested resource) or if url does not match the resource's name, then you can change it's name and plural name by setting the `name` and `plural` configuration variables:
 
 ```javascript
 restmod.model().$mix(function() {
-	NAME: 'mouse', // if you only set NAME, then plural is infered from it using the inflector.
-	PLURAL: 'mice'
+	$config: {
+		name: 'mouse', // if you only set NAME, then plural is infered from it using the inflector.
+		plural: 'mice'
+	}
 });
 ```
 
-It's also posible to change the root property name without changing the resource name by setting the `JSON_ROOT_SINGLE`, `JSON_ROOT_MANY` or the `JSON_ROOT` (both single and many) configuration properties. This should only be used when the properties are fixed or not named after the resource.
+It's also posible to change the root property name without changing the resource name by setting the `jsonRootSingle`, `jsonRootMany` or the `jsonRoot` (both single and many) configuration properties. This should only be used when the properties are fixed or not named after the resource.
 
 ### <a name="q3"></a> How can I extract response metadata from the root object?
 
-Take a look at the [previous question](#q2) first and set up the default packer.
+Take a look at the [previous question](#q2) first and set up the default packer mixin.
 
-By default, the default packer extracts metadata from the `meta` root property and stores it in the record's (or collection's) `$metadata` property.
+By default, the default packer `unpack` method extracts metadata from the `meta` root property and stores it in the record's (or collection's) `$metadata` property.
 
 So, the following response to a collection's `$fetch`:
 
@@ -114,7 +116,7 @@ So, the following response to a collection's `$fetch`:
 
 Will put `{ page: 1 }` in the collection's `$metadata` property.
 
-To change the property from where the packer extracts the metadata set the `JSON_META` configuration property. Set it to '.' to extract metadata from root, so given:
+To change the property from where the packer extracts the metadata set the `jsonMeta` configuration property. Set it to '.' to extract metadata from root, so given:
 
 
 ```json
@@ -128,8 +130,7 @@ To change the property from where the packer extracts the metadata set the `JSON
 ```
 
 ```javascript
-var Bike = restmod.model('/api/bikes').$mix({
-	PACKER: 'default',
+var Bike = restmod.model('/api/bikes').$mix('DefaultPacker',
 	JSON_META: '.'
 });
 
@@ -172,9 +173,7 @@ Given the following api response for the resource `/api/bikes/:id`
 The following model definition should correctly load every resource:
 
 ```javacript
-var Base = restmod.mixin({
-	PACKER: 'default' // remember to enable the default packer.
-});
+var Base = restmod.mixin('DefaultPacker');  // remember to enable the default packer.
 
 var User = restmod.model('/api/users').$mix(Base);
 var Part = restmod.model('/api/parts').$mix(Base);
@@ -211,18 +210,15 @@ restmod.model().$mix(function() {
 
 ### <a name="q5"></a> My resource properties are being automatically renamed, is this normal?
 
-That is probably because the api style you selected has registered a property renamer.
+That is probably because the api style you selected has overriden the model's property renaming methods `encodeName` and `decodeName`.
 
-You can disable renaming or change the renamer by using the following builder methods:
+You can disable or modify renaming by overriding the following methods:
 
 ```javascript
 module.config(function(restmodProvider) {
-	restmodProvider.rebase(function() {
-		this.setRenamer(false); // remove the current renamer
-		this.setRenamer({  // set another renamer
-			decode: function(_name) { return _newName; },
-			encode: function(_name) { return _newName; }
-		});
+	restmodProvider.rebase({
+		'^encodeName': function(_name) { return _newName; }, // or null to disable renaming.
+		'^decodeName': function(_name) { return _newName; } // or null to disable renaming.
 	});
 });
 ```
@@ -239,16 +235,16 @@ To handle API's that require '$' prefixed properies you have two posibilities:
 
 	```javascript
 	module.config(function(restmodProvider) {
-		restmodProvider.rebase(function() {
-			this.setNameDecoder(function(_name) {
+		restmodProvider.rebase({
+			'^decodeName': function(_name) {
 				// change prefix to '_'
 				return _name.charAt(0) == '$' ? '_' + inflector.camelize(_name.substr(1), true) : inflector.camelize(_name);
-			});
+			},
 
-			this.setNameEncoder(function(_name) {
+			'^encodeName': function(_name) {
 				// change prefix back to '$'
 				return _name.charAt(0) == '_' ? '$' + inflector.parameterize(_name.substr(1), '_') : inflector.parameterize(_name, '_');
-			});
+			}
 		});
 	});
 	```
@@ -264,12 +260,14 @@ To handle API's that require '$' prefixed properies you have two posibilities:
 
 ### <a name="q7"></a> How can I set a common url prefix for every resource?
 
-You can user the `URL_PREFIX` configuration property, like this:
+You can user the `urlPrefix` configuration property, like this:
 
 ```javascript
 module.config(function(restmodProvider) {
 	restmodProvider.rebase({
-		URL_PREFIX: '/api/v1' // or use setProperty('urlPrefix', '/api/v1') in a definition function
+		$config: {
+			urlPrefix: '/api/v1' // or use setProperty('urlPrefix', '/api/v1') in a definition function
+		}
 	});
 });
 ```
@@ -281,9 +279,11 @@ You can hook to the `before-request` event and modify the url before is sent, re
 ```javascript
 module.config(function(restmodProvider) {
 	restmodProvider.rebase({
-		'~before-request': function(_req) {
-			// _req is just a $http configuration object.
-			_req.url += '.json';
+		$hooks: {
+			'before-request': function(_req) {
+				// _req is just a $http configuration object.
+				_req.url += '.json';
+			}
 		}
 	});
 });
@@ -298,8 +298,10 @@ Same as before, you can hook to the `before-request` event:
 ```javascript
 module.config(function(restmodProvider) {
 	restmodProvider.rebase({
-		'~before-request': function(_req) {
-			_req.headers = angular.extend(_req.headers, { 'X-My-Header': 'imateapot!' });
+		$hooks: {
+			'before-request': function(_req) {
+				_req.headers = angular.extend(_req.headers, { 'X-My-Header': 'imateapot!' });
+			}
 		}
 	});
 });
@@ -322,9 +324,11 @@ or to define your own style do:
 ```javascript
 module.config(function(restmodProvider) {
 	restmodProvider.rebase({
-		STYLE: 'MyDjangoStyle', // By setting the STYLE variable the warning is disabled.
-		PRIMARY_KEY: '_id'
-		/* other style related configuration */
+		$config: {
+			style: 'MyDjangoStyle', // By setting the style variable the warning is disabled.
+			primaryKey: '_id'
+			/* other style related configuration */
+		}
 	});
 });
 ```

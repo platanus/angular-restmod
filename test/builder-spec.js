@@ -26,7 +26,7 @@ describe('Restmod builder:', function() {
     });
 
     it('should change the url prefix for objects generated using $single', function() {
-      var bike = Bike.$single('my-bike');
+      var bike = Bike.single('my-bike');
       expect(bike.$url()).toEqual('/api/my-bike');
     });
   });
@@ -54,36 +54,31 @@ describe('Restmod builder:', function() {
       expect(Bike.$new().test()).toEqual('ok');
     });
 
-    it('should add a method to the desired prototypes if an object is provided', function() {
+    it('should add a method to the proper api', function() {
+
+      var fun = function() { };
 
       var Bike = restmod.model(null, function() {
-        this.define('test', {
-          record: function() { return 'record'; },
-          type: function() { return 'type'; },
-          collection: function() { return 'collection'; }
+        this.define('test1', fun);
+        this.define('Record.test2', fun);
+        this.define('Model.test3', fun);
+        this.define('Collection.test4', fun);
+        this.define('Scope.test5', fun);
+        this.define('Record', {
+          test6: fun
         });
       });
 
-      expect(Bike.test).toBeDefined();
-      expect(Bike.test()).toEqual('type');
-      expect(Bike.$new().test).toBeDefined();
-      expect(Bike.$new().test()).toEqual('record');
-      expect(Bike.$collection().test).toBeDefined();
-      expect(Bike.$collection().test()).toEqual('collection');
-    });
-  });
-
-  describe('classDefine', function() {
-    it('should extend the scope (type and collection)', function() {
-      var Bike = restmod.model(null, function() {
-        this.classDefine('test', function() { return 'ok'; });
-      });
-
-      expect(Bike.$new().test).toBeUndefined();
-      expect(Bike.test).toBeDefined();
-      expect(Bike.test()).toEqual('ok');
-      expect(Bike.$collection().test).toBeDefined();
-      expect(Bike.$collection().test()).toEqual('ok');
+      expect(Bike.$new().test1).toBeDefined();
+      expect(Bike.test1).not.toBeDefined();
+      expect(Bike.$new().test2).toBeDefined();
+      expect(Bike.test3).toBeDefined();
+      expect(Bike.test4).not.toBeDefined();
+      expect(Bike.$collection().test4).toBeDefined();
+      expect(Bike.test5).toBeDefined();
+      expect(Bike.$collection().test5).toBeDefined();
+      expect(Bike.$new().test5).not.toBeDefined();
+      expect(Bike.$new().test6).toBeDefined();
     });
   });
 
@@ -95,7 +90,7 @@ describe('Restmod builder:', function() {
     });
 
     it('should set the internal model property', function() {
-      expect(Bike.$getProperty('test')).toEqual('test');
+      expect(Bike.getProperty('test')).toEqual('test');
     });
   });
 
@@ -103,14 +98,15 @@ describe('Restmod builder:', function() {
 
   describe('OD prefix: @', function() {
 
-    it('should register a new class ', function() {
+    it('should register a new scope method', function() {
       var Bike = restmod.model(null, {
-        '@classMethod': function() {
+        '@scopeMethod': function() {
           return 'teapot';
         }
       });
 
-      expect(Bike.classMethod()).toEqual('teapot');
+      expect(Bike.scopeMethod()).toEqual('teapot');
+      expect(Bike.$collection().scopeMethod()).toEqual('teapot');
     });
   });
 
@@ -133,7 +129,7 @@ describe('Restmod builder:', function() {
         'PRIMARY_KEY': '_id'
       });
 
-      expect(Bike.$getProperty('primaryKey')).toEqual('_id');
+      expect(Bike.getProperty('primaryKey')).toEqual('_id');
     });
   });
 

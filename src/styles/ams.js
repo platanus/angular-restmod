@@ -1,21 +1,23 @@
 
 'use strict';
 
-angular.module('restmod').factory('AMSApi', ['restmod', 'inflector', 'DefaultPacker', function(restmod, inflector, DefaultPacker) {
+angular.module('restmod').factory('AMSApi', ['restmod', 'inflector', function(restmod, inflector) {
 
-	// special snakecase to camelcase renamer
-	var amsRenamer = {
-		decode: inflector.camelize,
-		encode: function(_v) { return inflector.parameterize(_v, '_'); }
-	};
+	return restmod.mixin('DefaultPacker', { // include default packer extension
+		$config: {
+			style: 'AMS',
+			primaryKey: 'id',
+			jsonMeta: 'meta',
+			jsonLinks: 'links'
+		},
 
-	return restmod.mixin(function() {
-		this.setProperty('style', 'AMS')
-			.setProperty('primaryKey', 'id') // just to make sure
-			.setRenamer(amsRenamer)
-			.setPacker(DefaultPacker)
-			.setProperty('jsonMeta', 'meta')
-			.setProperty('jsonLinks', 'links');
+		$methods: {
+			// special snakecase to camelcase renaming
+			type: {
+				decodeName: inflector.camelize,
+				encodeName: function(_v) { return inflector.parameterize(_v, '_'); }
+			}
+		}
 	});
 
 }]);

@@ -194,7 +194,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
       this.attrDecoder(_attr, function(_raw) {
         if(_raw === null) return null;
         loadModel();
-        if(!this[_attr] || this[_attr].$pk !== _model.$$inferKey(_raw)) {
+        if(!this[_attr] || this[_attr].$pk !== _model.inferKey(_raw)) {
           this[_attr] = _model.$buildRaw(_raw);
         } else {
           this[_attr].$decode(_raw);

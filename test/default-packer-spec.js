@@ -16,9 +16,7 @@ describe('DefaultPacker', function() {
   describe('extractRoot', function() {
 
     it('should extract single resource using singular name by default', function() {
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default'
-      });
+      var model = restmod.model('/api/bikes').mix('DefaultPacker');
 
       var record = model.$new(1);
       record.$unwrap({ bike: { model: 'Slash' } });
@@ -26,9 +24,7 @@ describe('DefaultPacker', function() {
     });
 
     it('should extract collection using plural name by default', function() {
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default'
-      });
+      var model = restmod.model('/api/bikes').mix('DefaultPacker');
 
       var many = model.$collection();
       many.$unwrap({ bikes: [{ model: 'Slash' }] });
@@ -36,10 +32,11 @@ describe('DefaultPacker', function() {
     });
 
     it('should let the single and plural keys to be overriden separately', function() {
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default',
-        JSON_ROOT_SINGLE: 'one_bike',
-        JSON_ROOT_MANY: 'many_bikes'
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: {
+          jsonRootSingle: 'one_bike',
+          jsonRootMany: 'many_bikes'
+        }
       });
 
       var record = model.$new(1);
@@ -52,9 +49,8 @@ describe('DefaultPacker', function() {
     });
 
     it('should let the single and plural keys to be overriden using jsonRoot', function() {
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default',
-        JSON_ROOT: 'the_root'
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonRoot: 'the_root' }
       });
 
       var record = model.$new(1);
@@ -71,9 +67,7 @@ describe('DefaultPacker', function() {
   describe('processMeta', function() {
 
     it('should extract metadata from meta property by default', function() {
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default',
-      });
+      var model = restmod.model('/api/bikes').mix('DefaultPacker');
 
       var record = model.$new(1);
       record.$unwrap({ bike: { model: 'Slash' }, meta: { pages: 1 } });
@@ -82,9 +76,8 @@ describe('DefaultPacker', function() {
     });
 
     it('should extract metadata from specified property', function() {
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default',
-        JSON_META: 'extra'
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonMeta: 'extra' }
       });
 
       var record = model.$new(1);
@@ -94,9 +87,7 @@ describe('DefaultPacker', function() {
     });
 
     it('should not fail if property is not found', function() {
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default'
-      });
+      var model = restmod.model('/api/bikes').mix('DefaultPacker');
 
       var record = model.$new(1);
       record.$unwrap({ bike: { model: 'Slash' } });
@@ -104,9 +95,8 @@ describe('DefaultPacker', function() {
     });
 
     it('should extract metadata from root if set to dot', function() {
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default',
-        JSON_META: '.'
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonMeta: '.' }
       });
 
       var record = model.$new(1);
@@ -116,9 +106,8 @@ describe('DefaultPacker', function() {
     });
 
     it('should skip metadata extraction if set to false', function() {
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default',
-        JSON_META: false
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonMeta: false }
       });
 
       var record = model.$new(1);
@@ -135,9 +124,7 @@ describe('DefaultPacker', function() {
     });
 
     it('should process links under "linked" by default', function() {
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default'
-      });
+      var model = restmod.model('/api/bikes').mix('DefaultPacker');
 
       var record = model.$new(1);
       record.$unwrap({ bike: {}, linked: { users: [] } });
@@ -145,9 +132,8 @@ describe('DefaultPacker', function() {
     });
 
     it('should process links under the property defined by used', function() {
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default',
-        JSON_LINKS: 'links'
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonLinks: 'links' }
       });
 
       var record = model.$new(1);
@@ -156,9 +142,8 @@ describe('DefaultPacker', function() {
     });
 
     it('should process links from root if set to dot', function() {
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default',
-        JSON_LINKS: '.'
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonLinks: '.' }
       });
 
       var record = model.$new(1);
@@ -168,9 +153,8 @@ describe('DefaultPacker', function() {
     });
 
     it('should not process links if set to false', function() {
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default',
-        JSON_LINKS: false
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonLinks: false }
       });
 
       var record = model.$new(1);

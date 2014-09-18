@@ -126,8 +126,8 @@ RMModule.provider('restmod', [function() {
           var model = buildModel(_baseUrl, BASE_CHAIN);
 
           if(arguments.length > 1) {
-            model.$mix(arraySlice.call(arguments, 1));
-            $log.warn('Passing mixins and difinitions in the model method will be deprecated in restmod 1.1, use restmod.model().$mix() instead.');
+            model.mix(arraySlice.call(arguments, 1));
+            $log.warn('Passing mixins and difinitions in the model method will be deprecated in restmod 1.2, use restmod.model().$mix() instead.');
           }
 
           return model;
@@ -168,7 +168,7 @@ RMModule.provider('restmod', [function() {
          * @return {RecordApi} New resource instance.
          */
         singleton: function(_url/*, _mix */) {
-          return restmod.model.apply(this, arguments).$single(_url);
+          return restmod.model.apply(this, arguments).single(_url);
         }
       };
 

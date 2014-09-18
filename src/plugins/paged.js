@@ -35,16 +35,15 @@
 
 angular.module('restmod').factory('PagedModel', ['restmod', function(restmod) {
 
-  return restmod.mixin({
-    PAGE_HEADER: 'X-Page',
-    PAGE_COUNT_HEADER: 'X-Page-Total',
+  return restmod.mixin(function() {
+    this.setProperty('pageHeader', 'X-Page')
+        .setProperty('pageCountHeader', 'X-Page-Total')
+        .on('after-fetch-many', function(_response) {
+          var page = _response.headers(this.$type.getProperty('pageHeader')),
+              pageCount = _response.headers(this.$type.getProperty('pageCountHeader'));
 
-    '~afterFetchMany': function(_response) {
-      var page = _response.headers(this.$getProperty('pageHeader')),
-          pageCount = _response.headers(this.$getProperty('pageCountHeader'));
-
-      this.$page = (page !== undefined ? parseInt(page, 10) : 1);
-      this.$pageCount = (pageCount !== undefined ? parseInt(pageCount, 10) : 1);
-    }
+          this.$page = (page !== undefined ? parseInt(page, 10) : 1);
+          this.$pageCount = (pageCount !== undefined ? parseInt(pageCount, 10) : 1);
+        });
   });
 }]);

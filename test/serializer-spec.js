@@ -2,22 +2,23 @@
 
 describe('Restmod serializer', function() {
 
-  var serializer;
+  var serializer, factory;
 
   beforeEach(module('restmod'));
 
   beforeEach(inject(function($injector) {
-    serializer = $injector.get('RMSerializer')();
+    factory = $injector.get('RMSerializer');
+    serializer = factory({});
   }));
 
   describe('encode', function() {
 
-    describe('if a renamer is provided', function() {
+    describe('if a renaming strategy is provided', function() {
 
       beforeEach(function() {
-        serializer.dsl().setRenamer({
-          decode: function(_str) { return '_'+_str; },
-          encode: function(_str) { return _str.substr(1); }
+        serializer = factory({
+          decodeName: function(_str) { return '_'+_str; },
+          encodeName: function(_str) { return _str.substr(1); }
         });
       });
 
@@ -55,12 +56,12 @@ describe('Restmod serializer', function() {
 
   describe('decode', function() {
 
-    describe('if a renamer is provided', function() {
+    describe('if a renaming strategy is provided', function() {
 
       beforeEach(function() {
-        serializer.dsl().setRenamer({
-          decode: function(_str) { return '_'+_str; },
-          encode: function(_str) { return _str.substr(1); }
+        serializer = factory({
+          decodeName: function(_str) { return '_'+_str; },
+          encodeName: function(_str) { return _str.substr(1); }
         });
       });
 
@@ -95,7 +96,7 @@ describe('Restmod serializer', function() {
     });
 
     it('should ignore properties prefixed with $ AFTER rename is computed', function() {
-      serializer.dsl().setRenamer({ decode: function(_name) { return _name === '$mustSee' ? 'mustSee' : _name; } });
+      serializer = factory({ decodeName: function(_name) { return _name === '$mustSee' ? 'mustSee' : _name; } });
 
       var result = {};
       serializer.decode(result, { $mustSee: true });

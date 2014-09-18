@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', function($http, $q, $log, packerCache) {
+RMModule.factory('RMCommonApi', ['$http', '$q', '$log', function($http, $q, $log) {
 
   var EMPTY_ARRAY = [];
 
@@ -341,7 +341,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', functio
     $send: function(_options, _success, _error) {
 
       // make sure a style base was selected for the model
-      if(!this.$getProperty('style')) {
+      if(!this.$type.getProperty('style')) {
         $log.warn('No API style base was selected, see the Api Integration FAQ for more information on this warning');
       }
 
@@ -441,51 +441,6 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', functio
       }
 
       return pendingCount > 0;
-    },
-
-    /// Misc common methods
-
-    /**
-     * @memberof CommonApi#
-     *
-     * @description
-     *
-     * Unpacks and decode raw data from a server generated structure.
-     *
-     * ATTENTION: do not override this method to change the object wrapping strategy,
-     * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
-     *
-     * @param  {mixed} _raw Raw server data
-     * @param  {string} _mask 'CRU' mask
-     * @return {CommonApi} this
-     */
-    $unwrap: function(_raw, _mask) {
-      try {
-        packerCache.prepare();
-        _raw = this.$$unpack(_raw);
-        return this.$decode(_raw, _mask);
-      } finally {
-        packerCache.clear();
-      }
-    },
-
-    /**
-     * @memberof CommonApi#
-     *
-     * @description
-     *
-     * Encode and packs object into a server compatible structure that can be used for PUT/POST operations.
-     *
-     * ATTENTION: do not override this method to change the object wrapping strategy,
-     * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
-     *
-     * @param  {string} _mask 'CRU' mask
-     * @return {string} raw data
-     */
-    $wrap: function(_mask) {
-      var raw = this.$encode(_mask);
-      raw = this.$$pack(raw);
-      return raw;
     }
   };
 

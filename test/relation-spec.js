@@ -94,7 +94,11 @@ describe('Restmod model relation:', function() {
 
     it('should bubble child events to child type', function() {
       var spy = jasmine.createSpy();
-      $injector.get('BikeRide').$mix({ '~after-init': spy });
+      $injector.get('BikeRide').mix({
+        $hooks: {
+          'after-init': spy
+        }
+      });
       Bike.$new(1).$decode({ rides: [{ id: 1 }] });
       expect(spy).toHaveBeenCalled();
     });
@@ -167,7 +171,11 @@ describe('Restmod model relation:', function() {
 
     it('should bubble child events to child type', function() {
       var spy = jasmine.createSpy();
-      $injector.get('SerialNo').$mix({ '~after-init': spy });
+      $injector.get('SerialNo').mix({
+        $hooks: {
+          'after-init': spy
+        }
+      });
       Bike.$new(1).$decode({ serial: { value: 'SERIAL' } });
       expect(spy).toHaveBeenCalled();
     });
@@ -266,8 +274,7 @@ describe('Restmod model relation:', function() {
 
       // this is more of an integration test, place it somewhere else
 
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default',
+      var model = restmod.model('/api/bikes', 'DefaultPacker', {
         user: { belongsTo: 'User' }
       });
 
@@ -340,8 +347,7 @@ describe('Restmod model relation:', function() {
 
       // this is more of an integration test, place it somewhere else
 
-      var model = restmod.model('/api/bikes', {
-        PACKER: 'default',
+      var model = restmod.model('/api/bikes', 'DefaultPacker', {
         parts: { belongsToMany: 'Part' }
       });
 
