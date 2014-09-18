@@ -21,7 +21,7 @@ angular.module('restmod').factory('DirtyModel', ['restmod', function(restmod) {
           // store original information in a model's special property
           var original = this.$cmStatus = {};
           this.$each(function(_value, _key) {
-            original[_key] = _value;
+            original[_key] = angular.copy(_value);
           });
         })
         /**
@@ -46,12 +46,20 @@ angular.module('restmod').factory('DirtyModel', ['restmod', function(restmod) {
           var original = this.$cmStatus;
           if(_prop) {
             if(!original || original[_prop] === undefined) return false;
-            return original[_prop] !== this[_prop];
+            if (typeof this[_prop] === 'object') {
+              return angular.toJson(original[_prop]) !== angular.toJson(this[_prop]);
+            } else {
+              return original[_prop] !== this[_prop];
+            }
           } else {
             var changes = [], key;
             if(original) {
               for(key in original) {
                 if(original.hasOwnProperty(key) && original[key] !== this[key]) {
+                  if (typeof this[key] === 'object' &&
+                      angular.toJson(original[key]) === angular.toJson(this[key])) {
+                    continue;
+                  }
                   changes.push(key);
                 }
               }
@@ -82,10 +90,10 @@ angular.module('restmod').factory('DirtyModel', ['restmod', function(restmod) {
         .define('$restore', function(_prop) {
           var original = this.$cmStatus;
           if(_prop) {
-            this[_prop] = original[_prop];
+            this[_prop] = angular.copy(original[_prop]);
           } else {
             for(var key in original) {
-              if(original.hasOwnProperty(key)) this[key] = original[key];
+              if(original.hasOwnProperty(key)) this[key] = angular.copy(original[key]);
             }
           }
           return this;
