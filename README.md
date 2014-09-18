@@ -171,6 +171,17 @@ To reload an object use `$fetch`. **WARNING:** This will overwrite modified prop
 bike.$fetch();
 ```
 
+If you only want to retrieve an object data if it hasn't been retrieved yet, use `$resolve` instead of `$fetch`:
+
+```javascript
+bike.$resolve();
+```
+
+To mark an object as unresolved call `$reset`. You can hook to the `before-resolve` event to add some expiration logic
+for resolved objects, just call `$reset` inside the hook to force the object to be retrieved.
+
+Remember to use `$resolve().$asPromise()` if you are returning inside a resolve function.
+
 <!-- it: $httpBackend.flush(); expect(bike.model).toEqual('Slash') -->
 <!-- end -->
 
