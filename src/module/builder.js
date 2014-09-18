@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', function($injector, inflector, Utils) {
+RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', function($injector, inflector, $log, Utils) {
 
   // TODO: add urlPrefix option
 
@@ -177,10 +177,12 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', function($in
         forEach(_description, function(_desc, _attr) {
           switch(_attr.charAt(0)) {
           case '@':
+            $log.warn('Usage of @ in description objects will be removed in 1.2, use a $extend block instead');
             this.define('Scope.' + _attr.substring(1), _desc); // set static method
             break;
           case '~':
             _attr = inflector.parameterize(_attr.substring(1));
+            $log.warn('Usage of ~ in description objects will be removed in 1.2, use a $hooks block instead');
             this.on(_attr, _desc);
             break;
           default:
@@ -197,6 +199,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', function($in
                 if(_desc.hasOwnProperty(key)) this.on(key, _desc[key]);
               }
             } else if(VAR_RGX.test(_attr)) {
+              $log.warn('Usage of ~ in description objects will be removed in 1.2, use a $config block instead');
               _attr = inflector.camelize(_attr.toLowerCase());
               this.setProperty(_attr, _desc);
             }
