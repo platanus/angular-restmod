@@ -353,7 +353,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
       // provide record contructor
       $new: function(_pk, _scope) {
-        return new Model(_scope || this, _pk);
+        return Model.$new(_pk, _scope || this);
       },
 
       // provide collection constructor
