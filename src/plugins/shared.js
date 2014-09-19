@@ -3,9 +3,7 @@
  *
  * @description
  *
- * Enables caching instances by primary key so separate calls to $find will retrieve the same record instance.
- *
- * **This plugin is a work in progress and has not been tested**
+ * Enables caching instances by primary key so a resource with a given id will always refer to the same instance.
  */
 
 'use strict';
@@ -17,7 +15,7 @@ angular.module('restmod').factory('SharedModel', ['restmod', function(restmod) {
 
     this
         // override scope.$new to return existing instances or update cache.
-        .classDefine('$new', function(_key, _scope) {
+        .define('Model.$new', function(_key, _scope) {
           if(_key) {
             // search for instance with same key, if key is found then return instance
             return cache[_key] || (cache[_key] = this.$super(_key, _scope));
