@@ -30,6 +30,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
         mappings = {};
 
     function isMasked(_name, _mask) {
+      if(typeof _mask === 'function') return _mask(_name);
       var mask = masks[_name];
       return (mask && (mask === true || mask.indexOf(_mask) !== -1));
     }
