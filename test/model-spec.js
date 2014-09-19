@@ -115,6 +115,35 @@ describe('Restmod model class:', function() {
 
   describe('$save', function() {
 
+    describe('when record is identified and a patch array is given', function() {
+
+      var bike;
+
+      beforeEach(function() {
+        bike = Bike.$new(1).$extend({ brand: 'Santa Cruz', model: 'Bronson', wheelSz: 27.5 });
+      });
+
+      it('should begin a PATCH action', function() {
+        bike.$save(['brand']);
+        $httpBackend.expectPATCH('/api/bikes/1').respond(200, {});
+        $httpBackend.flush();
+      });
+
+      it('should begin a PUT action if configured to do so', function() {
+        Bike.mix({ $config: { patchMethod: 'PUT' } });
+        bike.$save(['brand']);
+        $httpBackend.expectPUT('/api/bikes/1').respond(200, {});
+        $httpBackend.flush();
+      });
+
+      it('should only send requested properties', function() {
+        bike.$save(['brand', 'wheelSz']);
+        $httpBackend.expectPATCH('/api/bikes/1', { brand: 'Santa Cruz', wheelSz: 27.5 }).respond(200, {});
+        $httpBackend.flush();
+      });
+
+    });
+
     it('should call callbacks in proper order when creating', function() {
       var calls = [];
 

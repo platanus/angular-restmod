@@ -245,29 +245,44 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
     /**
      * @memberof RecordApi#
      *
-     * @description Begin a server request to create/update resource.
+     * @description Begin a server request to create/update/patch resource.
+     *
+     * A patch is only executed if model is identified and a patch property list is given. It is posible to
+     * change the method used for PATCH operations by setting the `patchMethod` configuration.
      *
      * If resource is new and it belongs to a collection and it hasnt been revealed, then it will be revealed.
      *
      * The request's promise can be accessed using the `$asPromise` method.
      *
+     * @param {array} _patch Optional list of properties to send in update operation.
      * @return {RecordApi} this
      */
-    $save: function() {
+    $save: function(_patch) {
 
       var url = this.$scope.$updateUrlFor ? this.$scope.$updateUrlFor(this.$pk) : this.$url(), request;
 
       if(url) {
+
         // If bound, update
-        request = { method: 'PUT', url: url, data: this.$wrap(Utils.UPDATE_MASK) };
-        this.$dispatch('before-update', [request]);
+        if(_patch) {
+          request = {
+            method: this.$type.getProperty('patchMethod', 'PATCH'), // allow user to override patch method
+            url: url,
+            // Use special mask for patches, mask everything that is not in the patch list.
+            data: this.$wrap(function(_name) { return _patch.indexOf(_name) === -1; })
+          };
+        } else {
+          request = { method: 'PUT', url: url, data: this.$wrap(Utils.UPDATE_MASK) };
+        }
+
+        this.$dispatch('before-update', [request, !!_patch]);
         this.$dispatch('before-save', [request]);
         return this.$send(request, function(_response) {
           this.$unwrap(_response.data);
-          this.$dispatch('after-update', [_response]);
+          this.$dispatch('after-update', [_response, !!_patch]);
           this.$dispatch('after-save', [_response]);
         }, function(_response) {
-          this.$dispatch('after-update-error', [_response]);
+          this.$dispatch('after-update-error', [_response, !!_patch]);
           this.$dispatch('after-save-error', [_response]);
         });
       } else {

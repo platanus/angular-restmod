@@ -249,6 +249,20 @@ newBike.$save(); // bike is persisted
 <!-- it: $httpBackend.expectPOST('/bikes').respond(200, '{}'); $httpBackend.flush(); -->
 <!-- end -->
 
+<!-- section: $save patch -->
+
+To patch an object, just modify the properties and call `$save` passing an array of properties to be patched as first argument.
+
+```javascript
+bike = Bike.$find(1);
+bike.brand = 'Trek';
+bike.model = 'Slash';
+bike.$save(['brand']);
+```
+
+<!-- it: $httpBackend.expectPATCH('/bikes/1').respond(200, '{}'); $httpBackend.flush(); -->
+<!-- end -->
+
 <!-- section: $create on type -->
 
 Or use `$create`
