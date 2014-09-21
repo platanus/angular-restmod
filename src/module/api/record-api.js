@@ -152,23 +152,6 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
     /**
      * @memberof RecordApi#
      *
-     * @description Copyies another object's non-private properties.
-     *
-     * @param {object} _other Object to merge.
-     * @return {RecordApi} self
-     */
-    $extend: function(_other) {
-      for(var tmp in _other) {
-        if (_other.hasOwnProperty(tmp) && tmp[0] !== '$') {
-          this[tmp] = _other[tmp];
-        }
-      }
-      return this;
-    },
-
-    /**
-     * @memberof RecordApi#
-     *
      * @description Iterates over the object non-private properties
      *
      * @param {function} _fun Function to call for each
@@ -240,6 +223,46 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
           this.$dispatch('after-fetch-error', [_response]);
         });
       });
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Copyies another object's non-private properties.
+     *
+     * This method runs inside the promise chain, so calling
+     *
+     * ```javascript
+     * Bike.$find(1).$extend({ size: "L" }).$save();
+     * ```
+     * Will first fetch the bike data and after it is loaded the new size will be applied and then the
+     * updated model saved.
+     *
+     * @param {object} _other Object to merge.
+     * @return {RecordApi} self
+     */
+    $extend: function(_other) {
+      return this.$always(function() {
+        for(var tmp in _other) {
+          if (_other.hasOwnProperty(tmp) && tmp[0] !== '$') {
+            this[tmp] = _other[tmp];
+          }
+        }
+      });
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Shortcut method used to extend and save a model.
+     *
+     * This method will not force a PUT, if object is new `$update` will attempt to POST.
+     *
+     * @param {object} _other Data to change
+     * @return {RecordApi} self
+     */
+    $update: function(_other) {
+      return this.$extend(_other).$save();
     },
 
     /**

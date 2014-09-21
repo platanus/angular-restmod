@@ -78,6 +78,24 @@ describe('Restmod model class:', function() {
     });
   });
 
+  describe('$extend', function() {
+
+    it('should be called in the promise chain', function() {
+      $httpBackend.when('GET', '/api/bikes/1').respond(200, { category: 'XC' });
+
+      var bike = Bike.$find(1).$extend({ category: 'Trail' });
+      $httpBackend.flush();
+      expect(bike.category).toEqual('Trail');
+    });
+
+    it('should ignore properties that start with $', function() {
+      var bike = Bike.$new().$extend({ category: 'Trail', $ignored: 'internal' });
+      expect(bike.category).toBeDefined();
+      expect(bike.ignored).toBeUndefined();
+    });
+
+  });
+
   describe('$fetch', function() {
 
     it('should call callbacks in proper order', function() {
