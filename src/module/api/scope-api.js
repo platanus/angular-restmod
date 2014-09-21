@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMScopeApi', [function() {
+RMModule.factory('RMScopeApi', ['RMUtils', function(Utils) {
 
   /**
    * @class ScopeApi
@@ -12,6 +12,20 @@ RMModule.factory('RMScopeApi', [function() {
    * TODO: Talk about record building here
    */
   return {
+
+    /**
+     * @memberof ScopeApi#
+     *
+     * @description provides urls for scope's resources.
+     *
+     * @param {mixed} _resource The target resource.
+     * @return {string|null} The url or nill if resource does not meet the url requirements.
+     */
+    $urlFor: function(_resource) {
+      // force item unscoping if model is not nested (maybe make this optional)
+      var baseUrl = this.$type.$url() || this.$url();
+      return _resource.$isCollection ? baseUrl : Utils.joinUrl(baseUrl, _resource.$pk);
+    },
 
     /**
      * @memberof ScopeApi#
@@ -109,7 +123,6 @@ RMModule.factory('RMScopeApi', [function() {
     $search: function(_params) {
       return this.$collection(_params).$fetch();
     }
-
   };
 
 }]);

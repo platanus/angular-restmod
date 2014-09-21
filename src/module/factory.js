@@ -101,12 +101,6 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
         return config.urlPrefix ? Utils.joinUrl(config.urlPrefix, _baseUrl) : _baseUrl;
       },
 
-      // gets the url for a scope member
-      $urlFor: function(_pk) {
-        // TODO: move to scope api, unify with collection
-        return Utils.joinUrl(this.$url(), _pk);
-      },
-
       // bubbles events comming from related resources
       $dispatch: function(_hook, _args, _ctx) {
         var cbs = hooks[_hook], i, cb;

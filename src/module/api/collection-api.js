@@ -51,31 +51,6 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
     /**
      * @memberof CollectionApi#
      *
-     * @description Gets this collection url without query string.
-     *
-     * @return {string} The collection url.
-     */
-    $url: function() {
-      return this.$scope.$url();
-    },
-
-    /**
-     * @memberof CollectionApi#
-     *
-     * @description Part of the scope interface, provides urls for collection's items.
-     *
-     * @param {RecordApi} _pk Item key to provide the url to.
-     * @return {string|null} The url or nill if item does not meet the url requirements.
-     */
-    $urlFor: function(_pk) {
-      // force item unscoping if model is not nested (maybe make this optional)
-      var baseUrl = this.$type.$url();
-      return Utils.joinUrl(baseUrl ? baseUrl : this.$url(), _pk);
-    },
-
-    /**
-     * @memberof CollectionApi#
-     *
      * @description Feeds raw collection data into the collection.
      *
      * This method is for use in collections only.
@@ -139,7 +114,8 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
      * @return {CollectionApi} self
      */
     $fetch: function(_params) {
-      var request = { method: 'GET', url: this.$url(), params: this.$params };
+
+      var request = { method: 'GET', url: this.$url('fetchMany'), params: this.$params };
 
       if(_params) {
         request.params = request.params ? extend(request.params, _params) : _params;

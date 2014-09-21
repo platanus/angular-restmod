@@ -16,22 +16,19 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
   };
 
   RelationScope.prototype = {
-    // nest collection url
-    $url: function() {
-      return Utils.joinUrl(this.$scope.$url(), this.$partial);
-    },
-
     // record url is nested only for nested resources
-    $urlFor: function(_pk) {
+    $urlFor: function(_resource) {
+      if(_resource.$isCollection) return Utils.joinUrl(this.$scope.$url(), this.$partial);
+
       if(this.$target.isNested()) {
         return this.$fetchUrlFor();
       } else {
-        return this.$target.$urlFor(_pk);
+        return this.$target.$urlFor(_resource);
       }
     },
 
-    // fetch url is nested
-    $fetchUrlFor: function(/* _pk */) {
+    // fetch url is always nested
+    $fetchUrlFor: function(/* _resource */) {
       return Utils.joinUrl(this.$scope.$url(), this.$partial);
     },
 
@@ -117,19 +114,6 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
     /**
      * @memberof RecordApi#
      *
-     * @description Returns the url this object is bound to.
-     *
-     * This is the url used by fetch to retrieve the resource related data.
-     *
-     * @return {string} bound url.
-     */
-    $url: function() {
-      return this.$scope.$urlFor(this.$pk);
-    },
-
-    /**
-     * @memberof RecordApi#
-     *
      * @description Default item child scope factory.
      *
      * By default, no create url is provided and the update/destroy url providers
@@ -210,7 +194,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      */
     $fetch: function(_params) {
       return this.$always(function() {
-        var url = this.$scope.$fetchUrlFor ? this.$scope.$fetchUrlFor(this.$pk) : this.$url();
+        var url = this.$url('fetch');
         Utils.assert(!!url, 'Cant $fetch if resource is not bound');
 
         var request = { method: 'GET', url: url, params: _params };
@@ -282,7 +266,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      */
     $save: function(_patch) {
       return this.$always(function() {
-        var url = this.$scope.$updateUrlFor ? this.$scope.$updateUrlFor(this.$pk) : this.$url(), request;
+        var url = this.$url('update'), request;
 
         if(url) {
 
@@ -313,7 +297,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
             });
         } else {
           // If not bound create.
-          url = this.$scope.$createUrlFor ? this.$scope.$createUrlFor(this.$pk) : (this.$scope.$url && this.$scope.$url());
+          url = this.$url('create') || this.$scope.$url();
           Utils.assert(!!url, 'Cant $create if parent scope is not bound');
 
           request = { method: 'POST', url: url, data: this.$wrap(Utils.CREATE_MASK) };
@@ -353,7 +337,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
       return this.$always(function() {
         if(this.$pk)
         {
-          var url = this.$scope.$destroyUrlFor ? this.$scope.$destroyUrlFor(this.$pk) : this.$url();
+          var url = this.$url('destroy');
           Utils.assert(!!url, 'Cant $destroy if resource is not bound');
 
           var request = { method: 'DELETE', url: url };
