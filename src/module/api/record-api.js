@@ -226,20 +226,20 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {RecordApi} this
      */
     $fetch: function(_params) {
-      var url = this.$scope.$fetchUrlFor ? this.$scope.$fetchUrlFor(this.$pk) : this.$url();
-      Utils.assert(!!url, 'Cant $fetch if resource is not bound');
+      return this.$always(function() {
+        var url = this.$scope.$fetchUrlFor ? this.$scope.$fetchUrlFor(this.$pk) : this.$url();
+        Utils.assert(!!url, 'Cant $fetch if resource is not bound');
 
-      var request = { method: 'GET', url: url, params: _params };
+        var request = { method: 'GET', url: url, params: _params };
 
-      this.$dispatch('before-fetch', [request]);
-      this.$send(request, function(_response) {
-        this.$unwrap(_response.data);
-        this.$dispatch('after-fetch', [_response]);
-      }, function(_response) {
-        this.$dispatch('after-fetch-error', [_response]);
+        this.$dispatch('before-fetch', [request]);
+        this.$send(request, function(_response) {
+          this.$unwrap(_response.data);
+          this.$dispatch('after-fetch', [_response]);
+        }, function(_response) {
+          this.$dispatch('after-fetch-error', [_response]);
+        });
       });
-
-      return this;
     },
 
     /**
@@ -258,56 +258,63 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {RecordApi} this
      */
     $save: function(_patch) {
+      return this.$always(function() {
+        var url = this.$scope.$updateUrlFor ? this.$scope.$updateUrlFor(this.$pk) : this.$url(), request;
 
-      var url = this.$scope.$updateUrlFor ? this.$scope.$updateUrlFor(this.$pk) : this.$url(), request;
+        if(url) {
 
-      if(url) {
-
-        // If bound, update
-        if(_patch) {
-          request = {
-            method: this.$type.getProperty('patchMethod', 'PATCH'), // allow user to override patch method
-            url: url,
-            // Use special mask for patches, mask everything that is not in the patch list.
-            data: this.$wrap(function(_name) { return _patch.indexOf(_name) === -1; })
-          };
-        } else {
-          request = { method: 'PUT', url: url, data: this.$wrap(Utils.UPDATE_MASK) };
-        }
-
-        this.$dispatch('before-update', [request, !!_patch]);
-        this.$dispatch('before-save', [request]);
-        return this.$send(request, function(_response) {
-          this.$unwrap(_response.data);
-          this.$dispatch('after-update', [_response, !!_patch]);
-          this.$dispatch('after-save', [_response]);
-        }, function(_response) {
-          this.$dispatch('after-update-error', [_response, !!_patch]);
-          this.$dispatch('after-save-error', [_response]);
-        });
-      } else {
-        // If not bound create.
-        url = this.$scope.$createUrlFor ? this.$scope.$createUrlFor(this.$pk) : (this.$scope.$url && this.$scope.$url());
-        Utils.assert(!!url, 'Cant $create if parent scope is not bound');
-
-        request = { method: 'POST', url: url, data: this.$wrap(Utils.CREATE_MASK) };
-        this.$dispatch('before-save', [request]);
-        this.$dispatch('before-create', [request]);
-        return this.$send(request, function(_response) {
-          this.$unwrap(_response.data);
-
-          // reveal item (if not yet positioned)
-          if(this.$scope.$isCollection && this.$position === undefined && !this.$preventReveal) {
-            this.$scope.$add(this, this.$revealAt);
+          // If bound, update
+          if(_patch) {
+            request = {
+              method: this.$type.getProperty('patchMethod', 'PATCH'), // allow user to override patch method
+              url: url,
+              // Use special mask for patches, mask everything that is not in the patch list.
+              data: this.$wrap(function(_name) { return _patch.indexOf(_name) === -1; })
+            };
+          } else {
+            request = { method: 'PUT', url: url, data: this.$wrap(Utils.UPDATE_MASK) };
           }
 
-          this.$dispatch('after-create', [_response]);
-          this.$dispatch('after-save', [_response]);
-        }, function(_response) {
-          this.$dispatch('after-create-error', [_response]);
-          this.$dispatch('after-save-error', [_response]);
-        });
-      }
+          this
+            .$dispatch('before-update', [request, !!_patch])
+            .$dispatch('before-save', [request])
+            .$send(request, function(_response) {
+              this
+                .$unwrap(_response.data)
+                .$dispatch('after-update', [_response, !!_patch])
+                .$dispatch('after-save', [_response]);
+            }, function(_response) {
+              this
+                .$dispatch('after-update-error', [_response, !!_patch])
+                .$dispatch('after-save-error', [_response]);
+            });
+        } else {
+          // If not bound create.
+          url = this.$scope.$createUrlFor ? this.$scope.$createUrlFor(this.$pk) : (this.$scope.$url && this.$scope.$url());
+          Utils.assert(!!url, 'Cant $create if parent scope is not bound');
+
+          request = { method: 'POST', url: url, data: this.$wrap(Utils.CREATE_MASK) };
+          this
+            .$dispatch('before-save', [request])
+            .$dispatch('before-create', [request])
+            .$send(request, function(_response) {
+              this.$unwrap(_response.data);
+
+              // reveal item (if not yet positioned)
+              if(this.$scope.$isCollection && this.$position === undefined && !this.$preventReveal) {
+                this.$scope.$add(this, this.$revealAt);
+              }
+
+              this
+                .$dispatch('after-create', [_response])
+                .$dispatch('after-save', [_response]);
+            }, function(_response) {
+              this
+                .$dispatch('after-create-error', [_response])
+                .$dispatch('after-save-error', [_response]);
+            });
+        }
+      });
     },
 
     /**
@@ -320,22 +327,25 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {RecordApi} this
      */
     $destroy: function() {
-      var url = this.$scope.$destroyUrlFor ? this.$scope.$destroyUrlFor(this.$pk) : this.$url();
-      Utils.assert(!!url, 'Cant $destroy if resource is not bound');
+      return this.$always(function() {
+        var url = this.$scope.$destroyUrlFor ? this.$scope.$destroyUrlFor(this.$pk) : this.$url();
+        Utils.assert(!!url, 'Cant $destroy if resource is not bound');
 
-      var request = { method: 'DELETE', url: url };
+        var request = { method: 'DELETE', url: url };
 
-      this.$dispatch('before-destroy', [request]);
-      return this.$send(request, function(_response) {
+        this
+          .$dispatch('before-destroy', [request])
+          .$send(request, function(_response) {
 
-        // call scope callback
-        if(this.$scope.$remove) {
-          this.$scope.$remove(this);
-        }
+            // remove from scope
+            if(this.$scope.$remove) {
+              this.$scope.$remove(this);
+            }
 
-        this.$dispatch('after-destroy', [_response]);
-      }, function(_response) {
-        this.$dispatch('after-destroy-error', [_response]);
+            this.$dispatch('after-destroy', [_response]);
+          }, function(_response) {
+            this.$dispatch('after-destroy-error', [_response]);
+          });
       });
     },
 
