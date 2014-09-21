@@ -351,24 +351,32 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      */
     $destroy: function() {
       return this.$always(function() {
-        var url = this.$scope.$destroyUrlFor ? this.$scope.$destroyUrlFor(this.$pk) : this.$url();
-        Utils.assert(!!url, 'Cant $destroy if resource is not bound');
+        if(this.$pk)
+        {
+          var url = this.$scope.$destroyUrlFor ? this.$scope.$destroyUrlFor(this.$pk) : this.$url();
+          Utils.assert(!!url, 'Cant $destroy if resource is not bound');
 
-        var request = { method: 'DELETE', url: url };
+          var request = { method: 'DELETE', url: url };
 
-        this
-          .$dispatch('before-destroy', [request])
-          .$send(request, function(_response) {
+          this
+            .$dispatch('before-destroy', [request])
+            .$send(request, function(_response) {
 
-            // remove from scope
-            if(this.$scope.$remove) {
-              this.$scope.$remove(this);
-            }
+              // remove from scope
+              if(this.$scope.$remove) {
+                this.$scope.$remove(this);
+              }
 
-            this.$dispatch('after-destroy', [_response]);
-          }, function(_response) {
-            this.$dispatch('after-destroy-error', [_response]);
-          });
+              this.$dispatch('after-destroy', [_response]);
+            }, function(_response) {
+              this.$dispatch('after-destroy-error', [_response]);
+            });
+        }
+        else
+        {
+          // If not yet identified, just remove from scope
+          if(this.$scope.$remove) this.$scope.$remove(this);
+        }
       });
     },
 

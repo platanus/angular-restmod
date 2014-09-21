@@ -158,9 +158,9 @@ describe('Restmod model relation:', function() {
       $httpBackend.flush();
     });
 
-    it('should not be able to destroy when resource is anonymous', function() {
+    it('should not be able to destroy when resource is nested', function() {
       expect(function() {
-        Bike.$new(1).owner.$destroy();
+        Bike.$decode({ id: 1, owner: { id: 2 } }).owner.$destroy();
       }).toThrow();
     });
 

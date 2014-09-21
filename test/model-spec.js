@@ -224,6 +224,15 @@ describe('Restmod model class:', function() {
 
       expect(col.length).toEqual(0);
     });
+
+    it('should immediately remove item from collection if not identified', function() {
+      var col = Bike.$collection(),
+          bike = col.$buildRaw({ gears: 21 }).$reveal();
+
+      expect(col.length).toEqual(1);
+      bike.$destroy();
+      expect(col.length).toEqual(0);
+    });
   });
 
   describe('$decode', function() {
