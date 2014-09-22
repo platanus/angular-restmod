@@ -72,15 +72,16 @@ angular.module('restmod').factory('DirtyModel', ['restmod', function(restmod) {
          * @return {Model} self
          */
         .define('$restore', function(_prop) {
-          var original = this.$cmStatus;
-          if(_prop) {
-            this[_prop] = original[_prop];
-          } else {
-            for(var key in original) {
-              if(original.hasOwnProperty(key)) this[key] = original[key];
+          return this.$action(function() {
+            var original = this.$cmStatus;
+            if(_prop) {
+              this[_prop] = original[_prop];
+            } else {
+              for(var key in original) {
+                if(original.hasOwnProperty(key)) this[key] = original[key];
+              }
             }
-          }
-          return this;
+          });
         });
   });
 }]);
