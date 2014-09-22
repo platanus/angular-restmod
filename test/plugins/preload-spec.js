@@ -68,10 +68,6 @@ describe('Plugin: Preload function', function() {
       Ride.$populate = jasmine.createSpy().andReturn(User.dummy(true));
 
       bikes.$preload('user.friends', 'user.rides');
-      expect(User.$populate.callCount).toEqual(1);
-      expect(Ride.$populate.callCount).toEqual(0);
-      $rootScope.$apply();
-
       expect(Ride.$populate.callCount).toEqual(1);
       expect(Ride.$populate).toHaveBeenCalledWith([
         jasmine.objectContaining({ $pk: 1 }),
