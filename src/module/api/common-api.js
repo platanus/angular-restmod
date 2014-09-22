@@ -283,7 +283,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', function($http, $q, $log
      */
     $then: function(_success, _error) {
 
-      if(!this.$promise) { // TODO: $promise is resolved...
+      if(!this.$promise || this.$promise === this.$$lastResolved) {
         // if there is no pending promise, just execute success callback,
         // if callback returns a promise, then set it as the current promise.
         this.$last = null;
@@ -294,6 +294,14 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', function($http, $q, $log
           _success ? wrapPromise(this, _success) : _success,
           _error ? wrapPromise(this, _error) : _error
         );
+      }
+
+      if(this.$promise) {
+        // little optimization: keep an eye on last resolved promise!
+        var promise = this.$promise, _this = this;
+        this.$promise['finally'](function() {
+          _this.$$lastResolved = promise;
+        });
       }
 
       return this;
