@@ -193,7 +193,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {RecordApi} this
      */
     $fetch: function(_params) {
-      return this.$always(function() {
+      return this.$action(function() {
         var url = this.$url('fetch');
         Utils.assert(!!url, 'Cant $fetch if resource is not bound');
 
@@ -226,7 +226,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {RecordApi} self
      */
     $extend: function(_other) {
-      return this.$always(function() {
+      return this.$action(function() {
         for(var tmp in _other) {
           if (_other.hasOwnProperty(tmp) && tmp[0] !== '$') {
             this[tmp] = _other[tmp];
@@ -265,7 +265,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {RecordApi} this
      */
     $save: function(_patch) {
-      return this.$always(function() {
+      return this.$action(function() {
         var url = this.$url('update'), request;
 
         if(url) {
@@ -334,7 +334,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {RecordApi} this
      */
     $destroy: function() {
-      return this.$always(function() {
+      return this.$action(function() {
         if(this.$pk)
         {
           var url = this.$url('destroy');

@@ -78,9 +78,11 @@ RMModule.factory('RMExtendedApi', ['$q', 'RMPackerCache', function($q, packerCac
      * @return {ExtendedApi} self
      */
     $reset: function() {
-      this.$cancel(); // TODO: find another way of ignoring pending requests that will lead to resolution
-      this.$resolved = false;
-      return this;
+      // cancel outside promise chain
+      // TODO: find a way of only ignoring requests that will lead to resolution, maybe using action metadata
+      return this.$cancel().$action(function() {
+        this.$resolved = false;
+      });
     },
 
     /**
@@ -97,7 +99,7 @@ RMModule.factory('RMExtendedApi', ['$q', 'RMPackerCache', function($q, packerCac
      * @return {promise} Promise that resolves to the resource.
      */
     $resolve: function(_params) {
-      return this.$then(function() { // chain resolution in request promise chain
+      return this.$action(function() { // chain resolution in request promise chain
         this.$dispatch('before-resolve', []);
         if(!this.$resolved) this.$fetch(_params);
       });

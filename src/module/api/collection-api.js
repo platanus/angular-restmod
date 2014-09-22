@@ -97,8 +97,9 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
      * @return {CollectionApi} self
      */
     $clear: function() {
-      this.length = 0; // reset the collection contents
-      return this;
+      return this.$always(function() {
+        this.length = 0; // reset the collection contents
+      });
     },
 
     /**
@@ -114,20 +115,24 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
      * @return {CollectionApi} self
      */
     $fetch: function(_params) {
+      return this.$action(function() {
+        var request = { method: 'GET', url: this.$url('fetchMany'), params: this.$params };
 
-      var request = { method: 'GET', url: this.$url('fetchMany'), params: this.$params };
+        if(_params) {
+          request.params = request.params ? extend(request.params, _params) : _params;
+        }
 
-      if(_params) {
-        request.params = request.params ? extend(request.params, _params) : _params;
-      }
+        // TODO: check that collection is bound.
 
-      // TODO: check that collection is bound.
-      this.$dispatch('before-fetch-many', [request]);
-      return this.$send(request, function(_response) {
-        this.$unwrap(_response.data); // feed retrieved data.
-        this.$dispatch('after-fetch-many', [_response]);
-      }, function(_response) {
-        this.$dispatch('after-fetch-many-error', [_response]);
+        this
+          .$dispatch('before-fetch-many', [request])
+          .$send(request, function(_response) {
+            this
+              .$unwrap(_response.data)
+              .$dispatch('after-fetch-many', [_response]);
+          }, function(_response) {
+            this.$dispatch('after-fetch-many-error', [_response]);
+          });
       });
     },
 
@@ -143,20 +148,19 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
      * @return {CollectionApi} self
      */
     $add: function(_obj, _idx) {
-
       Utils.assert(_obj.$type && _obj.$type === this.$type, 'Collection $add expects record of the same $type');
 
-      // TODO: make sure object is f type Model?
-      if(_obj.$position === undefined) {
-        if(_idx !== undefined) {
-          this.splice(_idx, 0, _obj);
-        } else {
-          this.push(_obj);
+      return this.$action(function() {
+        if(_obj.$position === undefined) {
+          if(_idx !== undefined) {
+            this.splice(_idx, 0, _obj);
+          } else {
+            this.push(_obj);
+          }
+          _obj.$position = true; // use true for now, keeping position updated can be expensive
+          this.$dispatch('after-add', [_obj]);
         }
-        _obj.$position = true; // use true for now, keeping position updated can be expensive
-        this.$dispatch('after-add', [_obj]);
-      }
-      return this;
+      });
     },
 
     /**
@@ -173,13 +177,14 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
      * @return {CollectionApi} self
      */
     $remove: function(_obj) {
-      var idx = this.$indexOf(_obj);
-      if(idx !== -1) {
-        this.splice(idx, 1);
-        _obj.$position = undefined;
-        this.$dispatch('after-remove', [_obj]);
-      }
-      return this;
+      return this.$action(function() {
+        var idx = this.$indexOf(_obj);
+        if(idx !== -1) {
+          this.splice(idx, 1);
+          _obj.$position = undefined;
+          this.$dispatch('after-remove', [_obj]);
+        }
+      });
     },
 
     /**
