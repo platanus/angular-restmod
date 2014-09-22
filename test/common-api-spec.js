@@ -85,16 +85,6 @@ describe('Restmod model class:', function() {
       expect(bike.$status).toEqual('error');
     });
 
-    it('should properly update the $pending property', function() {
-      var bike = Bike.$new();
-      expect(bike.$pending).toBeUndefined();
-      bike.$send({ method: 'GET', url: '/api/bikes/1' });
-      bike.$send({ method: 'GET', url: '/api/bikes/2' });
-      expect(bike.$pending.length).toEqual(2);
-      $httpBackend.flush();
-      expect(bike.$pending.length).toEqual(0);
-    });
-
     it('should properly propagate success states to $then', function() {
       var bike = Bike.$new();
       var spy = jasmine.createSpy('callback');
@@ -113,28 +103,80 @@ describe('Restmod model class:', function() {
 
   });
 
-  describe('$hasPendingRequests', function() {
+  describe('$hasPendingActions', function() {
     it('should return true if there are pending requests', function() {
-      var bike = Bike.$new();
-      expect(bike.$hasPendingRequests()).toEqual(false);
-      bike.$send({ method: 'GET', url: '/api/bikes/1' });
-      expect(bike.$hasPendingRequests()).toEqual(true);
-      $httpBackend.when('GET','/api/bikes/1').respond(200, {});
-      $httpBackend.flush();
-      expect(bike.$hasPendingRequests()).toEqual(false);
+      var bike = Bike.$new(), defered = $q.defer();
+      expect(bike.$hasPendingActions()).toEqual(false);
+      bike.$action(function() { return defered.promise; });
+      expect(bike.$hasPendingActions()).toEqual(true);
+      defered.resolve(true);
+      $rootScope.$apply();
+      expect(bike.$hasPendingActions()).toEqual(false);
     });
   });
 
   describe('$cancel', function() {
-    it('should cancel every pending request', function() {
-      var bike = Bike.$new();
-      bike.$send({ method: 'GET', url: '/api/bikes/1' });
-      bike.$send({ method: 'GET', url: '/api/bikes/6' });
-
-      expect(bike.$hasPendingRequests()).toEqual(true);
+    it('should cancel every pending action', function() {
+      var bike = Bike.$new(), defered = $q.defer();
+      bike.$action(function() { return defered.promise; });
+      expect(bike.$hasPendingActions()).toEqual(true);
       bike.$cancel();
-      expect(bike.$hasPendingRequests()).toEqual(false);
+      expect(bike.$hasPendingActions()).toEqual(false);
     });
+  });
+
+  describe('$action', function() {
+
+    it('should keep action in pending action list until its done', function() {
+      var bike = Bike.$new(), defered = $q.defer();
+      bike.$action(function() { return defered.promise; });
+      expect(bike.$pending.length).toEqual(1);
+      defered.resolve();
+      $rootScope.$apply();
+      expect(bike.$pending.length).toEqual(0);
+    });
+
+    it('should execute actions one by one', function() {
+      var bike = Bike.$new(), defered = $q.defer(), test = false;
+      bike.$action(function() { return defered.promise; });
+      bike.$action(function() { test = true; });
+
+      expect(test).toBe(false);
+      defered.resolve();
+      $rootScope.$apply();
+      expect(test).toBe(true);
+    });
+
+    it('should remove action from pending list and reject promise if canceled', function() {
+      var bike = Bike.$new(), spySuccess = jasmine.createSpy(), spyError = jasmine.createSpy(), defered = $q.defer();
+
+      bike
+        .$action(function() { return defered.promise; }) // this first action cannot be canceled since its runned immediatelly
+        .$action(function() { return defered.promise; })
+        .$then(spySuccess, spyError);
+
+      bike.$cancel();
+      defered.resolve();
+      $rootScope.$apply();
+
+      expect(bike.$pending.length).toEqual(0);
+      expect(spySuccess).not.toHaveBeenCalled();
+      expect(spyError).toHaveBeenCalled();
+    });
+
+    it('should cancel $send calls performed inside action', function() {
+      var bike = Bike.$new(), spySuccess = jasmine.createSpy();
+
+      bike.$action(function() {
+        this.$send({ url: '/api/bikes/1', method: 'GET' }, spySuccess);
+      }).$cancel();
+
+      $httpBackend.when('GET','/api/bikes/1').respond(200, {});
+      $httpBackend.flush();
+
+      expect(spySuccess).not.toHaveBeenCalled();
+    });
+
   });
 
   describe('$then', function() {
@@ -176,8 +218,6 @@ describe('Restmod model class:', function() {
         return 'resolved';
       }).$then(spy);
 
-      expect(spy).not.toHaveBeenCalled();
-      $rootScope.$apply();
       expect(spy).toHaveBeenCalled();
     });
 
@@ -288,7 +328,7 @@ describe('Restmod model class:', function() {
 
       $httpBackend.when('GET','/api/bikes/1').respond(200, {});
       $httpBackend.flush();
-      expect(spy).toHaveBeenCalledWith();
+      expect(spy).toHaveBeenCalled();
     });
 
     it('should be called on error', function() {
@@ -298,7 +338,7 @@ describe('Restmod model class:', function() {
 
       $httpBackend.when('GET','/api/bikes/1').respond(404);
       $httpBackend.flush();
-      expect(spy).toHaveBeenCalledWith();
+      expect(spy).toHaveBeenCalled();
     });
   });
 

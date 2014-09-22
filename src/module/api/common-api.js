@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMCommonApi', ['$http', '$q', '$log', function($http, $q, $log) {
+RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q, $log) {
 
   var EMPTY_ARRAY = [];
 
@@ -283,25 +283,13 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', function($http, $q, $log
      */
     $then: function(_success, _error) {
 
-      if(!this.$promise || this.$promise === this.$$lastResolved) {
-        // if there is no pending promise, just execute success callback,
-        // if callback returns a promise, then set it as the current promise.
-        this.$last = null;
-        var result = _success.call(this, this);
-        if(result !== undefined) this.$promise = $q.when(result);
+      if(!this.$promise) {
+        this.$promise = $q.when(wrapPromise(this, _success)(this));
       } else {
         this.$promise = this.$promise.then(
           _success ? wrapPromise(this, _success) : _success,
           _error ? wrapPromise(this, _error) : _error
         );
-      }
-
-      if(this.$promise) {
-        // little optimization: keep an eye on last resolved promise!
-        var promise = this.$promise, _this = this;
-        this.$promise['finally'](function() {
-          _this.$$lastResolved = promise;
-        });
       }
 
       return this;
@@ -342,7 +330,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', function($http, $q, $log
      * @return {CommonApi} self
      */
     $finally: function(_cb) {
-      this.$promise = this.$asPromise()['finally'](_cb);
+      this.$promise = this.$promise['finally'](wrapPromise(this, _cb));
       return this;
     },
 
@@ -370,17 +358,9 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', function($http, $q, $log
         $log.warn('No API style base was selected, see the Api Integration FAQ for more information on this warning');
       }
 
-      this.$pending = (this.$pending || []);
-      this.$pending.push(_options);
+      var action = this.$$action;
 
       return this.$always(function() {
-
-        // if request was canceled, then just return a resolved promise
-        if(_options.canceled) {
-          this.$pending.splice(0, 1);
-          this.$status = 'canceled';
-          return;
-        }
 
         this.$response = null;
         this.$status = 'pending';
@@ -390,10 +370,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', function($http, $q, $log
         return $http(_options).then(function(_response) {
 
           return _this.$decorate(dsp, function() {
-
-            this.$pending.splice(0, 1);
-
-            if(_options.canceled) {
+            if(action && action.canceled) {
               // if request was canceled during request, ignore post request actions.
               this.$status =  'canceled';
             } else {
@@ -408,10 +385,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', function($http, $q, $log
         }, function(_response) {
 
           return _this.$decorate(dsp, function() {
-
-            this.$pending.splice(0, 1);
-
-            if(_options.canceled) {
+            if(action && action.canceled) {
               // if request was canceled during request, ignore error handling
               this.$status = 'canceled';
               return this;
@@ -431,18 +405,57 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', function($http, $q, $log
       });
     },
 
+    // Actions API
+
     /**
      * @memberof CommonApi#
      *
-     * @description Cancels all pending requests initiated with $send.
+     * @description Registers a new action to be executed in the promise queue.
+     *
+     * Registered pending actions can be canceled using `$cancel`
+     *
+     * `$cancel` will also cancel any ongoing call to `$send` (will not abort it yet though...)
+     *
+     * @return {CommonApi} self
+     */
+    $action: function(_fun) {
+      var status = {
+        canceled: false
+      }, pending = this.$pending || (this.$pending = []);
+
+      pending.push(status);
+
+      return this.$always(function() {
+        var oldAction = this.$$action;
+        try {
+          if(!status.canceled) {
+            this.$$action = status;
+            return _fun.call(this);
+          } else {
+            return $q.reject(this);
+          }
+        } finally {
+          // restore object state and pending actions
+          this.$$action = oldAction;
+        }
+      }).$finally(function() {
+        // after action and related async code finishes, remove status from pending list
+        pending.splice(pending.indexOf(status), 1);
+      });
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Cancels all pending actions registered with $action.
      *
      * @return {CommonApi} self
      */
     $cancel: function() {
       // cancel every pending request.
       if(this.$pending) {
-        angular.forEach(this.$pending, function(_config) {
-          _config.canceled = true;
+        angular.forEach(this.$pending, function(_status) {
+          _status.canceled = true;
         });
       }
 
@@ -452,16 +465,16 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', function($http, $q, $log
     /**
      * @memberof CommonApi#
      *
-     * @description Returns true if object has queued pending request
+     * @description Returns true if object has queued actions
      *
      * @return {Boolean} Object request pending status.
      */
-    $hasPendingRequests: function() {
+    $hasPendingActions: function() {
       var pendingCount = 0;
 
       if(this.$pending) {
-        angular.forEach(this.$pending, function(_config) {
-          if(!_config.canceled) pendingCount++;
+        angular.forEach(this.$pending, function(_status) {
+          if(!_status.canceled) pendingCount++;
         });
       }
 
