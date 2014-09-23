@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.0.3 - 2014-09-16
+ * @version v1.1.0 - 2014-09-23
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -97,8 +97,8 @@ angular.module('restmod').factory('DebouncedModel', ['restmod', '$timeout', '$q'
          */
         .define('$save', function(_opt) {
 
-          var timeout = this.$getProperty('dmTimeout'),
-              adjourn = this.$getProperty('dmAdjourn'),
+          var timeout = this.$type.getProperty('dmTimeout'),
+              adjourn = this.$type.getProperty('dmAdjourn'),
               status = this.$dmStatus;
 
           // apply configuration overrides

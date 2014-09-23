@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.0.3 - 2014-09-16
+ * @version v1.1.0 - 2014-09-23
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -80,15 +80,16 @@ angular.module('restmod').factory('DirtyModel', ['restmod', function(restmod) {
          * @return {Model} self
          */
         .define('$restore', function(_prop) {
-          var original = this.$cmStatus;
-          if(_prop) {
-            this[_prop] = original[_prop];
-          } else {
-            for(var key in original) {
-              if(original.hasOwnProperty(key)) this[key] = original[key];
+          return this.$action(function() {
+            var original = this.$cmStatus;
+            if(_prop) {
+              this[_prop] = original[_prop];
+            } else {
+              for(var key in original) {
+                if(original.hasOwnProperty(key)) this[key] = original[key];
+              }
             }
-          }
-          return this;
+          });
         });
   });
 }]);})(angular);

@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.0.3 - 2014-09-16
+ * @version v1.1.0 - 2014-09-23
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -134,8 +134,8 @@ RMModule.provider('restmod', [function() {
           var model = buildModel(_baseUrl, BASE_CHAIN);
 
           if(arguments.length > 1) {
-            model.$mix(arraySlice.call(arguments, 1));
-            $log.warn('Passing mixins and difinitions in the model method will be deprecated in restmod 1.1, use restmod.model().$mix() instead.');
+            model.mix(arraySlice.call(arguments, 1));
+            $log.warn('Passing mixins and difinitions in the model method will be deprecated in restmod 1.2, use restmod.model().$mix() instead.');
           }
 
           return model;
@@ -176,7 +176,7 @@ RMModule.provider('restmod', [function() {
          * @return {RecordApi} New resource instance.
          */
         singleton: function(_url/*, _mix */) {
-          return restmod.model.apply(this, arguments).$single(_url);
+          return restmod.model.apply(this, arguments).single(_url);
         }
       };
 
@@ -242,31 +242,6 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
     /**
      * @memberof CollectionApi#
      *
-     * @description Gets this collection url without query string.
-     *
-     * @return {string} The collection url.
-     */
-    $url: function() {
-      return this.$scope.$url();
-    },
-
-    /**
-     * @memberof CollectionApi#
-     *
-     * @description Part of the scope interface, provides urls for collection's items.
-     *
-     * @param {RecordApi} _pk Item key to provide the url to.
-     * @return {string|null} The url or nill if item does not meet the url requirements.
-     */
-    $urlFor: function(_pk) {
-      // force item unscoping if model is not nested (maybe make this optional)
-      var baseUrl = this.$type.$url();
-      return Utils.joinUrl(baseUrl ? baseUrl : this.$url(), _pk);
-    },
-
-    /**
-     * @memberof CollectionApi#
-     *
      * @description Feeds raw collection data into the collection.
      *
      * This method is for use in collections only.
@@ -313,8 +288,9 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
      * @return {CollectionApi} self
      */
     $clear: function() {
-      this.length = 0; // reset the collection contents
-      return this;
+      return this.$always(function() {
+        this.length = 0; // reset the collection contents
+      });
     },
 
     /**
@@ -330,19 +306,24 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
      * @return {CollectionApi} self
      */
     $fetch: function(_params) {
-      var request = { method: 'GET', url: this.$url(), params: this.$params };
+      return this.$action(function() {
+        var request = { method: 'GET', url: this.$url('fetchMany'), params: this.$params };
 
-      if(_params) {
-        request.params = request.params ? extend(request.params, _params) : _params;
-      }
+        if(_params) {
+          request.params = request.params ? extend(request.params, _params) : _params;
+        }
 
-      // TODO: check that collection is bound.
-      this.$dispatch('before-fetch-many', [request]);
-      return this.$send(request, function(_response) {
-        this.$unwrap(_response.data); // feed retrieved data.
-        this.$dispatch('after-fetch-many', [_response]);
-      }, function(_response) {
-        this.$dispatch('after-fetch-many-error', [_response]);
+        // TODO: check that collection is bound.
+
+        this
+          .$dispatch('before-fetch-many', [request])
+          .$send(request, function(_response) {
+            this
+              .$unwrap(_response.data)
+              .$dispatch('after-fetch-many', [_response]);
+          }, function(_response) {
+            this.$dispatch('after-fetch-many-error', [_response]);
+          });
       });
     },
 
@@ -358,20 +339,19 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
      * @return {CollectionApi} self
      */
     $add: function(_obj, _idx) {
-
       Utils.assert(_obj.$type && _obj.$type === this.$type, 'Collection $add expects record of the same $type');
 
-      // TODO: make sure object is f type Model?
-      if(_obj.$position === undefined) {
-        if(_idx !== undefined) {
-          this.splice(_idx, 0, _obj);
-        } else {
-          this.push(_obj);
+      return this.$action(function() {
+        if(_obj.$position === undefined) {
+          if(_idx !== undefined) {
+            this.splice(_idx, 0, _obj);
+          } else {
+            this.push(_obj);
+          }
+          _obj.$position = true; // use true for now, keeping position updated can be expensive
+          this.$dispatch('after-add', [_obj]);
         }
-        _obj.$position = true; // use true for now, keeping position updated can be expensive
-        this.$dispatch('after-add', [_obj]);
-      }
-      return this;
+      });
     },
 
     /**
@@ -388,13 +368,14 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
      * @return {CollectionApi} self
      */
     $remove: function(_obj) {
-      var idx = this.$indexOf(_obj);
-      if(idx !== -1) {
-        this.splice(idx, 1);
-        _obj.$position = undefined;
-        this.$dispatch('after-remove', [_obj]);
-      }
-      return this;
+      return this.$action(function() {
+        var idx = this.$indexOf(_obj);
+        if(idx !== -1) {
+          this.splice(idx, 1);
+          _obj.$position = undefined;
+          this.$dispatch('after-remove', [_obj]);
+        }
+      });
     },
 
     /**
@@ -417,7 +398,7 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
   };
 
 }]);
-RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', function($http, $q, $log, packerCache) {
+RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q, $log) {
 
   var EMPTY_ARRAY = [];
 
@@ -442,7 +423,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', functio
    *
    * @description
    *
-   * Provides a common framework for other restmod components.
+   * Provides a common framework for restmod resources.
    *
    * This API is included in {@link RecordApi} and {@link CollectionApi}.
    * making its methods available in every structure generated by restmod.
@@ -455,6 +436,23 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', functio
    * @property {function} $$dsp The current event dispatcher (private api)
    */
   var CommonApi = {
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Gets this resource url.
+     *
+     * @param {string} _for Intended usage for the url (optional)
+     * @return {string} The resource url.
+     */
+    $url: function(_for) {
+      if(_for) {
+        _for = '$' + _for + 'UrlFor';
+        if(this.$scope[_for]) return this.$scope[_for](this);
+      }
+
+      return this.$scope.$urlFor(this);
+    },
 
     // Hooks API
 
@@ -683,12 +681,8 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', functio
      */
     $then: function(_success, _error) {
 
-      if(!this.$promise) { // TODO: $promise is resolved...
-        // if there is no pending promise, just execute success callback,
-        // if callback returns a promise, then set it as the current promise.
-        this.$last = null;
-        var result = _success.call(this, this);
-        if(result !== undefined) this.$promise = $q.when(result);
+      if(!this.$promise) {
+        this.$promise = $q.when(wrapPromise(this, _success)(this));
       } else {
         this.$promise = this.$promise.then(
           _success ? wrapPromise(this, _success) : _success,
@@ -734,7 +728,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', functio
      * @return {CommonApi} self
      */
     $finally: function(_cb) {
-      this.$promise = this.$asPromise()['finally'](_cb);
+      this.$promise = this.$promise['finally'](wrapPromise(this, _cb));
       return this;
     },
 
@@ -758,21 +752,13 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', functio
     $send: function(_options, _success, _error) {
 
       // make sure a style base was selected for the model
-      if(!this.$getProperty('style')) {
+      if(!this.$type.getProperty('style')) {
         $log.warn('No API style base was selected, see the Api Integration FAQ for more information on this warning');
       }
 
-      this.$pending = (this.$pending || []);
-      this.$pending.push(_options);
+      var action = this.$$action;
 
       return this.$always(function() {
-
-        // if request was canceled, then just return a resolved promise
-        if(_options.canceled) {
-          this.$pending.splice(0, 1);
-          this.$status = 'canceled';
-          return;
-        }
 
         this.$response = null;
         this.$status = 'pending';
@@ -782,10 +768,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', functio
         return $http(_options).then(function(_response) {
 
           return _this.$decorate(dsp, function() {
-
-            this.$pending.splice(0, 1);
-
-            if(_options.canceled) {
+            if(action && action.canceled) {
               // if request was canceled during request, ignore post request actions.
               this.$status =  'canceled';
             } else {
@@ -800,10 +783,7 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', functio
         }, function(_response) {
 
           return _this.$decorate(dsp, function() {
-
-            this.$pending.splice(0, 1);
-
-            if(_options.canceled) {
+            if(action && action.canceled) {
               // if request was canceled during request, ignore error handling
               this.$status = 'canceled';
               return this;
@@ -823,18 +803,57 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', functio
       });
     },
 
+    // Actions API
+
     /**
      * @memberof CommonApi#
      *
-     * @description Cancels all pending requests initiated with $send.
+     * @description Registers a new action to be executed in the promise queue.
+     *
+     * Registered pending actions can be canceled using `$cancel`
+     *
+     * `$cancel` will also cancel any ongoing call to `$send` (will not abort it yet though...)
+     *
+     * @return {CommonApi} self
+     */
+    $action: function(_fun) {
+      var status = {
+        canceled: false
+      }, pending = this.$pending || (this.$pending = []);
+
+      pending.push(status);
+
+      return this.$always(function() {
+        var oldAction = this.$$action;
+        try {
+          if(!status.canceled) {
+            this.$$action = status;
+            return _fun.call(this);
+          } else {
+            return $q.reject(this);
+          }
+        } finally {
+          // restore object state and pending actions
+          this.$$action = oldAction;
+        }
+      }).$finally(function() {
+        // after action and related async code finishes, remove status from pending list
+        pending.splice(pending.indexOf(status), 1);
+      });
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Cancels all pending actions registered with $action.
      *
      * @return {CommonApi} self
      */
     $cancel: function() {
       // cancel every pending request.
       if(this.$pending) {
-        angular.forEach(this.$pending, function(_config) {
-          _config.canceled = true;
+        angular.forEach(this.$pending, function(_status) {
+          _status.canceled = true;
         });
       }
 
@@ -844,72 +863,27 @@ RMModule.factory('RMCommonApi', ['$http', '$q', '$log', 'RMPackerCache', functio
     /**
      * @memberof CommonApi#
      *
-     * @description Returns true if object has queued pending request
+     * @description Returns true if object has queued actions
      *
      * @return {Boolean} Object request pending status.
      */
-    $hasPendingRequests: function() {
+    $hasPendingActions: function() {
       var pendingCount = 0;
 
       if(this.$pending) {
-        angular.forEach(this.$pending, function(_config) {
-          if(!_config.canceled) pendingCount++;
+        angular.forEach(this.$pending, function(_status) {
+          if(!_status.canceled) pendingCount++;
         });
       }
 
       return pendingCount > 0;
-    },
-
-    /// Misc common methods
-
-    /**
-     * @memberof CommonApi#
-     *
-     * @description
-     *
-     * Unpacks and decode raw data from a server generated structure.
-     *
-     * ATTENTION: do not override this method to change the object wrapping strategy,
-     * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
-     *
-     * @param  {mixed} _raw Raw server data
-     * @param  {string} _mask 'CRU' mask
-     * @return {CommonApi} this
-     */
-    $unwrap: function(_raw, _mask) {
-      try {
-        packerCache.prepare();
-        _raw = this.$$unpack(_raw);
-        return this.$decode(_raw, _mask);
-      } finally {
-        packerCache.clear();
-      }
-    },
-
-    /**
-     * @memberof CommonApi#
-     *
-     * @description
-     *
-     * Encode and packs object into a server compatible structure that can be used for PUT/POST operations.
-     *
-     * ATTENTION: do not override this method to change the object wrapping strategy,
-     * instead, check {@link BuilderApi#setPacker} for instruction about loading a new packer.
-     *
-     * @param  {string} _mask 'CRU' mask
-     * @return {string} raw data
-     */
-    $wrap: function(_mask) {
-      var raw = this.$encode(_mask);
-      raw = this.$$pack(raw);
-      return raw;
     }
   };
 
   return CommonApi;
 
 }]);
-RMModule.factory('RMExtendedApi', ['$q', function($q) {
+RMModule.factory('RMExtendedApi', ['$q', 'RMPackerCache', function($q, packerCache) {
 
   /**
    * @class ExtendedApi
@@ -930,6 +904,51 @@ RMModule.factory('RMExtendedApi', ['$q', function($q) {
       return this;
     },
 
+    /// Misc common methods
+
+    /**
+     * @memberof ExtendedApi#
+     *
+     * @description
+     *
+     * Unpacks and decode raw data from a server generated structure.
+     *
+     * ATTENTION: do not override this method to change the object wrapping strategy,
+     * instead, override the static {@link Model.$unpack} method.
+     *
+     * @param  {mixed} _raw Raw server data
+     * @param  {string} _mask 'CRU' mask
+     * @return {ExtendedApi} this
+     */
+    $unwrap: function(_raw, _mask) {
+      try {
+        packerCache.prepare();
+        _raw = this.$type.unpack(this, _raw);
+        return this.$decode(_raw, _mask);
+      } finally {
+        packerCache.clear();
+      }
+    },
+
+    /**
+     * @memberof ExtendedApi#
+     *
+     * @description
+     *
+     * Encode and packs object into a server compatible structure that can be used for PUT/POST operations.
+     *
+     * ATTENTION: do not override this method to change the object wrapping strategy,
+     * instead, override the static {@link Model.$pack} method.
+     *
+     * @param  {string} _mask 'CRU' mask
+     * @return {string} raw data
+     */
+    $wrap: function(_mask) {
+      var raw = this.$encode(_mask);
+      raw = this.$type.pack(this, raw);
+      return raw;
+    },
+
     /**
      * @memberof ExtendedApi#
      *
@@ -942,9 +961,11 @@ RMModule.factory('RMExtendedApi', ['$q', function($q) {
      * @return {ExtendedApi} self
      */
     $reset: function() {
-      this.$cancel(); // TODO: find another way of ignoring pending requests that will lead to resolution
-      this.$resolved = false;
-      return this;
+      // cancel outside promise chain
+      // TODO: find a way of only ignoring requests that will lead to resolution, maybe using action metadata
+      return this.$cancel().$action(function() {
+        this.$resolved = false;
+      });
     },
 
     /**
@@ -961,7 +982,7 @@ RMModule.factory('RMExtendedApi', ['$q', function($q) {
      * @return {promise} Promise that resolves to the resource.
      */
     $resolve: function(_params) {
-      return this.$then(function() { // chain resolution in request promise chain
+      return this.$action(function() { // chain resolution in request promise chain
         this.$dispatch('before-resolve', []);
         if(!this.$resolved) this.$fetch(_params);
       });
@@ -997,22 +1018,19 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
   };
 
   RelationScope.prototype = {
-    // nest collection url
-    $url: function() {
-      return Utils.joinUrl(this.$scope.$url(), this.$partial);
-    },
-
     // record url is nested only for nested resources
-    $urlFor: function(_pk) {
-      if(this.$target.$isNested()) {
+    $urlFor: function(_resource) {
+      if(_resource.$isCollection) return Utils.joinUrl(this.$scope.$url(), this.$partial);
+
+      if(this.$target.isNested()) {
         return this.$fetchUrlFor();
       } else {
-        return this.$target.$urlFor(_pk);
+        return this.$target.$urlFor(_resource);
       }
     },
 
-    // fetch url is nested
-    $fetchUrlFor: function(/* _pk */) {
+    // fetch url is always nested
+    $fetchUrlFor: function(/* _resource */) {
       return Utils.joinUrl(this.$scope.$url(), this.$partial);
     },
 
@@ -1098,19 +1116,6 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
     /**
      * @memberof RecordApi#
      *
-     * @description Returns the url this object is bound to.
-     *
-     * This is the url used by fetch to retrieve the resource related data.
-     *
-     * @return {string} bound url.
-     */
-    $url: function() {
-      return this.$scope.$urlFor(this.$pk);
-    },
-
-    /**
-     * @memberof RecordApi#
-     *
      * @description Default item child scope factory.
      *
      * By default, no create url is provided and the update/destroy url providers
@@ -1128,23 +1133,6 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
       } else {
         return new RelationScope(this, _for, _partial);
       }
-    },
-
-    /**
-     * @memberof RecordApi#
-     *
-     * @description Copyies another object's non-private properties.
-     *
-     * @param {object} _other Object to merge.
-     * @return {RecordApi} self
-     */
-    $extend: function(_other) {
-      for(var tmp in _other) {
-        if (_other.hasOwnProperty(tmp) && tmp[0] !== '$') {
-          this[tmp] = _other[tmp];
-        }
-      }
-      return this;
     },
 
     /**
@@ -1176,8 +1164,8 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      */
     $decode: function(_raw, _mask) {
       // IDEA: let user override serializer
-      this.$super(_raw, _mask || Utils.READ_MASK);
-      if(!this.$pk) this.$pk = this.$$inferKey(_raw); // TODO: warn if key changes
+      this.$type.decode(this, _raw, _mask || Utils.READ_MASK);
+      if(!this.$pk) this.$pk = this.$type.inferKey(_raw); // TODO: warn if key changes
       this.$dispatch('after-feed', [_raw]);
       return this;
     },
@@ -1191,7 +1179,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {string} raw data
      */
     $encode: function(_mask) {
-      var raw = this.$super(_mask || Utils.CREATE_MASK);
+      var raw = this.$type.encode(this, _mask || Utils.CREATE_MASK);
       this.$dispatch('before-render', [raw]);
       return raw;
     },
@@ -1207,73 +1195,135 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {RecordApi} this
      */
     $fetch: function(_params) {
-      var url = this.$scope.$fetchUrlFor ? this.$scope.$fetchUrlFor(this.$pk) : this.$url();
-      Utils.assert(!!url, 'Cant $fetch if resource is not bound');
+      return this.$action(function() {
+        var url = this.$url('fetch');
+        Utils.assert(!!url, 'Cant $fetch if resource is not bound');
 
-      var request = { method: 'GET', url: url, params: _params };
+        var request = { method: 'GET', url: url, params: _params };
 
-      this.$dispatch('before-fetch', [request]);
-      this.$send(request, function(_response) {
-        this.$unwrap(_response.data);
-        this.$dispatch('after-fetch', [_response]);
-      }, function(_response) {
-        this.$dispatch('after-fetch-error', [_response]);
+        this.$dispatch('before-fetch', [request]);
+        this.$send(request, function(_response) {
+          this.$unwrap(_response.data);
+          this.$dispatch('after-fetch', [_response]);
+        }, function(_response) {
+          this.$dispatch('after-fetch-error', [_response]);
+        });
       });
-
-      return this;
     },
 
     /**
      * @memberof RecordApi#
      *
-     * @description Begin a server request to create/update resource.
+     * @description Copyies another object's non-private properties.
+     *
+     * This method runs inside the promise chain, so calling
+     *
+     * ```javascript
+     * Bike.$find(1).$extend({ size: "L" }).$save();
+     * ```
+     * Will first fetch the bike data and after it is loaded the new size will be applied and then the
+     * updated model saved.
+     *
+     * @param {object} _other Object to merge.
+     * @return {RecordApi} self
+     */
+    $extend: function(_other) {
+      return this.$action(function() {
+        for(var tmp in _other) {
+          if (_other.hasOwnProperty(tmp) && tmp[0] !== '$') {
+            this[tmp] = _other[tmp];
+          }
+        }
+      });
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Shortcut method used to extend and save a model.
+     *
+     * This method will not force a PUT, if object is new `$update` will attempt to POST.
+     *
+     * @param {object} _other Data to change
+     * @return {RecordApi} self
+     */
+    $update: function(_other) {
+      return this.$extend(_other).$save();
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
+     * @description Begin a server request to create/update/patch resource.
+     *
+     * A patch is only executed if model is identified and a patch property list is given. It is posible to
+     * change the method used for PATCH operations by setting the `patchMethod` configuration.
      *
      * If resource is new and it belongs to a collection and it hasnt been revealed, then it will be revealed.
      *
      * The request's promise can be accessed using the `$asPromise` method.
      *
+     * @param {array} _patch Optional list of properties to send in update operation.
      * @return {RecordApi} this
      */
-    $save: function() {
+    $save: function(_patch) {
+      return this.$action(function() {
+        var url = this.$url('update'), request;
 
-      var url = this.$scope.$updateUrlFor ? this.$scope.$updateUrlFor(this.$pk) : this.$url(), request;
+        if(url) {
 
-      if(url) {
-        // If bound, update
-        request = { method: 'PUT', url: url, data: this.$wrap(Utils.UPDATE_MASK) };
-        this.$dispatch('before-update', [request]);
-        this.$dispatch('before-save', [request]);
-        return this.$send(request, function(_response) {
-          this.$unwrap(_response.data);
-          this.$dispatch('after-update', [_response]);
-          this.$dispatch('after-save', [_response]);
-        }, function(_response) {
-          this.$dispatch('after-update-error', [_response]);
-          this.$dispatch('after-save-error', [_response]);
-        });
-      } else {
-        // If not bound create.
-        url = this.$scope.$createUrlFor ? this.$scope.$createUrlFor(this.$pk) : (this.$scope.$url && this.$scope.$url());
-        Utils.assert(!!url, 'Cant $create if parent scope is not bound');
-
-        request = { method: 'POST', url: url, data: this.$wrap(Utils.CREATE_MASK) };
-        this.$dispatch('before-save', [request]);
-        this.$dispatch('before-create', [request]);
-        return this.$send(request, function(_response) {
-          this.$unwrap(_response.data);
-
-          // reveal item (if not yet positioned)
-          if(this.$scope.$isCollection && this.$position === undefined && !this.$preventReveal) {
-            this.$scope.$add(this, this.$revealAt);
+          // If bound, update
+          if(_patch) {
+            request = {
+              method: this.$type.getProperty('patchMethod', 'PATCH'), // allow user to override patch method
+              url: url,
+              // Use special mask for patches, mask everything that is not in the patch list.
+              data: this.$wrap(function(_name) { return _patch.indexOf(_name) === -1; })
+            };
+          } else {
+            request = { method: 'PUT', url: url, data: this.$wrap(Utils.UPDATE_MASK) };
           }
 
-          this.$dispatch('after-create', [_response]);
-          this.$dispatch('after-save', [_response]);
-        }, function(_response) {
-          this.$dispatch('after-create-error', [_response]);
-          this.$dispatch('after-save-error', [_response]);
-        });
-      }
+          this
+            .$dispatch('before-update', [request, !!_patch])
+            .$dispatch('before-save', [request])
+            .$send(request, function(_response) {
+              this
+                .$unwrap(_response.data)
+                .$dispatch('after-update', [_response, !!_patch])
+                .$dispatch('after-save', [_response]);
+            }, function(_response) {
+              this
+                .$dispatch('after-update-error', [_response, !!_patch])
+                .$dispatch('after-save-error', [_response]);
+            });
+        } else {
+          // If not bound create.
+          url = this.$url('create') || this.$scope.$url();
+          Utils.assert(!!url, 'Cant $create if parent scope is not bound');
+
+          request = { method: 'POST', url: url, data: this.$wrap(Utils.CREATE_MASK) };
+          this
+            .$dispatch('before-save', [request])
+            .$dispatch('before-create', [request])
+            .$send(request, function(_response) {
+              this.$unwrap(_response.data);
+
+              // reveal item (if not yet positioned)
+              if(this.$scope.$isCollection && this.$position === undefined && !this.$preventReveal) {
+                this.$scope.$add(this, this.$revealAt);
+              }
+
+              this
+                .$dispatch('after-create', [_response])
+                .$dispatch('after-save', [_response]);
+            }, function(_response) {
+              this
+                .$dispatch('after-create-error', [_response])
+                .$dispatch('after-save-error', [_response]);
+            });
+        }
+      });
     },
 
     /**
@@ -1286,22 +1336,33 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {RecordApi} this
      */
     $destroy: function() {
-      var url = this.$scope.$destroyUrlFor ? this.$scope.$destroyUrlFor(this.$pk) : this.$url();
-      Utils.assert(!!url, 'Cant $destroy if resource is not bound');
+      return this.$action(function() {
+        if(this.$pk)
+        {
+          var url = this.$url('destroy');
+          Utils.assert(!!url, 'Cant $destroy if resource is not bound');
 
-      var request = { method: 'DELETE', url: url };
+          var request = { method: 'DELETE', url: url };
 
-      this.$dispatch('before-destroy', [request]);
-      return this.$send(request, function(_response) {
+          this
+            .$dispatch('before-destroy', [request])
+            .$send(request, function(_response) {
 
-        // call scope callback
-        if(this.$scope.$remove) {
-          this.$scope.$remove(this);
+              // remove from scope
+              if(this.$scope.$remove) {
+                this.$scope.$remove(this);
+              }
+
+              this.$dispatch('after-destroy', [_response]);
+            }, function(_response) {
+              this.$dispatch('after-destroy-error', [_response]);
+            });
         }
-
-        this.$dispatch('after-destroy', [_response]);
-      }, function(_response) {
-        this.$dispatch('after-destroy-error', [_response]);
+        else
+        {
+          // If not yet identified, just remove from scope
+          if(this.$scope.$remove) this.$scope.$remove(this);
+        }
       });
     },
 
@@ -1351,7 +1412,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
   };
 
 }]);
-RMModule.factory('RMScopeApi', [function() {
+RMModule.factory('RMScopeApi', ['RMUtils', function(Utils) {
 
   /**
    * @class ScopeApi
@@ -1363,6 +1424,20 @@ RMModule.factory('RMScopeApi', [function() {
    * TODO: Talk about record building here
    */
   return {
+
+    /**
+     * @memberof ScopeApi#
+     *
+     * @description provides urls for scope's resources.
+     *
+     * @param {mixed} _resource The target resource.
+     * @return {string|null} The url or nill if resource does not meet the url requirements.
+     */
+    $urlFor: function(_resource) {
+      // force item unscoping if model is not nested (maybe make this optional)
+      var baseUrl = this.$type.$url() || this.$url();
+      return _resource.$isCollection ? baseUrl : Utils.joinUrl(baseUrl, _resource.$pk);
+    },
 
     /**
      * @memberof ScopeApi#
@@ -1402,7 +1477,7 @@ RMModule.factory('RMScopeApi', [function() {
      * @return {RecordApi} single record
      */
     $buildRaw: function(_raw, _mask) {
-      var obj = this.$new(this.$$inferKey(_raw));
+      var obj = this.$new(this.$type.inferKey(_raw));
       obj.$decode(_raw, _mask);
       return obj;
     },
@@ -1460,11 +1535,10 @@ RMModule.factory('RMScopeApi', [function() {
     $search: function(_params) {
       return this.$collection(_params).$fetch();
     }
-
   };
 
 }]);
-RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', function($injector, inflector, Utils) {
+RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', function($injector, inflector, $log, Utils) {
 
   // TODO: add urlPrefix option
 
@@ -1493,45 +1567,52 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', function($in
    *
    *   // MODEL CONFIGURATION
    *
-   *   URL: 'resource',
-   *   NAME: 'resource',
-   *   PRIMARY_KEY: '_id',
+   *   $config: {
+   *     name: 'resource',
+   *     primaryKey: '_id'
+   *   },
    *
-   *   // ATTRIBUTE MODIFIERS
+   *   // ATTRIBUTE MODIFIERS AND RELATIONS
    *
    *   propWithDefault: { init: 20 },
    *   propWithDecoder: { decode: 'date', chain: true },
-   *
-   *   // RELATIONS
-   *
    *   hasManyRelation: { hasMany: 'Other' },
-   *   hasOneRelation: { hasOne: 'Other' }
-   *
-   *   // METHODS
-   *
-   *   instanceMethod: function() {
-   *   },
-   *
-   *   '@classMethod': function() {
-   *   },
+   *   hasOneRelation: { hasOne: 'Other' },
    *
    *   // HOOKS
    *
-   *   '~afterCreate': function() {
+   *   $hooks: {
+   *     'after-create': function() {
+   *     }
+   *   },
+   *
+   *   // METHODS
+   *
+   *   $extend: {
+   *     Record: {
+   *       instanceMethod: function() {
+   *       }
+   *     },
+   *     Model: {
+   *       scopeMethod: function() {
+   *       }
+   *     }
    *   }
    * });
    * ```
    *
-   * Special model configuration variables can be set by refering to the variable name in capitalized form, like this:
+   * Special model configuration variables can be set by using a `$config` block:
    *
    * ```javascript
    * restmod.model({
    *
-   *   URL: 'resource',
-   *   NAME: 'resource',
-   *   PRIMARY_KEY: '_id'
+   *   $config: {
+   *     name: 'resource',
+   *     primaryKey: '_id'
+   *   }
    *
    *  });
+   * ```
    *
    * With the exception of model configuration variables and properties starting with a special character (**@** or **~**),
    * each property in the definition object asigns a behavior to the same named property in a model's record.
@@ -1546,18 +1627,11 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', function($in
    * * `map` sets an explicit server attribute mapping, see {@link BuilderApi#attrMap}
    * * `decode` sets how an attribute is decoded after being fetch, maps to {@link BuilderApi#attrDecoder}
    * * `encode` sets how an attribute is encoded before being sent, maps to {@link BuilderApi#attrEncoder}
+   * * `volatile` sets the attribute volatility, maps to {@link BuilderApi#attrVolatile}
    *
-   * To add/override methods from the record api, a function can be passed to one of the
-   * description properties:
+   * **For relations modifiers take a look at {@link RelationBuilderApi}**
    *
-   * ```javascript
-   * var Model = restmod.model('/', {
-   *   sayHello: function() { alert('hello!'); }
-   * })
-   *
-   * // then say hello is available for use at model records
-   * Model.$new().sayHello();
-   * ```
+   * **For other extended bundled methods check out the {@link ExtendedBuilderApi}**
    *
    * If other kind of value (different from object or function) is passed to a definition property,
    * then it is considered to be a default value. (same as calling {@link BuilderApi#define} at a definition function)
@@ -1571,25 +1645,47 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', function($in
    * Model.$new().im20; // 20
    * ```
    *
-   * To add static/collection methods to the Model, prefix the definition property name with **@**
-   * (same as calling {@link BuilderApi#classDefine} at a definition function).
+   * To add/override methods from the record api, use the `$extend` block:
    *
    * ```javascript
    * var Model = restmod.model('/', {
-   *   '@sayHello': function() { alert('hello!'); }
+   *   $extend: {
+   *     sayHello: function() { alert('hello!'); }
+   *   }
    * })
    *
-   * // then say hello is available for use at model type and collection.
-   * Model.sayHello();
-   * Model.$collection().sayHello();
+   * // then say hello is available for use at model records
+   * Model.$new().sayHello();
    * ```
    *
-   * To add hooks to the Model lifecycle events, prefix the definition property name with **~** and make sure the
-   * property name matches the event name (same as calling {@link BuilderApi#on} at a definition function).
+   * To add a static method or a collection method, you must specify the method scope: , prefix the definition key with **^**, to add it to the model collection prototype,
+   * prefix it with ***** static/collection methods to the Model, prefix the definition property name with **@**
+   * (same as calling {@link BuilderApi#scopeDefine} at a definition function).
    *
    * ```javascript
    * var Model = restmod.model('/', {
-   *   '~afterInit': function() { alert('hello!'); }
+   *   $extend: {
+   *     'Collection.count': function() { return this.length; },  // scope is set using a prefix
+   *
+   *     Model: {
+   *       sayHello: function() { alert('hello!'); } // scope is set using a block
+   *     }
+   * })
+   *
+   * // then the following call will be valid.
+   * Model.sayHello();
+   * Model.$collection().count();
+   * ```
+   *
+   * More information about method scopes can be found in {@link BuilderApi#define}
+   *
+   * To add hooks to the Model lifecycle events use the `$hooks` block:
+   *
+   * ```javascript
+   * var Model = restmod.model('/', {
+   *   $hooks: {
+   *     'after-init': function() { alert('hello!'); }
+   *   }
    * })
    *
    * // the after-init hook is called after every record initialization.
@@ -1620,7 +1716,8 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', function($in
       ignore: ['attrMask'],
       map: ['attrMap', 'force'],
       decode: ['attrDecoder', 'param', 'chain'],
-      encode: ['attrEncoder', 'param', 'chain']
+      encode: ['attrEncoder', 'param', 'chain'],
+      'volatile': ['attrVolatile']
     };
 
     // DSL core functions.
@@ -1640,22 +1737,31 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', 'RMUtils', function($in
         forEach(_description, function(_desc, _attr) {
           switch(_attr.charAt(0)) {
           case '@':
-            _attr = _attr.substring(1);
-            if(isFunction(_desc)) this.classDefine(_attr, _desc); // set type and collection by default
-            else this.define(_attr, _desc);
+            $log.warn('Usage of @ in description objects will be removed in 1.2, use a $extend block instead');
+            this.define('Scope.' + _attr.substring(1), _desc); // set static method
             break;
           case '~':
             _attr = inflector.parameterize(_attr.substring(1));
+            $log.warn('Usage of ~ in description objects will be removed in 1.2, use a $hooks block instead');
             this.on(_attr, _desc);
             break;
           default:
-            if(VAR_RGX.test(_attr)) {
+            if(_attr === '$config') { // configuration block
+              for(var key in _desc) {
+                if(_desc.hasOwnProperty(key)) this.setProperty(key, _desc[key]);
+              }
+            } else if(_attr === '$extend') { // extension block
+              for(var key in _desc) {
+                if(_desc.hasOwnProperty(key)) this.define(key, _desc[key]);
+              }
+            } else if(_attr === '$hooks') { // hooks block
+              for(var key in _desc) {
+                if(_desc.hasOwnProperty(key)) this.on(key, _desc[key]);
+              }
+            } else if(VAR_RGX.test(_attr)) {
+              $log.warn('Usage of ~ in description objects will be removed in 1.2, use a $config block instead');
               _attr = inflector.camelize(_attr.toLowerCase());
-
-              // allow packer and renamer to be set as configuration variables
-              if(_attr === 'packer') this.setPacker(_desc);
-              else if(_attr === 'renamer') this.setRenamer(_desc);
-              else this.setProperty(_attr, _desc);
+              this.setProperty(_attr, _desc);
             }
             else if(isObject(_desc)) this.attribute(_attr, _desc);
             else if(isFunction(_desc)) this.define(_attr, _desc);
@@ -2078,7 +2184,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
       this.attrDecoder(_attr, function(_raw) {
         if(_raw === null) return null;
         loadModel();
-        if(!this[_attr] || this[_attr].$pk !== _model.$$inferKey(_raw)) {
+        if(!this[_attr] || this[_attr].$pk !== _model.inferKey(_raw)) {
           this[_attr] = _model.$buildRaw(_raw);
         } else {
           this[_attr].$decode(_raw);
@@ -2224,14 +2330,22 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
   return function(_baseUrl, _baseChain) {
 
+    // IDEA: make constructor inaccessible, use separate type for records?
+    // * Will ensure proper usage.
+    // * Will lose type checking
+    function Model(_scope, _pk) {
+      this.$scope = _scope || Model;
+      this.$pk = _pk;
+      this.$initialize();
+    }
+
     _baseUrl = Utils.cleanUrl(_baseUrl);
 
     var config = {
         primaryKey: 'id',
         urlPrefix: null
       },
-      serializer = new Serializer(),
-      packer = null,
+      serializer = new Serializer(Model),
       defaults = [],                    // attribute defaults as an array of [key, value]
       meta = {},                        // atribute metadata
       hooks = {},
@@ -2247,49 +2361,19 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       config.plural = inflector.pluralize(config.name);
     }
 
-    // IDEA: make constructor inaccessible, use separate type for records?
-    // * Will ensure proper usage.
-    // * Will lose type checking
-    function Model(_scope, _pk) {
-      this.$type = Model;
-      this.$scope = _scope || Model;
-      this.$pk = _pk;
-      this.$initialize();
-    }
-
-    var Collection = Utils.buildArrayType();
+    var Collection = Utils.buildArrayType(),
+        Dummy = function(_asCollection) {
+          this.$isCollection = _asCollection;
+          this.$initialize();
+        };
 
     // Collection factory (since a constructor cant be provided...)
     function newCollection(_scope, _params) {
       var col = new Collection();
-      col.$type = Model;
       col.$scope = _scope;
       col.$params = _params;
       col.$initialize();
       return col;
-    }
-
-    // packer adaptor generator
-    function adaptPacker(_fun) {
-      return function(_raw) {
-        if(packer) {
-          // a packer instance must be built every time.
-          var inst = typeof packer === 'function' ? new packer(Model) : packer;
-          return inst[_fun](_raw, this);
-        }
-
-        return _raw;
-      };
-    }
-
-    // Infer key adaptor.
-    function inferKey() {
-      return Model.$inferKey.apply(Model, arguments);
-    }
-
-    // Get property adaptor.
-    function getProperty() {
-      return Model.$getProperty.apply(Model, arguments);
     }
 
     ///// Setup static api
@@ -2313,11 +2397,16 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
      */
     extend(Model, {
 
+      // gets an attribute description (metadata)
+      $$getDescription: function(_attribute) {
+        return meta[_attribute];
+      },
+
       // definition chain
       $$chain: [],
 
-      // infer key adaptor
-      $$inferKey: inferKey,
+      // keep a reference to type itself for scope api compatibility
+      $type: Model,
 
       // creates a new model bound by default to the static scope
       $new: function(_pk, _scope) {
@@ -2329,9 +2418,20 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
         return newCollection(_scope || Model, _params);
       },
 
-      // gets an attribute description (metadata)
-      $$getDescription: function(_attribute) {
-        return meta[_attribute];
+      // gets scope url
+      $url: function() {
+        return config.urlPrefix ? Utils.joinUrl(config.urlPrefix, _baseUrl) : _baseUrl;
+      },
+
+      // bubbles events comming from related resources
+      $dispatch: function(_hook, _args, _ctx) {
+        var cbs = hooks[_hook], i, cb;
+        if(cbs) {
+          for(i = 0; !!(cb = cbs[i]); i++) {
+            cb.apply(_ctx || this, _args || []);
+          }
+        }
+        return this;
       },
 
       /**
@@ -2351,7 +2451,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        * @param  {string} _rawData Raw object data (before it goes into decode)
        * @return {mixed} The primary key value.
        */
-      $inferKey: function(_rawData) {
+      inferKey: function(_rawData) {
         if(!_rawData || typeof _rawData[config.primaryKey] === 'undefined') return null;
         return _rawData[config.primaryKey];
       },
@@ -2372,7 +2472,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        * @param  {mixed} _default Value to return if property is not defined
        * @return {mixed} value
        */
-      $getProperty: function(_key, _default) {
+      getProperty: function(_key, _default) {
         var val = config[_key];
         return val !== undefined ? val : _default;
       },
@@ -2386,7 +2486,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        *
        * @return {boolean} true if model is nested.
        */
-      $isNested: function() {
+      isNested: function() {
         return !_baseUrl;
       },
 
@@ -2406,7 +2506,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        * @param {string} _url Url to bound resource to.
        * @return {Model} new resource instance.
        */
-      $single: function(_url) {
+      single: function(_url) {
         return new Model({
           $urlFor: function() {
             return config.urlPrefix ? Utils.joinUrl(config.urlPrefix, _url) : _url;
@@ -2415,14 +2515,13 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       },
 
       /**
-       * @memberof StaticApi#
+       * Builds a new dummy resource, the dummy resource can be used to execute random queries
+       * using the same infrastructure as records and collections.
        *
-       * @description Returns the model base url.
-       *
-       * @return {string} The base url.
+       * @return {Dummy} the dummy object
        */
-      $url: function() {
-        return config.urlPrefix ? Utils.joinUrl(config.urlPrefix, _baseUrl) : _baseUrl;
+      dummy: function(_asCollection) {
+        return new Dummy(_asCollection);
       },
 
       /**
@@ -2446,21 +2545,8 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        * @return {boolean} If true, return plural name
        * @return {string} The base url.
        */
-      $name: function(_plural) {
+      identity: function(_plural) {
         return _plural ? config.plural : config.name;
-      },
-
-      /**
-       * @memberof StaticApi#
-       *
-       * @description Part of the scope interface, provides urls for collection's items.
-       *
-       * @param {Model} _pk Item key to provide the url to.
-       * @return {string|null} The url or nill if item does not meet the url requirements.
-       */
-      $urlFor: function(_pk) {
-        // TODO: move to scope api, unify with collection
-        return Utils.joinUrl(this.$url(), _pk);
       },
 
       /**
@@ -2471,32 +2557,91 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        * @params {mixed} _mixins One or more mixins or model definitions.
        * @return {Model} The model
        */
-      $mix: function(/* mixins */) {
+      mix: function(/* mixins */) {
         builder.chain(arguments);
         this.$$chain.push.apply(this.$$chain, arguments);
         return this;
       },
 
+      // Strategies
+
       /**
        * @memberof StaticApi#
        *
-       * @description Simple $dispatch implementation for CommonApi compat.
+       * @description The model unpacking strategy
        *
-       * @param  {string} _hook Hook name
-       * @param  {array} _args Hook arguments
-       * @param  {object} _ctx Hook execution context override
+       * This method is called to extract record data from a request response, its also
+       * responsible of handling the response metadata.
        *
-       * @return {Model} The model
+       * Override this method to change the metadata processing strategy, by default its a noop
+       *
+       * @params {mixed} _resource Related resource instance
+       * @params {mixed} _raw Response raw data
+       * @return {mixed} Resource raw data
        */
-      $dispatch: function(_hook, _args, _ctx) {
-        var cbs = hooks[_hook], i, cb;
-        if(cbs) {
-          for(i = 0; !!(cb = cbs[i]); i++) {
-            cb.apply(_ctx || this, _args || []);
-          }
-        }
-        return this;
-      }
+      unpack: function(_resource, _raw) { return _raw; },
+
+      /**
+       * @memberof StaticApi#
+       *
+       * @description The model packing strategy
+       *
+       * This method is called to wrap raw record data to be sent in a request.
+       *
+       * Override this method to change the request packing strategy, by default its a noop
+       *
+       * @params {mixed} _resource Related resource instance
+       * @params {mixed} _raw Record data to be sent (can be an array if resource is collection)
+       * @return {mixed} Wrapped data
+       */
+      pack: function(_record, _raw) { return _raw; },
+
+      /**
+       * @memberof StaticApi#
+       *
+       * @description The model decoding strategy
+       *
+       * This method is called to populate a record from raw data (unppacked)
+       */
+      decode: serializer.decode,
+
+      /**
+       * @memberof StaticApi#
+       *
+       * @description The model encoding strategy
+       *
+       * This method is called to extract raw data from a record to be sent to server (before packing)
+       */
+      encode: serializer.encode,
+
+      /**
+       * @memberof StaticApi#
+       *
+       * @description The model name decoding strategy
+       *
+       * This method is called on every raw record data property to rename it, by default is not defined.
+       *
+       * Override this method to change the property renaming strategy.
+       *
+       * @params {string} _name Response (raw) name
+       * @return {string} Record name
+       */
+      decodeName: null,
+
+      /**
+       * @memberof StaticApi#
+       *
+       * @description The model name encoding strategy
+       *
+       * This method is called when encoding a record to rename the record properties into the raw data properties,
+       * by default is not defined.
+       *
+       * Override this method to change the property renaming strategy
+       *
+       * @params {string} _name Record name
+       * @return {string} Response (raw) name
+       */
+      encodeName: null
 
     }, ScopeApi);
 
@@ -2504,76 +2649,72 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
     extend(Model.prototype, {
 
-      // infer key adaptor
-      $$inferKey: inferKey,
+      $type: Model,
 
-      // default initialize: loads the default parameter values
+      // default initializer: loads the default parameter values
       $initialize: function() {
         var tmp;
         for(var i = 0; (tmp = defaults[i]); i++) {
           this[tmp[0]] = (typeof tmp[1] === 'function') ? tmp[1].apply(this) : tmp[1];
         }
-      },
+      }
 
-      // packer pack adaptor used by $wrap
-      $$pack: adaptPacker('pack'),
-
-      // packer unpack adaptor used by $unwrap
-      $$unpack: adaptPacker('unpack'),
-
-      // serializer decode adaptor used by $decode
-      $decode: function(_raw, _mask) {
-        serializer.decode(this, _raw, _mask);
-      },
-
-      // serializer encode adaptor used by $encode
-      $encode: function(_mask) {
-        return serializer.encode(this, _mask);
-      },
-
-      // expose getProperty in records
-      $getProperty: getProperty
     }, CommonApi, RecordApi, ExtendedApi);
 
     ///// Setup collection api
 
     extend(Collection.prototype, {
 
-      // infer key adaptor
-      $$inferKey: inferKey,
+      $type: Model,
 
       // provide record contructor
       $new: function(_pk, _scope) {
-        return new Model(_scope || this, _pk);
+        return Model.$new(_pk, _scope || this);
       },
 
       // provide collection constructor
       $collection: function(_params, _scope) {
         _params = this.$params ? angular.extend({}, this.$params, _params) : _params;
         return newCollection(_scope || this.$scope, _params);
-      },
-
-      // packer pack adaptor used by $wrap
-      $$pack: adaptPacker('packMany'),
-
-      // packer unpack adaptor used by $unwrap
-      $$unpack: adaptPacker('unpackMany'),
-
-      // expose getProperty in collection
-      $getProperty: getProperty
+      }
 
     }, ScopeApi, CommonApi, CollectionApi, ExtendedApi);
 
+    ///// Setup dummy api
+
+    extend(Dummy.prototype, {
+
+      $type: Model,
+
+      $initialize: function() {
+        // Nothing by default
+      }
+
+    }, CommonApi);
+
     ///// Setup builder
 
-    /**
-     * @class SerializerBuilderApi
-     *
-     * @description
-     *
-     * Provides an isolated set of methods to customize the serializer behaviour.
-     *
-     */
+    var APIS = {
+      Model: Model,
+      Record: Model.prototype,
+      Collection: Collection.prototype,
+      Dummy: Dummy.prototype
+    };
+
+    // helper used to extend api's
+    function helpDefine(_api, _name, _fun) {
+      var api = APIS[_api];
+
+      Utils.assert(!!api, 'Invalid api name $1', _api);
+
+      if(_name) {
+        api[_name] = Utils.override(api[_name], _fun);
+      } else {
+        Utils.extendOverriden(api, _fun);
+      }
+    }
+
+    // load the builder
     builder = new Builder(angular.extend(serializer.dsl(), {
 
       /**
@@ -2629,59 +2770,25 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       },
 
       /**
-       * @memberof ExtendedBuilderApi#
-       *
-       * @description
-       *
-       * Sets the object "packer", the packer is responsable of providing the object wrapping strategy
-       * so it matches the API.
-       *
-       * The method accepts a packer name, an instance or a packer factory, if the first (preferred)
-       * option is used, then a <Name>Packer factory must be available that return an object or factory function.
-       *
-       * In case of using a factory function, the constructor will be called passing the model type object
-       * as first parameter:
-       *
-       * ```javascript
-       * // like this:
-       * var packer = new packerFactory(Model);
-       * ```
-       *
-       * ### Packer structure.
-       *
-       * Custom packers must implement all of the following methods:
-       *
-       * * **unpack(_rawData, _record):** unwraps data belonging to a single record, must return the unpacked
-       * data to be passed to `$decode`.
-       * * **unpackMany(_rawData, _collection):** unwraps the data belonging to a collection of records,
-       * must return the unpacked data array, each array element will be passed to $decode on each new element.
-       * * **pack(_rawData, _record):** wraps the encoded data from a record before is sent to the server,
-       * must return the packed data object to be sent.
-       * * **packMany(_rawData, _collection):** wraps the encoded data from a collection before is sent to the server,
-       * must return the packed data object to be sent.
-       *
-       * Currently the following builtin strategies are provided:
-       * * {@link DefaultPacker} with json root, metadata and links support.
-       *
-       * @param {string|object} _mode The packer instance, constructor or name
-       * @return {BuilderApi} self
-       */
-      setPacker: function(_packer) {
-
-        if(typeof _packer === 'string') {
-          _packer = $injector.get(inflector.camelize(_packer, true) + 'Packer');
-        }
-
-        packer = _packer;
-        return this;
-      },
-
-      /**
        * @memberof BuilderApi#
        *
        * @description Adds methods to the model
        *
-       * By default this method adds **record** methods. If called with an object
+       * This method allows to extend the different model API's.
+       *
+       * The following API's can be extended using this method:
+       * * Model: The static API, affects the Model object itself.
+       * * Record: Affects each record generated by the model.
+       * * Collection: Affects each collection generated by the model.
+       * * Scope: Affects both the static API and collections.
+       * * Resource: Affects records and collections.
+       *
+       * If no api is given
+       *
+       *
+       * If no scope is given,
+       * By default this method extends the **Record** prototype.
+       * If called with an object
        * instead of a function it can be used to extend the collection and the type with
        * specific implementations.
        *
@@ -2689,48 +2796,51 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        *
        * ```javascript
        * restmod.mixin(function() {
-       *   this.define('myMethod', function() {})
-       *       .define('myMethod', {
-       *         record: function() {}, // called when record.myMethod is called.
-       *         collection: function() {}, // called when collection.myMethod is called.
-       *         type: function() {} // called when Model.myMethod is called.
-       *       });
+       *   this.define('myRecordMethod', function() {})
+       *       .define('Model.myStaticMethod', function() {})
+       *       .define('Collection', { }); // object to extend collection api with
        * });
        * ```
        *
-       * It is posible to override an existing method using define,
-       * if overriden, the old method can be called using `this.$super`
-       * inside de new method.
+       * It is posible to override an existing method using define, if overriden,
+       * the old method can be called using `this.$super` inside de new method.
        *
-       * @param {string} _name Method name
+       * @param {string} _where
        * @param {function} _fun Function to define or object with particular implementations
+       * @param {string} _api One of the api names listed above, if not given defaults to 'Record'
        * @return {BuilderApi} self
        */
-      define: function(_name, _fun) {
-        if(typeof _fun === 'function') {
-          Model.prototype[_name] = Utils.override(Model.prototype[_name], _fun);
-        } else {
-          if(_fun.type) Model[_name] = Utils.override(Model[_name], _fun.type);
-          if(_fun.collection) Collection.prototype[_name] = Utils.override(Collection.prototype[_name], _fun.collection);
-          if(_fun.record) Model.prototype[_name] = Utils.override(Model.prototype[_name], _fun.record);
-        }
-        return this;
-      },
+      define: function(_where, _fun) {
 
-      /**
-       * @memberof BuilderApi#
-       *
-       * @description Registers a scope method
-       *
-       * Same as calling `define('name', { type: fun, collection: fun })`.
-       * See {@link BuilderApi#define} for more information.
-       *
-       * @param {string} _name Method name
-       * @param {function} _fun Function to define
-       * @return {BuilderApi} self
-       */
-      classDefine:  function(_name, _fun) {
-        this.define(_name, { type: _fun, collection: _fun });
+        var name = false, api = 'Record';
+        if(typeof _fun === 'object' && _fun) {
+          api = _where;
+        } else {
+          name = _where.split('.');
+          if(name.length === 1) {
+            name = name[0];
+          } else {
+            api = name[0];
+            name = name[1];
+          }
+        }
+
+        switch(api) {
+        // Virtual API's
+        case 'Scope':
+          helpDefine('Model', name, _fun);
+          helpDefine('Collection', name, _fun);
+          break;
+        case 'Resource':
+          helpDefine('Record', name, _fun);
+          helpDefine('Collection', name, _fun);
+          helpDefine('Dummy', name, _fun);
+          break;
+        default:
+          helpDefine(api, name, _fun);
+        }
+
+        return this;
       },
 
       /**
@@ -2761,6 +2871,83 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
 }]);
 
+/**
+ * @class FastQ
+ *
+ * @description
+ *
+ * Synchronous promise implementation (partial)
+ *
+ */
+RMModule.factory('RMFastQ', [function() {
+
+  var isFunction = angular.isFunction;
+
+  function simpleQ(_val, _withError) {
+
+    if(_val && isFunction(_val.then)) return wrappedQ(_val);
+
+    return {
+      simple: true,
+
+      then: function(_success, _error) {
+        return simpleQ(_withError ? _error(_val) : _success(_val));
+      },
+      'finally': function(_cb) {
+        var result = _cb();
+        if(result && isFunction(_val.then)) {
+          // if finally returns a promise, then
+          return wrappedQ(_val.then(
+            function() { return _withError ? simpleQ(_val, true) : _val; },
+            function() { return _withError ? simpleQ(_val, true) : _val; })
+          );
+        } else {
+          return this;
+        }
+      }
+    };
+  }
+
+  function wrappedQ(_promise) {
+    if(_promise.simple) return _promise;
+
+    var simple;
+
+    // when resolved, make $q a simpleQ
+    _promise.then(function(_val) {
+      simple = simpleQ(_val);
+    }, function(_val) {
+      simple = simpleQ(_val, true);
+    });
+
+    return {
+      then: function(_success, _error) {
+        return simple ?
+          simple.then(_success, _error) :
+          wrappedQ(_promise.then(_success, _error));
+      },
+      'finally': function(_cb) {
+        return simple ?
+          simple['finally'](_cb) :
+          wrappedQ(_promise['finally'](_cb));
+      }
+    };
+  }
+
+  return {
+    reject: function(_reason) {
+      return simpleQ(_reason, true);
+    },
+
+    // non waiting promise, if resolved executes immediately
+    when: function(_val) {
+      return simpleQ(_val, false);
+    },
+
+    wrap: wrappedQ
+  };
+}]);
+
 RMModule.factory('RMPackerCache', [function() {
 
   var packerCache;
@@ -2770,7 +2957,7 @@ RMModule.factory('RMPackerCache', [function() {
    *
    * @description
    *
-   * The packer cache service enables packers to register raw object data that can be then used by
+   * The packer cache service enables packing strategies to register raw object data that can be then used by
    * supporting relations during the decoding process to preload other related resources.
    *
    * This is specially useful for apis that include linked objects data in external metadata.
@@ -2778,7 +2965,7 @@ RMModule.factory('RMPackerCache', [function() {
    * The packer cache is reset on every response unwrapping so it's not supposed to be used as an
    * application wide cache.
    *
-   * ### For packer developers:
+   * ### For extension developers:
    *
    * Use the `feed` method to add new raw data to cache.
    *
@@ -2815,11 +3002,11 @@ RMModule.factory('RMPackerCache', [function() {
       if(packerCache) { // make sure this is a packer cache enabled context.
 
         var modelType = _record.$type,
-            cache = packerCache[modelType.$name(true)];
+            cache = packerCache[modelType.identity(true)];
 
         if(cache && _record.$pk) {
           for(var i = 0, l = cache.length; i < l; i++) {
-            if(_record.$pk === modelType.$$inferKey(cache[i])) { // this could be sort of slow? nah
+            if(_record.$pk === modelType.inferKey(cache[i])) { // this could be sort of slow? nah
               _record.$decode(cache[i]);
               break;
             }
@@ -2860,7 +3047,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
     _into[_path[_path.length-1]] = _value;
   }
 
-  return function() {
+  return function(_strategies) {
 
     var isArray = angular.isArray;
 
@@ -2870,9 +3057,10 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
         encoders = {},
         mapped = {},
         mappings = {},
-        renamer = null;
+        vol = {};
 
     function isMasked(_name, _mask) {
+      if(typeof _mask === 'function') return _mask(_name);
       var mask = masks[_name];
       return (mask && (mask === true || mask.indexOf(_mask) !== -1));
     }
@@ -2891,7 +3079,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
           if(maps[i].map) {
             value = extract(_from, maps[i].map);
           } else {
-            value = _from[renamer ? renamer.encode(maps[i].path) : maps[i].path];
+            value = _from[_strategies.encodeName ? _strategies.encodeName(maps[i].path) : maps[i].path];
           }
 
           if(!maps[i].forced && value === undefined) continue;
@@ -2905,7 +3093,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
       for(key in _from) {
         if(_from.hasOwnProperty(key)) {
 
-          decodedName = renamer ? renamer.decode(key) : key;
+          decodedName = _strategies.decodeName ? _strategies.decodeName(key) : key;
           if(decodedName[0] === '$') continue;
 
           if(maps) {
@@ -2964,9 +3152,11 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
 
           value = encodeProp(_from[key], fullName, _mask, _ctx);
           if(value !== undefined) {
-            encodedName = renamer ? renamer.encode(key) : key;
+            encodedName = _strategies.encodeName ? _strategies.encodeName(key) : key;
             _to[encodedName] = value;
           }
+
+          if(vol[fullName]) delete _from[key];
         }
       }
 
@@ -2985,7 +3175,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
             if(maps[i].map) {
               insert(_to, maps[i].map, value);
             } else {
-              _to[renamer ? renamer.encode(maps[i].path) : maps[i].path] = value;
+              _to[_strategies.encodeName ? _strategies.encodeName(maps[i].path) : maps[i].path] = value;
             }
           }
         }
@@ -3030,50 +3220,10 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
       // builds a serializerd DSL, is a standalone object that can be extended.
       dsl: function() {
 
-        /**
-         * @class SerializerBuilderApi
-         *
-         * @description
-         *
-         * Provides an isolated set of methods to customize the serializer behaviour.
-         *
-         */
         return {
-          /**
-           * @memberof SerializerBuilderApi#
-           *
-           * @description Changes the way restmod maps attributes names from records to json api data.
-           *
-           * This is intended to be used as a way of keeping property naming style consistent accross
-           * languajes. By default, property renaming is disabled.
-           *
-           * As setPacker, this method accepts a renamer name, an instance or a factory, if the first (preferred)
-           * option is used, then a <Name>Renamer factory must be available that return an object or factory function.
-           *
-           * ### Renamer structure
-           *
-           * Custom renamers must implement all of the following methods:
-           *
-           * * **decode(_apiName):** transforms an api name to a record name, decoding happens before $-prefixed attribute filtering.
-           * * **encode(_recordName):** transforms a record property name to the corresponding api name.
-           *
-           * If `false` is given, then renaming is disabled.
-           *
-           * @param {function|false} _value decoding function
-           * @return {SerializerBuilderApi} self
-           */
-          setRenamer: function(_renamer) {
-
-            if(typeof _packer === 'string') {
-              _renamer = $injector.get(inflector.camelize(_renamer, true) + 'Renamer');
-            }
-
-            renamer = _renamer;
-            return this;
-          },
 
           /**
-           * @memberof SerializerBuilderApi#
+           * @memberof BuilderApi#
            *
            * @description Sets an attribute mapping.
            *
@@ -3092,7 +3242,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
            *
            * @param {string} _attr Attribute name
            * @param {string} _serverName Server (request/response) property name
-           * @return {SerializerBuilderApi} self
+           * @return {BuilderApi} self
            */
           attrMap: function(_attr, _serverPath, _forced) {
             // extract parent node from client name:
@@ -3108,7 +3258,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
           },
 
           /**
-           * @memberof SerializerBuilderApi#
+           * @memberof BuilderApi#
            *
            * @description Sets an attribute mask.
            *
@@ -3142,7 +3292,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
           },
 
           /**
-           * @memberof SerializerBuilderApi#
+           * @memberof BuilderApi#
            *
            * @description Assigns a decoding function/filter to a given attribute.
            *
@@ -3150,7 +3300,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
            * @param {string|function} _filter filter or function to register
            * @param {mixed} _filterParam Misc filter parameter
            * @param {boolean} _chain If true, filter is chained to the current attribute filter.
-           * @return {SerializerBuilderApi} self
+           * @return {BuilderApi} self
            */
           attrDecoder: function(_attr, _filter, _filterParam, _chain) {
 
@@ -3164,7 +3314,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
           },
 
           /**
-           * @memberof SerializerBuilderApi#
+           * @memberof BuilderApi#
            *
            * @description Assigns a encoding function/filter to a given attribute.
            *
@@ -3172,7 +3322,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
            * @param {string|function} _filter filter or function to register
            * @param {mixed} _filterParam Misc filter parameter
            * @param {boolean} _chain If true, filter is chained to the current attribute filter.
-           * @return {SerializerBuilderApi} self
+           * @return {BuilderApi} self
            */
           attrEncoder: function(_attr, _filter, _filterParam, _chain) {
 
@@ -3183,6 +3333,20 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
 
             encoders[_attr] = _chain ? Utils.chain(encoders[_attr], _filter) : _filter;
             return this;
+          },
+
+          /**
+           * @memberof BuilderApi#
+           *
+           * @description Makes an attribute volatile, a volatile attribute is deleted from source after encoding.
+           *
+           * @param {string} _name Attribute name
+           * @param {boolean} _isVolatile defaults to true, if set to false then the attribute is no longer volatile.
+           * @return {BuilderApi} self
+           */
+          attrVolatile: function(_attr, _isVolatile) {
+            vol[_attr] = _isVolatile === undefined ? true : _isVolatile;
+            return this;
           }
         };
       }
@@ -3190,38 +3354,73 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
   };
 
 }]);
-RMModule.factory('DefaultPacker', ['inflector', 'RMPackerCache', function(inflector, packerCache) {
+RMModule.factory('DefaultPacker', ['restmod', 'inflector', 'RMPackerCache', function(restmod, inflector, packerCache) {
+
+  // process metadata
+  function processMeta(_meta, _raw, _skip) {
+    var metaDef = _meta;
+    if(typeof metaDef === 'string') {
+      if(metaDef === '.') {
+        var meta = {};
+        for(var key in _raw) {
+          if(_raw.hasOwnProperty(key) &&  _skip.indexOf(key) === -1) { // skip links and object root if extracting from root.
+            meta[key] = _raw[key];
+          }
+        }
+        return meta;
+      } else {
+        return _raw[metaDef];
+      }
+    } else if(typeof metaDef === 'function') {
+      return metaDef(_raw);
+    }
+  }
+
+  // process links and stores them in the packer cache
+	function processLinks(_links, _raw, _skip) {
+    var source = _links === '.' ? _raw : _raw[_links];
+    if(!source) return;
+
+    // feed packer cache
+    for(var key in source) {
+      if(source.hasOwnProperty(key) && _skip.indexOf(key) === -1) {
+        var cache = source[key];
+        // TODO: check that cache is an array.
+        packerCache.feed(key, cache);
+      }
+    }
+  }
 
   /**
    * @class DefaultPacker
    *
    * @description
    *
-   * Simple packer implementation that attempts to cover the standard proposed by
-   * [active_model_serializers](https://github.com/rails-api/active_model_serializers).
+   * Simple `$unpack` implementation that attempts to cover the standard proposed by
+   * [active_model_serializers](https://github.com/rails-api/active_model_serializers.
    *
    * This is a simplified version of the wrapping structure recommented by the jsonapi.org standard,
    * it supports side loaded associated resources (via supporting relations) and metadata extraction.
    *
-   * To activate use
+   * To activate add mixin to model chain
    *
    * ```javascript
-   * PACKER: 'default'
+   * restmodProvide.rebase('DefaultPacker');
    * ```
    *
    * ### Json root
    *
-   * By default the packer will use the singular model name as json root for single resource requests
+   * By default the mixin will use the singular model name as json root for single resource requests
    * and pluralized name for collection requests. Make sure the model name is correctly set.
    *
-   * To override the name used by the packer set the JSON_ROOT_SINGLE and JSON_ROOT_MANY variables.
-   * Or set JSON_ROOT to override both.
+   * To override the name used by the mixin set the **jsonRootSingle** and **jsonRootMany** variables.
+   * Or set **jsonRoot** to override both.
    *
    * ### Side loaded resources
    *
-   * By default the packer will look for links to other resources in the 'linked' root property, you
-   * can change this by setting the JSON_LINKS variable. To use the root element as link source
-   * use `JSON_LINKS: true`. To skip links processing, set it to false.
+   * By default the mixin will look for links to other resources in the 'linked' root property, you
+   * can change this by setting the jsonLinks variable. To use the root element as link source
+   * use `jsonLinks: true`. To skip links processing, set it to false.
    *
    * Links are expected to use the pluralized version of the name for the referenced model. For example,
    * given the following response:
@@ -3243,7 +3442,7 @@ RMModule.factory('DefaultPacker', ['inflector', 'RMPackerCache', function(inflec
    * By default metadata is only captured if it comes in the 'meta' root property. Metadata is then
    * stored in the $meta property of the resource being unwrapped.
    *
-   * To change the metadata source property set the JSON_META property to the desired name, set
+   * To change the metadata source property set the jsonMeta property to the desired name, set
    * it to '.' to capture the entire raw response or set it to false to skip metadata. It can also be set
    * to a function, for custom processsing.
    *
@@ -3253,75 +3452,24 @@ RMModule.factory('DefaultPacker', ['inflector', 'RMPackerCache', function(inflec
    * @property {object} meta The metadata repository property name
    *
    */
-  function Packer(_model) {
-    this.single = _model.$getProperty('jsonRootSingle') || _model.$getProperty('jsonRoot') || _model.$getProperty('name');
-    this.plural = _model.$getProperty('jsonRootMany') || _model.$getProperty('jsonRoot') || _model.$getProperty('plural');
+  return restmod.mixin(function() {
+    this.define('Model.unpack', function(_resource, _raw) {
+      var name = null,
+          links = this.getProperty('jsonLinks', 'linked'),
+          meta = this.getProperty('jsonMeta', 'meta');
 
-    // Special options
-    this.links = _model.$getProperty('jsonLinks', 'linked');
-    this.meta = _model.$getProperty('jsonMeta', 'meta');
-    // TODO: use plural for single resource option.
-  }
-
-  // process metadata
-  function processMeta(_packer, _raw, _skip) {
-    var metaDef = _packer.meta;
-    if(typeof metaDef === 'string') {
-      if(metaDef === '.') {
-        var meta = {};
-        for(var key in _raw) {
-          if(_raw.hasOwnProperty(key) && key !== _skip && key !== _packer.links) { // skip links and object root if extracting from root.
-            meta[key] = _raw[key];
-          }
-        }
-        return meta;
+      if(_resource.$isCollection) {
+        name = this.getProperty('jsonRootMany') || this.getProperty('jsonRoot') || this.getProperty('plural');
       } else {
-        return _raw[metaDef];
+        // TODO: use plural for single resource option.
+        name = this.getProperty('jsonRootSingle') || this.getProperty('jsonRoot') || this.getProperty('name');
       }
-    } else if(typeof metaDef === 'function') {
-      return metaDef(_raw);
-    }
-  }
 
-  // process links and stores them in the packer cache
-	function processLinks(_packer, _raw, _skip) {
-    var source = _packer.links === '.' ? _raw : _raw[_packer.links];
-    if(!source) return;
-
-    // feed packer cache
-    for(var key in source) {
-      if(source.hasOwnProperty(key) && key !== _skip) {
-        var cache = source[key];
-        // TODO: check that cache is an array.
-        packerCache.feed(key, cache);
-      }
-    }
-  }
-
-  Packer.prototype = {
-
-    unpack: function(_unpackedRaw, _record) {
-      if(this.meta) _record.$metadata = processMeta(this, _unpackedRaw, this.single);
-      if(this.links) processLinks(this, _unpackedRaw, this.single);
-      return _unpackedRaw[this.single];
-    },
-
-    unpackMany: function(_unpackedRaw, _collection) {
-      if(this.meta) _collection.$metadata = processMeta(this, _unpackedRaw, this.plural);
-      if(this.links) processLinks(this, _unpackedRaw, this.plural);
-      return _unpackedRaw[this.plural];
-    },
-
-    pack: function(_raw) {
-      return _raw; // no special packing
-    },
-
-    packMany: function(_raw) {
-      return _raw; // no special packing
-    }
-  };
-
-  return Packer;
+      if(meta) _resource.$metadata = processMeta(meta, _raw, [name, links]);
+      if(links) processLinks(links, _raw, [name]);
+      return _raw[name];
+    });
+  });
 
 }]);
 /**

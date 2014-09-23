@@ -1,3 +1,50 @@
+<a name="1.1.0"></a>
+## 1.1.0 (2014-09-23)
+
+
+#### Bug Fixes
+
+* **test:** fixes the preload plugin spec ([502358d4](http://github.com/angular-platanus/restmod/commit/502358d4023aa3fcc2e62690ad8d9b8a17054cf6))
+
+
+#### Features
+
+* **common:**
+  * adds the $action method that allows creation of cancelable actions. ([8808e119](http://github.com/angular-platanus/restmod/commit/8808e11961cdbc8b4617a6672aa4c916362e7b9a))
+  * prevents $then to wait for a digest cycle when last promise is resolved. ([faafeb80](http://github.com/angular-platanus/restmod/commit/faafeb80a2bd8f3fd39497b1a6906a1fd8bede54))
+* **docs:** adds section about $resolve ([036f9f7d](http://github.com/angular-platanus/restmod/commit/036f9f7da12df4a803035acf162134e174354b97))
+* **model:** adds the dummy method to generate dummy resources. ([a072ad32](http://github.com/angular-platanus/restmod/commit/a072ad3238637badc762ef15029512d74b76952d))
+* **plugins:**
+  * Adds the Preload plugin. ([58c9cb09](http://github.com/angular-platanus/restmod/commit/58c9cb096dc3e6b184341e75fd5beeffffd9711e), closes [#75](http://github.com/angular-platanus/restmod/issues/75))
+  * Adds the FindMany plugin. ([c5f37dc1](http://github.com/angular-platanus/restmod/commit/c5f37dc133401a0bc69df7acc671a8f38e9f9aa2))
+* **plugins.dirty:** makes $restore use $action ([c704f425](http://github.com/angular-platanus/restmod/commit/c704f42530cb802736dd4fd7aef4bd4bc186b1a3))
+* **plugins.shared:** Adds the SharedModel plugin ([a09888af](http://github.com/angular-platanus/restmod/commit/a09888afe74f16ee77c57afcc1f2237f64aa527e), closes [#124](http://github.com/angular-platanus/restmod/issues/124))
+* **record:**
+  * makes destroy immediately remove revealed item from owner collection if not save ([e8408381](http://github.com/angular-platanus/restmod/commit/e8408381af161037c10896f6fd85c6317fa19995), closes [#146](http://github.com/angular-platanus/restmod/issues/146))
+  * makes $extend execute in the promise chain. ([c7a692cf](http://github.com/angular-platanus/restmod/commit/c7a692cf305d11f0422d89cc7f9053d6e1b62672))
+  * enables PATCH operations on $save ([b8370417](http://github.com/angular-platanus/restmod/commit/b8370417dcbfc6c5f824b81ebf143d417c9a1d08), closes [#98](http://github.com/angular-platanus/restmod/issues/98))
+* **serializer:**
+  * adds volatile attributes ([35f5c0aa](http://github.com/angular-platanus/restmod/commit/35f5c0aa3a10fe85e60b8123a6602d3466b7b070), closes [#77](http://github.com/angular-platanus/restmod/issues/77))
+  * allows to pass a method as mask ([3ae2edb2](http://github.com/angular-platanus/restmod/commit/3ae2edb24689e6bb8b433929971473de26acb096))
+
+
+#### Breaking Changes
+
+* Actions will now be chained and may not execute inmediatelly if called after an async action.
+
+Affected actions:
+* Record.$fetch
+* Record.$extend
+* Record.$save
+* Record.$destroy
+* Collection.$fetch
+* Collection.$add
+* Collection.$remove
+* Record/Collection.$resolve
+* Record/Collection.$reset
+ ([e5942d0e](http://github.com/angular-platanus/restmod/commit/e5942d0e682bcd4bb1a38b052667b05c67dd9b37))
+
+
 <a name="1.0.3"></a>
 ### 1.0.3 (2014-09-16)
 
