@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>restmod Mixin: PagedModel</title>
+	<title>restmod Global</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -187,12 +187,12 @@
 					
 
 
-	<h1 class="page-title">Mixin: PagedModel</h1>
+	<h1 class="page-title">Global</h1>
 <section>
 
 <header>
     <h2>
-    PagedModel
+    
     </h2>
     
 </header>
@@ -202,21 +202,6 @@
     
 
     
-        
-            <div class="description"><p>Extracts header paging information into the <code>$page</code> and <code>$pageCount</code> properties.</p>
-<p>Usage:</p>
-<p>Just add mixin to a model's mixin chain</p>
-<pre><code class="lang-javascript">var Bike = restmod.model('api/bikes', 'PagedModel');</code></pre>
-<p>Then using fetch on a collection bound to a paged api should provide page information</p>
-<pre><code class="lang-javascript">Bike.$search().$then(function() {
-  console.log this.$page; // should print the current page number.
-  console.log this.$pageCount; // should print the request total page count.
-});</code></pre>
-<p>Paging information is extracted from the 'X-Page' and the 'X-Page-Total' headers, to use different headers just
-override the $pageHeader or the $pageCountHeader definition during model building.</p>
-<pre><code class="lang-javascript">restmod.model('PagedModel', function() {
- this.define('$pageHeader', 'X-My-Page-Header');
-})</code></pre></div>
         
 
         
@@ -239,11 +224,6 @@ override the $pageHeader or the $pageCountHeader definition during model buildin
 
     
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        plugins/paged.js, line 1
-    </li></ul></dd>
     
 
     
@@ -270,6 +250,103 @@ override the $pageHeader or the $pageCountHeader definition during model buildin
 
     
 
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<dt>
+    <h4 class="name" id="dummy"><span class="type-signature"></span>dummy<span class="signature">()</span><span class="type-signature"> &rarr; {Dummy}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Builds a new dummy resource, the dummy resource can be used to execute random queries
+using the same infrastructure as records and collections.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/factory.js, line 201
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>the dummy object</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Dummy</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        </dl>
     
 
     

@@ -53,6 +53,10 @@
 						</li>
 						
 						<li>
+							<a href="FastQ.html">FastQ</a>
+						</li>
+						
+						<li>
 							<a href="PackerCache.html">PackerCache</a>
 						</li>
 						
@@ -78,10 +82,6 @@
 						
 						<li>
 							<a href="ScopeApi.html">ScopeApi</a>
-						</li>
-						
-						<li>
-							<a href="SerializerBuilderApi.html">SerializerBuilderApi</a>
 						</li>
 						
 						<li>
@@ -112,6 +112,14 @@
 						
 						<li>
 							<a href="PagedModel.html">PagedModel</a>
+						</li>
+						
+						<li>
+							<a href="Populate.html">Populate</a>
+						</li>
+						
+						<li>
+							<a href="Preload.html">Preload</a>
 						</li>
 						
 						<li>
@@ -152,6 +160,20 @@
 					</ul>
 				</li>
 				
+				<li class="dropdown">
+					<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="global.html#dummy">dummy</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
 			</ul>
 		</div>
 	</div>
@@ -171,191 +193,66 @@
 </header>  
 
 <article>
-    <p>Model building in restmod is done via the <code>$restmod</code> service.</p>
+    <p>Model building in restmod is done via the <code>restmod</code> service.</p>
 <p>The service provides two methods: <code>model</code> is used to build new models and <code>mixin</code> to build mixins. More on <strong>mixins</strong> later.</p>
 <h2>Simple model building</h2>
 <p>Basic model building looks like this</p>
-<pre><code class="lang-javascript">angular.module('test').factory('MyModel', function($restmod) {
-    return $restmod.model('/model-base-url');
+<pre><code class="lang-javascript">angular.module('test').factory('MyModel', function(restmod) {
+    return restmod.model('/model-base-url');
 });</code></pre>
 <p>It's recommended to put models inside factories, this is usefull later when defining relations and inheritance, since the angular $injector is used by these features. It's also the angular way of doing things. This guide will skip the factory code in examples for simplicity sake.</p>
-<p>The first and only required parameter is the base url for the model, if null is given then the model is considered unbound.</p>
-<p>Unbound models can only be fetched/created/updated when bound to other models (via a relation).</p>
+<p>The first and only required parameter is the base url for the model, if null is given then the model is considered nested.</p>
+<p>Nested models can only be fetched/created/updated when bound to other models (using a relation).</p>
 <p>Refer to <a href="tutorial-model.html">model</a> for information about how to use the generated model.</p>
 <h2>Advanced model building</h2>
-<p>Restmod offers two ways of customizing a model's behaviour, <strong>definition blocks</strong> and <strong>definition objects</strong>, both are used by passing the required parameters to the <code>model</code> function after the base url parameter.</p>
+<p>Restmod offers two ways of customizing a model's behaviour, <strong>definition blocks</strong> and <strong>definition objects</strong>, both are used by passing the required parameters to the <code>Model.mix</code> static method.</p>
 <h3>Model definition blocks</h3>
 <p>If a function is given to <code>model</code>, then the function is called in the builder context (<code>this</code> points to the builder).</p>
-<pre><code class="lang-javascript">$restmod.model('/model-base-url', function() {
-    this.attrMask('createdBy', SyncMask.DECODE) // Set an attribute mask
+<pre><code class="lang-javascript">restmod.model('/model-base-url').mix(function() {
+    this.attrMask('createdBy', 'R') // Set an attribute mask
         .attrDefault('createdBy', 'This is read only') // Set an attribute default value
-        .beforeSave(function() { // Set a model hook
+        .on('before-save', function() { // Set a model hook
             alert('model will be saved!')
         });
 });</code></pre>
-<p>Even though the preferred way of customizing a model is using the definition object, some builder methods like <code>beforeCreate</code>can only be accesed through the builder context.</p>
-<p>For more information about available builder functions check <em>The Builder DSL</em> section below and the ModelBuilder class documentation.</p>
+<p>Even though the preferred way of customizing a model is using the definition object, some builder methods like <code>extend</code>can only be accesed through the builder context.</p>
+<p>For more information about available builder functions check the ModelBuilder class documentation.</p>
 <h3>The model definition object</h3>
 <p>It is also posible to provide an plain object to the <code>model</code> method. This object will be treated as a model definition.</p>
 <p>A model assigns one or more modifiers to model instance properties.</p>
-<pre><code class="lang-javascript">$restmod.model('api/bikes', {
+<pre><code class="lang-javascript">restmod.model('api/bikes').mix({
     created_at: { serialize: 'RailsDate' }, // set a serializer
-    createdBy: { init: 'This is readonly', mask: SyncMask.DECODE }, // set a default value and a mask
+    createdBy: { init: 'This is readonly', mask: 'R' }, // set a default value and a mask
     parts: { hasMany: 'Part' } // set a relation with another model built by a factory called 'Part'
 });</code></pre>
 <p>Property modifiers map directly to builder DSL functions, so using</p>
-<pre><code class="lang-javascript">$restmod.model('', {
+<pre><code class="lang-javascript">restmod.model('').mix({
   prop: { init: 20 }
 });</code></pre>
 <p>Is equivalent to</p>
-<pre><code class="lang-javascript">$restmod.model('', function() {
+<pre><code class="lang-javascript">restmod.model('').mix(function() {
   this.attrDefault('prop', 20);
 }</code></pre>
-<p>For more information about available property modifiers check the ModelBuilder class documentation.</p>
+<p>For more information about available property modifiers check the <a href="BuilderApi.html">BuilderApi</a> documentation.</p>
 <p>Some plugins also add additional modifiers.</p>
 <p>Property modifiers map directly to builder DSL methods, but not every builder method is available as a property behavior modifier. The model definition object only provides a subset of the available builder DSL methods.</p>
 <h3>The mixin chain</h3>
-<p>You are not restricted to use only one building method, multiple object and function blocks can be passed to the <code>model</code> function and are processed sequentially by the model builder. This is called the mixin chain.</p>
+<p>You are not restricted to use only one building method, multiple object and function blocks can be passed to the <code>mix</code> function and are processed sequentially by the builder. This is called the mixin chain.</p>
 <p>In addition to definition objects and functions, the mixin chain also allows for model or mixin names, if a name is given, the model/mixin is looked up using the injector and its mixin chain is injected in the current chain.</p>
 <pre><code class="lang-javascript">// Example using multiple mixins
-$restmod.model('api/bikes',
-'Vehicle', // inject Vehicle mixin chain first
+restmod.model('api/bikes').mix('Vehicle', // inject Vehicle mixin chain first
 // Then a model definition object
 {
     brakes: { serialize: 'Brakes' },
 },
 // Finally a model definition block
 function() {
-    this.beforeCreate(function() {
+    this.on('before-create', function() {
 
     });
 })</code></pre>
 <h4>The global mixin chain</h4>
-<p>It is also posible to define a common mixin chain for all models in the application, this is done using the <code>pushModelBase</code> method available at the $restmodProvider provider in the configuration stage.</p>
-<h2>The builder DSL</h2>
-<h3>Defaults</h3>
-<p>A default value can be given to any model property, this is done via de <code>init</code> property modifier. Check the ModelBuilder#attrDefault docs for more information.</p>
-<pre><code class="lang-javascript">var Model = $restmod.model(null, {
-    owner: { init: 'anonymous' }
-};</code></pre>
-<p>If a function is provided then it will be evaluated every time a model instance is created and its return value assigned to the property.</p>
-<h3>Property transformation</h3>
-<p>It is posible to specify how a given property is serialized or deserialized using the <code>encode</code> or <code>decode</code> property modifiers respectively. This modifiers take a filter name or a function and applies it to the property value during transformation. Check the ModelBuilder#attrDecoder and {@link ModelBuilder#attrEncoder} docs for more information.</p>
-<pre><code class="lang-javascript">var Model = $restmod.model(null, {
-    createdAt: { encode: 'date', param: 'yyyy-MM-dd' }, // use the angular date filter to serialize
-    sku: { decode: function(v) { return v.replace(/[^\d]+/,''); } } // use an inline function to deserialize
-});</code></pre>
-<p>Another way of specifying how a property is serialized is using a serializer. A serializer is an object that defines al least a decode or an encode method (or both). The methods are called with the property value and are expected to return a new value. The <code>serialize</code> modifier can be used to define a Serializer, if a <em>string</em> is given then the angular injector is used to load the required serializer by appending 'Serializer' to the given string. Check the ModelBuilder#attrSerializer docs for more information.</p>
-<pre><code class="lang-javascript">var Model = $restmod.model(null, {
-    createdAt: { serialize: 'date' }, // will search for a 'DateSerializer' in the current injector.
-    sku: {
-        // use an inline serializer
-        serialize: {
-            encode: function(v) { return v + '!' },
-            decode: function(v) { return v.replace(/[^\d]+/,''); }
-        }
-    }
-});</code></pre>
-<h3>Masks</h3>
-<p>Masks can be used to prevent certain properties to be sent to or loaded from the server. They specify a set actions a property is masked from. Available mask values are enumerated in the SyncMask constant and can be combined using bit operations.</p>
-<p>Masks can be specified using the <code>mask</code> or <code>ignore</code> property modifiers. Check the ModelBuilder#attrMask docs for more information.</p>
-<pre><code class="lang-javascript">var Model = $restmod.model(null, {
-    viewed: { mask: true }, // the property value is never sent to or loaded from the server.
-    createdAt: { mask: SyncMask.ENCODE }, // this property value is never sent to the server (but it is loaded from)
-    createdBy: { mask: SyncMask.ENCODE_UPDATE } // this property value is not sent to the server during an update
-});</code></pre>
-<h3>Defining relations</h3>
-<p>Relations can be specified between models using the <code>hasMany</code> and <code>hasOne</code> modifiers. Check the ModelBuilder#hasMany and {@link ModelBuilder#hasOne} docs for more information.</p>
-<pre><code class="lang-javascript">angular.module('test')
-    .factory('Part', function($restmod) {
-        return $restmod.model(null);
-    })
-    .factory('Bike', function($restmod) {
-        return $restmode.model('/bikes', {
-            parts: { hasMany: 'Part' }
-        });
-    });</code></pre>
-<p>More about relations in the <a href="tutorial-model.html">model</a> guide.</p>
-<h3>Hooks</h3>
-<p>A model behavior can be modified using a wide range of hooks provided by restmod. The hooks are placed on model's lifecycle key points and can be used to modify/extend the model behavior.</p>
-<pre><code class="lang-javascript">var Model = $restmod.model(null, function() {
-    // make a property undefined after every save.
-    this.on('after-save', function() {
-        delete this.sendOnce;
-    });
-};</code></pre>
-<p>Notes:
-<em> The before-request hooks can be used to modify the request before is sent.
-</em> The after-request[-error] hooks can be used to modify the request before processed by model.
-* The model builder provides a set of shorthand methods to subscribe to the most common hooks</p>
-<p>Additional hooks can be called by user defined methods using the <code>$callback</code> method</p>
-<h4>Object lifecycle hooks</h4>
-<p>For <code>$fetch</code>:</p>
-<ul>
-<li>before-fetch</li>
-<li>before-request</li>
-<li>after-request[-error]</li>
-<li>after-feed (only called if no errors)</li>
-<li>after-fetch[-error]</li>
-</ul>
-<p>For <code>$fetch</code> on a collection:</p>
-<ul>
-<li>before-fetch-many</li>
-<li>before-request</li>
-<li>after-request[-error]</li>
-<li>after-feed (only called if no errors)</li>
-<li>after-fetch-many[-error]</li>
-</ul>
-<p>For <code>$save</code> when creating:</p>
-<ul>
-<li>before-render</li>
-<li>before-save</li>
-<li>before-create</li>
-<li>before-request</li>
-<li>after-request[-error]</li>
-<li>after-feed (only called if no errors)</li>
-<li>after-create[-error]</li>
-<li>after-save[-error]</li>
-</ul>
-<p>For <code>$save</code> when updating:</p>
-<ul>
-<li>before-render</li>
-<li>before-save</li>
-<li>before-update</li>
-<li>before-request</li>
-<li>after-request[-error]</li>
-<li>after-feed (only called if no errors)</li>
-<li>after-update[-error]</li>
-<li>after-save[-error]</li>
-</ul>
-<p>For <code>$destroy</code>:</p>
-<ul>
-<li>before-destroy</li>
-<li>before-request</li>
-<li>after-request[-error]</li>
-<li>after-destroy[-error]</li>
-</ul>
-<h3>Adding new methods and actions</h3>
-<p>Methods can be added or overriden both in model instances and model collections using the builder ModelBuilder#define and the ModelBuilder#classDefine respectively. Methods that override another method through these functions will have access to the this.$super property that points to the old method (prebound, so its not necessary to call this.$super.call).</p>
-<pre><code class="lang-javascript">$restmod.model(null, function() {
-    // add the $create method to model instances
-    this.define('$create', function() {
-        this.id = undefined;
-        return this.$save();
-    });
-
-    // override model collection's $fetch method
-    this.classDefine('$fetch', function() {
-        this.$super({ forceParam: 'This parameter will be included in all fetch requests' });
-    });
-});</code></pre>
-<p>It is also posible to add or override a model <strong>instance</strong> method using a definition object</p>
-<pre><code class="lang-javascript">$restmod.model(null, {
-    $create: function() {
-        this.id = undefined;
-        return this.$save();
-    }
-});</code></pre>
+<p>It is also posible to define a common mixin chain for all models in the application, this is done using the <code>rebase</code> method available at the restmodProvider provider in the configuration stage.</p>
 <h3>Extending the DSL</h3>
 <p><strong>UNDER CONSTRUCTION</strong></p>
 <p>DSL extension is done using the mixin mechanism and the <code>extend</code> builder method.</p>
@@ -374,7 +271,7 @@ function() {
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on Fri Sep 12 2014 11:56:33 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Tue Sep 23 2014 00:16:30 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

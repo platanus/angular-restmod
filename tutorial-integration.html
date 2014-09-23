@@ -53,6 +53,10 @@
 						</li>
 						
 						<li>
+							<a href="FastQ.html">FastQ</a>
+						</li>
+						
+						<li>
 							<a href="PackerCache.html">PackerCache</a>
 						</li>
 						
@@ -78,10 +82,6 @@
 						
 						<li>
 							<a href="ScopeApi.html">ScopeApi</a>
-						</li>
-						
-						<li>
-							<a href="SerializerBuilderApi.html">SerializerBuilderApi</a>
 						</li>
 						
 						<li>
@@ -112,6 +112,14 @@
 						
 						<li>
 							<a href="PagedModel.html">PagedModel</a>
+						</li>
+						
+						<li>
+							<a href="Populate.html">Populate</a>
+						</li>
+						
+						<li>
+							<a href="Preload.html">Preload</a>
 						</li>
 						
 						<li>
@@ -146,6 +154,20 @@
 						
 						<li>
 							<a href="tutorial-styles.html">styles</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="global.html#dummy">dummy</a>
 						</li>
 						
 
@@ -187,23 +209,23 @@
 </ul>
 <h3><a name="q1"></a> How can I change the property used for the primary key</h3>
 <p>The primary key is just a model configuration property and by default is set to 'id'.</p>
-<p>To change it for a particular model use the configuration property:</p>
+<p>To change it for a particular model use the <code>$config</code> block:</p>
 <pre><code class="lang-javascript">restmod.model('/bikes').$mix({
-    PRIMARY_KEY: '_id'
+    $config: { primaryKey: '_id' }
 });</code></pre>
 <p>Or for every model, just set a base model definition using <code>rebase</code>:</p>
 <pre><code class="lang-javascript">module.config(function(restmodProvider) {
     restmodProvider.rebase({
-        PRIMARY_KEY: '_id'
+        $config: {
+            primaryKey: '_id'
+        }
     });
 });</code></pre>
 <h3><a name="q2"></a> How do I handle a wrapped response object? (json root object)</h3>
-<p>In restmod response wrapping is handled by the configured <strong>packer</strong>, by default no packer is configured so records and collections are expected at response root level.</p>
-<p>Restmod comes with a default packer that should handle most situations, to enable the default packer set the <code>PACKER</code> configuration property:</p>
+<p>In restmod response wrapping is handled by the model's <code>unpack</code> and <code>pack</code> static methods, by default this methods do nothing so records and collections are expected at response root level.</p>
+<p>Restmod comes with a default packer mixin that should handle most situations, to enable the default packer just add the <code>DefaultPacker</code> mixin:</p>
 <pre><code class="lang-javascript">module.config(function(restmodProvider) {
-    restmodProvider.rebase({
-        PACKER: 'default'
-    });
+    restmodProvider.rebase('DefaultPacker');
 });</code></pre>
 <p>This will enable json root wrapping and by default it will use the resource's name for single records and the resource's plural name for collections.</p>
 <p>So doing:</p>
@@ -218,15 +240,17 @@
 <pre><code class="lang-json">{
     &quot;bike&quot;: { &quot;id&quot;: 1, &quot;brand&quot;: &quot;Trek&quot; }
 }</code></pre>
-<p>The resoure's name is extracted from the resource url, if no url is given (nested resource) or if url does not match the resource's name, then you can change it's name and plural name by setting the <code>NAME</code> and <code>PLURAL</code> configuration variables:</p>
+<p>The resoure's name is extracted from the resource url, if no url is given (nested resource) or if url does not match the resource's name, then you can change it's name and plural name by setting the <code>name</code> and <code>plural</code> configuration variables:</p>
 <pre><code class="lang-javascript">restmod.model().$mix(function() {
-    NAME: 'mouse', // if you only set NAME, then plural is infered from it using the inflector.
-    PLURAL: 'mice'
+    $config: {
+        name: 'mouse', // if you only set NAME, then plural is infered from it using the inflector.
+        plural: 'mice'
+    }
 });</code></pre>
-<p>It's also posible to change the root property name without changing the resource name by setting the <code>JSON_ROOT_SINGLE</code>, <code>JSON_ROOT_MANY</code> or the <code>JSON_ROOT</code> (both single and many) configuration properties. This should only be used when the properties are fixed or not named after the resource.</p>
+<p>It's also posible to change the root property name without changing the resource name by setting the <code>jsonRootSingle</code>, <code>jsonRootMany</code> or the <code>jsonRoot</code> (both single and many) configuration properties. This should only be used when the properties are fixed or not named after the resource.</p>
 <h3><a name="q3"></a> How can I extract response metadata from the root object?</h3>
-<p>Take a look at the <a href="#q2">previous question</a> first and set up the default packer.</p>
-<p>By default, the default packer extracts metadata from the <code>meta</code> root property and stores it in the record's (or collection's) <code>$metadata</code> property.</p>
+<p>Take a look at the <a href="#q2">previous question</a> first and set up the default packer mixin.</p>
+<p>By default, the default packer <code>unpack</code> method extracts metadata from the <code>meta</code> root property and stores it in the record's (or collection's) <code>$metadata</code> property.</p>
 <p>So, the following response to a collection's <code>$fetch</code>:</p>
 <pre><code class="lang-json">{
     &quot;bikes&quot;: [{
@@ -238,7 +262,7 @@
     }
 }</code></pre>
 <p>Will put <code>{ page: 1 }</code> in the collection's <code>$metadata</code> property.</p>
-<p>To change the property from where the packer extracts the metadata set the <code>JSON_META</code> configuration property. Set it to '.' to extract metadata from root, so given:</p>
+<p>To change the property from where the packer extracts the metadata set the <code>jsonMeta</code> configuration property. Set it to '.' to extract metadata from root, so given:</p>
 <pre><code class="lang-json">{
     &quot;bikes&quot;: [{
         &quot;user_id&quot;: 1,
@@ -246,8 +270,7 @@
     }],
     &quot;page&quot;: 1
 }</code></pre>
-<pre><code class="lang-javascript">var Bike = restmod.model('/api/bikes').$mix({
-    PACKER: 'default',
+<pre><code class="lang-javascript">var Bike = restmod.model('/api/bikes').$mix('DefaultPacker',
     JSON_META: '.'
 });
 
@@ -277,9 +300,7 @@ Bike.$search().$then(function(_colection) {
     }
 }</code></pre>
 <p>The following model definition should correctly load every resource:</p>
-<pre><code class="lang-javacript">var Base = restmod.mixin({
-    PACKER: 'default' // remember to enable the default packer.
-});
+<pre><code class="lang-javacript">var Base = restmod.mixin('DefaultPacker');  // remember to enable the default packer.
 
 var User = restmod.model('/api/users').$mix(Base);
 var Part = restmod.model('/api/parts').$mix(Base);
@@ -305,15 +326,12 @@ bike = Bike.$find(1).$then(function() {
     PLURAL: 'mice'
 });</code></pre>
 <h3><a name="q5"></a> My resource properties are being automatically renamed, is this normal?</h3>
-<p>That is probably because the api style you selected has registered a property renamer.</p>
-<p>You can disable renaming or change the renamer by using the following builder methods:</p>
+<p>That is probably because the api style you selected has overriden the model's property renaming methods <code>encodeName</code> and <code>decodeName</code>.</p>
+<p>You can disable or modify renaming by overriding the following methods:</p>
 <pre><code class="lang-javascript">module.config(function(restmodProvider) {
-    restmodProvider.rebase(function() {
-        this.setRenamer(false); // remove the current renamer
-        this.setRenamer({  // set another renamer
-            decode: function(_name) { return _newName; },
-            encode: function(_name) { return _newName; }
-        });
+    restmodProvider.rebase({
+        '^encodeName': function(_name) { return _newName; }, // or null to disable renaming.
+        '^decodeName': function(_name) { return _newName; } // or null to disable renaming.
     });
 });</code></pre>
 <h3><a name="q6"></a> Are there any other conventions related to naming I should be aware of?</h3>
@@ -323,16 +341,16 @@ bike = Bike.$find(1).$then(function() {
 <ol>
 <li><p>Change the name decoder so it renames properties that start with '$' and gives them another prefix and then change the name encoder to detect the special prefix and change it back to '$':</p>
 <pre><code class="lang-javascript"> module.config(function(restmodProvider) {
-     restmodProvider.rebase(function() {
-         this.setNameDecoder(function(_name) {
+     restmodProvider.rebase({
+         '^decodeName': function(_name) {
              // change prefix to '_'
              return _name.charAt(0) == '$' ? '_' + inflector.camelize(_name.substr(1), true) : inflector.camelize(_name);
-         });
+         },
 
-         this.setNameEncoder(function(_name) {
+         '^encodeName': function(_name) {
              // change prefix back to '$'
              return _name.charAt(0) == '_' ? '$' + inflector.parameterize(_name.substr(1), '_') : inflector.parameterize(_name, '_');
-         });
+         }
      });
  });</code></pre>
 </li>
@@ -344,19 +362,23 @@ bike = Bike.$find(1).$then(function() {
 </li>
 </ol>
 <h3><a name="q7"></a> How can I set a common url prefix for every resource?</h3>
-<p>You can user the <code>URL_PREFIX</code> configuration property, like this:</p>
+<p>You can user the <code>urlPrefix</code> configuration property, like this:</p>
 <pre><code class="lang-javascript">module.config(function(restmodProvider) {
     restmodProvider.rebase({
-        URL_PREFIX: '/api/v1' // or use setProperty('urlPrefix', '/api/v1') in a definition function
+        $config: {
+            urlPrefix: '/api/v1' // or use setProperty('urlPrefix', '/api/v1') in a definition function
+        }
     });
 });</code></pre>
 <h3><a name="q8"></a> How can I add a trailing slash or extension to the url sent to server?</h3>
 <p>You can hook to the <code>before-request</code> event and modify the url before is sent, restmod will remove trailing slashes from generated urls before this hook is called, so slashes appended here will be sent.</p>
 <pre><code class="lang-javascript">module.config(function(restmodProvider) {
     restmodProvider.rebase({
-        '~before-request': function(_req) {
-            // _req is just a $http configuration object.
-            _req.url += '.json';
+        $hooks: {
+            'before-request': function(_req) {
+                // _req is just a $http configuration object.
+                _req.url += '.json';
+            }
         }
     });
 });</code></pre>
@@ -365,8 +387,10 @@ bike = Bike.$find(1).$then(function() {
 <p>Same as before, you can hook to the <code>before-request</code> event:</p>
 <pre><code class="lang-javascript">module.config(function(restmodProvider) {
     restmodProvider.rebase({
-        '~before-request': function(_req) {
-            _req.headers = angular.extend(_req.headers, { 'X-My-Header': 'imateapot!' });
+        $hooks: {
+            'before-request': function(_req) {
+                _req.headers = angular.extend(_req.headers, { 'X-My-Header': 'imateapot!' });
+            }
         }
     });
 });</code></pre>
@@ -379,9 +403,11 @@ bike = Bike.$find(1).$then(function() {
 <p>or to define your own style do:</p>
 <pre><code class="lang-javascript">module.config(function(restmodProvider) {
     restmodProvider.rebase({
-        STYLE: 'MyDjangoStyle', // By setting the STYLE variable the warning is disabled.
-        PRIMARY_KEY: '_id'
-        /* other style related configuration */
+        $config: {
+            style: 'MyDjangoStyle', // By setting the style variable the warning is disabled.
+            primaryKey: '_id'
+            /* other style related configuration */
+        }
     });
 });</code></pre>
 <p>To see available styles or colaborate with a new one, take a look at the <a href="https://github.com/platanus/angular-restmod/blob/master/docs/guides/styles.md">Style listing</a>.</p>
@@ -397,7 +423,7 @@ bike = Bike.$find(1).$then(function() {
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on Fri Sep 12 2014 11:56:33 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Tue Sep 23 2014 00:16:30 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

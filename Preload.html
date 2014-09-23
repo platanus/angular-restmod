@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>restmod Mixin: PagedModel</title>
+	<title>restmod Mixin: Preload</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -187,12 +187,12 @@
 					
 
 
-	<h1 class="page-title">Mixin: PagedModel</h1>
+	<h1 class="page-title">Mixin: Preload</h1>
 <section>
 
 <header>
     <h2>
-    PagedModel
+    Preload
     </h2>
     
 </header>
@@ -203,20 +203,7 @@
 
     
         
-            <div class="description"><p>Extracts header paging information into the <code>$page</code> and <code>$pageCount</code> properties.</p>
-<p>Usage:</p>
-<p>Just add mixin to a model's mixin chain</p>
-<pre><code class="lang-javascript">var Bike = restmod.model('api/bikes', 'PagedModel');</code></pre>
-<p>Then using fetch on a collection bound to a paged api should provide page information</p>
-<pre><code class="lang-javascript">Bike.$search().$then(function() {
-  console.log this.$page; // should print the current page number.
-  console.log this.$pageCount; // should print the request total page count.
-});</code></pre>
-<p>Paging information is extracted from the 'X-Page' and the 'X-Page-Total' headers, to use different headers just
-override the $pageHeader or the $pageCountHeader definition during model building.</p>
-<pre><code class="lang-javascript">restmod.model('PagedModel', function() {
- this.define('$pageHeader', 'X-My-Page-Header');
-})</code></pre></div>
+            <div class="description"><p>Provides relation eager loading via the <code>Resource.$preload</code> method.</p></div>
         
 
         
@@ -242,7 +229,7 @@ override the $pageHeader or the $pageCountHeader definition during model buildin
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        plugins/paged.js, line 1
+        plugins/preload.js, line 1
     </li></ul></dd>
     
 
@@ -270,6 +257,159 @@ override the $pageHeader or the $pageCountHeader definition during model buildin
 
     
 
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<dt>
+    <h4 class="name" id="Resource.$preload"><span class="type-signature">&lt;static> </span>Resource.$preload<span class="signature">(arguments)</span><span class="type-signature"> &rarr; {Resource}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Preloads a resource's relations</p>
+<p>The method receives a list of relation names to preload, it also
+handles nested relation names. If a nested relation is added to be resolved
+then the parent relation is also resolved.</p>
+<p>Usage:</p>
+<pre><code class="lang-javascript">Bike.$search({ category: 'xc' }).$preload('user', 'parts.maker'); // this will also resolve 'parts'</code></pre>
+<p>Preload will attempt to use the target model's <code>$populate</code> method, if not found it will fallback to
+simple resolving. Take a look at the Populate plugin for a $populate implementation using special
+API support.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>arguments</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Relations to preload.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        plugins/preload.js, line 59
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type">Resource</span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        </dl>
     
 
     

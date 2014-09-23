@@ -53,6 +53,10 @@
 						</li>
 						
 						<li>
+							<a href="FastQ.html">FastQ</a>
+						</li>
+						
+						<li>
 							<a href="PackerCache.html">PackerCache</a>
 						</li>
 						
@@ -78,10 +82,6 @@
 						
 						<li>
 							<a href="ScopeApi.html">ScopeApi</a>
-						</li>
-						
-						<li>
-							<a href="SerializerBuilderApi.html">SerializerBuilderApi</a>
 						</li>
 						
 						<li>
@@ -112,6 +112,14 @@
 						
 						<li>
 							<a href="PagedModel.html">PagedModel</a>
+						</li>
+						
+						<li>
+							<a href="Populate.html">Populate</a>
+						</li>
+						
+						<li>
+							<a href="Preload.html">Preload</a>
 						</li>
 						
 						<li>
@@ -146,6 +154,20 @@
 						
 						<li>
 							<a href="tutorial-styles.html">styles</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="global.html#dummy">dummy</a>
 						</li>
 						
 
@@ -383,7 +405,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 44
+        module/api/record-api.js, line 41
     </li></ul></dd>
     
 
@@ -433,6 +455,253 @@
         <h3 class="subsection-title">Methods</h3>
 
         <dl>
+            
+<dt>
+    <h4 class="name" id="$action"><span class="type-signature"></span>$action<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="CommonApi.html">CommonApi</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Registers a new action to be executed in the promise queue.</p>
+<p>Registered pending actions can be canceled using <code>$cancel</code></p>
+<p><code>$cancel</code> will also cancel any ongoing call to <code>$send</code> (will not abort it yet though...)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="CommonApi.html#$action">CommonApi#$action</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/api/common-api.js, line 421
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="CommonApi.html">CommonApi</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <h4 class="name" id="$always"><span class="type-signature"></span>$always<span class="signature">(_fun)</span><span class="type-signature"> &rarr; {<a href="CommonApi.html">CommonApi</a>}</span></h4>
+    
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Promise chaining method, similar to then but executes same callback in success or error.</p>
+<p>Usage:</p>
+<pre><code class="lang-javascript">col.$fetch().$always(function() { });</code></pre>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_fun</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>success/error callback</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
+    
+    
+    
+<dl class="details">
+    
+
+    
+
+    
+
+    
+    <dt class="inherited-from">Inherited From:</dt>
+    <dd class="inherited-from"><ul class="dummy"><li>
+        <a href="CommonApi.html#$always">CommonApi#$always</a>
+    </li></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        module/api/common-api.js, line 312
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>self</p>
+</div>
+
+
+
+<dl>
+	<dt>
+		Type
+	</dt>
+	<dd>
+		
+<span class="param-type"><a href="CommonApi.html">CommonApi</a></span>
+
+
+	</dd>
+</dl>
+
+
+        
+    
+    
+</dd>
+
+        
             
 <dt>
     <h4 class="name" id="$asPromise"><span class="type-signature"></span>$asPromise<span class="signature">()</span><span class="type-signature"> &rarr; {promise}</span></h4>
@@ -485,7 +754,7 @@ new promise is not set as the current object promise, for that use <code>$then</
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/common-api.js, line 242
+        module/api/common-api.js, line 259
     </li></ul></dd>
     
 
@@ -652,7 +921,7 @@ attempt to first use the unscoped resource url.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 144
+        module/api/record-api.js, line 128
     </li></ul></dd>
     
 
@@ -711,7 +980,7 @@ attempt to first use the unscoped resource url.</p>
     
     
     <div class="description">
-        <p>Cancels all pending requests initiated with $send.</p>
+        <p>Cancels all pending actions registered with $action.</p>
     </div>
     
 
@@ -749,7 +1018,7 @@ attempt to first use the unscoped resource url.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/common-api.js, line 398
+        module/api/common-api.js, line 454
     </li></ul></dd>
     
 
@@ -913,7 +1182,7 @@ attempt to first use the unscoped resource url.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 196
+        module/api/record-api.js, line 163
     </li></ul></dd>
     
 
@@ -1098,7 +1367,7 @@ restmod.mixin({
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/common-api.js, line 169
+        module/api/common-api.js, line 186
     </li></ul></dd>
     
 
@@ -1191,7 +1460,7 @@ restmod.mixin({
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 307
+        module/api/record-api.js, line 336
     </li></ul></dd>
     
 
@@ -1412,7 +1681,7 @@ myBike.$decorate({
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/common-api.js, line 89
+        module/api/common-api.js, line 106
     </li></ul></dd>
     
 
@@ -1528,7 +1797,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/common-api.js, line 220
+        module/api/common-api.js, line 237
     </li></ul></dd>
     
 
@@ -1669,7 +1938,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 177
+        module/api/record-api.js, line 144
     </li></ul></dd>
     
 
@@ -1810,7 +2079,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 212
+        module/api/record-api.js, line 179
     </li></ul></dd>
     
 
@@ -1870,6 +2139,10 @@ contextual hook system in asynchronic operations.</p>
     
     <div class="description">
         <p>Copyies another object's non-private properties.</p>
+<p>This method runs inside the promise chain, so calling</p>
+<pre><code class="lang-javascript">Bike.$find(1).$extend({ size: &quot;L&quot; }).$save();</code></pre>
+<p>Will first fetch the bike data and after it is loaded the new size will be applied and then the
+updated model saved.</p>
     </div>
     
 
@@ -1951,7 +2224,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 160
+        module/api/record-api.js, line 228
     </li></ul></dd>
     
 
@@ -2093,7 +2366,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 228
+        module/api/record-api.js, line 195
     </li></ul></dd>
     
 
@@ -2242,7 +2515,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/common-api.js, line 301
+        module/api/common-api.js, line 332
     </li></ul></dd>
     
 
@@ -2293,7 +2566,7 @@ contextual hook system in asynchronic operations.</p>
         
             
 <dt>
-    <h4 class="name" id="$hasPendingRequests"><span class="type-signature"></span>$hasPendingRequests<span class="signature">()</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
+    <h4 class="name" id="$hasPendingActions"><span class="type-signature"></span>$hasPendingActions<span class="signature">()</span><span class="type-signature"> &rarr; {Boolean}</span></h4>
     
     
 </dt>
@@ -2301,7 +2574,7 @@ contextual hook system in asynchronic operations.</p>
     
     
     <div class="description">
-        <p>Returns true if object has queued pending request</p>
+        <p>Returns true if object has queued actions</p>
     </div>
     
 
@@ -2322,7 +2595,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="CommonApi.html#$hasPendingRequests">CommonApi#$hasPendingRequests</a>
+        <a href="CommonApi.html#$hasPendingActions">CommonApi#$hasPendingActions</a>
     </li></dd>
     
 
@@ -2339,7 +2612,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/common-api.js, line 416
+        module/api/common-api.js, line 472
     </li></ul></dd>
     
 
@@ -2432,7 +2705,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 108
+        module/api/record-api.js, line 105
     </li></ul></dd>
     
 
@@ -2551,7 +2824,7 @@ contextual hook system in asynchronic operations.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 339
+        module/api/record-api.js, line 379
     </li></ul></dd>
     
 
@@ -2726,7 +2999,7 @@ bike2.$save(); // no alert is shown after bike2 is saved</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/common-api.js, line 138
+        module/api/common-api.js, line 155
     </li></ul></dd>
     
 
@@ -2870,7 +3143,7 @@ then calling this method without parameters will force the object to be added to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 362
+        module/api/record-api.js, line 402
     </li></ul></dd>
     
 
@@ -2921,7 +3194,7 @@ then calling this method without parameters will force the object to be added to
         
             
 <dt>
-    <h4 class="name" id="$save"><span class="type-signature"></span>$save<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="RecordApi.html">RecordApi</a>}</span></h4>
+    <h4 class="name" id="$save"><span class="type-signature"></span>$save<span class="signature">(_patch)</span><span class="type-signature"> &rarr; {<a href="RecordApi.html">RecordApi</a>}</span></h4>
     
     
 </dt>
@@ -2929,7 +3202,9 @@ then calling this method without parameters will force the object to be added to
     
     
     <div class="description">
-        <p>Begin a server request to create/update resource.</p>
+        <p>Begin a server request to create/update/patch resource.</p>
+<p>A patch is only executed if model is identified and a patch property list is given. It is posible to
+change the method used for PATCH operations by setting the <code>patchMethod</code> configuration.</p>
 <p>If resource is new and it belongs to a collection and it hasnt been revealed, then it will be revealed.</p>
 <p>The request's promise can be accessed using the <code>$asPromise</code> method.</p>
     </div>
@@ -2939,6 +3214,55 @@ then calling this method without parameters will force the object to be added to
     
     
     
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+
+		<th>Type</th>
+
+		
+
+		
+
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+
+	<tbody>
+	
+
+        <tr>
+            
+                <td class="name"><code>_patch</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Optional list of properties to send in update operation.</p></td>
+        </tr>
+
+	
+	</tbody>
+</table>
+
     
     
     
@@ -2964,7 +3288,7 @@ then calling this method without parameters will force the object to be added to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 256
+        module/api/record-api.js, line 267
     </li></ul></dd>
     
 
@@ -3162,7 +3486,7 @@ then calling this method without parameters will force the object to be added to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/common-api.js, line 323
+        module/api/common-api.js, line 354
     </li></ul></dd>
     
 
@@ -3334,7 +3658,7 @@ then calling this method without parameters will force the object to be added to
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/common-api.js, line 267
+        module/api/common-api.js, line 284
     </li></ul></dd>
     
 
@@ -3385,7 +3709,7 @@ then calling this method without parameters will force the object to be added to
         
             
 <dt>
-    <h4 class="name" id="$unwrap"><span class="type-signature"></span>$unwrap<span class="signature">(_raw, _mask)</span><span class="type-signature"> &rarr; {<a href="CommonApi.html">CommonApi</a>}</span></h4>
+    <h4 class="name" id="$update"><span class="type-signature"></span>$update<span class="signature">(_other)</span><span class="type-signature"> &rarr; {<a href="RecordApi.html">RecordApi</a>}</span></h4>
     
     
 </dt>
@@ -3393,9 +3717,8 @@ then calling this method without parameters will force the object to be added to
     
     
     <div class="description">
-        <p>Unpacks and decode raw data from a server generated structure.</p>
-<p>ATTENTION: do not override this method to change the object wrapping strategy,
-instead, check BuilderApi#setPacker for instruction about loading a new packer.</p>
+        <p>Shortcut method used to extend and save a model.</p>
+<p>This method will not force a PUT, if object is new <code>$update</code> will attempt to POST.</p>
     </div>
     
 
@@ -3429,13 +3752,13 @@ instead, check BuilderApi#setPacker for instruction about loading a new packer.<
 
         <tr>
             
-                <td class="name"><code>_raw</code></td>
+                <td class="name"><code>_other</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">mixed</span>
+<span class="param-type">object</span>
 
 
             
@@ -3445,30 +3768,7 @@ instead, check BuilderApi#setPacker for instruction about loading a new packer.<
 
             
 
-            <td class="description last"><p>Raw server data</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_mask</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>'CRU' mask</p></td>
+            <td class="description last"><p>Data to change</p></td>
         </tr>
 
 	
@@ -3486,11 +3786,6 @@ instead, check BuilderApi#setPacker for instruction about loading a new packer.<
     
 
     
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="CommonApi.html#$unwrap">CommonApi#$unwrap</a>
-    </li></dd>
-    
 
     
 
@@ -3505,7 +3800,7 @@ instead, check BuilderApi#setPacker for instruction about loading a new packer.<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/common-api.js, line 444
+        module/api/record-api.js, line 248
     </li></ul></dd>
     
 
@@ -3530,7 +3825,7 @@ instead, check BuilderApi#setPacker for instruction about loading a new packer.<
     
             
 <div class="param-desc">
-    <p>this</p>
+    <p>self</p>
 </div>
 
 
@@ -3541,7 +3836,7 @@ instead, check BuilderApi#setPacker for instruction about loading a new packer.<
 	</dt>
 	<dd>
 		
-<span class="param-type"><a href="CommonApi.html">CommonApi</a></span>
+<span class="param-type"><a href="RecordApi.html">RecordApi</a></span>
 
 
 	</dd>
@@ -3556,7 +3851,7 @@ instead, check BuilderApi#setPacker for instruction about loading a new packer.<
         
             
 <dt>
-    <h4 class="name" id="$url"><span class="type-signature"></span>$url<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+    <h4 class="name" id="$url"><span class="type-signature"></span>$url<span class="signature">(_for)</span><span class="type-signature"> &rarr; {string}</span></h4>
     
     
 </dt>
@@ -3564,102 +3859,7 @@ instead, check BuilderApi#setPacker for instruction about loading a new packer.<
     
     
     <div class="description">
-        <p>Returns the url this object is bound to.</p>
-<p>This is the url used by fetch to retrieve the resource related data.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        module/api/record-api.js, line 126
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>bound url.</p>
-</div>
-
-
-
-<dl>
-	<dt>
-		Type
-	</dt>
-	<dd>
-		
-<span class="param-type">string</span>
-
-
-	</dd>
-</dl>
-
-
-        
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <h4 class="name" id="$wrap"><span class="type-signature"></span>$wrap<span class="signature">(_mask)</span><span class="type-signature"> &rarr; {string}</span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Encode and packs object into a server compatible structure that can be used for PUT/POST operations.</p>
-<p>ATTENTION: do not override this method to change the object wrapping strategy,
-instead, check BuilderApi#setPacker for instruction about loading a new packer.</p>
+        <p>Gets this resource url.</p>
     </div>
     
 
@@ -3693,7 +3893,7 @@ instead, check BuilderApi#setPacker for instruction about loading a new packer.<
 
         <tr>
             
-                <td class="name"><code>_mask</code></td>
+                <td class="name"><code>_for</code></td>
             
 
             <td class="type">
@@ -3709,7 +3909,7 @@ instead, check BuilderApi#setPacker for instruction about loading a new packer.<
 
             
 
-            <td class="description last"><p>'CRU' mask</p></td>
+            <td class="description last"><p>Intended usage for the url (optional)</p></td>
         </tr>
 
 	
@@ -3729,7 +3929,7 @@ instead, check BuilderApi#setPacker for instruction about loading a new packer.<
     
     <dt class="inherited-from">Inherited From:</dt>
     <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="CommonApi.html#$wrap">CommonApi#$wrap</a>
+        <a href="CommonApi.html#$url">CommonApi#$url</a>
     </li></dd>
     
 
@@ -3746,7 +3946,7 @@ instead, check BuilderApi#setPacker for instruction about loading a new packer.<
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/api/common-api.js, line 467
+        module/api/common-api.js, line 50
     </li></ul></dd>
     
 
@@ -3771,7 +3971,7 @@ instead, check BuilderApi#setPacker for instruction about loading a new packer.<
     
             
 <div class="param-desc">
-    <p>raw data</p>
+    <p>The resource url.</p>
 </div>
 
 
@@ -3815,7 +4015,7 @@ instead, check BuilderApi#setPacker for instruction about loading a new packer.<
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on Fri Sep 12 2014 11:56:33 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Tue Sep 23 2014 00:16:30 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
