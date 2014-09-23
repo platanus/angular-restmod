@@ -27,7 +27,8 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
         decoders = {},
         encoders = {},
         mapped = {},
-        mappings = {};
+        mappings = {},
+        vol = {};
 
     function isMasked(_name, _mask) {
       if(typeof _mask === 'function') return _mask(_name);
@@ -125,6 +126,8 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
             encodedName = _strategies.encodeName ? _strategies.encodeName(key) : key;
             _to[encodedName] = value;
           }
+
+          if(vol[fullName]) delete _from[key];
         }
       }
 
@@ -308,6 +311,20 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
             }
 
             encoders[_attr] = _chain ? Utils.chain(encoders[_attr], _filter) : _filter;
+            return this;
+          },
+
+          /**
+           * @memberof SerializerBuilderApi#
+           *
+           * @description Makes an attribute volatile, a volatile attribute is deleted from source after encoding.
+           *
+           * @param {string} _name Attribute name
+           * @param {boolean} _isVolatile defaults to true, if set to false then the attribute is no longer volatile.
+           * @return {SerializerBuilderApi} self
+           */
+          attrVolatile: function(_attr, _isVolatile) {
+            vol[_attr] = _isVolatile === undefined ? true : _isVolatile;
             return this;
           }
         };

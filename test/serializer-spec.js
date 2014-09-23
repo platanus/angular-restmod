@@ -283,5 +283,32 @@ describe('Restmod serializer', function() {
       expect(result.gearRatio).toEqual(24/36);
     });
   });
+
+  describe('attrVolatile', function() {
+
+    it('should remove attribute after encoding', function() {
+      serializer.dsl().attrVolatile('gearRatio');
+      var source = { gearRatio: 24/36 },
+          result = serializer.encode(source, '');
+      expect(result.gearRatio).toBeDefined();
+      expect(source.gearRatio).toBeUndefined();
+    });
+
+    it('should work on nested attributes', function() {
+      serializer.dsl().attrVolatile('stats.gearRatio');
+      var source = { stats: { gearRatio: 24/36 } },
+          result = serializer.encode(source, '');
+      expect(result.stats.gearRatio).toBeDefined();
+      expect(source.stats.gearRatio).toBeUndefined();
+    });
+
+    it('should work on nested arrays', function() {
+      serializer.dsl().attrVolatile('stats[].gearRatio');
+      var source = { stats: [{ gearRatio: 24/36 }] },
+          result = serializer.encode(source, '');
+      expect(result.stats[0].gearRatio).toBeDefined();
+      expect(source.stats[0].gearRatio).toBeUndefined();
+    });
+  });
 });
 

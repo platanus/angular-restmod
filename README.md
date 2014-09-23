@@ -2,7 +2,6 @@
 <!-- provide: $provide -->
 <!-- inject: $httpBackend -->
 <!-- inject: $injector -->
-<!-- inject: $injector -->
 <!-- inject: restmod -->
 
 <!-- before:
@@ -893,6 +892,16 @@ You can explicitly tell restmod to map a given server attribute to one of the mo
 ```javascript
 var Bike = restmod.model('/bikes').mix({
 	created: { map: 'stats.created_at' }
+});
+```
+
+### Volatile attributes
+
+You can define volatile attributes, volatile attributes will be deleted from record instance after being sent to server, this is usefull for things like passwords.
+
+```javascript
+var User = restmod.model('/users').mix({
+	password: { volatile: true } // make password volatile
 });
 ```
 

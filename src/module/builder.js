@@ -29,43 +29,49 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', func
    *
    *   // MODEL CONFIGURATION
    *
-   *   URL: 'resource',
-   *   NAME: 'resource',
-   *   PRIMARY_KEY: '_id',
+   *   $config: {
+   *     name: 'resource',
+   *     primaryKey: '_id'
+   *   },
    *
-   *   // ATTRIBUTE MODIFIERS
+   *   // ATTRIBUTE MODIFIERS AND RELATIONS
    *
    *   propWithDefault: { init: 20 },
    *   propWithDecoder: { decode: 'date', chain: true },
-   *
-   *   // RELATIONS
-   *
    *   hasManyRelation: { hasMany: 'Other' },
-   *   hasOneRelation: { hasOne: 'Other' }
-   *
-   *   // METHODS
-   *
-   *   instanceMethod: function() {
-   *   },
-   *
-   *   '@scopeMethod': function() {
-   *   },
+   *   hasOneRelation: { hasOne: 'Other' },
    *
    *   // HOOKS
    *
-   *   '~afterCreate': function() {
+   *   $hooks: {
+   *     'after-create': function() {
+   *     }
+   *   },
+   *
+   *   // METHODS
+   *
+   *   $extend: {
+   *     Record: {
+   *       instanceMethod: function() {
+   *       }
+   *     },
+   *     Model: {
+   *       scopeMethod: function() {
+   *       }
+   *     }
    *   }
    * });
    * ```
    *
-   * Special model configuration variables can be set by refering to the variable name in capitalized form, like this:
+   * Special model configuration variables can be set by using a `$config` block:
    *
    * ```javascript
    * restmod.model({
    *
-   *   URL: 'resource',
-   *   NAME: 'resource',
-   *   PRIMARY_KEY: '_id'
+   *   $config: {
+   *     name: 'resource',
+   *     primaryKey: '_id'
+   *   }
    *
    *  });
    *
@@ -82,18 +88,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', func
    * * `map` sets an explicit server attribute mapping, see {@link BuilderApi#attrMap}
    * * `decode` sets how an attribute is decoded after being fetch, maps to {@link BuilderApi#attrDecoder}
    * * `encode` sets how an attribute is encoded before being sent, maps to {@link BuilderApi#attrEncoder}
-   *
-   * To add/override methods from the record api, a function can be passed to one of the
-   * description properties:
-   *
-   * ```javascript
-   * var Model = restmod.model('/', {
-   *   sayHello: function() { alert('hello!'); }
-   * })
-   *
-   * // then say hello is available for use at model records
-   * Model.$new().sayHello();
-   * ```
+   * * `volatile` sets the attribute volatility, maps to {@link BuilderApi#attrVolatile}
    *
    * If other kind of value (different from object or function) is passed to a definition property,
    * then it is considered to be a default value. (same as calling {@link BuilderApi#define} at a definition function)
@@ -107,26 +102,47 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', func
    * Model.$new().im20; // 20
    * ```
    *
-   * To add a method to the model type, prefix the definition key with **^**, to add it to the model collection prototype,
+   * To add/override methods from the record api, use the `$extend` block:
+   *
+   * ```javascript
+   * var Model = restmod.model('/', {
+   *   $extend: {
+   *     sayHello: function() { alert('hello!'); }
+   *   }
+   * })
+   *
+   * // then say hello is available for use at model records
+   * Model.$new().sayHello();
+   * ```
+   *
+   * To add a static method or a collection method, you must specify the method scope: , prefix the definition key with **^**, to add it to the model collection prototype,
    * prefix it with ***** static/collection methods to the Model, prefix the definition property name with **@**
    * (same as calling {@link BuilderApi#scopeDefine} at a definition function).
    *
    * ```javascript
    * var Model = restmod.model('/', {
-   *   '@sayHello': function() { alert('hello!'); }
+   *   $extend: {
+   *     'Collection.count': function() { return this.length; },  // scope is set using a prefix
+   *
+   *     Model: {
+   *       sayHello: function() { alert('hello!'); } // scope is set using a block
+   *     }
    * })
    *
-   * // then say hello is available for use at model type and collection.
+   * // then the following call will be valid.
    * Model.sayHello();
-   * Model.$collection().sayHello();
+   * Model.$collection().count();
    * ```
    *
-   * To add hooks to the Model lifecycle events, prefix the definition property name with **~** and make sure the
-   * property name matches the event name (same as calling {@link BuilderApi#on} at a definition function).
+   * More information about method scopes can be found in {@link BuilderApi#define}
+   *
+   * To add hooks to the Model lifecycle events use the `$hooks` block:
    *
    * ```javascript
    * var Model = restmod.model('/', {
-   *   '~afterInit': function() { alert('hello!'); }
+   *   $hooks: {
+   *     'after-init': function() { alert('hello!'); }
+   *   }
    * })
    *
    * // the after-init hook is called after every record initialization.
@@ -157,7 +173,8 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', func
       ignore: ['attrMask'],
       map: ['attrMap', 'force'],
       decode: ['attrDecoder', 'param', 'chain'],
-      encode: ['attrEncoder', 'param', 'chain']
+      encode: ['attrEncoder', 'param', 'chain'],
+      'volatile': ['attrVolatile']
     };
 
     // DSL core functions.
