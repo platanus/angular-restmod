@@ -1,3 +1,12 @@
+<a name="1.1.1"></a>
+### 1.1.1 (2014-09-23)
+
+
+#### Bug Fixes
+
+* **styles:** Fixes AMS style definition, adds a ams-spec. ([92b5cb90](http://github.com/angular-platanus/restmod/commit/92b5cb90c4c7f2bef29f46be0f87e21e401760ce), closes [#151](http://github.com/angular-platanus/restmod/issues/151))
+
+
 <a name="1.1.0"></a>
 ## 1.1.0 (2014-09-23)
 
