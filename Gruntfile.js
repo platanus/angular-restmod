@@ -39,6 +39,8 @@ module.exports = function(grunt) {
           'dist/plugins/debounced.js': 'src/plugins/debounced.js',
           'dist/plugins/dirty.js': 'src/plugins/dirty.js',
           'dist/plugins/paged.js': 'src/plugins/paged.js',
+          'dist/plugins/find-many.js': 'src/plugins/find-many.js',
+          'dist/plugins/preload.js': 'src/plugins/preload.js',
           'dist/styles/ams.js': 'src/styles/ams.js'
         }
       }
@@ -54,6 +56,8 @@ module.exports = function(grunt) {
           'dist/plugins/debounced.min.js': 'dist/plugins/debounced.js',
           'dist/plugins/dirty.min.js': 'dist/plugins/dirty.js',
           'dist/plugins/paged.min.js': 'dist/plugins/paged.js',
+          'dist/plugins/find-many.min.js': 'dist/plugins/find-many.js',
+          'dist/plugins/preload.min.js': 'dist/plugins/preload.js',
           'dist/styles/ams.min.js': 'dist/styles/ams.js'
         }
       }
