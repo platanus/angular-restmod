@@ -21,6 +21,7 @@ module.exports = function(config) {
       'src/module.js',
       'src/module/**/*.js',
       'src/plugins/*.js',
+      'src/styles/*.js',
 
       // the specs
       // Do not run the README test since it requires requirejs and I could make it work on sauce
