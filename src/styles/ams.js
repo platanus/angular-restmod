@@ -11,9 +11,9 @@ angular.module('restmod').factory('AMSApi', ['restmod', 'inflector', function(re
 			jsonLinks: 'links'
 		},
 
-		$methods: {
+		$extend: {
 			// special snakecase to camelcase renaming
-			type: {
+			Model: {
 				decodeName: inflector.camelize,
 				encodeName: function(_v) { return inflector.parameterize(_v, '_'); }
 			}
