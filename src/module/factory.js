@@ -392,14 +392,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       }
     }
 
-    /**
-     * @class SerializerBuilderApi
-     *
-     * @description
-     *
-     * Provides an isolated set of methods to customize the serializer behaviour.
-     *
-     */
+    // load the builder
     builder = new Builder(angular.extend(serializer.dsl(), {
 
       /**

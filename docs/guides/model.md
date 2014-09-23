@@ -1,4 +1,6 @@
 
+**IMPORTANT**: This guide is deprecated!!
+
 $restmod provides two levels of model interaction, through collections and instances.
 
 The model type is considered the base collection and is limited to certain collection methods.

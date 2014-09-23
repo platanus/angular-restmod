@@ -191,18 +191,10 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
       // builds a serializerd DSL, is a standalone object that can be extended.
       dsl: function() {
 
-        /**
-         * @class SerializerBuilderApi
-         *
-         * @description
-         *
-         * Provides an isolated set of methods to customize the serializer behaviour.
-         *
-         */
         return {
 
           /**
-           * @memberof SerializerBuilderApi#
+           * @memberof BuilderApi#
            *
            * @description Sets an attribute mapping.
            *
@@ -221,7 +213,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
            *
            * @param {string} _attr Attribute name
            * @param {string} _serverName Server (request/response) property name
-           * @return {SerializerBuilderApi} self
+           * @return {BuilderApi} self
            */
           attrMap: function(_attr, _serverPath, _forced) {
             // extract parent node from client name:
@@ -237,7 +229,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
           },
 
           /**
-           * @memberof SerializerBuilderApi#
+           * @memberof BuilderApi#
            *
            * @description Sets an attribute mask.
            *
@@ -271,7 +263,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
           },
 
           /**
-           * @memberof SerializerBuilderApi#
+           * @memberof BuilderApi#
            *
            * @description Assigns a decoding function/filter to a given attribute.
            *
@@ -279,7 +271,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
            * @param {string|function} _filter filter or function to register
            * @param {mixed} _filterParam Misc filter parameter
            * @param {boolean} _chain If true, filter is chained to the current attribute filter.
-           * @return {SerializerBuilderApi} self
+           * @return {BuilderApi} self
            */
           attrDecoder: function(_attr, _filter, _filterParam, _chain) {
 
@@ -293,7 +285,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
           },
 
           /**
-           * @memberof SerializerBuilderApi#
+           * @memberof BuilderApi#
            *
            * @description Assigns a encoding function/filter to a given attribute.
            *
@@ -301,7 +293,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
            * @param {string|function} _filter filter or function to register
            * @param {mixed} _filterParam Misc filter parameter
            * @param {boolean} _chain If true, filter is chained to the current attribute filter.
-           * @return {SerializerBuilderApi} self
+           * @return {BuilderApi} self
            */
           attrEncoder: function(_attr, _filter, _filterParam, _chain) {
 
@@ -315,13 +307,13 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
           },
 
           /**
-           * @memberof SerializerBuilderApi#
+           * @memberof BuilderApi#
            *
            * @description Makes an attribute volatile, a volatile attribute is deleted from source after encoding.
            *
            * @param {string} _name Attribute name
            * @param {boolean} _isVolatile defaults to true, if set to false then the attribute is no longer volatile.
-           * @return {SerializerBuilderApi} self
+           * @return {BuilderApi} self
            */
           attrVolatile: function(_attr, _isVolatile) {
             vol[_attr] = _isVolatile === undefined ? true : _isVolatile;

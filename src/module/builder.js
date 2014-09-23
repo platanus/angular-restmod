@@ -74,6 +74,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', func
    *   }
    *
    *  });
+   * ```
    *
    * With the exception of model configuration variables and properties starting with a special character (**@** or **~**),
    * each property in the definition object asigns a behavior to the same named property in a model's record.
@@ -89,6 +90,10 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', func
    * * `decode` sets how an attribute is decoded after being fetch, maps to {@link BuilderApi#attrDecoder}
    * * `encode` sets how an attribute is encoded before being sent, maps to {@link BuilderApi#attrEncoder}
    * * `volatile` sets the attribute volatility, maps to {@link BuilderApi#attrVolatile}
+   *
+   * **For relations modifiers take a look at {@link RelationBuilderApi}**
+   *
+   * **For other extended bundled methods check out the {@link ExtendedBuilderApi}**
    *
    * If other kind of value (different from object or function) is passed to a definition property,
    * then it is considered to be a default value. (same as calling {@link BuilderApi#define} at a definition function)
