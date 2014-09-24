@@ -66,6 +66,8 @@ angular.module('restmod').factory('restmod.Preload', ['restmod', '$q', function(
      * handles nested relation names. If a nested relation is added to be resolved
      * then the parent relation is also resolved.
      *
+     * **IMPORTANT**: Only `belongsTo` and `belongsToMany` relations can be preloaded.
+     *
      * Usage:
      *
      * ```javascript

@@ -1,5 +1,5 @@
 /**
- * @mixin Populate
+ * @mixin FindMany
  *
  * @description
  *
@@ -15,8 +15,8 @@ angular.module('restmod').factory('restmod.FindMany', ['restmod', 'RMPackerCache
   return restmod.mixin(function() {
 
     /**
-     * @method $populate
-     * @memberOf Populate
+     * @method $findManyUrl
+     * @memberOf FindMany
      *
      * @description Provides the url for a findMany/populate operation.
      */
@@ -25,7 +25,7 @@ angular.module('restmod').factory('restmod.FindMany', ['restmod', 'RMPackerCache
     })
     /**
      * @method $populate
-     * @memberOf Populate
+     * @memberOf FindMany
      *
      * @description Resolves a series of records using a single api call.
      *
