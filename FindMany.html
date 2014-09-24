@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-	<title>restmod Class: PackerCache</title>
+	<title>restmod Mixin: FindMany</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -187,12 +187,12 @@
 					
 
 
-	<h1 class="page-title">Class: PackerCache</h1>
+	<h1 class="page-title">Mixin: FindMany</h1>
 <section>
 
 <header>
     <h2>
-    PackerCache
+    FindMany
     </h2>
     
 </header>
@@ -203,34 +203,11 @@
 
     
         
-<dt>
-    <h4 class="name" id="PackerCache"><span class="type-signature"></span>new PackerCache<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>The packer cache service enables packing strategies to register raw object data that can be then used by
-supporting relations during the decoding process to preload other related resources.</p>
-<p>This is specially useful for apis that include linked objects data in external metadata.</p>
-<p>The packer cache is reset on every response unwrapping so it's not supposed to be used as an
-application wide cache.</p>
-<h3>For extension developers:</h3>
-<p>Use the <code>feed</code> method to add new raw data to cache.</p>
-<h3>For relation developers:</h3>
-<p>Use the <code>resolve</code> method to inject cache data into a given identified record.</p>
-    </div>
-    
+            <div class="description"><p>Adds the <code>Scope.$populate</code> method that enables multiple record resolving using one request.</p>
+<p>This plugin requires special api support for multiple id requests.</p></div>
+        
 
-    
-    
-    
-    
-    
-    
-    
+        
 <dl class="details">
     
 
@@ -253,7 +230,7 @@ application wide cache.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/packer-cache.js, line 7
+        plugins/find-many.js, line 1
     </li></ul></dd>
     
 
@@ -264,20 +241,8 @@ application wide cache.</p>
     
 </dl>
 
-    
-    
 
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
+        
     
     </div>
 
@@ -299,7 +264,7 @@ application wide cache.</p>
         <dl>
             
 <dt>
-    <h4 class="name" id="feed"><span class="type-signature"></span>feed<span class="signature">(_name, _rawRecords)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="$findManyUrl"><span class="type-signature">&lt;static> </span>$findManyUrl<span class="signature">()</span><span class="type-signature"></span></h4>
     
     
 </dt>
@@ -307,7 +272,7 @@ application wide cache.</p>
     
     
     <div class="description">
-        <p>Feed data to the cache.</p>
+        <p>Provides the url for a findMany/populate operation.</p>
     </div>
     
 
@@ -315,78 +280,6 @@ application wide cache.</p>
     
     
     
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-
-		<th>Type</th>
-
-		
-
-		
-
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-
-	<tbody>
-	
-
-        <tr>
-            
-                <td class="name"><code>_name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Resource name (singular)</p></td>
-        </tr>
-
-	
-
-        <tr>
-            
-                <td class="name"><code>_rawRecords</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Raw record data as an array</p></td>
-        </tr>
-
-	
-	</tbody>
-</table>
-
     
     
     
@@ -412,7 +305,7 @@ application wide cache.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/packer-cache.js, line 38
+        plugins/find-many.js, line 17
     </li></ul></dd>
     
 
@@ -440,7 +333,7 @@ application wide cache.</p>
         
             
 <dt>
-    <h4 class="name" id="resolve"><span class="type-signature"></span>resolve<span class="signature">(_record)</span><span class="type-signature"> &rarr; {<a href="RecordApi.html">RecordApi</a>}</span></h4>
+    <h4 class="name" id="$populate"><span class="type-signature">&lt;static> </span>$populate<span class="signature">(_records)</span><span class="type-signature"> &rarr; {Resource}</span></h4>
     
     
 </dt>
@@ -448,7 +341,23 @@ application wide cache.</p>
     
     
     <div class="description">
-        <p>Searches for data matching the record's pk, if found data is then fed to the record using $decode.</p>
+        <p>Resolves a series of records using a single api call.</p>
+<p>By default, this method uses the same url used by <code>collection.$fetch</code>. To provide a different url
+then override the <code>Scope.$findManyUrl</code> function.</p>
+<p>By default this method uses the pluralized variat of the primary key for the query parameter holding
+the ids. You can override this parameter by setting the <code>findManyKey</code> configuration var.</p>
+<p>This method triggers the <code>before-find-many</code> event before sending the server request.</p>
+<p>Usage:</p>
+<pre><code class="lang-javascript">var bikes = [
+ Bike.$new(1),
+ Bike.$new(2),
+ Bike.$new(3)
+];
+
+Bike.$populate(bikes).$then(function() {
+  // populate returns a fully fledged resource!
+  alert('Ready!');
+})</code></pre>
     </div>
     
 
@@ -482,13 +391,13 @@ application wide cache.</p>
 
         <tr>
             
-                <td class="name"><code>_record</code></td>
+                <td class="name"><code>_records</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="RecordApi.html">RecordApi</a></span>
+<span class="param-type">array</span>
 
 
             
@@ -498,7 +407,7 @@ application wide cache.</p>
 
             
 
-            <td class="description last"><p>restmod record to resolve, must be identified.</p></td>
+            <td class="description last"><p>Records to resolve.</p></td>
         </tr>
 
 	
@@ -530,7 +439,7 @@ application wide cache.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/packer-cache.js, line 52
+        plugins/find-many.js, line 26
     </li></ul></dd>
     
 
@@ -555,7 +464,7 @@ application wide cache.</p>
     
             
 <div class="param-desc">
-    <p>The record, so call can be nested.</p>
+    <p>Resource holding the populate promise.</p>
 </div>
 
 
@@ -566,7 +475,7 @@ application wide cache.</p>
 	</dt>
 	<dd>
 		
-<span class="param-type"><a href="RecordApi.html">RecordApi</a></span>
+<span class="param-type">Resource</span>
 
 
 	</dd>
