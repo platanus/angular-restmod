@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.1.1 - 2014-09-23
+ * @version v1.1.2 - 2014-09-24
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -9,7 +9,7 @@
 (function(angular, undefined) {
 'use strict';
 /**
- * @mixin Populate
+ * @mixin FindMany
  *
  * @description
  *
@@ -23,8 +23,8 @@ angular.module('restmod').factory('restmod.FindMany', ['restmod', 'RMPackerCache
   return restmod.mixin(function() {
 
     /**
-     * @method $populate
-     * @memberOf Populate
+     * @method $findManyUrl
+     * @memberOf FindMany
      *
      * @description Provides the url for a findMany/populate operation.
      */
@@ -33,7 +33,7 @@ angular.module('restmod').factory('restmod.FindMany', ['restmod', 'RMPackerCache
     })
     /**
      * @method $populate
-     * @memberOf Populate
+     * @memberOf FindMany
      *
      * @description Resolves a series of records using a single api call.
      *
@@ -63,12 +63,12 @@ angular.module('restmod').factory('restmod.FindMany', ['restmod', 'RMPackerCache
      * @param {array} _records Records to resolve.
      * @return {Resource} Resource holding the populate promise.
      */
-    .define('Scope.$populate', function(_records) {
+    .define('Scope.$populate', function(_records, _params) {
 
       // Extract record pks for non resolved records and build a record map
       var pks = [],
           recordMap = {},
-          params = {},
+          params = _params || {},
           model = this.$type,
           dummy = model.dummy(true),
           record, request;

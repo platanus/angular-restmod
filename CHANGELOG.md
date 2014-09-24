@@ -1,3 +1,13 @@
+<a name="1.1.2"></a>
+### 1.1.2 (2014-09-24)
+
+#### Features
+
+* **default_packer:** adds support for explicitly setting links and metadata properties to extract. ([dcfd37be](http://github.com/angular-platanus/restmod/commit/dcfd37be0fb8d5e3c5cb7e2c6a728ab96ee408fe), closes [#153](http://github.com/angular-platanus/restmod/issues/153))
+* **find_many:** adds posibility to include additional parameters in populate request ([bf05802b](http://github.com/angular-platanus/restmod/commit/bf05802b7d996c8e7a799f2d003fd2566a60419f))
+* **preload:** adds support for query parameters. ([62f1dcb1](http://github.com/angular-platanus/restmod/commit/62f1dcb136652bfb3e413749c67d1b4443958d07), closes [#152](http://github.com/angular-platanus/restmod/issues/152))
+
+
 <a name="1.1.1"></a>
 ### 1.1.1 (2014-09-23)
 
