@@ -55,12 +55,12 @@ angular.module('restmod').factory('restmod.FindMany', ['restmod', 'RMPackerCache
      * @param {array} _records Records to resolve.
      * @return {Resource} Resource holding the populate promise.
      */
-    .define('Scope.$populate', function(_records) {
+    .define('Scope.$populate', function(_records, _params) {
 
       // Extract record pks for non resolved records and build a record map
       var pks = [],
           recordMap = {},
-          params = {},
+          params = _params || {},
           model = this.$type,
           dummy = model.dummy(true),
           record, request;

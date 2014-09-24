@@ -27,6 +27,14 @@ describe('Plugin: Find Many plugin', function() {
       expect(bikes[1].brand).toEqual('Yetti');
     });
 
+    it('should include additional parameters in request', function() {
+      var bikes = [ Bike.$new(1) ];
+
+      Bike.$populate(bikes, { include: 'parts' });
+      $httpBackend.expectGET('/api/bikes?ids=1&include=parts').respond(200, []);
+      $httpBackend.flush();
+    });
+
     it('should not repeat ids in request, but should populate repeated records separatedly', function() {
       var bikes = [
         Bike.$new(1),
