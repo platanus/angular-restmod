@@ -91,7 +91,7 @@ describe('DefaultPacker', function() {
 
       var record = model.$new(1);
       record.$unwrap({ bike: { model: 'Slash' } });
-      expect(record.$metadata).toBeUndefined();
+      expect(record.$metadata).toEqual({});
     });
 
     it('should extract metadata from root if set to dot', function() {
@@ -101,8 +101,28 @@ describe('DefaultPacker', function() {
 
       var record = model.$new(1);
       record.$unwrap({ bike: { model: 'Slash' }, pages: 20 });
-      expect(record.$metadata.bike).toBeUndefined();
       expect(record.$metadata.pages).toBeDefined();
+    });
+
+    it('should skip links and name if set to dot', function() {
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonMeta: '.' }
+      });
+
+      var record = model.$new(1);
+      record.$unwrap({ bike: { model: 'Slash' }, linked: { users: [] }, pages: 20 });
+      expect(record.$metadata.bike).toBeUndefined();
+      expect(record.$metadata.linked).toBeUndefined();
+
+      var model2 = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonMeta: '.', jsonLinks: ['users', 'parts'] }
+      });
+
+      record = model2.$new(1);
+      record.$unwrap({ bike: { model: 'Slash' }, users: [], parts: [], pages: 20 });
+      expect(record.$metadata.bike).toBeUndefined();
+      expect(record.$metadata.users).toBeUndefined();
+      expect(record.$metadata.parts).toBeUndefined();
     });
 
     it('should skip metadata extraction if set to false', function() {
@@ -113,6 +133,18 @@ describe('DefaultPacker', function() {
       var record = model.$new(1);
       record.$unwrap({ bike: { model: 'Slash' }, meta: { pages: 20 } });
       expect(record.$metadata).toBeUndefined();
+    });
+
+    it('should extract only properties specified in array if array is given', function() {
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonMeta: ['pages', 'status'] }
+      });
+
+      var record = model.$new(1);
+      record.$unwrap({ bike: { model: 'Slash' }, pages: 20, status: 'success', pageSz: 20 });
+      expect(record.$metadata.pages).toBeDefined();
+      expect(record.$metadata.status).toBeDefined();
+      expect(record.$metadata.pageSz).toBeUndefined();
     });
 
   });
@@ -160,6 +192,36 @@ describe('DefaultPacker', function() {
       var record = model.$new(1);
       record.$unwrap({ bike: {}, linked: { users: [] } });
       expect(packerCache.feed).not.toHaveBeenCalledWith('users', []);
+    });
+
+    it('should skip metadata and name if set to dot', function() {
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonLinks: '.' }
+      });
+
+      var record = model.$new(1);
+      record.$unwrap({ bike: { model: 'Slash' }, users: [], meta: {} });
+      expect(packerCache.feed).not.toHaveBeenCalledWith('meta', {});
+
+      var model2 = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonLinks: '.', jsonMeta: ['pages'] }
+      });
+
+      record = model2.$new(1);
+      record.$unwrap({ bike: { model: 'Slash' }, users: [], parts: [], pages: 20 });
+      expect(packerCache.feed).not.toHaveBeenCalledWith('pages', 20);
+    });
+
+    it('should extract only links specified in array if array is given', function() {
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonLinks: ['users', 'parts'] }
+      });
+
+      var record = model.$new(1);
+      record.$unwrap({ bike: {}, users: [], parts: [], rides: [] });
+      expect(packerCache.feed).toHaveBeenCalledWith('users', []);
+      expect(packerCache.feed).toHaveBeenCalledWith('parts', []);
+      expect(packerCache.feed).not.toHaveBeenCalledWith('rides', []);
     });
 
   });

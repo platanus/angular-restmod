@@ -2,38 +2,30 @@
 
 RMModule.factory('DefaultPacker', ['restmod', 'inflector', 'RMPackerCache', function(restmod, inflector, packerCache) {
 
-  // process metadata
-  function processMeta(_meta, _raw, _skip) {
-    var metaDef = _meta;
-    if(typeof metaDef === 'string') {
-      if(metaDef === '.') {
-        var meta = {};
-        for(var key in _raw) {
-          if(_raw.hasOwnProperty(key) &&  _skip.indexOf(key) === -1) { // skip links and object root if extracting from root.
-            meta[key] = _raw[key];
-          }
-        }
-        return meta;
-      } else {
-        return _raw[metaDef];
+  function include(_source, _list, _do) {
+    for(var i = 0, l = _list.length; i < l; i++) {
+      _do(_list[i], _source[_list[i]]);
+    }
+  }
+
+  function exclude(_source, _skip, _do) {
+    for(var key in _source) {
+      if(_source.hasOwnProperty(key) && _skip.indexOf(key) === -1) {
+        _do(key, _source[key]);
       }
-    } else if(typeof metaDef === 'function') {
-      return metaDef(_raw);
     }
   }
 
   // process links and stores them in the packer cache
-  function processLinks(_links, _raw, _skip) {
-    var source = _links === '.' ? _raw : _raw[_links];
-    if(!source) return;
-
-    // feed packer cache
-    for(var key in source) {
-      if(source.hasOwnProperty(key) && _skip.indexOf(key) === -1) {
-        var cache = source[key];
-        // TODO: check that cache is an array.
-        packerCache.feed(key, cache);
-      }
+  function processFeature(_raw, _name, _feature, _other, _do) {
+    if(_feature === '.' || _feature === true) {
+      var skip = [_name];
+      if(_other) skip.push.apply(skip, angular.isArray(_other) ? _other : [_other]);
+      exclude(_raw, skip, _do);
+    } else if(typeof _feature === 'string') {
+      exclude(_raw[_feature], [], _do);
+    } else { // links is an array
+      include(_raw, _feature, _do);
     }
   }
 
@@ -66,7 +58,8 @@ RMModule.factory('DefaultPacker', ['restmod', 'inflector', 'RMPackerCache', func
    *
    * By default the mixin will look for links to other resources in the 'linked' root property, you
    * can change this by setting the jsonLinks variable. To use the root element as link source
-   * use `jsonLinks: true`. To skip links processing, set it to false.
+   * use `jsonLinks: '.'`. You can also explicitly select which properties to consider links using an
+   * array of property names. To skip links processing altogether, set it to false.
    *
    * Links are expected to use the pluralized version of the name for the referenced model. For example,
    * given the following response:
@@ -88,9 +81,9 @@ RMModule.factory('DefaultPacker', ['restmod', 'inflector', 'RMPackerCache', func
    * By default metadata is only captured if it comes in the 'meta' root property. Metadata is then
    * stored in the $meta property of the resource being unwrapped.
    *
-   * To change the metadata source property set the jsonMeta property to the desired name, set
-   * it to '.' to capture the entire raw response or set it to false to skip metadata. It can also be set
-   * to a function, for custom processsing.
+   * Just like links, to change the metadata source property set the jsonMeta property to the desired name, set
+   * it to '.' to capture the entire raw response or set it to false to skip metadata and set it to an array of properties
+   * to be extract selected properties.
    *
    * @property {mixed} single The expected single resource wrapper property name
    * @property {object} plural The expected collection wrapper property name
@@ -111,8 +104,20 @@ RMModule.factory('DefaultPacker', ['restmod', 'inflector', 'RMPackerCache', func
         name = this.getProperty('jsonRootSingle') || this.getProperty('jsonRoot') || this.getProperty('name');
       }
 
-      if(meta) _resource.$metadata = processMeta(meta, _raw, [name, links]);
-      if(links) processLinks(links, _raw, [name]);
+      if(meta) {
+        _resource.$metadata = {};
+        processFeature(_raw, name, meta, links, function(_key, _value) {
+          _resource.$metadata[_key] = _value;
+        });
+      }
+
+      if(links) {
+        processFeature(_raw, name, links, meta, function(_key, _value) {
+          // TODO: check that cache is an array.
+          packerCache.feed(_key, _value);
+        });
+      }
+
       return _raw[name];
     });
   });
