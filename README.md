@@ -991,7 +991,7 @@ Note that a hook can be defined for a type, a collection or a record. Also, hook
 
 # Mixins
 
-To ease up the definition of models, and keep thing DRY, Restmod provides you with mixin capabilities. For example, say you already defined a Vehicle model as a factory:
+To ease up the definition of models, and keep things DRY, Restmod provides you with mixin capabilities. For example, say you already defined a Vehicle model as a factory:
 
 ```javascript
 Angular.factory('Vehicle', function() {
