@@ -45,8 +45,19 @@ describe('Plugin: Preload function', function() {
         jasmine.objectContaining({ $pk: 10 }),
         jasmine.objectContaining({ $pk: 11 }),
         jasmine.objectContaining({ $pk: 13 })
-      ]);
+      ], undefined);
       expect(User.$populate.callCount).toEqual(1);
+    });
+
+    it('should support parameters', function() {
+      User.$populate = jasmine.createSpy().andReturn(User.dummy(true));
+
+      bikes.$preload({ path: 'user', params: { include: 'all' } });
+      expect(User.$populate).toHaveBeenCalledWith([
+        jasmine.objectContaining({ $pk: 10 }),
+        jasmine.objectContaining({ $pk: 11 }),
+        jasmine.objectContaining({ $pk: 13 })
+      ], { include: 'all' });
     });
 
     it('should work on single records too', function() {
@@ -54,7 +65,10 @@ describe('Plugin: Preload function', function() {
       User.$populate = jasmine.createSpy().andReturn(User.dummy(true));
 
       bike.$preload('user');
-      expect(User.$populate).toHaveBeenCalledWith([ jasmine.objectContaining({ $pk: 10 }) ]);
+      expect(User.$populate).toHaveBeenCalledWith(
+        [ jasmine.objectContaining({ $pk: 10 }) ],
+        undefined
+      );
     });
 
     it('should properly manager hierachies', function() {
@@ -73,14 +87,14 @@ describe('Plugin: Preload function', function() {
         jasmine.objectContaining({ $pk: 1 }),
         jasmine.objectContaining({ $pk: 5 }),
         jasmine.objectContaining({ $pk: 5 })
-      ]);
+      ], undefined);
 
       expect(User.$populate.callCount).toEqual(2);
       expect(User.$populate).toHaveBeenCalledWith([
         jasmine.objectContaining({ $pk: 1 }),
         jasmine.objectContaining({ $pk: 2 }),
         jasmine.objectContaining({ $pk: 3 })
-      ]);
+      ], undefined);
 
     });
 
