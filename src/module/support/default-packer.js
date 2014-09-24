@@ -23,7 +23,7 @@ RMModule.factory('DefaultPacker', ['restmod', 'inflector', 'RMPackerCache', func
   }
 
   // process links and stores them in the packer cache
-	function processLinks(_links, _raw, _skip) {
+  function processLinks(_links, _raw, _skip) {
     var source = _links === '.' ? _raw : _raw[_links];
     if(!source) return;
 
