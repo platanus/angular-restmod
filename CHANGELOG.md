@@ -1,3 +1,12 @@
+<a name="1.1.3"></a>
+### 1.1.3 (2014-09-25)
+
+
+#### Bug Fixes
+
+* **common:** fixes $send not properly handling the $promise property. ([d5542f05](http://github.com/angular-platanus/restmod/commit/d5542f056298e9fdf8f5d6773626bd7bbcd95309), closes [#154](http://github.com/angular-platanus/restmod/issues/154))
+
+
 <a name="1.1.2"></a>
 ### 1.1.2 (2014-09-24)
 

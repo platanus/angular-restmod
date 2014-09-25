@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.1.2 - 2014-09-24
+ * @version v1.1.3 - 2014-09-25
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -764,42 +764,32 @@ RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q,
         this.$status = 'pending';
         this.$dispatch('before-request', [_options]);
 
-        var dsp = this.$dispatcher(), _this = this;
-        return $http(_options).then(function(_response) {
+        return $http(_options).then(wrapPromise(this, function() {
+          if(action && action.canceled) {
+            // if request was canceled during request, ignore post request actions.
+            this.$status =  'canceled';
+          } else {
+            this.$status = 'ok';
+            this.$response = this.$last;
+            this.$dispatch('after-request', [this.$last]);
+            if(_success) _success.call(this, this.$last);
+          }
+        }), wrapPromise(this, function() {
+          if(action && action.canceled) {
+            // if request was canceled during request, ignore error handling
+            this.$status = 'canceled';
+          } else {
+            this.$status = 'error';
+            this.$response = this.$last;
 
-          return _this.$decorate(dsp, function() {
-            if(action && action.canceled) {
-              // if request was canceled during request, ignore post request actions.
-              this.$status =  'canceled';
-            } else {
-              this.$status = 'ok';
-              this.$response = _response;
+            // IDEA: Consider flushing pending request in case of an error. Also continue ignoring requests
+            // until the error flag is reset by user.
 
-              this.$dispatch('after-request', [_response]);
-              if(_success) _success.call(this, _response);
-            }
-          });
-
-        }, function(_response) {
-
-          return _this.$decorate(dsp, function() {
-            if(action && action.canceled) {
-              // if request was canceled during request, ignore error handling
-              this.$status = 'canceled';
-              return this;
-            } else {
-              this.$status = 'error';
-              this.$response = _response;
-
-              // IDEA: Consider flushing pending request in case of an error. Also continue ignoring requests
-              // until the error flag is reset by user.
-
-              this.$dispatch('after-request-error', [_response]);
-              if(_error) _error.call(this, _response);
-              return $q.reject(this);
-            }
-          });
-        });
+            this.$dispatch('after-request-error', [this.$last]);
+            if(_error) _error.call(this, this.$last);
+            return $q.reject(this); // TODO: this will step over any promise generated in _error!!
+          }
+        }));
       });
     },
 
@@ -1992,6 +1982,29 @@ RMModule.factory('RMBuilderExt', ['$injector', '$parse', 'inflector', '$log', 'r
 }]);
 RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUtils', 'restmod', 'RMPackerCache', function($injector, inflector, $log, Utils, restmod, packerCache) {
 
+  // hooks: only has_many/has_one
+  // support global hooks using config.
+
+  function wrapHook(_fun, _owner) {
+    return function() {
+      var oldOwner = this.$owner;
+      this.$owner = _owner;
+      try {
+        return _fun.apply(this, arguments);
+      } finally {
+        this.$owner = oldOwner;
+      }
+    };
+  }
+
+  function applyHooks(_target, _hooks, _owner) {
+    for(var key in _hooks) {
+      if(_hooks.hasOwnProperty(key)) {
+        _target.$on(key, wrapHook(_hooks[key], _owner));
+      }
+    }
+  }
+
   /**
    * @class RelationBuilderApi
    *
@@ -2019,12 +2032,18 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
      * @param {string} _inverseOf Inverse property name (optional)
      * @return {BuilderApi} self
      */
-    attrAsCollection: function(_attr, _model, _url, _source, _inverseOf) {
+    attrAsCollection: function(_attr, _model, _url, _source, _inverseOf, _params, _decorateScope, _hooks) {
+
+      var globalHooks;
 
       this.attrDefault(_attr, function() {
 
         if(typeof _model === 'string') {
           _model = $injector.get(_model);
+
+          // retrieve global options
+          if(!_decorateScope) _decorateScope = _model.getProperty('hasManyOpt');
+          globalHooks = _model.getProperty('hasManyOpt');
 
           if(_inverseOf) {
             var desc = _model.$$getDescription(_inverseOf);
@@ -2035,25 +2054,23 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
           }
         }
 
-        var self = this,
-            scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)),
-            col = _model.$collection(null, scope);
+        var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)), col;
 
-        // TODO: there should be a way to modify scope behavior just for this relation,
-        // since relation item scope IS the collection, then the collection should
-        // be extended to provide a modified scope. For this an additional _extensions
-        // parameters could be added to collection, then these 'extensions' are inherited
-        // by child collections, the other alternative is to enable full property inheritance ...
+        // setup collection
+        if(_decorateScope) scope = _decorateScope.call(this, scope);
+        col = _model.$collection(_params || null, scope);
+        if(globalHooks) applyHooks(col, globalHooks, this);
+        if(_hooks) applyHooks(col, _hooks, this);
 
         // set inverse property if required.
         if(_inverseOf) {
+          var self = this;
           col.$on('after-add', function(_obj) {
             _obj[_inverseOf] = self;
           });
         }
 
         return col;
-      // simple support for inline data, TODO: maybe deprecate this.
       });
 
       if(_source || _url) this.attrMap(_attr, _source || _url);
@@ -2079,12 +2096,18 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
      * @param {string} _inverseOf Inverse property name (optional)
      * @return {BuilderApi} self
      */
-    attrAsResource: function(_attr, _model, _url, _source, _inverseOf) {
+    attrAsResource: function(_attr, _model, _url, _source, _inverseOf, _decorateScope, _hooks) {
+
+      var globalHooks;
 
       this.attrDefault(_attr, function() {
 
         if(typeof _model === 'string') {
           _model = $injector.get(_model);
+
+          // retrieve global options
+          if(!_decorateScope) _decorateScope = _model.getProperty('hasOneOpt');
+          globalHooks = _model.getProperty('hasOne');
 
           if(_inverseOf) {
             var desc = _model.$$getDescription(_inverseOf);
@@ -2095,10 +2118,13 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
           }
         }
 
-        var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)),
-            inst = _model.$new(null, scope);
+        var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)), inst;
 
-        // TODO: provide a way to modify scope behavior just for this relation
+        // setup record
+        if(_decorateScope) scope = _decorateScope.call(this, scope);
+        inst = _model.$new(null, scope);
+        if(globalHooks) applyHooks(inst, globalHooks, this);
+        if(_hooks) applyHooks(inst, _hooks, this);
 
         if(_inverseOf) {
           inst[_inverseOf] = this;
@@ -2315,8 +2341,8 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
   };
 
   return restmod.mixin(function() {
-    this.extend('attrAsCollection', EXT.attrAsCollection, ['hasMany', 'path', 'source', 'inverseOf']) // TODO: rename source to map, but disable attrMap if map is used here...
-        .extend('attrAsResource', EXT.attrAsResource, ['hasOne', 'path', 'source', 'inverseOf'])
+    this.extend('attrAsCollection', EXT.attrAsCollection, ['hasMany', 'path', 'source', 'inverseOf', 'params', 'scope', 'hooks']) // TODO: rename source to map, but disable attrMap if map is used here...
+        .extend('attrAsResource', EXT.attrAsResource, ['hasOne', 'path', 'source', 'inverseOf', 'scope', 'hooks'])
         .extend('attrAsReference', EXT.attrAsReference, ['belongsTo', 'key', 'prefetch'])
         .extend('attrAsReferenceToMany', EXT.attrAsReferenceToMany, ['belongsToMany', 'keys']);
   });
