@@ -2,7 +2,7 @@
 
 describe('Restmod collection:', function() {
 
-  var restmod, $httpBackend, Bike, query;
+  var restmod, $httpBackend, $rootScope, Bike, query;
 
   beforeEach(module('restmod'));
 
@@ -14,6 +14,7 @@ describe('Restmod collection:', function() {
 
     // mock api
     $httpBackend = $injector.get('$httpBackend');
+    $rootScope = $injector.get('$rootScope');
     $httpBackend.when('GET', '/api/bikes?brand=trek').respond([ { model: 'Slash' }, { model: 'Remedy' } ]);
     $httpBackend.when('GET', '/api/bikes?brand=giant').respond([ { model: 'Reign' } ]);
   }));
@@ -38,6 +39,15 @@ describe('Restmod collection:', function() {
       query.$fetch({ brand: 'giant' });
       $httpBackend.flush();
       expect(query.length).toEqual(3);
+    });
+
+    it('should call $then callbacks after fetch completes (Issue #154)', function() {
+      var queryLen;
+      query = query.$search().$then(function() {
+        queryLen = query.length;
+      });
+      $httpBackend.flush();
+      expect(queryLen).toEqual(2);
     });
 
   });
