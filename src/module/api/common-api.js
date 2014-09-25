@@ -366,42 +366,32 @@ RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q,
         this.$status = 'pending';
         this.$dispatch('before-request', [_options]);
 
-        var dsp = this.$dispatcher(), _this = this;
-        return $http(_options).then(function(_response) {
+        return $http(_options).then(wrapPromise(this, function() {
+          if(action && action.canceled) {
+            // if request was canceled during request, ignore post request actions.
+            this.$status =  'canceled';
+          } else {
+            this.$status = 'ok';
+            this.$response = this.$last;
+            this.$dispatch('after-request', [this.$last]);
+            if(_success) _success.call(this, this.$last);
+          }
+        }), wrapPromise(this, function() {
+          if(action && action.canceled) {
+            // if request was canceled during request, ignore error handling
+            this.$status = 'canceled';
+          } else {
+            this.$status = 'error';
+            this.$response = this.$last;
 
-          return _this.$decorate(dsp, function() {
-            if(action && action.canceled) {
-              // if request was canceled during request, ignore post request actions.
-              this.$status =  'canceled';
-            } else {
-              this.$status = 'ok';
-              this.$response = _response;
+            // IDEA: Consider flushing pending request in case of an error. Also continue ignoring requests
+            // until the error flag is reset by user.
 
-              this.$dispatch('after-request', [_response]);
-              if(_success) _success.call(this, _response);
-            }
-          });
-
-        }, function(_response) {
-
-          return _this.$decorate(dsp, function() {
-            if(action && action.canceled) {
-              // if request was canceled during request, ignore error handling
-              this.$status = 'canceled';
-              return this;
-            } else {
-              this.$status = 'error';
-              this.$response = _response;
-
-              // IDEA: Consider flushing pending request in case of an error. Also continue ignoring requests
-              // until the error flag is reset by user.
-
-              this.$dispatch('after-request-error', [_response]);
-              if(_error) _error.call(this, _response);
-              return $q.reject(this);
-            }
-          });
-        });
+            this.$dispatch('after-request-error', [this.$last]);
+            if(_error) _error.call(this, this.$last);
+            return $q.reject(this); // TODO: this will step over any promise generated in _error!!
+          }
+        }));
       });
     },
 
