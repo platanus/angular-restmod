@@ -13,6 +13,31 @@ describe('Restmod model class:', function() {
     query = Bike.$collection();
   }));
 
+  describe('equality', function() {
+
+    // record equality test, I'll keep this here just in case a restmod-jasmine adaptor is built
+
+    var recordEquality = function(_first, _second) {
+      if (typeof _first === 'object' && typeof _second === 'object' &&
+        _first && _second && _first.$type === _second.$type) {
+        for(var key in _first) {
+          if(_first.hasOwnProperty(key) && key[0] !== '$') {
+            if(!jasmine.matchersUtil.equals(_first[key], _second[key], [])) { return false; }
+          }
+        }
+        return true;
+      }
+    };
+
+    beforeEach(function() {
+      jasmine.addCustomEqualityTester(recordEquality);
+    });
+
+    it('should work for instances that are equal', function() {
+      expect(Bike.$build({ model: 'slash' })).toEqual(Bike.$build({ model: 'slash' }));
+    });
+  });
+
   describe('constructor', function() {
 
     it('should fire the after-init hook', function() {

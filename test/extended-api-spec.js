@@ -50,7 +50,7 @@ describe('Restmod collection:', function() {
   describe('$resolve', function() {
     it('should skip $fetch if already resolved', function() {
       var bike = Bike.$new(1);
-      spyOn(bike, '$fetch').andCallThrough();
+      spyOn(bike, '$fetch').and.callThrough();
 
       bike.$decode({ name: 'nomad' }).$resolve();
       expect(bike.$fetch).not.toHaveBeenCalled();
@@ -58,7 +58,7 @@ describe('Restmod collection:', function() {
 
     it('should trigger a call to $fetch if not resolved', function() {
       var bike = Bike.$new(1);
-      spyOn(bike, '$fetch').andCallThrough();
+      spyOn(bike, '$fetch').and.callThrough();
 
       bike.$resolve();
       expect(bike.$fetch).toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe('Restmod collection:', function() {
 
     it('should trigger a call to $fetch if reset', function() {
       var bike = Bike.$new(1);
-      spyOn(bike, '$fetch').andCallThrough();
+      spyOn(bike, '$fetch').and.callThrough();
 
       bike.$decode({ name: 'nomad' }).$reset().$resolve();
       expect(bike.$fetch).toHaveBeenCalled();

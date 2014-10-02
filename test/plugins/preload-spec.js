@@ -38,7 +38,7 @@ describe('Plugin: Preload function', function() {
     });
 
     it('should call populate on preloaded resource ', function() {
-      User.$populate = jasmine.createSpy().andReturn(User.dummy(true));
+      User.$populate = jasmine.createSpy().and.returnValue(User.dummy(true));
 
       bikes.$preload('user');
       expect(User.$populate).toHaveBeenCalledWith([
@@ -46,11 +46,11 @@ describe('Plugin: Preload function', function() {
         jasmine.objectContaining({ $pk: 11 }),
         jasmine.objectContaining({ $pk: 13 })
       ], undefined);
-      expect(User.$populate.callCount).toEqual(1);
+      expect(User.$populate.calls.count()).toEqual(1);
     });
 
     it('should support parameters', function() {
-      User.$populate = jasmine.createSpy().andReturn(User.dummy(true));
+      User.$populate = jasmine.createSpy().and.returnValue(User.dummy(true));
 
       bikes.$preload({ path: 'user', params: { include: 'all' } });
       expect(User.$populate).toHaveBeenCalledWith([
@@ -62,7 +62,7 @@ describe('Plugin: Preload function', function() {
 
     it('should work on single records too', function() {
       var bike = Bike.$new(1).$decode({ userId: 10, brand: 'Santa Cruz' });
-      User.$populate = jasmine.createSpy().andReturn(User.dummy(true));
+      User.$populate = jasmine.createSpy().and.returnValue(User.dummy(true));
 
       bike.$preload('user');
       expect(User.$populate).toHaveBeenCalledWith(
@@ -72,24 +72,24 @@ describe('Plugin: Preload function', function() {
     });
 
     it('should properly manager hierachies', function() {
-      User.$populate = jasmine.createSpy().andCallFake(function(_records) {
+      User.$populate = jasmine.createSpy().and.callFake(function(_records) {
         _records[0].$decode({ rideIds: [1], friendIds: [1] });
         _records[1].$decode({ rideIds: [5], friendIds: [] });
         _records[2].$decode({ rideIds: [5], friendIds: [2, 3] });
         return User.dummy(true);
       });
 
-      Ride.$populate = jasmine.createSpy().andReturn(User.dummy(true));
+      Ride.$populate = jasmine.createSpy().and.returnValue(User.dummy(true));
 
       bikes.$preload('user.friends', 'user.rides');
-      expect(Ride.$populate.callCount).toEqual(1);
+      expect(Ride.$populate.calls.count()).toEqual(1);
       expect(Ride.$populate).toHaveBeenCalledWith([
         jasmine.objectContaining({ $pk: 1 }),
         jasmine.objectContaining({ $pk: 5 }),
         jasmine.objectContaining({ $pk: 5 })
       ], undefined);
 
-      expect(User.$populate.callCount).toEqual(2);
+      expect(User.$populate.calls.count()).toEqual(2);
       expect(User.$populate).toHaveBeenCalledWith([
         jasmine.objectContaining({ $pk: 1 }),
         jasmine.objectContaining({ $pk: 2 }),

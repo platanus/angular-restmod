@@ -63,13 +63,13 @@ describe('Plugin: Find Many plugin', function() {
 
     it('should call $decode only once in shared instances', function() {
       var bike = Bike.$new(1);
-      spyOn(bike, '$decode').andCallThrough();
+      spyOn(bike, '$decode').and.callThrough();
 
       Bike.$populate([ bike, bike ]);
       $httpBackend.expectGET('/api/bikes?ids=1').respond(200, [ { id: 1, brand: 'Giant' } ]);
       $httpBackend.flush();
 
-      expect(bike.$decode.callCount).toEqual(1);
+      expect(bike.$decode.calls.count()).toEqual(1);
     });
 
   });

@@ -18,7 +18,7 @@
     "karma-chrome-launcher": "*",
     "karma-cli": "*",
     "karma-firefox-launcher": "*",
-    "karma-jasmine": "*",
+    "karma-jasmine": "~0.2",
     "karma-osx-reporter": "*",
     "karma-requirejs": "*",
     "karma-sauce-launcher": "^0.2.10",
