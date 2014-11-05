@@ -1018,3 +1018,7 @@ Some links:
 
 REST api designs guidelines: https://github.com/interagent/http-api-design
 REST json api standard: http://jsonapi.org
+
+# Questions/Comments
+
+If you have a question please open up and issue here or [chat with us on gitter](https://gitter.im/platanus/angular-restmod)
