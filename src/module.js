@@ -12,7 +12,7 @@ var RMModule = angular.module('restmod', ['ng', 'platanus.inflector']);
  */
 RMModule.provider('restmod', [function() {
 
-  var BASE_CHAIN = ['RMBuilderExt', 'RMBuilderRelations'];
+  var BASE_CHAIN = ['RMBuilderExt', 'RMBuilderRelations', 'RMBuilderComputed'];
 
   function wrapInInvoke(_mixin) {
     return function(_injector) {
