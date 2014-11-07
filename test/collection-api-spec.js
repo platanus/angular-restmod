@@ -214,8 +214,12 @@ describe('Restmod collection:', function() {
     it('should call the type\'s unpack method', function() {
       
         
-      spyOn(Bike, 'unpack');
-      
+      spyOn(Bike, 'unpack').and.returnValue([]);
+      var bikes = Bike.$collection();
+
+      var raw = [{}];
+      bikes.$unwrap(raw);
+      expect(Bike.unpack).toHaveBeenCalledWith(bikes, raw);
     });
 
     it('should call $decode', function() {
