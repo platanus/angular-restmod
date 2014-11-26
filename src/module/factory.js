@@ -24,6 +24,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
         urlPrefix: null
       },
       serializer = new Serializer(Model),
+      computes = {},
       defaults = [],                    // attribute defaults as an array of [key, value]
       meta = {},                        // atribute metadata
       hooks = {},
@@ -331,10 +332,19 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
       // default initializer: loads the default parameter values
       $initialize: function() {
-        var tmp;
+        var tmp, self = this;
         for(var i = 0; (tmp = defaults[i]); i++) {
           this[tmp[0]] = (typeof tmp[1] === 'function') ? tmp[1].apply(this) : tmp[1];
         }
+        Object.keys(computes).forEach(function(key) {
+          //console.log(self);
+          Object.defineProperty(self, key, {
+            enumerable: true,
+            get: function() {
+              return computes[key].apply(self);
+            }
+          });
+        });
       }
 
     }, CommonApi, RecordApi, ExtendedApi);
@@ -430,6 +440,22 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        */
       attrDefault: function(_attr, _init) {
         defaults.push([_attr, _init]);
+        return this;
+      },
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Sets a computed value for an attribute.
+       *
+       * Computed values are set only on object construction phase.
+       *
+       * @param {string} _attr Attribute name
+       * @param {function} _fn Function that returns value
+       * @return {BuilderApi} self
+       */
+      attrComputed: function(_attr, _fn) {
+        computes[_attr] = _fn;
         return this;
       },
 
