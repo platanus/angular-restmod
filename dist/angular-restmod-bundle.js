@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.1.3 - 2014-09-25
+ * @version v1.1.4 - 2014-11-26
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -258,7 +258,7 @@ var RMModule = angular.module('restmod', ['ng', 'platanus.inflector']);
  */
 RMModule.provider('restmod', [function() {
 
-  var BASE_CHAIN = ['RMBuilderExt', 'RMBuilderRelations'];
+  var BASE_CHAIN = ['RMBuilderExt', 'RMBuilderRelations', 'RMBuilderComputed'];
 
   function wrapInInvoke(_mixin) {
     return function(_injector) {
@@ -687,6 +687,8 @@ RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q,
       if(_for) {
         _for = '$' + _for + 'UrlFor';
         if(this.$scope[_for]) return this.$scope[_for](this);
+      } else if(this.$scope.$cannonicalUrlFor) {
+        return this.$scope.$cannonicalUrlFor(this);
       }
 
       return this.$scope.$urlFor(this);
@@ -1246,20 +1248,23 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
   };
 
   RelationScope.prototype = {
-    // record url is nested only for nested resources
-    $urlFor: function(_resource) {
-      if(_resource.$isCollection) return Utils.joinUrl(this.$scope.$url(), this.$partial);
 
-      if(this.$target.isNested()) {
-        return this.$fetchUrlFor();
+    $nestedUrl: function() {
+      return Utils.joinUrl(this.$scope.$url(), this.$partial);
+    },
+
+    // url is nested for collections and nested records
+    $urlFor: function(_resource) {
+      if(_resource.$isCollection || this.$target.isNested()) {
+        return this.$nestedUrl();
       } else {
         return this.$target.$urlFor(_resource);
       }
     },
 
-    // fetch url is always nested
+    // a record's fetch url is always nested
     $fetchUrlFor: function(/* _resource */) {
-      return Utils.joinUrl(this.$scope.$url(), this.$partial);
+      return this.$nestedUrl();
     },
 
     // create is not posible in nested members
@@ -1344,6 +1349,19 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
     /**
      * @memberof RecordApi#
      *
+     * @description Called the resource's scope $urlFor method to build the url for the record using the proper scope.
+     *
+     * By default the resource partial url is just its `$pk` property. This can be overriden to provide other routing approaches.
+     *
+     * @return {string} The resource partial url
+     */
+    $buildUrl: function(_scope) {
+      return (this.$pk === undefined || this.$pk === null) ? null : Utils.joinUrl(_scope.$url(), this.$pk + '');
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
      * @description Default item child scope factory.
      *
      * By default, no create url is provided and the update/destroy url providers
@@ -1393,7 +1411,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
     $decode: function(_raw, _mask) {
       // IDEA: let user override serializer
       this.$type.decode(this, _raw, _mask || Utils.READ_MASK);
-      if(!this.$pk) this.$pk = this.$type.inferKey(_raw); // TODO: warn if key changes
+      if(this.$pk === undefined || this.$pk === null) this.$pk = this.$type.inferKey(_raw); // TODO: warn if key changes
       this.$dispatch('after-feed', [_raw]);
       return this;
     },
@@ -1565,11 +1583,9 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      */
     $destroy: function() {
       return this.$action(function() {
-        if(this.$pk)
+        var url = this.$url('destroy');
+        if(url)
         {
-          var url = this.$url('destroy');
-          Utils.assert(!!url, 'Cant $destroy if resource is not bound');
-
           var request = { method: 'DELETE', url: url };
 
           this
@@ -1588,7 +1604,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
         }
         else
         {
-          // If not yet identified, just remove from scope
+          // If not yet bound, just remove from parent
           if(this.$scope.$remove) this.$scope.$remove(this);
         }
       });
@@ -1663,8 +1679,8 @@ RMModule.factory('RMScopeApi', ['RMUtils', function(Utils) {
      */
     $urlFor: function(_resource) {
       // force item unscoping if model is not nested (maybe make this optional)
-      var baseUrl = this.$type.$url() || this.$url();
-      return _resource.$isCollection ? baseUrl : Utils.joinUrl(baseUrl, _resource.$pk);
+      var scope = this.$type.isNested() ? this : this.$type;
+      return typeof _resource.$buildUrl === 'function' ? _resource.$buildUrl(scope) : scope.$url();
     },
 
     /**
@@ -1764,6 +1780,74 @@ RMModule.factory('RMScopeApi', ['RMUtils', function(Utils) {
       return this.$collection(_params).$fetch();
     }
   };
+
+}]);
+RMModule.factory('RMViewApi', [function() {
+
+  /**
+   * @class CollectionApi
+   *
+   * @extends ScopeApi
+   * @extends CommonApi
+   *
+   * @description
+   *
+   * A restmod collection is an extended array type bound REST resource route.
+   *
+   * Every time a new restmod model is created, an associated collection type is created too.
+   *
+   * TODO: talk about fetch/refresh behaviour, lifecycles, collection scopes, adding/removing
+   *
+   * For `$fetch` on a collection:
+   *
+   * * before-fetch-many
+   * * before-request
+   * * after-request[-error]
+   * * after-feed (called for every record if no errors)
+   * * after-feed-many (only called if no errors)
+   * * after-fetch-many[-error]
+   *
+   * @property {boolean} $isCollection Helper flag to separate collections from the main type
+   * @property {object} $scope The collection scope (hierarchical scope, not angular scope)
+   * @property {object} $params The collection query parameters
+   *
+   */
+  var API = {
+
+    $isCollection: true,
+
+    /**
+     * @memberof CollectionApi#
+     *
+     * @description Called by collection constructor on initialization.
+     *
+     * Note: Is better to add a hook on after-init than overriding this method.
+     */
+    $initialize: function() {
+
+      this.$collection.on('after-add', function() {
+
+      }).on('after-remove', function() {
+
+      }).on('after-clear', function() {
+
+      });
+    },
+
+    $reload: function() {
+
+    }
+  };
+
+  // Proxy common collection methods to collection
+
+  angular.forEach(['$fetch', '$create', '$new', '$build', '$buildRaw'], function(_method) {
+    API[_method] = function() {
+      return this.$collection[_method].apply(this.$collection, arguments);
+    };
+  });
+
+  return API;
 
 }]);
 RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', function($injector, inflector, $log, Utils) {
@@ -2107,6 +2191,45 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', func
   return Builder;
 
 }]);
+RMModule.factory('RMBuilderComputed', ['restmod',
+  function(restmod) {
+    /**
+     * @class RMBuilderComputedApi
+     *
+     * @description
+     *
+     * Builder DSL extension to build computed properties.
+     *
+     * A computed property is a "virtual" property which is created using
+     * other model properties. For example, a user has a firstName and lastName,
+     * A computed property, fullName, is generated from the two.
+     *
+     * Adds the following property modifiers:
+     * * `computed` function will be assigned as getter to Model, maps to {@link RMBuilderComputedApi#attrAsComputed}
+     *
+     */
+    var EXT = {
+
+      /**
+       * @memberof RMBuilderComputedApi#
+       *
+       * @description Registers a model computed property
+       *
+       * @param {string}  _attr Attribute name
+       * @param {function} _fn Function that returns the desired attribute value when run.
+       * @return {BuilderApi} self
+       */
+      attrAsComputed: function(_attr, _fn) {
+        this.attrComputed(_attr, _fn);
+        return this;
+      }
+    };
+
+    return restmod.mixin(function() {
+      this.extend('attrAsComputed', EXT.attrAsComputed, ['computed']);
+    });
+  }
+]);
 RMModule.factory('RMBuilderExt', ['$injector', '$parse', 'inflector', '$log', 'restmod', function($injector, $parse, inflector, $log, restmod) {
 
   var bind = angular.bind,
@@ -2220,9 +2343,7 @@ RMModule.factory('RMBuilderExt', ['$injector', '$parse', 'inflector', '$log', 'r
 }]);
 RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUtils', 'restmod', 'RMPackerCache', function($injector, inflector, $log, Utils, restmod, packerCache) {
 
-  // hooks: only has_many/has_one
-  // support global hooks using config.
-
+  // wraps a hook callback to give access to the $owner object
   function wrapHook(_fun, _owner) {
     return function() {
       var oldOwner = this.$owner;
@@ -2235,6 +2356,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
     };
   }
 
+  // wraps a bunch of hooks
   function applyHooks(_target, _hooks, _owner) {
     for(var key in _hooks) {
       if(_hooks.hasOwnProperty(key)) {
@@ -2268,11 +2390,13 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
      * @param {string} _url Partial url
      * @param {string} _source Inline resource alias (optional)
      * @param {string} _inverseOf Inverse property name (optional)
+     * @param {object} _params Generated collection default parameters
+     * @param {object} _hooks Hooks to be applied just to the generated collection
      * @return {BuilderApi} self
      */
-    attrAsCollection: function(_attr, _model, _url, _source, _inverseOf, _params, _decorateScope, _hooks) {
+    attrAsCollection: function(_attr, _model, _url, _source, _inverseOf, _params, _hooks) {
 
-      var globalHooks;
+      var options, globalHooks; // global relation configuration
 
       this.attrDefault(_attr, function() {
 
@@ -2280,8 +2404,8 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
           _model = $injector.get(_model);
 
           // retrieve global options
-          if(!_decorateScope) _decorateScope = _model.getProperty('hasManyOpt');
-          globalHooks = _model.getProperty('hasManyOpt');
+          options = _model.getProperty('hasMany', {});
+          globalHooks = options.hooks;
 
           if(_inverseOf) {
             var desc = _model.$$getDescription(_inverseOf);
@@ -2292,13 +2416,13 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
           }
         }
 
-        var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)), col;
+        var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)), col; // TODO: name to url transformation should be a Model strategy
 
         // setup collection
-        if(_decorateScope) scope = _decorateScope.call(this, scope);
         col = _model.$collection(_params || null, scope);
         if(globalHooks) applyHooks(col, globalHooks, this);
         if(_hooks) applyHooks(col, _hooks, this);
+        col.$dispatch('after-has-many-init');
 
         // set inverse property if required.
         if(_inverseOf) {
@@ -2332,11 +2456,12 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
      * @param {string} _url Partial url (optional)
      * @param {string} _source Inline resource alias (optional)
      * @param {string} _inverseOf Inverse property name (optional)
+     * @param {object} _hooks Hooks to be applied just to the instantiated record
      * @return {BuilderApi} self
      */
-    attrAsResource: function(_attr, _model, _url, _source, _inverseOf, _decorateScope, _hooks) {
+    attrAsResource: function(_attr, _model, _url, _source, _inverseOf, _hooks) {
 
-      var globalHooks;
+      var options, globalHooks; // global relation configuration
 
       this.attrDefault(_attr, function() {
 
@@ -2344,8 +2469,8 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
           _model = $injector.get(_model);
 
           // retrieve global options
-          if(!_decorateScope) _decorateScope = _model.getProperty('hasOneOpt');
-          globalHooks = _model.getProperty('hasOne');
+          options = _model.getProperty('hasOne', {});
+          globalHooks = options.hooks;
 
           if(_inverseOf) {
             var desc = _model.$$getDescription(_inverseOf);
@@ -2359,10 +2484,10 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
         var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)), inst;
 
         // setup record
-        if(_decorateScope) scope = _decorateScope.call(this, scope);
         inst = _model.$new(null, scope);
         if(globalHooks) applyHooks(inst, globalHooks, this);
         if(_hooks) applyHooks(inst, _hooks, this);
+        inst.$dispatch('after-has-one-init');
 
         if(_inverseOf) {
           inst[_inverseOf] = this;
@@ -2579,8 +2704,8 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
   };
 
   return restmod.mixin(function() {
-    this.extend('attrAsCollection', EXT.attrAsCollection, ['hasMany', 'path', 'source', 'inverseOf', 'params', 'scope', 'hooks']) // TODO: rename source to map, but disable attrMap if map is used here...
-        .extend('attrAsResource', EXT.attrAsResource, ['hasOne', 'path', 'source', 'inverseOf', 'scope', 'hooks'])
+    this.extend('attrAsCollection', EXT.attrAsCollection, ['hasMany', 'path', 'source', 'inverseOf', 'params', 'hooks']) // TODO: rename source to map, but disable attrMap if map is used here...
+        .extend('attrAsResource', EXT.attrAsResource, ['hasOne', 'path', 'source', 'inverseOf', 'hooks'])
         .extend('attrAsReference', EXT.attrAsReference, ['belongsTo', 'key', 'prefetch'])
         .extend('attrAsReferenceToMany', EXT.attrAsReferenceToMany, ['belongsToMany', 'keys']);
   });
@@ -2611,6 +2736,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       },
       serializer = new Serializer(Model),
       defaults = [],                    // attribute defaults as an array of [key, value]
+      computes = [],                    // computed attributes
       meta = {},                        // atribute metadata
       hooks = {},
       builder;                          // the model builder
@@ -2917,9 +3043,16 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
       // default initializer: loads the default parameter values
       $initialize: function() {
-        var tmp;
-        for(var i = 0; (tmp = defaults[i]); i++) {
+        var tmp, i, self = this;
+        for(i = 0; (tmp = defaults[i]); i++) {
           this[tmp[0]] = (typeof tmp[1] === 'function') ? tmp[1].apply(this) : tmp[1];
+        }
+
+        for(i = 0; (tmp = computes[i]); i++) {
+          Object.defineProperty(self, tmp[0], {
+            enumerable: true,
+            get: tmp[1]
+          });
         }
       }
 
@@ -3016,6 +3149,24 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        */
       attrDefault: function(_attr, _init) {
         defaults.push([_attr, _init]);
+        return this;
+      },
+
+      /**
+       * @memberof BuilderApi#
+       *
+       * @description Sets a computed value for an attribute.
+       *
+       * Computed values are set only on object construction phase.
+       * Computed values are always masked
+       *
+       * @param {string} _attr Attribute name
+       * @param {function} _fn Function that returns value
+       * @return {BuilderApi} self
+       */
+      attrComputed: function(_attr, _fn) {
+        computes.push([_attr, _fn]);
+        this.attrMask(_attr, true);
         return this;
       },
 
