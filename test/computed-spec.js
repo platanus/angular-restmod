@@ -6,14 +6,13 @@ describe('RMBuilderComputed', function() {
 
   beforeEach(module('restmod'));
 
-  beforeEach(module(function($provide, restmodProvider) {
+  beforeEach(module(function($provide) {
     $provide.factory('UserModel', function(restmod) {
       return restmod.model('/api/users', {
         firstName: ''
       });
     });
   }));
-
 
   // cache entities to be used in tests
   beforeEach(inject(['$injector',
@@ -32,6 +31,7 @@ describe('RMBuilderComputed', function() {
     describe('basics', function() {
 
       var DeviceModel, device;
+
       beforeEach(function() {
         DeviceModel = restmod.model('/api/devices', {
           vendor: 'default vendor',
@@ -50,16 +50,28 @@ describe('RMBuilderComputed', function() {
       });
 
       it('changes when model properties update', function() {
-        device.vendor = "Apple";
-        device.model = "iPhone";
+        device.vendor = 'Apple';
+        device.model = 'iPhone';
         expect(device.fancyName).toEqual('Apple: iPhone');
+      });
+
+      it('should be masked by default',function() {
+        var encoded = device.$encode();
+        expect(encoded.fancyName).toBeUndefined();
+      });
+
+      it('should be listed in $each',function() {
+        var test = {};
+        device.$each(function(v, k) { test[k] = v; });
+        expect(test.fancyName).toBeDefined();
       });
 
     });
 
     describe('with relations', function() {
 
-      var DeviceModel, UserModel, device;
+      var DeviceModel, device;
+
       beforeEach(function() {
 
         DeviceModel = restmod.model('/api/devices', {
@@ -70,7 +82,7 @@ describe('RMBuilderComputed', function() {
           },
           ownedBy: {
             computed: function() {
-              return this.user.firstName + "'s " + this.model;
+              return this.user.firstName + '\'s ' + this.model;
             }
           }
         });
@@ -84,7 +96,7 @@ describe('RMBuilderComputed', function() {
       });
 
       it('can access related models', function() {
-        expect(device.ownedBy).toEqual("Johnny's Watch");
+        expect(device.ownedBy).toEqual('Johnny\'s Watch');
       });
 
     });
