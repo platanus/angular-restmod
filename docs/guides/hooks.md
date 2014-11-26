@@ -47,7 +47,63 @@ bike = bikes.$new();
 bike.$save(); // this call will trigger the hook defined above
 ```
 
-##### 4. Hooks that apply only to a certain execution context using `$decorate`, used mainly to modify a method behaviour
+##### 4. Hooks that apply to a relation object
+
+The `hasMany` and `hasOne` relations support hooks, these can be defined in the relation definition or in the type config block
+
+In the relation definition:
+
+```javascript
+var Bike = $restmod.model('/bikes'.$mix({
+	parts: {
+		hasMany: 'Part',
+		hooks: {
+			'after-fetch-many': function() { /* do something with the new parts */ }
+		}
+	}
+});
+```
+
+or in the configuration block (applies to every relation where the extended class is the **NESTED** resource):
+
+```javascript
+Var Part = $restmod.model().$mix({
+	$config {
+		hasMany: {
+			hooks: {
+				'after-has-many-init': function() {
+					// Here we are using the init hook to override every hasMany Part relation scope.
+					// This can be useful if a custom url scheme is needed for relations.
+					this.$scope = customScope(this.$scope);
+				}
+			}
+		}
+	}
+})
+```
+
+To access the owner object inside a relation hook, use the child object's `$owner` property:
+
+```javascript
+var Bike = $restmod.model('/bikes').$mix({
+	parts: {
+		hasMany: 'Part',
+		hooks: {
+			'after-fetch-many': function() {
+				this.$owner.partsCount = this.length; // update the owner partCount every time the relation is fetched!
+			}
+		}
+	}
+});
+```
+
+Both `hasOne` and `hasMany` trigger an special event after hooks are added to the child resource, this enables you to specify some
+logic to be run after relation resource is initialized (since hooks are added AFTER `after-init` and `after-collection-init` are triggered).
+* `hasMany` triggers `after-has-many-init` after `after-collection-init`.
+* `hasOne` triggers `after-has-one-init` after `after-init`.
+
+
+##### 5. Hooks that apply only to a certain execution context using `$decorate`, used mainly to modify a method behaviour
 
 ```javascript
 var Bike = $restmod.model('/bikes', {

@@ -488,6 +488,8 @@ Will send GET to /bikes/1/parts/:id instead of /parts/:id
 
 <!-- end -->
 
+You can also define `hasMany` relation hooks. Check the [hooks advanced documentation](https://github.com/platanus/angular-restmod/blob/master/docs/guides/hooks.md) for more information.
+
 <!-- end -->
 
 #### HasOne
@@ -578,6 +580,8 @@ owner.$save();
 > will send a PUT to /bikes/1/owner
 
 <!-- end -->
+
+You can also define `hasOne` relation hooks. Check the [hooks advanced documentation](https://github.com/platanus/angular-restmod/blob/master/docs/guides/hooks.md) for more information.
 
 <!-- ignore -->
 

@@ -2,6 +2,28 @@
 
 RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUtils', 'restmod', 'RMPackerCache', function($injector, inflector, $log, Utils, restmod, packerCache) {
 
+  // wraps a hook callback to give access to the $owner object
+  function wrapHook(_fun, _owner) {
+    return function() {
+      var oldOwner = this.$owner;
+      this.$owner = _owner;
+      try {
+        return _fun.apply(this, arguments);
+      } finally {
+        this.$owner = oldOwner;
+      }
+    };
+  }
+
+  // wraps a bunch of hooks
+  function applyHooks(_target, _hooks, _owner) {
+    for(var key in _hooks) {
+      if(_hooks.hasOwnProperty(key)) {
+        _target.$on(key, wrapHook(_hooks[key], _owner));
+      }
+    }
+  }
+
   /**
    * @class RelationBuilderApi
    *
@@ -27,14 +49,22 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
      * @param {string} _url Partial url
      * @param {string} _source Inline resource alias (optional)
      * @param {string} _inverseOf Inverse property name (optional)
+     * @param {object} _params Generated collection default parameters
+     * @param {object} _hooks Hooks to be applied just to the generated collection
      * @return {BuilderApi} self
      */
-    attrAsCollection: function(_attr, _model, _url, _source, _inverseOf) {
+    attrAsCollection: function(_attr, _model, _url, _source, _inverseOf, _params, _hooks) {
+
+      var options, globalHooks; // global relation configuration
 
       this.attrDefault(_attr, function() {
 
         if(typeof _model === 'string') {
           _model = $injector.get(_model);
+
+          // retrieve global options
+          options = _model.getProperty('hasMany', {});
+          globalHooks = options.hooks;
 
           if(_inverseOf) {
             var desc = _model.$$getDescription(_inverseOf);
@@ -45,25 +75,23 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
           }
         }
 
-        var self = this,
-            scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)),
-            col = _model.$collection(null, scope);
+        var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)), col; // TODO: name to url transformation should be a Model strategy
 
-        // TODO: there should be a way to modify scope behavior just for this relation,
-        // since relation item scope IS the collection, then the collection should
-        // be extended to provide a modified scope. For this an additional _extensions
-        // parameters could be added to collection, then these 'extensions' are inherited
-        // by child collections, the other alternative is to enable full property inheritance ...
+        // setup collection
+        col = _model.$collection(_params || null, scope);
+        if(globalHooks) applyHooks(col, globalHooks, this);
+        if(_hooks) applyHooks(col, _hooks, this);
+        col.$dispatch('after-has-many-init');
 
         // set inverse property if required.
         if(_inverseOf) {
+          var self = this;
           col.$on('after-add', function(_obj) {
             _obj[_inverseOf] = self;
           });
         }
 
         return col;
-      // simple support for inline data, TODO: maybe deprecate this.
       });
 
       if(_source || _url) this.attrMap(_attr, _source || _url);
@@ -87,14 +115,21 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
      * @param {string} _url Partial url (optional)
      * @param {string} _source Inline resource alias (optional)
      * @param {string} _inverseOf Inverse property name (optional)
+     * @param {object} _hooks Hooks to be applied just to the instantiated record
      * @return {BuilderApi} self
      */
-    attrAsResource: function(_attr, _model, _url, _source, _inverseOf) {
+    attrAsResource: function(_attr, _model, _url, _source, _inverseOf, _hooks) {
+
+      var options, globalHooks; // global relation configuration
 
       this.attrDefault(_attr, function() {
 
         if(typeof _model === 'string') {
           _model = $injector.get(_model);
+
+          // retrieve global options
+          options = _model.getProperty('hasOne', {});
+          globalHooks = options.hooks;
 
           if(_inverseOf) {
             var desc = _model.$$getDescription(_inverseOf);
@@ -105,10 +140,13 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
           }
         }
 
-        var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)),
-            inst = _model.$new(null, scope);
+        var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)), inst;
 
-        // TODO: provide a way to modify scope behavior just for this relation
+        // setup record
+        inst = _model.$new(null, scope);
+        if(globalHooks) applyHooks(inst, globalHooks, this);
+        if(_hooks) applyHooks(inst, _hooks, this);
+        inst.$dispatch('after-has-one-init');
 
         if(_inverseOf) {
           inst[_inverseOf] = this;
@@ -325,8 +363,8 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
   };
 
   return restmod.mixin(function() {
-    this.extend('attrAsCollection', EXT.attrAsCollection, ['hasMany', 'path', 'source', 'inverseOf']) // TODO: rename source to map, but disable attrMap if map is used here...
-        .extend('attrAsResource', EXT.attrAsResource, ['hasOne', 'path', 'source', 'inverseOf'])
+    this.extend('attrAsCollection', EXT.attrAsCollection, ['hasMany', 'path', 'source', 'inverseOf', 'params', 'hooks']) // TODO: rename source to map, but disable attrMap if map is used here...
+        .extend('attrAsResource', EXT.attrAsResource, ['hasOne', 'path', 'source', 'inverseOf', 'hooks'])
         .extend('attrAsReference', EXT.attrAsReference, ['belongsTo', 'key', 'prefetch'])
         .extend('attrAsReferenceToMany', EXT.attrAsReferenceToMany, ['belongsToMany', 'keys']);
   });

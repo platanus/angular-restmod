@@ -41,7 +41,8 @@ describe('Restmod model relation:', function() {
     beforeEach(function() {
       Bike = restmod.model('/api/bikes', {
         allParts: { hasMany: 'Part' },
-        activity: { hasMany: 'BikeRide', path: 'rides', inverseOf: 'bike' }
+        activity: { hasMany: 'BikeRide', path: 'rides', inverseOf: 'bike' },
+        todayActivity: { hasMany: 'BikeRide', path: 'rides', inverseOf: 'bike', params: { since: 'today' } }
       });
     });
 
@@ -51,6 +52,49 @@ describe('Restmod model relation:', function() {
 
     it('should use url provided in path option', function() {
       expect(Bike.$new(1).activity.$url()).toEqual('/api/bikes/1/rides');
+    });
+
+    it('should use parameters provided in params option', function() {
+      Bike = restmod.model('/api/bikes', {
+        wheels: { hasMany: 'Part', params: { category: 'wheel' } }
+      });
+
+      expect(Bike.$new(1).wheels.$params.category).toEqual('wheel');
+    });
+
+    it('should use hooks provided in hooks option', function() {
+      var owner, added;
+      Bike = restmod.model('/api/bikes').mix({
+        wheels: {
+          hasMany: 'Part',
+          hooks: {
+            'a-hook': function(_value) {
+              owner = this.$owner;
+              added = _value;
+            }
+          }
+        }
+      });
+
+      var bike = Bike.$new(1);
+      bike.wheels.$dispatch('a-hook', ['param1']);
+      expect(owner).toEqual(bike);
+      expect(added).toEqual('param1');
+    });
+
+    it('should trigger an after-has-many-init hook on creation', function() {
+      var spy = jasmine.createSpy();
+      Bike = restmod.model('/api/bikes').mix({
+        wheels: {
+          hasMany: 'Part',
+          hooks: {
+            'after-has-many-init': spy
+          }
+        }
+      });
+
+      Bike.$new(1);
+      expect(spy).toHaveBeenCalled();
     });
 
     it('should set the inverse property of each child if required', function() {
@@ -183,6 +227,41 @@ describe('Restmod model relation:', function() {
     it('should assign inverse relation with host instance', function() {
       var bike = Bike.$new(1).$decode({ serial: { id: 'XX' } });
       expect(bike.serialNo.bike).toEqual(bike);
+    });
+
+    it('should use hooks provided in hooks option', function() {
+      var owner, added;
+      Bike = restmod.model('/api/bikes').mix({
+        serial: {
+          hasOne: 'SerialNo',
+          hooks: {
+            'a-hook': function(_value) {
+              owner = this.$owner;
+              added = _value;
+            }
+          }
+        }
+      });
+
+      var bike = Bike.$new(1);
+      bike.serial.$dispatch('a-hook', ['param1']);
+      expect(owner).toEqual(bike);
+      expect(added).toEqual('param1');
+    });
+
+    it('should trigger an after-has-many-init hook on creation', function() {
+      var spy = jasmine.createSpy();
+      Bike = restmod.model('/api/bikes').mix({
+        serial: {
+          hasOne: 'SerialNo',
+          hooks: {
+            'after-has-one-init': spy
+          }
+        }
+      });
+
+      Bike.$new(1);
+      expect(spy).toHaveBeenCalled();
     });
   });
 
