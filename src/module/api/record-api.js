@@ -16,20 +16,23 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
   };
 
   RelationScope.prototype = {
-    // record url is nested only for nested resources
-    $urlFor: function(_resource) {
-      if(_resource.$isCollection) return Utils.joinUrl(this.$scope.$url(), this.$partial);
 
-      if(this.$target.isNested()) {
-        return this.$fetchUrlFor();
+    $nestedUrl: function() {
+      return Utils.joinUrl(this.$scope.$url(), this.$partial);
+    },
+
+    // url is nested for collections and nested records
+    $urlFor: function(_resource) {
+      if(_resource.$isCollection || this.$target.isNested()) {
+        return this.$nestedUrl();
       } else {
         return this.$target.$urlFor(_resource);
       }
     },
 
-    // fetch url is always nested
+    // a record's fetch url is always nested
     $fetchUrlFor: function(/* _resource */) {
-      return Utils.joinUrl(this.$scope.$url(), this.$partial);
+      return this.$nestedUrl();
     },
 
     // create is not posible in nested members
@@ -114,6 +117,19 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
     /**
      * @memberof RecordApi#
      *
+     * @description Called the resource's scope $urlFor method to build the url for the record using the proper scope.
+     *
+     * By default the resource partial url is just its `$pk` property. This can be overriden to provide other routing approaches.
+     *
+     * @return {string} The resource partial url
+     */
+    $buildUrl: function(_scope) {
+      return (this.$pk === undefined || this.$pk === null) ? null : Utils.joinUrl(_scope.$url(), this.$pk + '');
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
      * @description Default item child scope factory.
      *
      * By default, no create url is provided and the update/destroy url providers
@@ -163,7 +179,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
     $decode: function(_raw, _mask) {
       // IDEA: let user override serializer
       this.$type.decode(this, _raw, _mask || Utils.READ_MASK);
-      if(!this.$pk) this.$pk = this.$type.inferKey(_raw); // TODO: warn if key changes
+      if(this.$pk === undefined || this.$pk === null) this.$pk = this.$type.inferKey(_raw); // TODO: warn if key changes
       this.$dispatch('after-feed', [_raw]);
       return this;
     },
@@ -335,11 +351,9 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      */
     $destroy: function() {
       return this.$action(function() {
-        if(this.$pk)
+        var url = this.$url('destroy');
+        if(url)
         {
-          var url = this.$url('destroy');
-          Utils.assert(!!url, 'Cant $destroy if resource is not bound');
-
           var request = { method: 'DELETE', url: url };
 
           this
@@ -358,7 +372,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
         }
         else
         {
-          // If not yet identified, just remove from scope
+          // If not yet bound, just remove from parent
           if(this.$scope.$remove) this.$scope.$remove(this);
         }
       });

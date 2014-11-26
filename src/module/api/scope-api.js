@@ -23,8 +23,8 @@ RMModule.factory('RMScopeApi', ['RMUtils', function(Utils) {
      */
     $urlFor: function(_resource) {
       // force item unscoping if model is not nested (maybe make this optional)
-      var baseUrl = this.$type.$url() || this.$url();
-      return _resource.$isCollection ? baseUrl : Utils.joinUrl(baseUrl, _resource.$pk);
+      var scope = this.$type.isNested() ? this : this.$type;
+      return typeof _resource.$buildUrl === 'function' ? _resource.$buildUrl(scope) : scope.$url();
     },
 
     /**

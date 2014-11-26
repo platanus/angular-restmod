@@ -12,6 +12,12 @@ describe('Restmod scope api:', function() {
     Bike = restmod.model('/api/bikes');
   }));
 
+  describe('$urlFor', function() {
+    it('return a valid url if resource $pk is 0', function() {
+      expect(Bike.$urlFor(Bike.$new(0))).not.toBeNull();
+    });
+  });
+
   describe('$collection', function() {
     // TODO.
   });
