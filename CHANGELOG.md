@@ -4,14 +4,13 @@
 
 #### Bug Fixes
 
-* **common:** fixes $send not properly handling the $promise property. ([10188a17](http://github.com/angular-platanus/restmod/commit/10188a178cc44eb4185ab12af5c10fcc9fca1e53), closes [#154](http://github.com/angular-platanus/restmod/issues/154))
 * **record_api:** Improves url building and adds support for falsy `$pk`s ([db4e63b4](http://github.com/angular-platanus/restmod/commit/db4e63b4fc4d98c121481fc5a54c688149ad528e), closes [#205](http://github.com/angular-platanus/restmod/issues/205))
 
 
 #### Features
 
 * **common_api:** Adds the posibility to override the cannonical url for nested resources. ([db47f98c](http://github.com/angular-platanus/restmod/commit/db47f98c7137cab5ffccacc3ba4e08de84debfcc))
-* **computed:** Adds mask to computed properties. ([9a015311](http://github.com/angular-platanus/restmod/commit/9a015311ee93615b7b29d83d84080e0a0206f8b9))
+* **computed:** Adds compute properties. ([9a015311](http://github.com/angular-platanus/restmod/commit/9a015311ee93615b7b29d83d84080e0a0206f8b9))
 * **relations:** adds hasMany and hasOne hooks. ([fc2a8059](http://github.com/angular-platanus/restmod/commit/fc2a8059089725853025acf6804d6ed675ed7488), closes [#35](http://github.com/angular-platanus/restmod/issues/35), [#28](http://github.com/angular-platanus/restmod/issues/28))
 
 
