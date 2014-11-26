@@ -1023,3 +1023,5 @@ Some links:
 
 REST api designs guidelines: https://github.com/interagent/http-api-design
 REST json api standard: http://jsonapi.org
+
+[Authors and Contributors](https://github.com/platanus/angular-restmod/blob/master/authors.md)
