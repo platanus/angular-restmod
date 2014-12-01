@@ -131,11 +131,13 @@ To change the property from where the packer extracts the metadata set the `json
 
 ```javascript
 var Bike = restmod.model('/api/bikes').$mix('DefaultPacker',
-	JSON_META: '.'
+	$config: {
+		jsonMeta: '.'
+	}
 });
 
 Bike.$search().$then(function(_colection) {
-	_colection.$meta; // = { page: 1 } it will ignore response's bikes property.
+	_colection.$metadata; // = { page: 1 } it will ignore response's bikes property.
 })
 ```
 
