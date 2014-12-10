@@ -1,7 +1,7 @@
 'use strict';
 
-RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMListApi', 'RMCollectionApi', 'RMExtendedApi', 'RMSerializer', 'RMBuilder',
-  function($injector, inflector, Utils, ScopeApi, CommonApi, RecordApi, ListApi, CollectionApi, ExtendedApi, Serializer, Builder) {
+RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMListApi', 'RMCollectionApi', 'RMExtendedApi', 'RMSerializer', 'RMBuilder',
+  function($injector, $log, inflector, Utils, ScopeApi, CommonApi, RecordApi, ListApi, CollectionApi, ExtendedApi, Serializer, Builder) {
 
   var NAME_RGX = /(.*?)([^\/]+)\/?$/,
       extend = Utils.extendOverriden;
@@ -334,7 +334,25 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        * @params {string} _name Record name
        * @return {string} Response (raw) name
        */
-      encodeName: null
+      encodeName: null,
+
+      /**
+       * @memberof StaticApi#
+       *
+       * @description The model name to url encoding strategy
+       *
+       * This method is called when translating a name into an url fragment (mainly by relations).
+       *
+       * By default it uses the `inflector.parameterize` method, in 1.2 this will change and the default
+       * behaviour will be to do nothing.
+       *
+       * @params {string} _name local name
+       * @return {string} url fragment
+       */
+      encodeUrlName: function(_name) {
+        $log.warn('Default paremeterization of urls will be disabled in 1.2, override Model.encodeUrlName with inflector.parameterize in your base model to keep the same behaviour.');
+        return inflector.parameterize(_name);
+      }
 
     }, ScopeApi);
 

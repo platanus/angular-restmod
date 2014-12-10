@@ -10,7 +10,8 @@ describe('Style: AMS', function() {
     restmodProvider.rebase('AMSApi');
     $provide.factory('Bike', function(restmod) {
       return restmod.model('/api/bikes', {
-        user: { belongsTo: restmod.model('/api/users') }
+        user: { belongsTo: restmod.model('/api/users') },
+        allUsers: { hasMany: restmod.model('/api/users') }
       });
     });
   }));
@@ -31,6 +32,10 @@ describe('Style: AMS', function() {
   it('should use "id" as primary key', function() {
     bike.$decode({ id: 1 });
     expect(bike.$pk).toEqual(1);
+  });
+
+  it('should properly encode url names using lowercase and dashes', function() {
+    expect(bike.$decode({ id: 1 }).allUsers.$url()).toEqual('/api/bikes/1/all-users');
   });
 
   it('should extract metadata from "meta" property', function() {

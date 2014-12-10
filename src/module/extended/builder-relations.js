@@ -75,7 +75,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
           }
         }
 
-        var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)), col; // TODO: name to url transformation should be a Model strategy
+        var scope = this.$buildScope(_model, _url || _model.encodeUrlName(_attr)), col;
 
         // setup collection
         col = _model.$collection(_params || null, scope);
@@ -140,7 +140,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
           }
         }
 
-        var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)), inst;
+        var scope = this.$buildScope(_model, _url || _model.encodeUrlName(_attr)), inst;
 
         // setup record
         inst = _model.$new(null, scope);

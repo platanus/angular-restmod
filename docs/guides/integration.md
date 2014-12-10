@@ -10,8 +10,9 @@ Make sure you read all of the following Q&A before you start integrating your AP
 * [Are there any other conventions related to naming I should be aware of?](#q6)
 * [How can I set a common url prefix for every resource?](#q7)
 * [How can I add a trailing slash or extension to the url sent to server?](#q8)
-* [How can I add Ia custom header or parameter to every request?](#q9)
+* [How can I add a custom header or parameter to every request?](#q9)
 * [I'm getting a 'No API style base was included' warning, what does it mean?](#q10)
+* [Can I change the way url names are generated for relations?](#q11)
 
 ### <a name="q1"></a> How can I change the property used for the primary key
 
@@ -191,22 +192,24 @@ bike = Bike.$find(1).$then(function() {
 });
 ```
 
-To change the property where the inlined resources are located set the JSON_LINKS configuration property or set it to '.' to extract links from root.
+To change the property where the inlined resources are located set the `jsonLinks` configuration property or set it to '.' to extract links from root.
 
 ```javascript
 module.config(function(restmodProvider) {
 	restmodProvider.rebase(function() {
-		this.setProperty('jsonLinks', 'links'); // or set JSON_LINKS: 'links' in a definition object.
+		this.setProperty('jsonLinks', 'links'); // or set jsonLinks: 'links' in a definition object.
 	});
 });
 ```
 
-Take a look at the default naming stardards, inlined resources are expected to use the **pluralized** names for their respective model names. See. By default the name is extracted from the url, you can change a model's name and plural name by setting the `NAME` and `PLURAL` configuration variables:
+Take a look at the default naming stardards, inlined resources are expected to use the **pluralized** names for their respective model names. See. By default the name is extracted from the url, you can change a model's name and plural name by setting the `name` and `plural` configuration variables:
 
 ```javascript
 restmod.model().$mix(function() {
-	NAME: 'mouse', // if you only set NAME, then plural is infered from it.
-	PLURAL: 'mice'
+	$config: {
+		name: 'mouse', // if you only set name, then plural is infered from it.
+		plural: 'mice'
+	}
 });
 ```
 
@@ -219,8 +222,12 @@ You can disable or modify renaming by overriding the following methods:
 ```javascript
 module.config(function(restmodProvider) {
 	restmodProvider.rebase({
-		'^encodeName': function(_name) { return _newName; }, // or null to disable renaming.
-		'^decodeName': function(_name) { return _newName; } // or null to disable renaming.
+		$extend: {
+			Model: {
+				encodeName: function(_name) { return _newName; }, // or null to disable renaming.
+				decodeName: function(_name) { return _newName; } // or null to disable renaming.
+			}
+		}
 	});
 });
 ```
@@ -238,14 +245,18 @@ To handle API's that require '$' prefixed properies you have two posibilities:
 	```javascript
 	module.config(function(restmodProvider) {
 		restmodProvider.rebase({
-			'^decodeName': function(_name) {
-				// change prefix to '_'
-				return _name.charAt(0) == '$' ? '_' + inflector.camelize(_name.substr(1), true) : inflector.camelize(_name);
-			},
+			$extend: {
+				Model: {
+					decodeName: function(_name) {
+						// change prefix to '_'
+						return _name.charAt(0) == '$' ? '_' + inflector.camelize(_name.substr(1), true) : inflector.camelize(_name);
+					},
 
-			'^encodeName': function(_name) {
-				// change prefix back to '$'
-				return _name.charAt(0) == '_' ? '$' + inflector.parameterize(_name.substr(1), '_') : inflector.parameterize(_name, '_');
+					encodeName: function(_name) {
+						// change prefix back to '$'
+						return _name.charAt(0) == '_' ? '$' + inflector.parameterize(_name.substr(1), '_') : inflector.parameterize(_name, '_');
+					}
+				}
 			}
 		});
 	});
@@ -337,4 +348,22 @@ module.config(function(restmodProvider) {
 
 To see available styles or colaborate with a new one, take a look at the [Style listing](https://github.com/platanus/angular-restmod/blob/master/docs/guides/styles.md).
 
+### <a name="q11"></a> Can I change the way url names are generated for relations?
 
+Yes you can, just override the `Model.encodeUrlName` method to provide custom name transformation, like this:
+
+```javascript
+module.config(function(restmodProvider) {
+	restmodProvider.rebase({
+		$extend: {
+			Model: {
+				encodeUrlName: function(_name) {
+					return _name.toLowerCase();
+				}
+			}
+		}
+	});
+});
+```
+
+Transformations will be applied to relations where the extended model is referenced.

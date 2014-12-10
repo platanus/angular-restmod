@@ -15,7 +15,8 @@ angular.module('restmod').factory('AMSApi', ['restmod', 'inflector', function(re
 			// special snakecase to camelcase renaming
 			Model: {
 				decodeName: inflector.camelize,
-				encodeName: function(_v) { return inflector.parameterize(_v, '_'); }
+				encodeName: function(_v) { return inflector.parameterize(_v, '_'); },
+				encodeUrlName: inflector.parameterize
 			}
 		}
 	});
