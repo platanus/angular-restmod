@@ -22,13 +22,20 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
     return result;
   }
 
+  function navigate(_target, _keys) {
+    var key, i = 0;
+    while((key = _keys[i++])) {
+      if(_target && _target.hasOwnProperty(key)) _target = _target[key];
+    }
+    return _target;
+  }
+
   function hasValueChanged(_model, _original, _keys, _comparator) {
     var isDirty = false,
-        prop = _keys.pop(),
-        propChain = buildPropChain(_model, _original, _keys);
+        prop = _keys.pop();
 
-    _model = propChain[0];
-    _original = propChain[1];
+    _model = navigate(_model, _keys);
+    _original = navigate(_original, _keys);
 
     if(_original.hasOwnProperty(prop)) {
       if(_comparator && typeof _comparator === 'function') {
@@ -53,7 +60,7 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
             changes.push.apply(changes, childChanges);
           } else {
             if(hasValueChanged(_model, _original, [key], _comparator)) {
-              changes.push(_keys.concat([key]).join('.'));
+              changes.push(_keys.concat([key]));
             }
           }
         }
@@ -63,17 +70,21 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
     return changes;
   }
 
-  // Helper function to build a property chain from a set of keys
-  function buildPropChain(_model, _original, _keys) {
-    var key;
-
-    while(_keys.length) {
-      key = _keys.shift();
-      _model = _model[key];
-      _original = _original[key];
+  function changesToStrings(_changes) {
+    for(var i = 0, l = _changes.length; i < l; i++) {
+      _changes[i] = _changes[i].join('.');
     }
+    return _changes;
+  }
 
-    return [_model, _original];
+  function restoreValue(_model, _original, _keys) {
+    var prop = _keys.pop();
+    _model = navigate(_model, _keys);
+    _original = navigate(_original, _keys);
+
+    if(_original && _model && _original.hasOwnProperty(prop)) {
+      _model[prop] = angular.copy(_original[prop]);
+    }
   }
 
   return restmod.mixin(function() {
@@ -109,7 +120,7 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
             return hasValueChanged(this, original, _prop.split('.'), _comparator);
           } else {
             if(angular.isFunction(_prop)) _comparator = _prop;
-            return findChangedValues(this, original, [], _comparator);
+            return changesToStrings(findChangedValues(this, original, [], _comparator));
           }
         })
         /**
@@ -134,19 +145,15 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
          */
         .define('$restore', function(_prop) {
           return this.$action(function() {
-            var original = this.$cmStatus,
-                model = this;
+            var original = this.$cmStatus;
 
             if(_prop) {
-              var keys = _prop.split('.'), propChain;
-
-              _prop = keys.pop();
-              propChain = buildPropChain(model, original, keys);
-
-              propChain[0][_prop] = angular.copy(propChain[1][_prop]);
+              var keys = _prop.split('.');
+              restoreValue(this, original, keys);
             } else {
-              for(var key in original) {
-                if(original.hasOwnProperty(key)) model[key] = angular.copy(original[key]);
+              var changes = findChangedValues(this, original, []);
+              for(var i = 0, l = changes.length; i < l; i++) {
+                restoreValue(this, original, changes[i]);
               }
             }
           });
