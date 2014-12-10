@@ -30,12 +30,12 @@ describe('Plugin: Nested Dirty Model', function() {
     it('should list changes on nested objects', function() {
       bike.brandName = 'BMX';
       expect(bike.$dirty()).not.toContain('customisations.wheels');
-      
+
       bike.customisations.wheels = 3;
       bike.colours.frame = 'green';
       expect(bike.$dirty()).toContain('customisations.wheels');
       expect(bike.$dirty()).toContain('colours.frame');
-      
+
       bike.customisations.seat.material = 'leather';
       expect(bike.$dirty()).toContain('customisations.seat.material');
     });
@@ -45,6 +45,11 @@ describe('Plugin: Nested Dirty Model', function() {
       expect(bike.$dirty()).not.toContain('stickers');
       bike.stickers.pop();
       expect(bike.$dirty()).toContain('stickers');
+    });
+
+    it('should detect missing objects', function() {
+      bike.customisations = null;
+      expect(bike.$dirty()).toContain('customisations');
     });
 
     it('should compare with comparator function', function() {

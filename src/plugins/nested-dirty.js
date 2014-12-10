@@ -8,6 +8,10 @@
 
 angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restmod) {
 
+  function isPlainObject(_val) {
+    return angular.isObject(_val) && !angular.isArray(_val);
+  }
+
   function copyOriginalData(_from) {
     var Model = _from.$type, result = {};
 
@@ -38,7 +42,7 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
     _original = navigate(_original, _keys);
 
     if(_original.hasOwnProperty(prop)) {
-      if(_comparator && typeof _comparator === 'function') {
+      if(typeof _comparator === 'function') {
         isDirty = !!_comparator(_model[prop], _original[prop]);
       } else {
         isDirty = !angular.equals(_model[prop], _original[prop]);
@@ -54,8 +58,7 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
     if(_original) {
       for(var key in _original) {
         if(_original.hasOwnProperty(key)) {
-          // isObject returns true if value is an array
-          if(angular.isObject(_original[key]) && !angular.isArray(_original[key])) {
+          if(isPlainObject(_original[key]) && isPlainObject(_model[key])) {
             childChanges = findChangedValues(_model[key], _original[key], _keys.concat([key]), _comparator);
             changes.push.apply(changes, childChanges);
           } else {
