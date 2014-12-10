@@ -163,7 +163,7 @@ describe('Restmod model class:', function() {
       var bike;
 
       beforeEach(function() {
-        bike = Bike.$new(1).$extend({ brand: 'Santa Cruz', model: 'Bronson', wheelSz: 27.5 });
+        bike = Bike.$new(1).$extend({ brand: 'Santa Cruz', model: 'Bronson', wheelSz: 27.5, dim: { height: 10, width: 10 } });
       });
 
       it('should begin a PATCH action', function() {
@@ -182,6 +182,18 @@ describe('Restmod model class:', function() {
       it('should only send requested properties', function() {
         bike.$save(['brand', 'wheelSz']);
         $httpBackend.expectPATCH('/api/bikes/1', { brand: 'Santa Cruz', wheelSz: 27.5 }).respond(200, {});
+        $httpBackend.flush();
+      });
+
+      it('should include explicitly specified subproperties', function() {
+        bike.$save(['brand', 'dim.width']);
+        $httpBackend.expectPATCH('/api/bikes/1', { brand: 'Santa Cruz', dim: { width: 10 } }).respond(200, {});
+        $httpBackend.flush();
+      });
+
+      it('should include every sub property in a property if parent name is given', function() {
+        bike.$save(['brand', 'dim']);
+        $httpBackend.expectPATCH('/api/bikes/1', { brand: 'Santa Cruz', dim: { height: 10, width: 10 } }).respond(200, {});
         $httpBackend.flush();
       });
 

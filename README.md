@@ -257,10 +257,26 @@ To patch an object, just modify the properties and call `$save` passing an array
 bike = Bike.$find(1);
 bike.brand = 'Trek';
 bike.model = 'Slash';
-bike.$save(['brand']);
+bike.dim = { width: 10.0, height: 10.0 };
+bike.$save(['brand', 'dim']); // will only send brand and dim (every sub property)
 ```
 
-<!-- it: $httpBackend.expectPATCH('/bikes/1').respond(200, '{}'); $httpBackend.flush(); -->
+<!-- it: $httpBackend.expectPATCH('/bikes/1', { brand: 'Trek', dim: { width: 10.0, height: 10.0 } }).respond(200, '{}'); $httpBackend.flush(); -->
+<!-- end -->
+
+<!-- section: $save patch nested -->
+
+To specify a single subproperty to be sent in patch, use dot notation:
+
+```javascript
+bike = Bike.$find(1);
+bike.brand = 'Trek';
+bike.model = 'Slash';
+bike.dim = { width: 10.0, height: 10.0 };
+bike.$save(['dim.height']); // will only send dim.height
+```
+
+<!-- it: $httpBackend.expectPATCH('/bikes/1', { dim: { height: 10.0 } }).respond(200, '{}'); $httpBackend.flush(); -->
 <!-- end -->
 
 <!-- section: $create on type -->

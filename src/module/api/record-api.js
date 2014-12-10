@@ -292,7 +292,16 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
               method: this.$type.getProperty('patchMethod', 'PATCH'), // allow user to override patch method
               url: url,
               // Use special mask for patches, mask everything that is not in the patch list.
-              data: this.$wrap(function(_name) { return _patch.indexOf(_name) === -1; })
+              data: this.$wrap(function(_name) {
+                for(var i = 0, l = _patch.length; i < l; i++) {
+                  if(_name === _patch[i] ||
+                    _name.indexOf(_patch[i] + '.') === 0 ||
+                    _patch[i].indexOf(_name + '.') === 0
+                  ) { return false; }
+                }
+
+                return true;
+              })
             };
           } else {
             request = { method: 'PUT', url: url, data: this.$wrap(Utils.UPDATE_MASK) };
