@@ -8,35 +8,25 @@
 
 angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restmod) {
 
-  // Helper function to check model for changes properties
-  function findChanged(_model, _original, _keys, _comparator) {
-    var changes = [], keys = angular.copy(_keys);
+  function copyOriginalData(_from) {
+    var Model = _from.$type, result = {};
 
-    if(_original) {
-      for(var key in _original) {
-        // isObject returns true if value is an array
-        if(angular.isObject(_original[key]) && !angular.isArray(_original[key])) {
-          keys.push(key);
-          changes = changes.concat(findChanged(_model[key], _original[key], keys, _comparator));
-        } else {
-          if(isDirtyValue(_model, _original, [key], _comparator)) {
-            changes.push(keys.length ? (keys.push(key) && keys.join('.')) : key);
-          }
-        }
-
-        keys = angular.copy(_keys);
+    _from.$each(function(value, key) {
+      var meta = Model.$$getDescription(key);
+      if(!meta || !meta.relation) {
+        // TODO: skip masked properties too?
+        result[key] = angular.copy(value);
       }
-    }
+    });
 
-    return changes;
+    return result;
   }
 
-  // Compares original value with current value
-  function isDirtyValue(_model, _original, _keys, _comparator) {
+  function hasValueChanged(_model, _original, _keys, _comparator) {
     var isDirty = false,
         prop = _keys.pop(),
         propChain = buildPropChain(_model, _original, _keys);
-        
+
     _model = propChain[0];
     _original = propChain[1];
 
@@ -56,6 +46,28 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
     return isDirty;
   }
 
+  function findChangedValues(_model, _original, _keys, _comparator) {
+    var changes = [], childChanges;
+
+    if(_original) {
+      for(var key in _original) {
+        if(_original.hasOwnProperty(key)) {
+          // isObject returns true if value is an array
+          if(angular.isObject(_original[key]) && !angular.isArray(_original[key])) {
+            childChanges = findChangedValues(_model[key], _original[key], _keys.concat([key]), _comparator);
+            changes.push.apply(changes, childChanges);
+          } else {
+            if(hasValueChanged(_model, _original, [key], _comparator)) {
+              changes.push(_keys.concat([key]).join('.'));
+            }
+          }
+        }
+      }
+    }
+
+    return changes;
+  }
+
   // Helper function to build a property chain from a set of keys
   function buildPropChain(_model, _original, _keys) {
     var key;
@@ -70,9 +82,9 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
   }
 
   return restmod.mixin(function() {
-    this.on('after-feed', function(_original) {
+    this.on('after-feed', function() {
           // store original information in a model's special property
-          this.$cmStatus = angular.copy(_original);
+          this.$cmStatus = copyOriginalData(this);
         })
         /**
          * @method $dirty
@@ -80,7 +92,7 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
          *
          * @description Retrieves the model changes
          *
-         * Property changes are determined using the strict equality operator if no comparator 
+         * Property changes are determined using the strict equality operator if no comparator
          * function is provided.
          *
          * If given a property name, this method will return true if property has changed
@@ -96,14 +108,13 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
          * @return {boolean|array} Property state or array of changed properties
          */
         .define('$dirty', function(_prop, _comparator) {
-          var original = this.$cmStatus, keys;
+          var original = this.$cmStatus;
 
           if(_prop && !angular.isFunction(_prop)) {
-            keys = _prop.split('.');
-            return isDirtyValue(this, original, keys, _comparator);
+            return hasValueChanged(this, original, _prop.split('.'), _comparator);
           } else {
             if(angular.isFunction(_prop)) _comparator = _prop;
-            return findChanged(this, original, [], _comparator);
+            return findChangedValues(this, original, [], _comparator);
           }
         })
         /**
@@ -136,7 +147,7 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
 
               _prop = keys.pop();
               propChain = buildPropChain(model, original, keys);
-   
+
               propChain[0][_prop] = angular.copy(propChain[1][_prop]);
             } else {
               for(var key in original) {
