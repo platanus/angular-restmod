@@ -31,15 +31,10 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
     _original = propChain[1];
 
     if(_original.hasOwnProperty(prop)) {
-      if(_comparator && angular.isFunction(_comparator)) {
+      if(_comparator && typeof _comparator === 'function') {
         isDirty = !!_comparator(_model[prop], _original[prop]);
-      } else { // Check via equality
-        // Join arrays before comparing them
-        if(angular.isArray(_original[prop])) {
-          isDirty = _model[prop].join('|') !== _original[prop].join('|');
-        } else {
-          isDirty = _model[prop] !== _original[prop];
-        }
+      } else {
+        isDirty = !angular.equals(_model[prop], _original[prop]);
       }
     }
 
