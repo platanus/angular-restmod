@@ -132,6 +132,7 @@ module.exports = function(grunt) {
         files: {
           src: [
             'bower.json',
+            'package.json',
             'CHANGELOG.md',
             'dist/**/*'
             ]
