@@ -68,6 +68,7 @@ describe('Restmod builder:', function() {
           test6: fun
         });
         this.define('Dummy.test7', fun);
+        this.define('List.test8', fun);
       });
 
       expect(Bike.$new().test1).toBeDefined();
@@ -82,6 +83,8 @@ describe('Restmod builder:', function() {
       expect(Bike.$new().test6).toBeDefined();
       expect(Bike.dummy().test6).toBeDefined();
       expect(Bike.dummy().test7).toBeDefined();
+      expect(Bike.list().test8).toBeDefined();
+      expect(Bike.$collection().test8).toBeDefined();
     });
   });
 

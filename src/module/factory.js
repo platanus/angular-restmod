@@ -1,7 +1,7 @@
 'use strict';
 
-RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', 'RMExtendedApi', 'RMSerializer', 'RMBuilder',
-  function($injector, inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi, ExtendedApi, Serializer, Builder) {
+RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMListApi', 'RMCollectionApi', 'RMExtendedApi', 'RMSerializer', 'RMBuilder',
+  function($injector, inflector, Utils, ScopeApi, CommonApi, RecordApi, ListApi, CollectionApi, ExtendedApi, Serializer, Builder) {
 
   var NAME_RGX = /(.*?)([^\/]+)\/?$/,
       extend = Utils.extendOverriden;
@@ -41,15 +41,16 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
     }
 
     var Collection = Utils.buildArrayType(),
+        List = Utils.buildArrayType(),
         Dummy = function(_asCollection) {
           this.$isCollection = _asCollection;
-          this.$initialize();
+          this.$initialize(); // TODO: deprecate this
         };
 
-    // Collection factory (since a constructor cant be provided...)
-    function newCollection(_scope, _params) {
+    // Collection factory
+    function newCollection(_params, _scope) {
       var col = new Collection();
-      col.$scope = _scope;
+      col.$scope = _scope || Model;
       col.$params = _params;
       col.$initialize();
       return col;
@@ -93,9 +94,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       },
 
       // creates a new collection bound by default to the static scope
-      $collection: function(_params, _scope) {
-        return newCollection(_scope || Model, _params);
-      },
+      $collection: newCollection,
 
       // gets scope url
       $url: function() {
@@ -201,6 +200,21 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        */
       dummy: function(_asCollection) {
         return new Dummy(_asCollection);
+      },
+
+      /**
+       * Creates a new record list.
+       *
+       * A list is a ordered set of records not bound to a particular scope.
+       *
+       * Contained records can belong to any scope.
+       *
+       * @return {List} the new list
+       */
+      list: function(_items) {
+        var list = new List();
+        if(_items) list.push.apply(list, _items);
+        return list;
       },
 
       /**
@@ -361,10 +375,18 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       // provide collection constructor
       $collection: function(_params, _scope) {
         _params = this.$params ? angular.extend({}, this.$params, _params) : _params;
-        return newCollection(_scope || this.$scope, _params);
+        return newCollection(_params, _scope || this.$scope);
       }
 
-    }, ScopeApi, CommonApi, CollectionApi, ExtendedApi);
+    }, ListApi, ScopeApi, CommonApi, CollectionApi, ExtendedApi);
+
+    ///// Setup list api
+
+    extend(List.prototype, {
+
+      $type: Model
+
+    }, ListApi, CommonApi);
 
     ///// Setup dummy api
 
@@ -384,6 +406,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       Model: Model,
       Record: Model.prototype,
       Collection: Collection.prototype,
+      List: List.prototype,
       Dummy: Dummy.prototype
     };
 
@@ -531,6 +554,10 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
         switch(api) {
         // Virtual API's
+        case 'List':
+          helpDefine('Collection', name, _fun);
+          helpDefine('List', name, _fun);
+          break;
         case 'Scope':
           helpDefine('Model', name, _fun);
           helpDefine('Collection', name, _fun);
@@ -538,6 +565,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
         case 'Resource':
           helpDefine('Record', name, _fun);
           helpDefine('Collection', name, _fun);
+          helpDefine('List', name, _fun);
           helpDefine('Dummy', name, _fun);
           break;
         default:

@@ -912,7 +912,7 @@ var User = restmod.model('/users').mix({
 
 ## Custom methods
 
-A restmod object is composed of three main APIs, the Model statis API, the record API and the collection API.
+A restmod object is composed of three main APIs, the Model static API, the record API and the collection API.
 
 Each one of these APis can be extended using the `$extend` block in the object definition:
 
@@ -949,6 +949,7 @@ The following API's are available for extension:
 * Collection: model collection instance api.
 * Scope: Same as extending Model and Collection
 * Resource: Same as extending Record and+ Collection
+* List: special api implemented by any record list, including collections
 
 So, to add a static method we would use:
 
@@ -975,6 +976,49 @@ var Bike = restmod.model('/bikes').mix({
 			}
 		}
 	}
+});
+```
+
+### Custom methods and Lists
+
+A `List` namespace is provided for collections and lists, this enables the creation of chainable list methods:
+
+For example, lets say you need to be able to filter a collection of records and then do something with the resulting list:
+
+```javascript
+var Part = restmod.model('/parts').mix({
+	$extend: {
+		List: {
+			filterByCategory: function(_category) {
+				return this.$asList(function(_parts) {
+					return _.filter(_parts, function(_part) {
+						return _part.category == _category;
+					});
+				});
+			},
+			filterByBrand: function(_brand) {
+				return this.$asList(function(_parts) {
+					return _.filter(_parts, function(_part) {
+						return _part.brand == _brand;
+					});
+				});
+			},
+			getTotalWeight: function(_category) {
+				return _.reduce(this, function(sum, _part) {
+					return sum + _part.weight;
+				};
+			}
+		}
+	}
+});
+```
+
+Now, since `List` methods are shared by both collections and lists, you can do:
+
+```javascript
+Part.$search().filterByCategory('wheels').filterByBrand('SRAM').$then(function() {
+	// use $then because the $asList method will honor promises.
+	scope.weight = this.getTotalWeight();
 });
 ```
 
