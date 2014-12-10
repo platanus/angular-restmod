@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.1.4 - 2014-11-26
+ * @version v1.1.5 - 2014-12-10
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -135,7 +135,7 @@ RMModule.provider('restmod', [function() {
 
           if(arguments.length > 1) {
             model.mix(arraySlice.call(arguments, 1));
-            $log.warn('Passing mixins and difinitions in the model method will be deprecated in restmod 1.2, use restmod.model().$mix() instead.');
+            $log.warn('Passing mixins and difinitions in the model method will be deprecated in restmod 1.2, use restmod.model().mix() instead.');
           }
 
           return model;
@@ -994,6 +994,43 @@ RMModule.factory('RMExtendedApi', ['$q', 'RMPackerCache', function($q, packerCac
   };
 
 }]);
+RMModule.factory('RMListApi', [function() {
+
+  /**
+   * @class ListApi
+   *
+   * @description Common methods for Lists and Collections.
+   */
+  return {
+
+    /**
+     * @memberof ListApi#
+     *
+     * @description Generates a new list from this one.
+     *
+     * If called without arguments, the list is popupated with the same contents as this list.
+     *
+     * If there is a pending async operation on the host collection/list, then this method will
+     * return an empty list and fill it when the async operation finishes. If you don't need the async behavior
+     * then use `$type.list` directly to generate a new list.
+     *
+     * @param {function} _filter A filter function that should return the list contents as an array.
+     * @return {ListApi} list
+     */
+    $asList: function(_filter) {
+      var list = this.$type.list(),
+          promise = this.$asPromise();
+
+      // set the list initial promise to the resolution of the parent promise.
+      list.$promise = promise.then(function(_this) {
+        list.push.apply(list, _filter ? _filter(_this) : _this);
+      });
+
+      return list;
+    }
+  };
+
+}]);
 RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
 
   /**
@@ -1286,7 +1323,16 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
               method: this.$type.getProperty('patchMethod', 'PATCH'), // allow user to override patch method
               url: url,
               // Use special mask for patches, mask everything that is not in the patch list.
-              data: this.$wrap(function(_name) { return _patch.indexOf(_name) === -1; })
+              data: this.$wrap(function(_name) {
+                for(var i = 0, l = _patch.length; i < l; i++) {
+                  if(_name === _patch[i] ||
+                    _name.indexOf(_patch[i] + '.') === 0 ||
+                    _patch[i].indexOf(_name + '.') === 0
+                  ) { return false; }
+                }
+
+                return true;
+              })
             };
           } else {
             request = { method: 'PUT', url: url, data: this.$wrap(Utils.UPDATE_MASK) };
@@ -1542,74 +1588,6 @@ RMModule.factory('RMScopeApi', ['RMUtils', function(Utils) {
       return this.$collection(_params).$fetch();
     }
   };
-
-}]);
-RMModule.factory('RMViewApi', [function() {
-
-  /**
-   * @class CollectionApi
-   *
-   * @extends ScopeApi
-   * @extends CommonApi
-   *
-   * @description
-   *
-   * A restmod collection is an extended array type bound REST resource route.
-   *
-   * Every time a new restmod model is created, an associated collection type is created too.
-   *
-   * TODO: talk about fetch/refresh behaviour, lifecycles, collection scopes, adding/removing
-   *
-   * For `$fetch` on a collection:
-   *
-   * * before-fetch-many
-   * * before-request
-   * * after-request[-error]
-   * * after-feed (called for every record if no errors)
-   * * after-feed-many (only called if no errors)
-   * * after-fetch-many[-error]
-   *
-   * @property {boolean} $isCollection Helper flag to separate collections from the main type
-   * @property {object} $scope The collection scope (hierarchical scope, not angular scope)
-   * @property {object} $params The collection query parameters
-   *
-   */
-  var API = {
-
-    $isCollection: true,
-
-    /**
-     * @memberof CollectionApi#
-     *
-     * @description Called by collection constructor on initialization.
-     *
-     * Note: Is better to add a hook on after-init than overriding this method.
-     */
-    $initialize: function() {
-
-      this.$collection.on('after-add', function() {
-
-      }).on('after-remove', function() {
-
-      }).on('after-clear', function() {
-
-      });
-    },
-
-    $reload: function() {
-
-    }
-  };
-
-  // Proxy common collection methods to collection
-
-  angular.forEach(['$fetch', '$create', '$new', '$build', '$buildRaw'], function(_method) {
-    API[_method] = function() {
-      return this.$collection[_method].apply(this.$collection, arguments);
-    };
-  });
-
-  return API;
 
 }]);
 RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', function($injector, inflector, $log, Utils) {
@@ -2473,8 +2451,8 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
   });
 
 }]);
-RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMCollectionApi', 'RMExtendedApi', 'RMSerializer', 'RMBuilder',
-  function($injector, inflector, Utils, ScopeApi, CommonApi, RecordApi, CollectionApi, ExtendedApi, Serializer, Builder) {
+RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMListApi', 'RMCollectionApi', 'RMExtendedApi', 'RMSerializer', 'RMBuilder',
+  function($injector, inflector, Utils, ScopeApi, CommonApi, RecordApi, ListApi, CollectionApi, ExtendedApi, Serializer, Builder) {
 
   var NAME_RGX = /(.*?)([^\/]+)\/?$/,
       extend = Utils.extendOverriden;
@@ -2514,15 +2492,16 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
     }
 
     var Collection = Utils.buildArrayType(),
+        List = Utils.buildArrayType(),
         Dummy = function(_asCollection) {
           this.$isCollection = _asCollection;
-          this.$initialize();
+          this.$initialize(); // TODO: deprecate this
         };
 
-    // Collection factory (since a constructor cant be provided...)
-    function newCollection(_scope, _params) {
+    // Collection factory
+    function newCollection(_params, _scope) {
       var col = new Collection();
-      col.$scope = _scope;
+      col.$scope = _scope || Model;
       col.$params = _params;
       col.$initialize();
       return col;
@@ -2566,9 +2545,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       },
 
       // creates a new collection bound by default to the static scope
-      $collection: function(_params, _scope) {
-        return newCollection(_scope || Model, _params);
-      },
+      $collection: newCollection,
 
       // gets scope url
       $url: function() {
@@ -2674,6 +2651,21 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        */
       dummy: function(_asCollection) {
         return new Dummy(_asCollection);
+      },
+
+      /**
+       * Creates a new record list.
+       *
+       * A list is a ordered set of records not bound to a particular scope.
+       *
+       * Contained records can belong to any scope.
+       *
+       * @return {List} the new list
+       */
+      list: function(_items) {
+        var list = new List();
+        if(_items) list.push.apply(list, _items);
+        return list;
       },
 
       /**
@@ -2834,10 +2826,18 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       // provide collection constructor
       $collection: function(_params, _scope) {
         _params = this.$params ? angular.extend({}, this.$params, _params) : _params;
-        return newCollection(_scope || this.$scope, _params);
+        return newCollection(_params, _scope || this.$scope);
       }
 
-    }, ScopeApi, CommonApi, CollectionApi, ExtendedApi);
+    }, ListApi, ScopeApi, CommonApi, CollectionApi, ExtendedApi);
+
+    ///// Setup list api
+
+    extend(List.prototype, {
+
+      $type: Model
+
+    }, ListApi, CommonApi);
 
     ///// Setup dummy api
 
@@ -2857,6 +2857,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
       Model: Model,
       Record: Model.prototype,
       Collection: Collection.prototype,
+      List: List.prototype,
       Dummy: Dummy.prototype
     };
 
@@ -3004,6 +3005,10 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
 
         switch(api) {
         // Virtual API's
+        case 'List':
+          helpDefine('Collection', name, _fun);
+          helpDefine('List', name, _fun);
+          break;
         case 'Scope':
           helpDefine('Model', name, _fun);
           helpDefine('Collection', name, _fun);
@@ -3011,6 +3016,7 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
         case 'Resource':
           helpDefine('Record', name, _fun);
           helpDefine('Collection', name, _fun);
+          helpDefine('List', name, _fun);
           helpDefine('Dummy', name, _fun);
           break;
         default:

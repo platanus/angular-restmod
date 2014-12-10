@@ -1,3 +1,19 @@
+<a name="1.1.5"></a>
+### 1.1.5 (2014-12-10)
+
+
+#### Bug Fixes
+
+* **guides.integration:** fixes deprecated notation references ([7bdb2569](http://github.com/angular-platanus/restmod/commit/7bdb256972786ba5c007b84c6bf122fe5b093d65), closes [#215](http://github.com/angular-platanus/restmod/issues/215))
+* **service:** fixes wrong warning message refering to `$mix` instead of `mix` ([09b1f352](http://github.com/angular-platanus/restmod/commit/09b1f352357aa3fe34e4c86f60b57d8af63eb589), closes [#178](http://github.com/angular-platanus/restmod/issues/178))
+
+
+#### Features
+
+* adds the List type and namespace. ([7ee7b9ce](http://github.com/angular-platanus/restmod/commit/7ee7b9cee197c235eeba2b28fbbd9cf6be4f57ca), closes [#169](http://github.com/angular-platanus/restmod/issues/169))
+* improves PATCH logic, now refering to an object containing property will automatically include it's subproperties.
+
+
 <a name="1.1.4"></a>
 ### 1.1.4 (2014-11-26)
 
