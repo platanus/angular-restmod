@@ -205,6 +205,10 @@ module.exports = function(grunt) {
     grunt.config.data.pkg.version = version;
     grunt.file.write('bower.json', JSON.stringify(grunt.config.data.pkg, null, '  '));
 
+    var packagejson = grunt.file.readJSON('package.json');
+    packagejson.version = version;
+    grunt.file.write('package.json', JSON.stringify(packagejson, null, '  '));
+
     grunt.log.ok('Version bumped to ' + version);
   });
 
