@@ -47,9 +47,22 @@ describe('Plugin: Nested Dirty Model', function() {
       expect(bike.$dirty()).toContain('stickers');
     });
 
-    it('should detect missing objects', function() {
+    it('should detect missing object properties', function() {
       bike.customisations = null;
       expect(bike.$dirty()).toContain('customisations');
+    });
+
+    it('should detect properties that change type from object', function() {
+      bike.customisations = 0;
+      expect(bike.$dirty()).toContain('customisations');
+    });
+
+    it('should not consider changes on child properties when parent object changes', function() {
+      bike.customisations = null;
+      expect(bike.$dirty('customisations.wheels')).toBeFalsy();
+
+      bike.model = { name: 'Meta', version: '2' };
+      expect(bike.$dirty('model.name')).toBeFalsy();
     });
 
     it('should compare with comparator function', function() {

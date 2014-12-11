@@ -29,27 +29,28 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
   function navigate(_target, _keys) {
     var key, i = 0;
     while((key = _keys[i++])) {
-      if(_target && _target.hasOwnProperty(key)) _target = _target[key];
+      if(_target) {
+        _target = _target.hasOwnProperty(key) ? _target[key] : null;
+      }
     }
     return _target;
   }
 
   function hasValueChanged(_model, _original, _keys, _comparator) {
-    var isDirty = false,
-        prop = _keys.pop();
+    var prop = _keys.pop();
 
     _model = navigate(_model, _keys);
     _original = navigate(_original, _keys);
 
-    if(_original.hasOwnProperty(prop)) {
+    if(angular.isObject(_original) && angular.isObject(_model) && _original.hasOwnProperty(prop)) {
       if(typeof _comparator === 'function') {
-        isDirty = !!_comparator(_model[prop], _original[prop]);
+        return !!_comparator(_model[prop], _original[prop]);
       } else {
-        isDirty = !angular.equals(_model[prop], _original[prop]);
+        return !angular.equals(_model[prop], _original[prop]);
       }
     }
 
-    return isDirty;
+    return false;
   }
 
   function findChangedValues(_model, _original, _keys, _comparator) {
@@ -61,10 +62,8 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
           if(isPlainObject(_original[key]) && isPlainObject(_model[key])) {
             childChanges = findChangedValues(_model[key], _original[key], _keys.concat([key]), _comparator);
             changes.push.apply(changes, childChanges);
-          } else {
-            if(hasValueChanged(_model, _original, [key], _comparator)) {
-              changes.push(_keys.concat([key]));
-            }
+          } else if(hasValueChanged(_model, _original, [key], _comparator)) {
+            changes.push(_keys.concat([key]));
           }
         }
       }
@@ -73,7 +72,7 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
     return changes;
   }
 
-  function changesToStrings(_changes) {
+  function changesAsStrings(_changes) {
     for(var i = 0, l = _changes.length; i < l; i++) {
       _changes[i] = _changes[i].join('.');
     }
@@ -123,7 +122,7 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
             return hasValueChanged(this, original, _prop.split('.'), _comparator);
           } else {
             if(angular.isFunction(_prop)) _comparator = _prop;
-            return changesToStrings(findChangedValues(this, original, [], _comparator));
+            return changesAsStrings(findChangedValues(this, original, [], _comparator));
           }
         })
         /**
