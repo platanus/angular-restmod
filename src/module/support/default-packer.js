@@ -29,6 +29,10 @@ RMModule.factory('DefaultPacker', ['restmod', 'inflector', 'RMPackerCache', func
     }
   }
 
+  function getDescendantProperty(_object, _key) {
+    return _key ? _object[_key] : _object;
+  }
+
   /**
    * @class DefaultPacker
    *
@@ -118,7 +122,7 @@ RMModule.factory('DefaultPacker', ['restmod', 'inflector', 'RMPackerCache', func
         });
       }
 
-      return _raw[name];
+      return name.split('.').reduce(getDescendantProperty, _raw);
     });
   });
 
