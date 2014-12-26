@@ -62,6 +62,20 @@ describe('DefaultPacker', function() {
       expect(many[0].model).toEqual('Slash');
     });
 
+    it('should get the descendant property in a nested json object', function() {
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonRoot: 'parent.child.the_root' }
+      });
+
+      var record = model.$new(1);
+      record.$unwrap({parent: { child: { the_root: { model: 'Slash' } } } });
+      expect(record.model).toEqual('Slash');
+
+      var many = model.$collection();
+      many.$unwrap({parent: { child: { the_root: [{ model: 'Slash' }] } } });
+      expect(many[0].model).toEqual('Slash');
+    });
+
   });
 
   describe('processMeta', function() {
