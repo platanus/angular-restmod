@@ -6,4 +6,5 @@ Authors
 
 With help from:
 
-* [Matt Miller](https://github.com/facultymatt) - The computed properties implementation
+* [Matt Miller](https://github.com/facultymatt) - The computed properties implementation.
+* [Chris Hanson](https://github.com/chris-hanson) - The NestedDirtyModel plugin.
