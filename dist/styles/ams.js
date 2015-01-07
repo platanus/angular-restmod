@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.1.5 - 2014-12-10
+ * @version v1.1.6 - 2015-01-06
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -23,7 +23,8 @@ angular.module('restmod').factory('AMSApi', ['restmod', 'inflector', function(re
 			// special snakecase to camelcase renaming
 			Model: {
 				decodeName: inflector.camelize,
-				encodeName: function(_v) { return inflector.parameterize(_v, '_'); }
+				encodeName: function(_v) { return inflector.parameterize(_v, '_'); },
+				encodeUrlName: inflector.parameterize
 			}
 		}
 	});

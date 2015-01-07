@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.1.5 - 2014-12-10
+ * @version v1.1.6 - 2015-01-06
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -449,8 +449,8 @@ RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q,
       if(_for) {
         _for = '$' + _for + 'UrlFor';
         if(this.$scope[_for]) return this.$scope[_for](this);
-      } else if(this.$scope.$cannonicalUrlFor) {
-        return this.$scope.$cannonicalUrlFor(this);
+      } else if(this.$scope.$canonicalUrlFor) {
+        return this.$scope.$canonicalUrlFor(this);
       }
 
       return this.$scope.$urlFor(this);
@@ -2156,7 +2156,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
           }
         }
 
-        var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)), col; // TODO: name to url transformation should be a Model strategy
+        var scope = this.$buildScope(_model, _url || _model.encodeUrlName(_attr)), col;
 
         // setup collection
         col = _model.$collection(_params || null, scope);
@@ -2221,7 +2221,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
           }
         }
 
-        var scope = this.$buildScope(_model, _url || inflector.parameterize(_attr)), inst;
+        var scope = this.$buildScope(_model, _url || _model.encodeUrlName(_attr)), inst;
 
         // setup record
         inst = _model.$new(null, scope);
@@ -2451,8 +2451,8 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
   });
 
 }]);
-RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMListApi', 'RMCollectionApi', 'RMExtendedApi', 'RMSerializer', 'RMBuilder',
-  function($injector, inflector, Utils, ScopeApi, CommonApi, RecordApi, ListApi, CollectionApi, ExtendedApi, Serializer, Builder) {
+RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils', 'RMScopeApi', 'RMCommonApi', 'RMRecordApi', 'RMListApi', 'RMCollectionApi', 'RMExtendedApi', 'RMSerializer', 'RMBuilder',
+  function($injector, $log, inflector, Utils, ScopeApi, CommonApi, RecordApi, ListApi, CollectionApi, ExtendedApi, Serializer, Builder) {
 
   var NAME_RGX = /(.*?)([^\/]+)\/?$/,
       extend = Utils.extendOverriden;
@@ -2785,7 +2785,25 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
        * @params {string} _name Record name
        * @return {string} Response (raw) name
        */
-      encodeName: null
+      encodeName: null,
+
+      /**
+       * @memberof StaticApi#
+       *
+       * @description The model name to url encoding strategy
+       *
+       * This method is called when translating a name into an url fragment (mainly by relations).
+       *
+       * By default it uses the `inflector.parameterize` method, in 1.2 this will change and the default
+       * behaviour will be to do nothing.
+       *
+       * @params {string} _name local name
+       * @return {string} url fragment
+       */
+      encodeUrlName: function(_name) {
+        $log.warn('Default paremeterization of urls will be disabled in 1.2, override Model.encodeUrlName with inflector.parameterize in your base model to keep the same behaviour.');
+        return inflector.parameterize(_name);
+      }
 
     }, ScopeApi);
 
@@ -3064,7 +3082,10 @@ RMModule.factory('RMModelFactory', ['$injector', 'inflector', 'RMUtils', 'RMScop
  */
 RMModule.factory('RMFastQ', [function() {
 
-  var isFunction = angular.isFunction;
+  var isFunction = angular.isFunction,
+      catchError = function(_error) {
+        return this.then(null, _error);
+      };
 
   function simpleQ(_val, _withError) {
 
@@ -3076,6 +3097,7 @@ RMModule.factory('RMFastQ', [function() {
       then: function(_success, _error) {
         return simpleQ(_withError ? _error(_val) : _success(_val));
       },
+      'catch': catchError,
       'finally': function(_cb) {
         var result = _cb();
         if(result && isFunction(_val.then)) {
@@ -3109,6 +3131,7 @@ RMModule.factory('RMFastQ', [function() {
           simple.then(_success, _error) :
           wrappedQ(_promise.then(_success, _error));
       },
+      'catch': catchError,
       'finally': function(_cb) {
         return simple ?
           simple['finally'](_cb) :

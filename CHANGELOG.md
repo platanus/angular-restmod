@@ -1,3 +1,23 @@
+<a name="1.1.6"></a>
+### 1.1.6 (2015-01-06)
+
+
+#### Bug Fixes
+
+* adds package.json to release task ([f7875766](http://github.com/angular-platanus/restmod/commit/f78757663c5b64136886f67069f7d694669607a1))
+* **factory:** fixes typo in call to canonicalUrlFor. ([5bfa439a](http://github.com/angular-platanus/restmod/commit/5bfa439a1cfe853d322403516ea70e12d51389fa), closes [#227](http://github.com/angular-platanus/restmod/issues/227))
+* **fastq:** adds missing 'catch' method to promises ([1fea426a](http://github.com/angular-platanus/restmod/commit/1fea426a1c6607ec3cc323d560f205a7e615be9f), closes [#183](http://github.com/angular-platanus/restmod/issues/183))
+
+
+#### Features
+
+* **nesteddirty:** adds NestedDirtyModel plugin ([04b6178f](http://github.com/angular-platanus/restmod/commit/04b6178fcd99cd06e08845676313443f290c059e))
+* **plugin.nested_dirty:**
+  * specifies how changing a nested object property to another type affects changed  ([2a295779](http://github.com/angular-platanus/restmod/commit/2a295779d77e94300e7aea6a4072c638179fc888))
+  * adds support for properties ([94bf9375](http://github.com/angular-platanus/restmod/commit/94bf937592136425bad514f618532af248a13936))
+* **service:** adds support for custom relation url name transformation. ([5a080925](http://github.com/angular-platanus/restmod/commit/5a08092513b8d1713b7431ea243ecc66564c238d), closes [#159](http://github.com/angular-platanus/restmod/issues/159))
+
+
 <a name="1.1.5"></a>
 ### 1.1.5 (2014-12-10)
 
