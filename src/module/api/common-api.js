@@ -51,8 +51,8 @@ RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q,
       if(_for) {
         _for = '$' + _for + 'UrlFor';
         if(this.$scope[_for]) return this.$scope[_for](this);
-      } else if(this.$scope.$cannonicalUrlFor) {
-        return this.$scope.$cannonicalUrlFor(this);
+      } else if(this.$scope.$canonicalUrlFor) {
+        return this.$scope.$canonicalUrlFor(this);
       }
 
       return this.$scope.$urlFor(this);
