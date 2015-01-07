@@ -293,6 +293,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
               url: url,
               // Use special mask for patches, mask everything that is not in the patch list.
               data: this.$wrap(function(_name) {
+                _name = _name.replace('[]', '');
                 for(var i = 0, l = _patch.length; i < l; i++) {
                   if(_name === _patch[i] ||
                     _name.indexOf(_patch[i] + '.') === 0 ||

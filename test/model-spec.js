@@ -163,7 +163,13 @@ describe('Restmod model class:', function() {
       var bike;
 
       beforeEach(function() {
-        bike = Bike.$new(1).$extend({ brand: 'Santa Cruz', model: 'Bronson', wheelSz: 27.5, dim: { height: 10, width: 10 } });
+        bike = Bike.$new(1).$extend({
+          brand: 'Santa Cruz',
+          model: 'Bronson',
+          wheelSz: 27.5,
+          dim: { height: 10, width: 10 },
+          parts: [ { name: 'i25', brand: 'WTB' }, { name: 'MTX', brand: 'Sunn' } ]
+        });
       });
 
       it('should begin a PATCH action', function() {
@@ -194,6 +200,18 @@ describe('Restmod model class:', function() {
       it('should include every sub property in a property if parent name is given', function() {
         bike.$save(['brand', 'dim']);
         $httpBackend.expectPATCH('/api/bikes/1', { brand: 'Santa Cruz', dim: { height: 10, width: 10 } }).respond(200, {});
+        $httpBackend.flush();
+      });
+
+      it('should include a complete array of objects if array property name is given', function() {
+        bike.$save(['parts']);
+        $httpBackend.expectPATCH('/api/bikes/1', { parts: [ { name: 'i25', brand: 'WTB' }, { name: 'MTX', brand: 'Sunn' } ] }).respond(200, {});
+        $httpBackend.flush();
+      });
+
+      it('should include every arrays object property if a nested property is given', function() {
+        bike.$save(['parts.name']);
+        $httpBackend.expectPATCH('/api/bikes/1', { parts: [ { name: 'i25' }, { name: 'MTX' } ] }).respond(200, {});
         $httpBackend.flush();
       });
 
