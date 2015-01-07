@@ -10,7 +10,10 @@
  */
 RMModule.factory('RMFastQ', [function() {
 
-  var isFunction = angular.isFunction;
+  var isFunction = angular.isFunction,
+      catchError = function(_error) {
+        return this.then(null, _error);
+      };
 
   function simpleQ(_val, _withError) {
 
@@ -22,6 +25,7 @@ RMModule.factory('RMFastQ', [function() {
       then: function(_success, _error) {
         return simpleQ(_withError ? _error(_val) : _success(_val));
       },
+      'catch': catchError,
       'finally': function(_cb) {
         var result = _cb();
         if(result && isFunction(_val.then)) {
@@ -55,6 +59,7 @@ RMModule.factory('RMFastQ', [function() {
           simple.then(_success, _error) :
           wrappedQ(_promise.then(_success, _error));
       },
+      'catch': catchError,
       'finally': function(_cb) {
         return simple ?
           simple['finally'](_cb) :
