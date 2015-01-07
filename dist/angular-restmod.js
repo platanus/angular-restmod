@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.1.6 - 2015-01-06
+ * @version v1.1.7 - 2015-01-06
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -1324,6 +1324,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
               url: url,
               // Use special mask for patches, mask everything that is not in the patch list.
               data: this.$wrap(function(_name) {
+                _name = _name.replace('[]', '');
                 for(var i = 0, l = _patch.length; i < l; i++) {
                   if(_name === _patch[i] ||
                     _name.indexOf(_patch[i] + '.') === 0 ||

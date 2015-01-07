@@ -1,3 +1,12 @@
+<a name="1.1.7"></a>
+### 1.1.7 (2015-01-06)
+
+
+#### Bug Fixes
+
+* **record:** Adds support for array properties on patch mask ([61665fa4](http://github.com/angular-platanus/restmod/commit/61665fa42a470651f3b6d006c2987b3e0d303813), closes [#217](http://github.com/angular-platanus/restmod/issues/217))
+
+
 <a name="1.1.6"></a>
 ### 1.1.6 (2015-01-06)
 
