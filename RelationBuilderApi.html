@@ -57,6 +57,10 @@
 						</li>
 						
 						<li>
+							<a href="ListApi.html">ListApi</a>
+						</li>
+						
+						<li>
 							<a href="PackerCache.html">PackerCache</a>
 						</li>
 						
@@ -78,6 +82,10 @@
 						
 						<li>
 							<a href="restmodProvider.html">restmodProvider</a>
+						</li>
+						
+						<li>
+							<a href="RMBuilderComputedApi.html">RMBuilderComputedApi</a>
 						</li>
 						
 						<li>
@@ -115,6 +123,10 @@
 						</li>
 						
 						<li>
+							<a href="NestedDirtyModel.html">NestedDirtyModel</a>
+						</li>
+						
+						<li>
 							<a href="PagedModel.html">PagedModel</a>
 						</li>
 						
@@ -149,10 +161,6 @@
 						</li>
 						
 						<li>
-							<a href="tutorial-model.html">model</a>
-						</li>
-						
-						<li>
 							<a href="tutorial-styles.html">styles</a>
 						</li>
 						
@@ -168,6 +176,10 @@
 						
 						<li>
 							<a href="global.html#dummy">dummy</a>
+						</li>
+						
+						<li>
+							<a href="global.html#list">list</a>
 						</li>
 						
 
@@ -250,7 +262,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/extended/builder-relations.js, line 5
+        module/extended/builder-relations.js, line 27
     </li></ul></dd>
     
 
@@ -296,7 +308,7 @@
         <dl>
             
 <dt>
-    <h4 class="name" id="attrAsCollection"><span class="type-signature"></span>attrAsCollection<span class="signature">(_name, _model, _url, _source, _inverseOf)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
+    <h4 class="name" id="attrAsCollection"><span class="type-signature"></span>attrAsCollection<span class="signature">(_name, _model, _url, _source, _inverseOf, _params, _hooks)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
     
     
 </dt>
@@ -453,6 +465,52 @@
         </tr>
 
 	
+
+        <tr>
+            
+                <td class="name"><code>_params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Generated collection default parameters</p></td>
+        </tr>
+
+	
+
+        <tr>
+            
+                <td class="name"><code>_hooks</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Hooks to be applied just to the generated collection</p></td>
+        </tr>
+
+	
 	</tbody>
 </table>
 
@@ -481,7 +539,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/extended/builder-relations.js, line 32
+        module/extended/builder-relations.js, line 56
     </li></ul></dd>
     
 
@@ -715,7 +773,7 @@ same <strong>foreign key name</strong> that was using on decoding. (<code>user_i
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/extended/builder-relations.js, line 179
+        module/extended/builder-relations.js, line 217
     </li></ul></dd>
     
 
@@ -927,7 +985,7 @@ so the referenced type should not be nested.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/extended/builder-relations.js, line 274
+        module/extended/builder-relations.js, line 312
     </li></ul></dd>
     
 
@@ -978,7 +1036,7 @@ so the referenced type should not be nested.</p>
         
             
 <dt>
-    <h4 class="name" id="attrAsResource"><span class="type-signature"></span>attrAsResource<span class="signature">(_name, _model, _url, _source, _inverseOf)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
+    <h4 class="name" id="attrAsResource"><span class="type-signature"></span>attrAsResource<span class="signature">(_name, _model, _url, _source, _inverseOf, _hooks)</span><span class="type-signature"> &rarr; {<a href="BuilderApi.html">BuilderApi</a>}</span></h4>
     
     
 </dt>
@@ -1135,6 +1193,29 @@ so the referenced type should not be nested.</p>
         </tr>
 
 	
+
+        <tr>
+            
+                <td class="name"><code>_hooks</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Hooks to be applied just to the instantiated record</p></td>
+        </tr>
+
+	
 	</tbody>
 </table>
 
@@ -1163,7 +1244,7 @@ so the referenced type should not be nested.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        module/extended/builder-relations.js, line 92
+        module/extended/builder-relations.js, line 121
     </li></ul></dd>
     
 
@@ -1232,7 +1313,7 @@ so the referenced type should not be nested.</p>
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on Wed Sep 24 2014 12:08:52 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Wed Feb 18 2015 20:30:54 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>

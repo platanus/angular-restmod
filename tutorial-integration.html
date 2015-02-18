@@ -57,6 +57,10 @@
 						</li>
 						
 						<li>
+							<a href="ListApi.html">ListApi</a>
+						</li>
+						
+						<li>
 							<a href="PackerCache.html">PackerCache</a>
 						</li>
 						
@@ -78,6 +82,10 @@
 						
 						<li>
 							<a href="restmodProvider.html">restmodProvider</a>
+						</li>
+						
+						<li>
+							<a href="RMBuilderComputedApi.html">RMBuilderComputedApi</a>
 						</li>
 						
 						<li>
@@ -115,6 +123,10 @@
 						</li>
 						
 						<li>
+							<a href="NestedDirtyModel.html">NestedDirtyModel</a>
+						</li>
+						
+						<li>
 							<a href="PagedModel.html">PagedModel</a>
 						</li>
 						
@@ -149,10 +161,6 @@
 						</li>
 						
 						<li>
-							<a href="tutorial-model.html">model</a>
-						</li>
-						
-						<li>
 							<a href="tutorial-styles.html">styles</a>
 						</li>
 						
@@ -168,6 +176,10 @@
 						
 						<li>
 							<a href="global.html#dummy">dummy</a>
+						</li>
+						
+						<li>
+							<a href="global.html#list">list</a>
 						</li>
 						
 
@@ -204,8 +216,9 @@
 <li><a href="#q6">Are there any other conventions related to naming I should be aware of?</a></li>
 <li><a href="#q7">How can I set a common url prefix for every resource?</a></li>
 <li><a href="#q8">How can I add a trailing slash or extension to the url sent to server?</a></li>
-<li><a href="#q9">How can I add Ia custom header or parameter to every request?</a></li>
+<li><a href="#q9">How can I add a custom header or parameter to every request?</a></li>
 <li><a href="#q10">I'm getting a 'No API style base was included' warning, what does it mean?</a></li>
+<li><a href="#q11">Can I change the way url names are generated for relations?</a></li>
 </ul>
 <h3><a name="q1"></a> How can I change the property used for the primary key</h3>
 <p>The primary key is just a model configuration property and by default is set to 'id'.</p>
@@ -271,11 +284,13 @@
     &quot;page&quot;: 1
 }</code></pre>
 <pre><code class="lang-javascript">var Bike = restmod.model('/api/bikes').$mix('DefaultPacker',
-    JSON_META: '.'
+    $config: {
+        jsonMeta: '.'
+    }
 });
 
 Bike.$search().$then(function(_colection) {
-    _colection.$meta; // = { page: 1 } it will ignore response's bikes property.
+    _colection.$metadata; // = { page: 1 } it will ignore response's bikes property.
 })</code></pre>
 <h3><a name="q4"></a> Does restmod supports linked elements side loaded in the response wrapper?</h3>
 <p>Yes it does, at least if its formated similar to what active_model_serializer generates.</p>
@@ -314,24 +329,30 @@ var Bike = restmod.model('/api/bikes').$mix(Base, {
 bike = Bike.$find(1).$then(function() {
     bike.user.name; // = Joe
 });</code></pre>
-<p>To change the property where the inlined resources are located set the JSON_LINKS configuration property or set it to '.' to extract links from root.</p>
+<p>To change the property where the inlined resources are located set the <code>jsonLinks</code> configuration property or set it to '.' to extract links from root.</p>
 <pre><code class="lang-javascript">module.config(function(restmodProvider) {
     restmodProvider.rebase(function() {
-        this.setProperty('jsonLinks', 'links'); // or set JSON_LINKS: 'links' in a definition object.
+        this.setProperty('jsonLinks', 'links'); // or set jsonLinks: 'links' in a definition object.
     });
 });</code></pre>
-<p>Take a look at the default naming stardards, inlined resources are expected to use the <strong>pluralized</strong> names for their respective model names. See. By default the name is extracted from the url, you can change a model's name and plural name by setting the <code>NAME</code> and <code>PLURAL</code> configuration variables:</p>
+<p>Take a look at the default naming stardards, inlined resources are expected to use the <strong>pluralized</strong> names for their respective model names. See. By default the name is extracted from the url, you can change a model's name and plural name by setting the <code>name</code> and <code>plural</code> configuration variables:</p>
 <pre><code class="lang-javascript">restmod.model().$mix(function() {
-    NAME: 'mouse', // if you only set NAME, then plural is infered from it.
-    PLURAL: 'mice'
+    $config: {
+        name: 'mouse', // if you only set name, then plural is infered from it.
+        plural: 'mice'
+    }
 });</code></pre>
 <h3><a name="q5"></a> My resource properties are being automatically renamed, is this normal?</h3>
 <p>That is probably because the api style you selected has overriden the model's property renaming methods <code>encodeName</code> and <code>decodeName</code>.</p>
 <p>You can disable or modify renaming by overriding the following methods:</p>
 <pre><code class="lang-javascript">module.config(function(restmodProvider) {
     restmodProvider.rebase({
-        '^encodeName': function(_name) { return _newName; }, // or null to disable renaming.
-        '^decodeName': function(_name) { return _newName; } // or null to disable renaming.
+        $extend: {
+            Model: {
+                encodeName: function(_name) { return _newName; }, // or null to disable renaming.
+                decodeName: function(_name) { return _newName; } // or null to disable renaming.
+            }
+        }
     });
 });</code></pre>
 <h3><a name="q6"></a> Are there any other conventions related to naming I should be aware of?</h3>
@@ -342,14 +363,18 @@ bike = Bike.$find(1).$then(function() {
 <li><p>Change the name decoder so it renames properties that start with '$' and gives them another prefix and then change the name encoder to detect the special prefix and change it back to '$':</p>
 <pre><code class="lang-javascript"> module.config(function(restmodProvider) {
      restmodProvider.rebase({
-         '^decodeName': function(_name) {
-             // change prefix to '_'
-             return _name.charAt(0) == '$' ? '_' + inflector.camelize(_name.substr(1), true) : inflector.camelize(_name);
-         },
+         $extend: {
+             Model: {
+                 decodeName: function(_name) {
+                     // change prefix to '_'
+                     return _name.charAt(0) == '$' ? '_' + inflector.camelize(_name.substr(1), true) : inflector.camelize(_name);
+                 },
 
-         '^encodeName': function(_name) {
-             // change prefix back to '$'
-             return _name.charAt(0) == '_' ? '$' + inflector.parameterize(_name.substr(1), '_') : inflector.parameterize(_name, '_');
+                 encodeName: function(_name) {
+                     // change prefix back to '$'
+                     return _name.charAt(0) == '_' ? '$' + inflector.parameterize(_name.substr(1), '_') : inflector.parameterize(_name, '_');
+                 }
+             }
          }
      });
  });</code></pre>
@@ -411,6 +436,20 @@ bike = Bike.$find(1).$then(function() {
     });
 });</code></pre>
 <p>To see available styles or colaborate with a new one, take a look at the <a href="https://github.com/platanus/angular-restmod/blob/master/docs/guides/styles.md">Style listing</a>.</p>
+<h3><a name="q11"></a> Can I change the way url names are generated for relations?</h3>
+<p>Yes you can, just override the <code>Model.encodeUrlName</code> method to provide custom name transformation, like this:</p>
+<pre><code class="lang-javascript">module.config(function(restmodProvider) {
+    restmodProvider.rebase({
+        $extend: {
+            Model: {
+                encodeUrlName: function(_name) {
+                    return _name.toLowerCase();
+                }
+            }
+        }
+    });
+});</code></pre>
+<p>Transformations will be applied to relations where the extended model is referenced.</p>
 </article>
 
 </section>  
@@ -423,7 +462,7 @@ bike = Bike.$find(1).$then(function() {
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on Wed Sep 24 2014 12:08:52 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Wed Feb 18 2015 20:30:54 GMT-0300 (CLST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
