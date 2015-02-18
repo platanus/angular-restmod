@@ -65,6 +65,12 @@ but we recommend you to use bower to retrieve the Restmod package
 bower install angular-restmod --save
 ```
 
+or if you prefer, a npm package is also available
+
+```
+npm install angular-restmod -d
+```
+
 #### 2. Include it on your project
 
 Make sure the restmod source is required in your code.

@@ -1,10 +1,22 @@
 {
   "name": "angular-restmod",
   "version": "1.1.7",
+  "description": "API Bound Models for AngularJS",
+  "license": "MIT",
+  "homepage": "https://github.com/angular-platanus/restmod",
+  "author": "Ignacio Baixas <ignacio@platan.us>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/angular-platanus/restmod.git"
+  },
+  "main": "dist/angular-restmod.js",
+  "dependencies": {
+    "angular": "*",
+    "angular-inflector": "~0.2"
+  },
   "engines": {
     "node": ">= 0.9"
   },
-  "dependencies": {},
   "devDependencies": {
     "grunt-bower": "*",
     "grunt-bower-task": "*",
