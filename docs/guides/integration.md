@@ -21,7 +21,7 @@ The primary key is just a model configuration property and by default is set to 
 To change it for a particular model use the `$config` block:
 
 ```javascript
-restmod.model('/bikes').$mix({
+restmod.model('/bikes').mix({
 	$config: { primaryKey: '_id' }
 });
 ```
@@ -85,7 +85,7 @@ Will expect:
 The resoure's name is extracted from the resource url, if no url is given (nested resource) or if url does not match the resource's name, then you can change it's name and plural name by setting the `name` and `plural` configuration variables:
 
 ```javascript
-restmod.model().$mix(function() {
+restmod.model().mix({
 	$config: {
 		name: 'mouse', // if you only set NAME, then plural is infered from it using the inflector.
 		plural: 'mice'
@@ -131,7 +131,7 @@ To change the property from where the packer extracts the metadata set the `json
 ```
 
 ```javascript
-var Bike = restmod.model('/api/bikes').$mix('DefaultPacker',
+var Bike = restmod.model('/api/bikes').mix('DefaultPacker',
 	$config: {
 		jsonMeta: '.'
 	}
@@ -178,10 +178,10 @@ The following model definition should correctly load every resource:
 ```javacript
 var Base = restmod.mixin('DefaultPacker');  // remember to enable the default packer.
 
-var User = restmod.model('/api/users').$mix(Base);
-var Part = restmod.model('/api/parts').$mix(Base);
+var User = restmod.model('/api/users').mix(Base);
+var Part = restmod.model('/api/parts').mix(Base);
 
-var Bike = restmod.model('/api/bikes').$mix(Base, {
+var Bike = restmod.model('/api/bikes').mix(Base, {
 	user: { belongsTo: User },
 	parts: { belongsToMany: Part }
 })
@@ -205,7 +205,7 @@ module.config(function(restmodProvider) {
 Take a look at the default naming stardards, inlined resources are expected to use the **pluralized** names for their respective model names. See. By default the name is extracted from the url, you can change a model's name and plural name by setting the `name` and `plural` configuration variables:
 
 ```javascript
-restmod.model().$mix(function() {
+restmod.model().mix({
 	$config: {
 		name: 'mouse', // if you only set name, then plural is infered from it.
 		plural: 'mice'
@@ -265,7 +265,7 @@ To handle API's that require '$' prefixed properies you have two posibilities:
 2. if there are only a couple of properties you need to let through, assign a special mapping to those properties:
 
 	```javascript
-	restmod.model().$mix({
+	restmod.model().mix({
 		myType: { map: '$type' },
 		myName: { map: '$name' }
 	})
