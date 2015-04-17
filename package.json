@@ -29,6 +29,7 @@
     "grunt-git": "^0.2.14",
     "grunt-jsdoc": "~0.5.4",
     "grunt-karma": "~0.8",
+    "grunt-npm": "0.0.2",
     "karma-chrome-launcher": "*",
     "karma-cli": "*",
     "karma-firefox-launcher": "*",

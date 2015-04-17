@@ -156,6 +156,14 @@ module.exports = function(grunt) {
           tags: true
         }
       }
+    },
+    'npm-publish': {
+      options: {
+        // list of tasks that are required before publishing
+        requires: ['build'],
+        // if the workspace is dirty, abort publishing (to avoid publishing local changes)
+        abortIfDirty: true,
+      }
     }
   });
 
@@ -168,6 +176,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-gh-pages');
   grunt.loadNpmTasks('grunt-conventional-changelog');
   grunt.loadNpmTasks('grunt-git');
+  grunt.loadNpmTasks('grunt-npm');
 
   // Default task
   grunt.registerTask('default', ['build']);
@@ -188,7 +197,7 @@ module.exports = function(grunt) {
   grunt.registerTask('release', ['bump', 'changelog', 'build']);
 
   // Publish Task
-  grunt.registerTask('publish', ['gitcommit:bump', 'gittag:bump', 'gitpush:bump']);
+  grunt.registerTask('publish', ['gitcommit:bump', 'gittag:bump', 'gitpush:bump', 'npm-publish']);
 
   // Provides the "bump" task.
   grunt.registerTask('bump', 'Increment version number', function() {
