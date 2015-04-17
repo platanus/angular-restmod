@@ -1090,4 +1090,24 @@ Some links:
 REST api designs guidelines: https://github.com/interagent/http-api-design
 REST json api standard: http://jsonapi.org
 
-[Authors and Contributors](https://github.com/platanus/angular-restmod/blob/master/authors.md)
+## Contributing
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
+
+Check [CONTRIBUTORS](https://github.com/platanus/angular-restmod/blob/master/CONTRIBUTE.md) for more details
+
+## Credits
+
+Thank you [contributors](https://github.com/platanus/angular-restmod/graphs/contributors)!
+
+<img src="http://platan.us/gravatar_with_text.png" alt="Platanus" width="250"/>
+
+angular-restmod is maintained by [platanus](http://platan.us).
+
+## License
+
+Guides is © 2014 platanus, spa. It is free software and may be redistributed under the terms specified in the LICENSE file.
