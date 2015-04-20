@@ -34,9 +34,9 @@ newBike.$save(); // bike is persisted sending a POST to /bikes
 <!-- end -->
 
 It also supports collections, relations, lifecycle hooks, attribute renaming, side data loading and much more.
-Continue reading for a quick start or check the API Reference for more: http://platanus.github.io/angular-restmod
+Continue reading for a quick start, check this [presentation](http://www.slideshare.net/MarcinGajda/angular-restmod-46881968) for an overview or check the API Reference for more: http://platanus.github.io/angular-restmod
 
-If you are working with ruby on rails, we recommend [active_model_serializers](https://github.com/rails-api/active_model_serializers) for seamless integration.
+If you are working with Ruby on Rails, we recommend [active_model_serializers](https://github.com/rails-api/active_model_serializers) for seamless integration.
 
 ## Why Restmod?
 
@@ -147,7 +147,7 @@ bike = Bike.$find(1);
 
 <!-- section: $then -->
 
-The bike object will be populated as soon as the API returns some data. You can use `$then` to do something when data becomes available.
+Right after this line executes, the bike object is an empty object. The bike object will be populated as soon as the API returns some data. This works great with Angular's way. Nevertheless, you can use `$then` to do something when data becomes available.
 
 ```javascript
 bike.$then(function() {
@@ -302,7 +302,7 @@ If called on a collection, `$build` and `$create` will return a collection-bound
 
 ```javascript
 newBike = bikes.$create({ brand: 'Comencal', model: 'Meta' });
-// after server returns, 'bikes' will contain 'newBike'.
+// after server returns, the 'bikes' collection will contain 'newBike'.
 ```
 
 <!-- it:
@@ -327,7 +327,7 @@ var newBike = bikes.$create({ brand: 'Comencal', model: 'Meta' }).$reveal();
 
 <!-- section: $destroy -->
 
-Finally, to destroy an object just call `$destroy`. Destroying an object bound to a collection will remove it from the collection.
+Finally, to destroy an object just call `$destroy`.
 
 ```javascript
 bike.$destroy();
@@ -337,32 +337,11 @@ bike.$destroy();
 
 <!-- section: $destroy on collection -->
 
-As with $create, calling `$destroy` on a record bound to a collection will remove it from the collection on server response.
+As with $create, calling `$destroy` on a record bound to a collection will also remove it from the collection on server response.
 
 <!-- end -->
 
-<!-- section: $then -->
-
-<!-- before: bike = Bike.$new(1); -->
-<!-- before: doSomething = jasmine.createSpy(); -->
-
-All REST operations described above generate `$q` promises that are fulfilled when the operation succeds or fail. To access this promises for something like a **resolve handler in ui-router** you can use the `$asPromise` method. Its also posible to use the `$then` method to chain additional logic to the last operation.
-
-```javascript
-bike.$fetch().$asPromise().then(function(_bike) {
-	doSomething(_bike.brand);
-});
-// similar to:
-bike.$fetch().$then(function(_bike) {
-	// if this function returns a promise, then other calls to $then (or REST operations) will wait until returned promise is resolved.
-	doSomething(_bike.brand);
-});
-```
-
-The difference between the `$asPromise` and the `$then` methods is that the first will just return the last promise and the second one will chain a new promise to the internal promise queue used to execute REST operations. That means that other calls to `$next` and REST operations will wait until logic injected using `$then` finish before running.
-
-<!-- it: $httpBackend.flush(); expect(doSomething).toHaveBeenCalled(); -->
-<!-- end -->
+All REST operations described above use `$q` promises that are fulfilled when the operation succeeds or fails. Take a look at the [promises guide](https://github.com/platanus/angular-restmod/blob/master/docs/guides/promises.md) for more details on this.
 
 <!-- end -->
 
@@ -417,7 +396,7 @@ Bike = restmod.model('/bikes').mix({
 	expect(Bike.$new().parts).toBeDefined();
 -->
 
-There are three types of relations:
+There are four types of relations:
 
 #### HasMany
 
@@ -447,6 +426,8 @@ parts = bike.parts.$fetch(); 	// sends a GET to /bikes/1/parts
 -->
 
 <!-- section: $fetch -->
+
+> Note: this is not necessarily great modeling ... for instance, if you destroy a bike's part `bike.parts[0].$destroy();`, you will be sending a DELETE to the resource in /parts/:id. If this is not what you want, you should consider working with a resource that represents the *relation* between a bike and a Part.
 
 Later on, after 'parts' has already been resolved,
 
@@ -746,7 +727,7 @@ This relation should be used in the following scenarios:
 }
 ```
 
-2. The api resource contanis another resource as an inline property and does not provide the same object as a nested url:
+2. The api resource contains another resource as an inline property and does not provide the same object as a nested url:
 
 ```
 {
