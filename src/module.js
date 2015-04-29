@@ -127,7 +127,7 @@ RMModule.provider('restmod', [function() {
 
           if(arguments.length > 1) {
             model.mix(arraySlice.call(arguments, 1));
-            $log.warn('Passing mixins and difinitions in the model method will be deprecated in restmod 1.2, use restmod.model().mix() instead.');
+            $log.warn('Passing mixins and definitions in the model method will be deprecated in restmod 1.2, use restmod.model().mix() instead.');
           }
 
           return model;
