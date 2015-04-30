@@ -408,7 +408,7 @@ module.factory('Part', function() {
 });
 ```
 
-The HasMany relation allows you to access parts of a specific bike directly from a bike object. In other words, HasMany is a hirearchical relation between a model instance (bike) and a model collection (parts).
+The HasMany relation allows you to access parts of a specific bike directly from a bike object. In other words, HasMany is a hierarchical relation between a model instance (bike) and a model collection (parts).
 
 ```javascript
 Bike = restmod.model('/bikes').mix({
@@ -497,7 +497,7 @@ You can also define `hasMany` relation hooks. Check the [hooks advanced document
 
 #### HasOne
 
-This is a hirearchical relation between one model's instance and another model's instance.
+This is a hierarchical relation between one model's instance and another model's instance.
 The child instance url is bound to the parent url.
 The child instance is created **at the same time** as the parent, so its available even if the parent is not resolved.
 
@@ -895,7 +895,7 @@ var Bike = restmod.model('/bikes').mix({
 
 ### Explicit attribute mapping
 
-You can explicitly tell restmod to map a given server attribute to one of the model's attributs:
+You can explicitly tell restmod to map a given server attribute to one of the model's attributes:
 
 ```javascript
 var Bike = restmod.model('/bikes').mix({
@@ -984,7 +984,7 @@ var Bike = restmod.model('/bikes').mix({
 
 ### Custom methods and Lists
 
-A `List` namespace is provided for collections and lists, this enables the creation of chainable list methods:
+A `List` namespace is provided for collections and lists, this enables the creation of chainable list methods.
 
 For example, lets say you need to be able to filter a collection of records and then do something with the resulting list:
 
