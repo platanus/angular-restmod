@@ -76,6 +76,21 @@ describe('Restmod model class:', function() {
     });
   });
 
+  describe('identity', function() {
+
+    it('should infer the model identity from the url', function() {
+      expect(Bike.identity()).toEqual('bike');
+    });
+
+    it('should infer the model plural identity from the name', function() {
+      expect(Bike.identity(true)).toEqual('bikes');
+    });
+
+    it('should use the specified plural identity if given', function() {
+      expect(Bike.mix({ $config: { plural: 'cletas' } }).identity(true)).toEqual('cletas');
+    });
+  });
+
   describe('dummy', function() {
 
     it('should create a new dummy resource with common api infrastructure', function() {
