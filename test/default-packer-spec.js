@@ -24,7 +24,9 @@ describe('DefaultPacker', function() {
     });
 
     it('should extract collection using plural name by default', function() {
-      var model = restmod.model('/api/bikes').mix('DefaultPacker');
+      var model = restmod.model().mix({
+        $config: { name: 'bike' }
+      }).mix('DefaultPacker');
 
       var many = model.$collection();
       many.$unwrap({ bikes: [{ model: 'Slash' }] });
