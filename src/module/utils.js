@@ -149,6 +149,25 @@ RMModule.factory('RMUtils', ['$log', function($log) {
      *
      * @description
      *
+     * Finds the location of a matching object in an array.
+     *
+     * @param {array} _array target array
+     * @param {function} _accept matching function
+     * @param {integer} _fromIdx Index from which to start searching, defaults to 0
+     * @return {number} Object index or -1 if not found
+     */
+    indexWhere: function(_array, _accept, _fromIdx) {
+      for(var i = _fromIdx || 0, l = _array.length; i < l; i++) {
+        if(_accept(_array[i])) return i;
+      }
+      return -1;
+    },
+
+    /**
+     * @memberof Utils
+     *
+     * @description
+     *
      * Extend an object using `Utils.override` instead of just replacing the functions.
      *
      * @param  {object} _target Object to be extended

@@ -1,6 +1,6 @@
 'use strict';
 
-RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q, $log) {
+RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', 'RMUtils', function($http, $q, $log, Utils) {
 
   var EMPTY_ARRAY = [];
 
@@ -157,6 +157,23 @@ RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q,
     $on: function(_hook, _fun) {
       var hooks = (this.$$cb || (this.$$cb = {}))[_hook] || (this.$$cb[_hook] = []);
       hooks.push(_fun);
+      return this;
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Unregisters an instance hook registered with `$on`
+     *
+     * @param {string} _hook Hook name
+     * @param {function} _fun Original callback
+     * @return {CommonApi} self
+     */
+    $off: function(_hook, _fun) {
+      if(this.$$cb && this.$$cb[_hook]) {
+        var idx = Utils.indexWhere(this.$$cb[_hook], function(e) { return e === _fun; });
+        if(idx !== -1) this.$$cb[_hook].splice(idx, 1);
+      }
       return this;
     },
 

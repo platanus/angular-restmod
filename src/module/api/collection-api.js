@@ -192,17 +192,17 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
      *
      * @description Finds the location of an object in the array.
      *
-     * If a function is provided then the index of the first item for which the function returns true is returned.
+     * If a function is provided then the index of the first item for which the function returns true.
      *
      * @param {RecordApi|function} _obj Object to find
+     * @param {integer} _fromIdx Index from which to start searching, defaults to 0
      * @return {number} Object index or -1 if not found
      */
-    $indexOf: function(_obj) {
-      var accept = typeof _obj === 'function' ? _obj : false;
-      for(var i = 0, l = this.length; i < l; i++) {
-        if(accept ? accept(this[i]) : this[i] === _obj) return i;
-      }
-      return -1;
+    $indexOf: function(_obj, _fromIdx) {
+      var accept = typeof _obj !== 'function' ?
+        function(e) { return e === _obj; } : _obj;
+
+      return Utils.indexWhere(this, accept, _fromIdx);
     }
   };
 

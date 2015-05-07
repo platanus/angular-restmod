@@ -368,6 +368,22 @@ describe('Restmod model class:', function() {
     });
   });
 
+  describe('$off', function() {
+
+    it('should unregister a callback registered using $on', function() {
+      var bike = Bike.$build(),
+          spy = jasmine.createSpy('callback');
+
+      bike.$on('poke', spy);
+      bike.$dispatch('poke');
+      expect(spy.calls.count()).toEqual(1);
+
+      bike.$off('poke', spy);
+      bike.$dispatch('poke');
+      expect(spy.calls.count()).toEqual(1);
+    });
+  });
+
   describe('$dispatch', function() {
     // TODO!
   });
