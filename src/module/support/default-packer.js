@@ -98,10 +98,10 @@ RMModule.factory('DefaultPacker', ['restmod', 'inflector', 'RMPackerCache', func
           meta = this.getProperty('jsonMeta', 'meta');
 
       if(_resource.$isCollection) {
-        name = this.getProperty('jsonRootMany') || this.getProperty('jsonRoot') || this.getProperty('plural');
+        name = this.getProperty('jsonRootMany') || this.getProperty('jsonRoot') || this.identity(true);
       } else {
         // TODO: use plural for single resource option.
-        name = this.getProperty('jsonRootSingle') || this.getProperty('jsonRoot') || this.getProperty('name');
+        name = this.getProperty('jsonRootSingle') || this.getProperty('jsonRoot') || this.identity();
       }
 
       if(meta) {
