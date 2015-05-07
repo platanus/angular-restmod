@@ -117,6 +117,17 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
     /**
      * @memberof RecordApi#
      *
+     * @description Checks whether a record is new or not
+     *
+     * @return {boolean} True if record is new.
+     */
+    $isNew: function() {
+      return this.$pk === undefined || this.$pk === null;
+    },
+
+    /**
+     * @memberof RecordApi#
+     *
      * @description Called the resource's scope $urlFor method to build the url for the record using the proper scope.
      *
      * By default the resource partial url is just its `$pk` property. This can be overriden to provide other routing approaches.
@@ -124,7 +135,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {string} The resource partial url
      */
     $buildUrl: function(_scope) {
-      return (this.$pk === undefined || this.$pk === null) ? null : Utils.joinUrl(_scope.$url(), this.$pk + '');
+      return this.$isNew() ? null : Utils.joinUrl(_scope.$url(), this.$pk + '');
     },
 
     /**
@@ -179,7 +190,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
     $decode: function(_raw, _mask) {
       // IDEA: let user override serializer
       this.$type.decode(this, _raw, _mask || Utils.READ_MASK);
-      if(this.$pk === undefined || this.$pk === null) this.$pk = this.$type.inferKey(_raw); // TODO: warn if key changes
+      if(this.$isNew()) this.$pk = this.$type.inferKey(_raw); // TODO: warn if key changes
       this.$dispatch('after-feed', [_raw]);
       return this;
     },
