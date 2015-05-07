@@ -172,15 +172,14 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', func
    */
   function Builder(_baseDsl) {
 
-    var mappings = {
-      init: ['attrDefault'],
-      mask: ['attrMask'],
-      ignore: ['attrMask'],
-      map: ['attrMap', 'force'],
-      decode: ['attrDecoder', 'param', 'chain'],
-      encode: ['attrEncoder', 'param', 'chain'],
-      'volatile': ['attrVolatile']
-    };
+    var mappings = [
+      { fun: 'attrDefault', sign: ['init'] },
+      { fun: 'attrMask', sign: ['ignore'] },
+      { fun: 'attrMap', sign: ['map', 'force'] },
+      { fun: 'attrDecoder', sign: ['decode', 'param', 'chain'] },
+      { fun: 'attrEncoder', sign: ['encode', 'param', 'chain'] },
+      { fun: 'attrVolatile', sign: ['volatile'] }
+    ];
 
     // DSL core functions.
 
@@ -265,10 +264,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', func
       extend: function(_name, _fun, _mapping) {
         if(typeof _name === 'string') {
           this[_name] = Utils.override(this[name], _fun);
-          if(_mapping) {
-            mappings[_mapping[0]] = _mapping;
-            _mapping[0] = _name;
-          }
+          if(_mapping) mappings.push({ fun: _name, sign: _mapping });
         } else Utils.extendOverriden(this, _name);
         return this;
       },
@@ -294,18 +290,15 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', func
        * @return {BuilderApi} self
        */
       attribute: function(_name, _description) {
-        var key, map, args, i;
-        for(key in _description) {
-          if(_description.hasOwnProperty(key)) {
-            map = mappings[key];
-            if(map) {
-              args = [_name, _description[key]];
-              for(i = 1; i < map.length; i++) {
-                args.push(_description[map[i]]);
-              }
-              args.push(_description);
-              this[map[0]].apply(this, args);
+        var i = 0, map;
+        while((map = mappings[i++])) {
+          if(_description.hasOwnProperty(map.sign[0])) {
+            var args = [_name];
+            for(var j = 0; j < map.sign.length; j++) {
+              args.push(_description[map.sign[j]]);
             }
+            args.push(_description);
+            this[map.fun].apply(this, args);
           }
         }
         return this;
