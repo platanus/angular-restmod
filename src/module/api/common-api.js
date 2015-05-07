@@ -370,18 +370,19 @@ RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q,
 
         return $http(_options).then(wrapPromise(this, function() {
           if(action && action.canceled) {
-            // if request was canceled during request, ignore post request actions.
             this.$status =  'canceled';
+            this.$dispatch('after-request-cancel', []);
+            return $q.reject(this);
           } else {
             this.$status = 'ok';
             this.$response = this.$last;
-            this.$dispatch('after-request', [this.$last]);
-            if(_success) _success.call(this, this.$last);
+            this.$dispatch('after-request', [this.$response]);
+            if(_success) _success.call(this, this.$response);
           }
         }), wrapPromise(this, function() {
           if(action && action.canceled) {
-            // if request was canceled during request, ignore error handling
             this.$status = 'canceled';
+            this.$dispatch('after-request-cancel', []);
           } else {
             this.$status = 'error';
             this.$response = this.$last;
@@ -389,10 +390,11 @@ RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q,
             // IDEA: Consider flushing pending request in case of an error. Also continue ignoring requests
             // until the error flag is reset by user.
 
-            this.$dispatch('after-request-error', [this.$last]);
-            if(_error) _error.call(this, this.$last);
-            return $q.reject(this); // TODO: this will step over any promise generated in _error!!
+            this.$dispatch('after-request-error', [this.$response]);
+            if(_error) _error.call(this, this.$response);
           }
+
+          return $q.reject(this);  // TODO: this will step over any promise generated in _error!!
         }));
       });
     },
