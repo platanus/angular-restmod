@@ -1,3 +1,18 @@
+<a name="1.1.9"></a>
+### 1.1.9 (2015-05-07)
+
+
+#### Bug Fixes
+
+* **CommonApi:** makes canceled request promises resolve to error ([0b8f21c5](http://github.com/angular-platanus/restmod/commit/0b8f21c51adfc101485498c65822311b7384583a), closes [#288](http://github.com/angular-platanus/restmod/issues/288))
+* **DefaultPacker:** fixes plural name not being infered from name. ([ddad7e44](http://github.com/angular-platanus/restmod/commit/ddad7e4491433e35dae59757ba5776ead1668a03), closes [#224](http://github.com/angular-platanus/restmod/issues/224))
+
+#### Features
+
+* **CommonApi:** adds $off method to unregister callbacks ([59fd3b84](http://github.com/angular-platanus/restmod/commit/59fd3b84bafd2bce159a4a254c24592cb799af3a), closes [#257](http://github.com/angular-platanus/restmod/issues/257))
+* **ModelApi:** makes identity do the pluralizing if plural is not defined ([d2f0c0c3](http://github.com/angular-platanus/restmod/commit/d2f0c0c3174743cd66a87382957396329be1859c))
+
+
 <a name="1.1.8"></a>
 ### 1.1.8 (2015-02-18)
 
