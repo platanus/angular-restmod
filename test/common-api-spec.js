@@ -93,6 +93,16 @@ describe('Restmod model class:', function() {
       expect(spy).toHaveBeenCalled();
     });
 
+    it('should resolve to error if containing action is canceled', function() {
+      var bike = Bike.$new();
+      var spy = jasmine.createSpy('callback');
+      bike.$$action = {}
+      bike.$send({ method: 'GET', url: '/api/bikes/2' }).$then(null, spy);
+      bike.$$action.canceled = true;
+      $httpBackend.flush();
+      expect(spy).toHaveBeenCalled();
+    });
+
     it('should properly propagate error states to $then', function() {
       var bike = Bike.$new();
       var spy = jasmine.createSpy('callback');
