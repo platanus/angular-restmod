@@ -32,12 +32,8 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
 
     // make sure the resource name and plural name are available if posible:
 
-    if(!config.name && _baseUrl) {
+    if(_baseUrl) {
       config.name = inflector.singularize(_baseUrl.replace(NAME_RGX, '$2'));
-    }
-
-    if(!config.plural && config.name) {
-      config.plural = inflector.pluralize(config.name);
     }
 
     var Collection = Utils.buildArrayType(),
@@ -229,9 +225,11 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
        * it should be manually set by writing the name and plural properties:
        *
        * ```javascript
-       * restmod.model(null, {
-       *   __name__: 'resource',
-       *   __plural__: 'resourciness' // set only if inflector cant properly gess the name.
+       * restmod.model().mix{
+       *   $config: {
+       *     name: 'resource',
+       *     plural: 'resourciness' // set only if inflector cant properly gess the name.
+       *   }
        * });
        * ```
        *
@@ -239,7 +237,12 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
        * @return {string} The base url.
        */
       identity: function(_plural) {
-        return _plural ? config.plural : config.name;
+        if(!_plural) return config.name;
+        if(_plural) {
+          if(config.plural) return config.plural;
+          if(config.name) return inflector.pluralize(config.name);
+        }
+        return null;
       },
 
       /**
