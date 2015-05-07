@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.1.8 - 2015-02-18
+ * @version v1.1.9 - 2015-05-07
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -383,22 +383,22 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
      *
      * @description Finds the location of an object in the array.
      *
-     * If a function is provided then the index of the first item for which the function returns true is returned.
+     * If a function is provided then the index of the first item for which the function returns true.
      *
      * @param {RecordApi|function} _obj Object to find
+     * @param {integer} _fromIdx Index from which to start searching, defaults to 0
      * @return {number} Object index or -1 if not found
      */
-    $indexOf: function(_obj) {
-      var accept = typeof _obj === 'function' ? _obj : false;
-      for(var i = 0, l = this.length; i < l; i++) {
-        if(accept ? accept(this[i]) : this[i] === _obj) return i;
-      }
-      return -1;
+    $indexOf: function(_obj, _fromIdx) {
+      var accept = typeof _obj !== 'function' ?
+        function(e) { return e === _obj; } : _obj;
+
+      return Utils.indexWhere(this, accept, _fromIdx);
     }
   };
 
 }]);
-RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q, $log) {
+RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', 'RMUtils', function($http, $q, $log, Utils) {
 
   var EMPTY_ARRAY = [];
 
@@ -555,6 +555,23 @@ RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q,
     $on: function(_hook, _fun) {
       var hooks = (this.$$cb || (this.$$cb = {}))[_hook] || (this.$$cb[_hook] = []);
       hooks.push(_fun);
+      return this;
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Unregisters an instance hook registered with `$on`
+     *
+     * @param {string} _hook Hook name
+     * @param {function} _fun Original callback
+     * @return {CommonApi} self
+     */
+    $off: function(_hook, _fun) {
+      if(this.$$cb && this.$$cb[_hook]) {
+        var idx = Utils.indexWhere(this.$$cb[_hook], function(e) { return e === _fun; });
+        if(idx !== -1) this.$$cb[_hook].splice(idx, 1);
+      }
       return this;
     },
 
@@ -768,18 +785,19 @@ RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q,
 
         return $http(_options).then(wrapPromise(this, function() {
           if(action && action.canceled) {
-            // if request was canceled during request, ignore post request actions.
             this.$status =  'canceled';
+            this.$dispatch('after-request-cancel', []);
+            return $q.reject(this);
           } else {
             this.$status = 'ok';
             this.$response = this.$last;
-            this.$dispatch('after-request', [this.$last]);
-            if(_success) _success.call(this, this.$last);
+            this.$dispatch('after-request', [this.$response]);
+            if(_success) _success.call(this, this.$response);
           }
         }), wrapPromise(this, function() {
           if(action && action.canceled) {
-            // if request was canceled during request, ignore error handling
             this.$status = 'canceled';
+            this.$dispatch('after-request-cancel', []);
           } else {
             this.$status = 'error';
             this.$response = this.$last;
@@ -787,10 +805,11 @@ RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', function($http, $q,
             // IDEA: Consider flushing pending request in case of an error. Also continue ignoring requests
             // until the error flag is reset by user.
 
-            this.$dispatch('after-request-error', [this.$last]);
-            if(_error) _error.call(this, this.$last);
-            return $q.reject(this); // TODO: this will step over any promise generated in _error!!
+            this.$dispatch('after-request-error', [this.$response]);
+            if(_error) _error.call(this, this.$response);
           }
+
+          return $q.reject(this);  // TODO: this will step over any promise generated in _error!!
         }));
       });
     },
@@ -2484,12 +2503,8 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
 
     // make sure the resource name and plural name are available if posible:
 
-    if(!config.name && _baseUrl) {
+    if(_baseUrl) {
       config.name = inflector.singularize(_baseUrl.replace(NAME_RGX, '$2'));
-    }
-
-    if(!config.plural && config.name) {
-      config.plural = inflector.pluralize(config.name);
     }
 
     var Collection = Utils.buildArrayType(),
@@ -2681,9 +2696,11 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
        * it should be manually set by writing the name and plural properties:
        *
        * ```javascript
-       * restmod.model(null, {
-       *   __name__: 'resource',
-       *   __plural__: 'resourciness' // set only if inflector cant properly gess the name.
+       * restmod.model().mix{
+       *   $config: {
+       *     name: 'resource',
+       *     plural: 'resourciness' // set only if inflector cant properly gess the name.
+       *   }
        * });
        * ```
        *
@@ -2691,7 +2708,12 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
        * @return {string} The base url.
        */
       identity: function(_plural) {
-        return _plural ? config.plural : config.name;
+        if(!_plural) return config.name;
+        if(_plural) {
+          if(config.plural) return config.plural;
+          if(config.name) return inflector.pluralize(config.name);
+        }
+        return null;
       },
 
       /**
@@ -3659,10 +3681,10 @@ RMModule.factory('DefaultPacker', ['restmod', 'inflector', 'RMPackerCache', func
           meta = this.getProperty('jsonMeta', 'meta');
 
       if(_resource.$isCollection) {
-        name = this.getProperty('jsonRootMany') || this.getProperty('jsonRoot') || this.getProperty('plural');
+        name = this.getProperty('jsonRootMany') || this.getProperty('jsonRoot') || this.identity(true);
       } else {
         // TODO: use plural for single resource option.
-        name = this.getProperty('jsonRootSingle') || this.getProperty('jsonRoot') || this.getProperty('name');
+        name = this.getProperty('jsonRootSingle') || this.getProperty('jsonRoot') || this.identity();
       }
 
       if(meta) {
@@ -3826,6 +3848,25 @@ RMModule.factory('RMUtils', ['$log', function($log) {
           this.$super = oldSuper;
         }
       };
+    },
+
+    /**
+     * @memberof Utils
+     *
+     * @description
+     *
+     * Finds the location of a matching object in an array.
+     *
+     * @param {array} _array target array
+     * @param {function} _accept matching function
+     * @param {integer} _fromIdx Index from which to start searching, defaults to 0
+     * @return {number} Object index or -1 if not found
+     */
+    indexWhere: function(_array, _accept, _fromIdx) {
+      for(var i = _fromIdx || 0, l = _array.length; i < l; i++) {
+        if(_accept(_array[i])) return i;
+      }
+      return -1;
     },
 
     /**
