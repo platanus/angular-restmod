@@ -93,7 +93,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
       var filter = decoders[_name], result = _value;
 
       if(filter) {
-        result = filter.call(_ctx, _value);
+        result = filter.call(_ctx, _value, _mask);
       } else if(typeof _value === 'object') {
         // IDEA: make extended decoding/encoding optional, could be a little taxing for some apps
         if(isArray(_value)) {
@@ -157,7 +157,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
       var filter = encoders[_name], result = _value;
 
       if(filter) {
-        result = filter.call(_ctx, _value);
+        result = filter.call(_ctx, _value, _mask);
       } else if(_value !== null && typeof _value === 'object' && typeof _value.toJSON !== 'function') {
         // IDEA: make deep decoding/encoding optional, could be a little taxing for some apps
         if(isArray(_value)) {
