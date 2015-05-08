@@ -132,6 +132,20 @@ describe('Restmod serializer', function() {
       raw = serializer.encode(result, 'U');
       expect(raw.brand).toBeUndefined();
     });
+
+    it('should mask a property using dynamic options if funtion is provided', function() {
+      serializer.dsl().attrMask('brand', function() {
+        return this.loadBrand ? '' : 'R';
+      });
+
+      var result = {};
+      serializer.decode(result, { brand: 'Canyon' }, 'R');
+      expect(result.brand).toBeUndefined();
+      result.loadBrand = true;
+
+      serializer.decode(result, { brand: 'Canyon' }, 'R');
+      expect(result.brand).toEqual('Canyon');
+    });
   });
 
   describe('attrDecoder', function() {

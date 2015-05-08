@@ -30,9 +30,10 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
         mappings = {},
         vol = {};
 
-    function isMasked(_name, _mask) {
+    function isMasked(_name, _mask, _ctx) {
       if(typeof _mask === 'function') return _mask(_name);
       var mask = masks[_name];
+      if(typeof mask === 'function') mask = mask.call(_ctx); // dynamic mask
       return (mask && (mask === true || mask.indexOf(_mask) !== -1));
     }
 
@@ -45,7 +46,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
       if(maps) {
         for(i = 0, l = maps.length; i < l; i++) {
           fullName = prefix + maps[i].path;
-          if(isMasked(fullName, _mask)) continue;
+          if(isMasked(fullName, _mask, _ctx)) continue;
 
           if(maps[i].map) {
             value = extract(_from, maps[i].map);
@@ -81,7 +82,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
 
           fullName = prefix + decodedName;
           // prevent masked or already mapped properties to be set
-          if(mapped[fullName] || isMasked(fullName, _mask)) continue;
+          if(mapped[fullName] || isMasked(fullName, _mask, _ctx)) continue;
 
           value = decodeProp(_from[key], fullName, _mask, _ctx);
           if(value !== undefined) _to[decodedName] = value; // ignore value if filter returns undefined
@@ -119,7 +120,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
         if(_from.hasOwnProperty(key) && key[0] !== '$') {
           fullName = prefix + key;
           // prevent masked or already mapped properties to be copied
-          if(mapped[fullName] || isMasked(fullName, _mask)) continue;
+          if(mapped[fullName] || isMasked(fullName, _mask, _ctx)) continue;
 
           value = encodeProp(_from[key], fullName, _mask, _ctx);
           if(value !== undefined) {
@@ -136,7 +137,7 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
       if(maps) {
         for(var i = 0, l = maps.length; i < l; i++) {
           fullName = prefix + maps[i].path;
-          if(isMasked(fullName, _mask)) continue;
+          if(isMasked(fullName, _mask, _ctx)) continue;
 
           value = _from[maps[i].path];
           if(!maps[i].forced && value === undefined) continue;
