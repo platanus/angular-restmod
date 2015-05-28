@@ -375,7 +375,8 @@ RMModule.factory('RMModelFactory', ['$injector', '$log', 'inflector', 'RMUtils',
         for(i = 0; (tmp = computes[i]); i++) {
           Object.defineProperty(self, tmp[0], {
             enumerable: true,
-            get: tmp[1]
+            get: tmp[1],
+            set: function() {}
           });
         }
       }
