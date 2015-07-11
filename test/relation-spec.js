@@ -360,7 +360,7 @@ describe('Restmod model relation:', function() {
       var record = model.$new(1);
       record.$unwrap({
         bike: { model: 'Slash', userId: 1 },
-        linked: {
+        included: {
           users: [ { id: 1, name: 'Hill' } ]
         }
       });
@@ -433,7 +433,7 @@ describe('Restmod model relation:', function() {
       var record = model.$new(1);
       record.$unwrap({
         bike: { model: 'Slash', partIds: [1, 2] },
-        linked: {
+        included: {
           parts: [ { id: 1, name: 'headset' }, { id: 2, name: 'brake' } ]
         }
       });
