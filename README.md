@@ -594,7 +594,7 @@ This relation should be used in the following scenarios:
 
 1. The api resource references another resource by id:
 
-```
+```javascript
 {
 	name: '...',
 	brand: '...',
@@ -604,7 +604,7 @@ This relation should be used in the following scenarios:
 
 2. The api resource contanis another resource as an inline property and does not provide the same object as a nested url:
 
-```
+```javascript
 {
 	name: '...',
 	brand: '...',
@@ -719,7 +719,7 @@ This relation should be used in the following scenarios:
 
 1. The api resource references another resource by id:
 
-```
+```javascript
 {
 	name: '...',
 	brand: '...',
@@ -729,7 +729,7 @@ This relation should be used in the following scenarios:
 
 2. The api resource contains another resource as an inline property and does not provide the same object as a nested url:
 
-```
+```javascript
 {
 	name: '...',
 	brand: '...',
@@ -923,7 +923,7 @@ Given the following json response:
 {
 	"id": 1,
 	"serialNo": {
-		"issued": '2014-05-05'
+		"issued": "2014-05-05"
 	}
 }
 ```
@@ -944,8 +944,8 @@ So if the json response looks like this:
 {
 	"id": 1,
 	"tags": [
-		{ name: 'endurow', weight: 20 },
-		{ name: 'offroad', weight: 5 }
+		{ "name": "endurow", "weight": 20 },
+		{ "name": "offroad", "weight": 5 }
 	]
 }
 ```
@@ -978,7 +978,7 @@ var Bike = restmod.model('/bikes').mix({
 });
 ```
 
-Even though the `$extend` block is the preferred method to extend a model, for small models it is also posible to
+Even though the `$extend` block is the preferred method to extend a model, for small models it is also possible to
 directly define the method in the definition object:
 
 ```javascript
