@@ -94,7 +94,7 @@ RMModule.factory('DefaultPacker', ['restmod', 'inflector', 'RMPackerCache', func
   return restmod.mixin(function() {
     this.define('Model.unpack', function(_resource, _raw) {
       var name = null,
-          links = this.getProperty('jsonLinks', 'linked'),
+          links = this.getProperty('jsonLinks', 'included'),
           meta = this.getProperty('jsonMeta', 'meta');
 
       if(_resource.$isCollection) {

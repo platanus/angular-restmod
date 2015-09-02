@@ -112,7 +112,7 @@ describe('DefaultPacker', function() {
       });
 
       var record = model.$new(1);
-      record.$unwrap({ bike: { model: 'Slash' }, linked: { users: [] }, pages: 20 });
+      record.$unwrap({ bike: { model: 'Slash' }, included: { users: [] }, pages: 20 });
       expect(record.$metadata.bike).toBeUndefined();
       expect(record.$metadata.linked).toBeUndefined();
 
@@ -161,7 +161,7 @@ describe('DefaultPacker', function() {
       var model = restmod.model('/api/bikes').mix('DefaultPacker');
 
       var record = model.$new(1);
-      record.$unwrap({ bike: {}, linked: { users: [] } });
+      record.$unwrap({ bike: {}, included: { users: [] } });
       expect(packerCache.feed).toHaveBeenCalledWith('users', []);
     });
 
@@ -192,7 +192,7 @@ describe('DefaultPacker', function() {
       });
 
       var record = model.$new(1);
-      record.$unwrap({ bike: {}, linked: { users: [] } });
+      record.$unwrap({ bike: {}, included: { users: [] } });
       expect(packerCache.feed).not.toHaveBeenCalledWith('users', []);
     });
 
