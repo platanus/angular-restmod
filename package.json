@@ -9,7 +9,7 @@
     "type": "git",
     "url": "git://github.com/angular-platanus/restmod.git"
   },
-  "main": "dist/angular-restmod.js",
+  "main": "./dist/angular-restmod-bundle.js",
   "dependencies": {
     "angular": "*",
     "angular-inflector": "~0.2"
