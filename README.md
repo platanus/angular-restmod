@@ -500,7 +500,14 @@ Will send GET to /bikes/1/parts/:id instead of /parts/:id
 
 <!-- end -->
 
-You can also define `hasMany` relation hooks. Check the [hooks advanced documentation](https://github.com/platanus/angular-restmod/blob/master/docs/guides/hooks.md) for more information.
+##### HasMany Options
+
+The has many relation provides the following options for you to customize its behaviour:
+
+* `path`: will change the relative path used to fetch/create the records. Ex: `{ hasMany: 'Part', path: 'pieces' }`
+* `inverseOf`: adds a property on the child object that points to the parent. Ex: `{ hasMany: 'Part', inverseOf: 'bike' }`.
+* `params`: optional query string parameters to be used when fetching collection. Ex: `{ hasMany: 'Part', params: { foo: 'bar' } }`.
+* `hooks`: you can also define `hasMany` relation hooks. Check the [hooks advanced documentation](https://github.com/platanus/angular-restmod/blob/master/docs/guides/hooks.md) for more information.
 
 <!-- end -->
 
@@ -593,7 +600,13 @@ owner.$save();
 
 <!-- end -->
 
-You can also define `hasOne` relation hooks. Check the [hooks advanced documentation](https://github.com/platanus/angular-restmod/blob/master/docs/guides/hooks.md) for more information.
+##### HasOne Options
+
+The has many relation provides the following options for you to customize its behaviour:
+
+* `path`: will change the relative path used to fetch/create the records. Ex: `{ hasOne: 'Part', path: 'pieces' }`
+* `inverseOf`: adds a property on the child object that points to the parent. Ex: `{ hasOne: 'Part', inverseOf: 'bike' }`.
+* `hooks`: you can also define `hasOne` relation hooks. Check the [hooks advanced documentation](https://github.com/platanus/angular-restmod/blob/master/docs/guides/hooks.md) for more information.
 
 <!-- ignore -->
 
