@@ -3,6 +3,8 @@
 RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils', function($injector, inflector, $filter, Utils) {
 
   function extract(_from, _path) {
+    if(_from === null && _path.length > 1) return undefined;
+
     var node;
     for(var i = 0; _from && (node = _path[i]); i++) {
       _from = _from[node];

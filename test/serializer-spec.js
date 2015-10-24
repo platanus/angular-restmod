@@ -252,6 +252,16 @@ describe('Restmod serializer', function() {
       expect(result.brand.full_name).toEqual('Giant');
     });
 
+    it('should properly handle null parent when processing nested properties', function() {
+      var spy = jasmine.createSpy();
+
+      serializer.dsl().attrMap('brand', 'brand.full_name');
+      serializer.dsl().attrDecoder('brand', spy);
+
+      serializer.decode({}, null, '');
+      expect(spy).not.toHaveBeenCalled();
+    });
+
     it('should allow mapping to a server property inside an ignored property', function() {
       serializer.dsl().attrMap('brandName', 'brand.full_name');
       serializer.dsl().attrMask('brand', true);
