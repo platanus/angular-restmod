@@ -1,3 +1,27 @@
+<a name="1.1.10"></a>
+### 1.1.10 (2015-10-24)
+
+
+#### Bug Fixes
+
+* **CommonApi:** makes canceled request promises resolve to error ([afcde0b4](http://github.com/angular-platanus/restmod/commit/afcde0b4c19c6a05cc7b09378e05b4462fb2cfc6), closes [#288](http://github.com/angular-platanus/restmod/issues/288))
+* **DefaultPacker:** fixes plural name not being infered from name. ([e4c02a13](http://github.com/angular-platanus/restmod/commit/e4c02a13447d3862bbfcf7eb7d1ee17e20bb22cd), closes [#224](http://github.com/angular-platanus/restmod/issues/224))
+* **Relations:** fixes hasMany and hasOne failing when inline property is null. ([05ab5479](http://github.com/angular-platanus/restmod/commit/05ab5479b9aed15fc5d42f09c6bad43b7f6239aa))
+* **Serializer:** fixes decoder being called on mapped properties even if the parent object was nu ([e8041b8d](http://github.com/angular-platanus/restmod/commit/e8041b8d9e5ba9aeb6833afce67bd1b7267df91a))
+
+
+#### Features
+
+* **CommonApi:** adds $off method to unregister callbacks ([591db81b](http://github.com/angular-platanus/restmod/commit/591db81b223c57b7b94b306c629aa3ab22d34f6e), closes [#257](http://github.com/angular-platanus/restmod/issues/257))
+* **ModelApi:** makes identity do the pluralizing if plural is not defined ([b94b349b](http://github.com/angular-platanus/restmod/commit/b94b349b2d8038fb68af9b51f1274a7dc14a320a))
+* **RecordApi:** 
+  * adds $isNew method ([104f3c25](http://github.com/angular-platanus/restmod/commit/104f3c25ea32ee1444c2f79f2736804f3ee382a6))
+  * makes $decode throw if encoded value is null or not an object. ([28636f69](http://github.com/angular-platanus/restmod/commit/28636f69783724a1ea5f50aad07029f0281ab21c))
+* **Serializer:**
+  * adds dynamic mask support ([51905cb5](http://github.com/angular-platanus/restmod/commit/51905cb5c8ebd226d15c323fc2961590810cb7de))
+  * mask now is passed to decoder/encoder as the second argument ([9db02baf](http://github.com/angular-platanus/restmod/commit/9db02bafc68a89c0f5d7a9e294875301b3ce01ce))
+
+
 <a name="1.1.9"></a>
 ### 1.1.9 (2015-05-07)
 
