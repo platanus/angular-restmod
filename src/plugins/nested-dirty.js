@@ -12,18 +12,25 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
     return angular.isObject(_val) && !angular.isArray(_val);
   }
 
-  function copyOriginalData(_from) {
-    var Model = _from.$type, result = {};
-
-    _from.$each(function(value, key) {
-      var meta = Model.$$getDescription(key);
-      if(!meta || !meta.relation) {
-        // TODO: skip masked properties too?
-        result[key] = angular.copy(value);
-      }
-    });
-
-    return result;
+  function convertToSimpleObj(data){
+        var Model = data.$type, result = {};  
+	      data.$each(function(value, key) {
+		      var meta = Model.$$getDescription(key);
+		      if(!meta || !meta.relation) {
+		        // TODO: skip masked properties too?
+		        // TODO: skip masked properties too?
+		        result[key] = angular.copy(value);
+		      } else if (meta) {
+				    if(meta.relation == "belongs_to"){ //This line deals with nested objects that are related by a "BelongsTo". Adds the $pk of nested value to the results object so it can be compared against.
+				    	if(value == null){ 
+				        result[key] = angular.copy(value);
+				      } else if(typeof value.$pk != "undefined") {
+				        result[key] = angular.copy(value.$pk); //This saved the primary key of the related object to the returned object, thereby allowing the plugin to notice when it has changed.
+				      }
+				    }	//Could also add an if statement to handle a "belongs_to_many" condition (serialize all $pks as an array)	      
+		      }
+	    });
+	    return result;
   }
 
   function navigate(_target, _keys) {
@@ -92,7 +99,7 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
   return restmod.mixin(function() {
     this.on('after-feed', function() {
           // store original information in a model's special property
-          this.$cmStatus = copyOriginalData(this);
+           this.$cmStatus = convertToSimpleObj(this);
         })
         /**
          * @method $dirty
@@ -117,13 +124,15 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
          */
         .define('$dirty', function(_prop, _comparator) {
           var original = this.$cmStatus;
-
+          var model = convertToSimpleObj(this); //Converts model to simple object before comparing (thereby "unnesting" any relation objects and simply comparing against $pks.)
+          
           if(_prop && !angular.isFunction(_prop)) {
-            return hasValueChanged(this, original, _prop.split('.'), _comparator);
+            return hasValueChanged(model, original, _prop.split('.'), _comparator);
           } else {
             if(angular.isFunction(_prop)) _comparator = _prop;
-            return changesAsStrings(findChangedValues(this, original, [], _comparator));
+            return changesAsStrings(findChangedValues(model, original, [], _comparator));
           }
+
         })
         /**
          * @method $restore
