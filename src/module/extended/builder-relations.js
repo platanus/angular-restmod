@@ -97,7 +97,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
       if(_source || _url) this.attrMap(_attr, _source || _url);
 
       this.attrDecoder(_attr, function(_raw) {
-            this[_attr].$reset().$decode(_raw);
+            this[_attr].$reset().$decode(_raw || []);
           })
           .attrMask(_attr, Utils.WRITE_MASK)
           .attrMeta(_attr, { relation: 'has_many' });
@@ -158,7 +158,7 @@ RMModule.factory('RMBuilderRelations', ['$injector', 'inflector', '$log', 'RMUti
       if(_source || _url) this.attrMap(_attr, _source || _url);
 
       this.attrDecoder(_attr, function(_raw) {
-            this[_attr].$decode(_raw);
+            this[_attr].$decode(_raw || {}); // TODO: null _raw should clear the object properties
           })
           .attrMask(_attr, Utils.WRITE_MASK)
           .attrMeta(_attr, { relation: 'has_one' });

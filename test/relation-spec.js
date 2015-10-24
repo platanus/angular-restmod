@@ -130,6 +130,11 @@ describe('Restmod model relation:', function() {
       expect(bike.activity.length).toEqual(2);
     });
 
+    it('should clear collection if inlined content is null', function() {
+      var bike = Bike.$new(1).$decode({ rides: null });
+      expect(bike.activity.length).toEqual(0);
+    });
+
     it('should reset collection content if new inline content is fed', function() {
       var bike = Bike.$new(1).$decode({ rides: [{ id: 1 }, { id: 2 }] });
       bike.$decode({ rides: [{ id: 3 }] });
@@ -211,6 +216,11 @@ describe('Restmod model relation:', function() {
     it('should load inline content into relation if available and use path as source', function() {
       var bike = Bike.$new(1).$decode({ serial: { value: 'SERIAL' } });
       expect(bike.serialNo.value).toEqual('SERIAL');
+    });
+
+    it('should do nothing if inline content is null', function() {
+      var bike = Bike.$new(1).$decode({ serial: null });
+      expect(bike.serialNo).not.toBeNull();
     });
 
     it('should bubble child events to child type', function() {
