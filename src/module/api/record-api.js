@@ -188,6 +188,9 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @return {RecordApi} this
      */
     $decode: function(_raw, _mask) {
+
+      Utils.assert(_raw && typeof _raw == 'object', 'Record $decode expected an object');
+
       // IDEA: let user override serializer
       this.$type.decode(this, _raw, _mask || Utils.READ_MASK);
       if(this.$isNew()) this.$pk = this.$type.inferKey(_raw); // TODO: warn if key changes
@@ -323,8 +326,9 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
             .$dispatch('before-update', [request, !!_patch])
             .$dispatch('before-save', [request])
             .$send(request, function(_response) {
+              if(_response.data) this.$unwrap(_response.data);
+
               this
-                .$unwrap(_response.data)
                 .$dispatch('after-update', [_response, !!_patch])
                 .$dispatch('after-save', [_response]);
             }, function(_response) {
@@ -342,7 +346,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
             .$dispatch('before-save', [request])
             .$dispatch('before-create', [request])
             .$send(request, function(_response) {
-              this.$unwrap(_response.data);
+              if(_response.data) this.$unwrap(_response.data);
 
               // reveal item (if not yet positioned)
               if(this.$scope.$isCollection && this.$position === undefined && !this.$preventReveal) {

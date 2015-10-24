@@ -230,6 +230,13 @@ describe('Restmod model class:', function() {
         $httpBackend.flush();
       });
 
+      it('should ignore empty responses', function() {
+        expect(function() {
+          bike.$save();
+          $httpBackend.when('PUT', '/api/bikes/1').respond(200, '');
+          $httpBackend.flush();
+        }).not.toThrow();
+      });
     });
 
     it('should call callbacks in proper order when creating', function() {
@@ -336,7 +343,7 @@ describe('Restmod model class:', function() {
   describe('$unwrap', function() {
 
     it('should call the type\'s unpack method', function() {
-      var spy = jasmine.createSpy();
+      var spy = jasmine.createSpy().and.returnValue({});
       var bike = restmod.model('/api/bikes', {
         'Model.unpack': spy
       }).$build();

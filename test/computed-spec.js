@@ -42,7 +42,8 @@ describe('RMBuilderComputed', function() {
             }
           }
         });
-        device = DeviceModel.$new().$decode();
+
+        device = DeviceModel.$new().$decode({});
       });
 
       it('calculates using given function', function() {
