@@ -1,3 +1,12 @@
+<a name="1.1.11"></a>
+### 1.1.11 (2015-10-26)
+
+
+#### Bug Fixes
+
+* **Builder:** fixes `mask` modifier being removed by mistake ([dc498735](http://github.com/angular-platanus/restmod/commit/dc49873538a260f26bf503498926cc22ed7e0156))
+
+
 <a name="1.1.10"></a>
 ### 1.1.10 (2015-10-24)
 

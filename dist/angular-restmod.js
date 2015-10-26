@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.1.10 - 2015-10-24
+ * @version v1.1.11 - 2015-10-26
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -1800,6 +1800,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', func
     var mappings = [
       { fun: 'attrDefault', sign: ['init'] },
       { fun: 'attrMask', sign: ['ignore'] },
+      { fun: 'attrMask', sign: ['mask'] },
       { fun: 'attrMap', sign: ['map', 'force'] },
       { fun: 'attrDecoder', sign: ['decode', 'param', 'chain'] },
       { fun: 'attrEncoder', sign: ['encode', 'param', 'chain'] },
