@@ -139,5 +139,18 @@ describe('Restmod builder:', function() {
     });
   });
 
+  // Builtin object modifiers
+
+  describe('mask', function() {
+    it('should register a new mask ', function() {
+      var Bike = restmod.model(null, {
+        foo: { mask: 'CU' }
+      });
+
+      var bike = Bike.$build({ foo: 'bar' }).$encode('CU');
+      expect(bike.foo).toBeUndefined();
+    });
+  });
+
 });
 

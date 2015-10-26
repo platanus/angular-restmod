@@ -175,6 +175,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', func
     var mappings = [
       { fun: 'attrDefault', sign: ['init'] },
       { fun: 'attrMask', sign: ['ignore'] },
+      { fun: 'attrMask', sign: ['mask'] },
       { fun: 'attrMap', sign: ['map', 'force'] },
       { fun: 'attrDecoder', sign: ['decode', 'param', 'chain'] },
       { fun: 'attrEncoder', sign: ['encode', 'param', 'chain'] },

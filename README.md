@@ -896,9 +896,9 @@ Following the Angular conventions, attributes that start with a '$' symbol are c
 
 ```javascript
 var Bike = restmod.model('/bikes').mix({
-	createdAt: {mask:'CU'}, // won't send this attribute on Create or Update
-	viewCount: {mask:'R'}, // won't load this attribute on Read (fetch)
-	opened: {mask:true}, // will ignore this attribute in relation to the API
+	createdAt: { ignore: 'CU' }, // won't send on Create or Update
+	viewCount: { ignore: 'R' }, // won't load on Read (fetch)
+	opened: { ignore: true }, // will ignore in every request and response
 });
 ```
 
