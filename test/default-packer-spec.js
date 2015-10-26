@@ -13,7 +13,7 @@ describe('DefaultPacker', function() {
     Part = restmod.model('/api/parts');
   }));
 
-  describe('extractRoot', function() {
+  describe('root extraction', function() {
 
     it('should extract single resource using singular name by default', function() {
       var model = restmod.model('/api/bikes').mix('DefaultPacker');
@@ -36,8 +36,10 @@ describe('DefaultPacker', function() {
     it('should let the single and plural keys to be overriden separately', function() {
       var model = restmod.model('/api/bikes').mix('DefaultPacker', {
         $config: {
-          jsonRootSingle: 'one_bike',
-          jsonRootMany: 'many_bikes'
+          jsonRoot: {
+            fetch: 'one_bike',
+            fetchMany: 'many_bikes'
+          }
         }
       });
 
@@ -62,6 +64,53 @@ describe('DefaultPacker', function() {
       var many = model.$collection();
       many.$unwrap({ the_root: [{ model: 'Slash' }] });
       expect(many[0].model).toEqual('Slash');
+    });
+
+    it('should allow disabling response wrapping by setting `fetch` config to false', function() {
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: {
+          jsonRoot: {
+            fetch: false
+          }
+        }
+      });
+
+      var record = model.$new(1);
+      record.$unwrap({ model: 'Slash' });
+      expect(record.model).toEqual('Slash');
+    });
+
+  });
+
+  describe('root wrapping', function() {
+
+    it('should wrap single resource using singular name by default', function() {
+      var model = restmod.model('/api/bikes').mix('DefaultPacker');
+
+      var data = model.$buildRaw({ id: 1, name: 'Process' }).$wrap();
+      expect(data).toEqual({ bike: { id: 1, name: 'Process' } });
+    });
+
+    it('should allow overriding default wrapper property name', function() {
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: { jsonRoot: 'the_root' }
+      });
+
+      var data = model.$buildRaw({ id: 1, name: 'Process' }).$wrap();
+      expect(data).toEqual({ the_root: { id: 1, name: 'Process' } });
+    });
+
+    it('should allow disabling request wrapping by setting `send` config to false', function() {
+      var model = restmod.model('/api/bikes').mix('DefaultPacker', {
+        $config: {
+          jsonRoot: {
+            send: false
+          }
+        }
+      });
+
+      var data = model.$buildRaw({ id: 1, name: 'Process' }).$wrap();
+      expect(data).toEqual({ id: 1, name: 'Process' });
     });
 
   });
