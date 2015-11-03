@@ -8,13 +8,26 @@
 
 angular.module('restmod').factory('DirtyModel', ['restmod', function(restmod) {
 
+  function copyOriginalData(_this) {
+    var original = _this.$cmStatus = {};
+    _this.$each(function(_value, _prop) {
+      original[_prop] = _value;
+    });
+  }
+
+  function updateOriginalData(_this, _data) {
+    var original = _this.$cmStatus;
+    for(var _prop in _data) {
+      original[_prop]  = _data[_prop];
+    }
+  }
+
   return restmod.mixin(function() {
-    this.on('after-feed', function(_original) {
-          // store original information in a model's special property
-          var original = this.$cmStatus = {};
-          this.$each(function(_value, _key) {
-            original[_key] = _value;
-          });
+    this.on('after-init', function() {
+          copyOriginalData(this);
+        })
+        .on('after-feed', function(_data) {
+          updateOriginalData(this, _data);
         })
         /**
          * @method $dirty
@@ -35,19 +48,16 @@ angular.module('restmod').factory('DirtyModel', ['restmod', function(restmod) {
          * @return {boolean|array} Property state or array of changed properties
          */
         .define('$dirty', function(_prop) {
-          var original = this.$cmStatus;
+          var self = this, original = self.$cmStatus;
           if(_prop) {
-            if(!original || original[_prop] === undefined) return false;
-            return original[_prop] !== this[_prop];
+            return (!original[_prop] || original[_prop] !== self[_prop]);
           } else {
-            var changes = [], key;
-            if(original) {
-              for(key in original) {
-                if(original.hasOwnProperty(key) && original[key] !== this[key]) {
-                  changes.push(key);
-                }
+            var changes = [];
+            self.$each(function(_value, _key) {
+              if(!original[_key] || original[_key] !== self[_key]) {
+                changes.push(_key);
               }
-            }
+            });
             return changes;
           }
         })
