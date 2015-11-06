@@ -6,7 +6,7 @@
 
 'use strict';
 
-angular.module('restmod').factory('DirtyModel', ['restmod', function(restmod) {
+angular.module('restmod').factory('DirtyModel', ['restmod', 'RMUtils', function(restmod, Utils) {
 
   function isPlainObject(_val) {
     return angular.isObject(_val) && !angular.isArray(_val);
@@ -26,6 +26,9 @@ angular.module('restmod').factory('DirtyModel', ['restmod', function(restmod) {
   }
 
   function loadOriginalData(_from) {
+    if(!_from.$type.getProperty('dirty'))
+      return;
+
     var original = _from.$cmStatus = {},
         properties = getModelProperties(_from);
 
@@ -104,6 +107,11 @@ angular.module('restmod').factory('DirtyModel', ['restmod', function(restmod) {
     }
   }
 
+  function getOriginalData(_model) {
+    Utils.assert(!!_model.$cmStatus, 'Need to set { $config: { dirty: true } } in model definition to use dirty model plugin functions');
+    return _model.$cmStatus;
+  }
+
   return restmod.mixin(function() {
     this.on('after-init', function() {
           loadOriginalData(this);
@@ -133,7 +141,7 @@ angular.module('restmod').factory('DirtyModel', ['restmod', function(restmod) {
          * @return {boolean|array} Property state or array of changed properties
          */
         .define('$dirty', function(_prop, _comparator) {
-          var original = this.$cmStatus;
+          var original = getOriginalData(this);
 
           if(_prop && !angular.isFunction(_prop)) {
             return hasValueChanged(this, original, _prop.split('.'), _comparator);
@@ -165,7 +173,7 @@ angular.module('restmod').factory('DirtyModel', ['restmod', function(restmod) {
          */
         .define('$restore', function(_prop) {
           return this.$action(function() {
-            var original = this.$cmStatus;
+            var original = getOriginalData(this);
 
             if(_prop) {
               var keys = _prop.split('.');
