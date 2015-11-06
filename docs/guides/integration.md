@@ -4,6 +4,7 @@ Make sure you read all of the following Q&A before you start integrating your AP
 
 * [How can I change the property used for the primary key](#q1)
 * [How do I handle a wrapped response object? (json root object)](#q2)
+* [How do I generated a wrapped request object?](#q2)
 * [How can I extract response metadata from the root object?](#q3)
 * [Does restmod supports linked elements side loaded in the response wrapper?](#q4)
 * [My resource properties are being automatically renamed, is this normal?](#q5)
@@ -39,7 +40,7 @@ module.config(function(restmodProvider) {
 });
 ```
 
-### <a name="q2"></a> How do I handle a wrapped response object? (json root object)
+### <a name="q2"></a> How do I handle a wrapped response or request object? (json root object)
 
 In restmod response wrapping is handled by the model's `unpack` and `pack` static methods, by default this methods do nothing so records and collections are expected at response root level.
 
@@ -51,7 +52,7 @@ module.config(function(restmodProvider) {
 });
 ```
 
-This will enable json root wrapping and by default it will use the resource's name for single records and the resource's plural name for collections.
+This will enable json root wrapping for **both responses and requests**. By default it will use the resource's name for single records and the resource's plural name for collections.
 
 So doing:
 
@@ -69,12 +70,25 @@ Will expect:
 
 And doing:
 
-
 ```javascript
 restmod.model('/api/bikes').$find(1);
 ```
 
 Will expect:
+
+```json
+{
+	"bike": { "id": 1, "brand": "Trek" }
+}
+```
+
+Also when saving
+
+```javascript
+bike.$save();
+```
+
+The following request body will be generated:
 
 ```json
 {
@@ -93,7 +107,18 @@ restmod.model().mix({
 });
 ```
 
-It's also posible to change the root property name without changing the resource name by setting the `jsonRootSingle`, `jsonRootMany` or the `jsonRoot` (both single and many) configuration properties. This should only be used when the properties are fixed or not named after the resource.
+You can customize or disable the json root for requests and/or responses using the `jsonRoot` config variable:
+
+```javascript
+restmod.model().mix({
+	$config: {
+		jsonRoot: {
+			send: false, // disable json root on requests
+			fetch: 'data' // set the expected json root for responses to 'data'
+		}
+	}
+});
+```
 
 ### <a name="q3"></a> How can I extract response metadata from the root object?
 
@@ -148,7 +173,7 @@ Yes it does, at least if its formated similar to what active_model_serializer ge
 
 Take a look at the [wrapped response question](#q2) first and set up the default packer.
 
-By default, the default packer will expect inlined resources to come in a property named `linked` (jsonapi.org standard).
+By default, the default packer will expect inlined resources to come in a property named `included` (jsonapi.org standard).
 
 The following example shows a simple use case scenario:
 
@@ -160,7 +185,7 @@ Given the following api response for the resource `/api/bikes/:id`
 		"user_id": 1,
 		"part_ids": [1, 2, 3]
 	},
-	"linked": {
+	"included": {
 		"users": [
 			{ "id": 1, "name": "Joe", "role": "admin" }
 		],

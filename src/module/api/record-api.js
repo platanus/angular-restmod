@@ -194,7 +194,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
       // IDEA: let user override serializer
       this.$type.decode(this, _raw, _mask || Utils.READ_MASK);
       if(this.$isNew()) this.$pk = this.$type.inferKey(_raw); // TODO: warn if key changes
-      this.$dispatch('after-feed', [_raw]);
+      this.$dispatch('after-feed', [_raw, _mask]);
       return this;
     },
 
@@ -208,7 +208,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      */
     $encode: function(_mask) {
       var raw = this.$type.encode(this, _mask || Utils.CREATE_MASK);
-      this.$dispatch('before-render', [raw]);
+      this.$dispatch('before-render', [raw, _mask]);
       return raw;
     },
 

@@ -28,6 +28,7 @@ RMModule.factory('RMUtils', ['$log', function($log) {
   var Utils = {
 
     // Ignore Masks
+    EMPTY_MASK: '',
     CREATE_MASK: 'C',
     UPDATE_MASK: 'U',
     READ_MASK: 'R',

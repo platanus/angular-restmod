@@ -39,6 +39,23 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
       return (mask && (mask === true || mask.indexOf(_mask) !== -1));
     }
 
+    function mapOut(_from, _map) {
+      if(!_map.map) {
+
+      }
+      if(maps[i].map) {
+          value = extract(_from, maps[i].map);
+        } else if(maps[i].dyn) {
+          value = extract(_from, maps[i].dyn.call(_ctx));
+        } else {
+          value = _from[_strategies.encodeName ? _strategies.encodeName(maps[i].path) : maps[i].path];
+        }
+    }
+
+    function mapIn(_to, _map, _value) {
+
+    }
+
     function decode(_from, _to, _prefix, _mask, _ctx) {
       var key, decodedName, fullName, value, maps, isMapped, i, l,
           prefix = _prefix ? _prefix + '.' : '';
@@ -52,6 +69,8 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
 
           if(maps[i].map) {
             value = extract(_from, maps[i].map);
+          } else if(maps[i].dyn) {
+            value = extract(_from, maps[i].dyn.call(_ctx));
           } else {
             value = _from[_strategies.encodeName ? _strategies.encodeName(maps[i].path) : maps[i].path];
           }
@@ -148,6 +167,8 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
           if(value !== undefined) {
             if(maps[i].map) {
               insert(_to, maps[i].map, value);
+            } else if(maps[i].dyn) {
+              insert(_to, maps[i].dyn.call(_ctx), value);
             } else {
               _to[_strategies.encodeName ? _strategies.encodeName(maps[i].path) : maps[i].path] = value;
             }
@@ -227,6 +248,13 @@ RMModule.factory('RMSerializer', ['$injector', 'inflector', '$filter', 'RMUtils'
             mapped[_attr] = true;
 
             var nodes = (mappings[node] || (mappings[node] = []));
+
+            if(typeof _serverPath == 'function') {
+
+            } else {
+              nodes.push({ path: leaf, map: _serverPath === '*' ? null : _serverPath.split('.'), mapPath: _serverPath, forced: _forced });
+            }
+
             nodes.push({ path: leaf, map: _serverPath === '*' ? null : _serverPath.split('.'), mapPath: _serverPath, forced: _forced });
             return this;
           },

@@ -29,18 +29,73 @@ RMModule.factory('DefaultPacker', ['restmod', 'inflector', 'RMPackerCache', func
     }
   }
 
+  var unpack = function(_resource, _raw) {
+    var name = null,
+        links = this.getProperty('jsonLinks', 'included'),
+        meta = this.getProperty('jsonMeta', 'meta'),
+        root = this.getProperty('jsonRoot', {});
+
+    if(root === false || typeof root === 'string') {
+      name = root;
+    } else {
+      if(_resource.$isCollection) name = root.fetchMany;
+      if(!name && name !== false) name = root.fetch;
+      if(!name && name !== false) name = this.identity(_resource.$isCollection);
+    }
+
+    if(meta) {
+      _resource.$metadata = {};
+      processFeature(_raw, name, meta, links, function(_key, _value) {
+        _resource.$metadata[_key] = _value;
+      });
+    }
+
+    if(links) {
+      processFeature(_raw, name, links, meta, function(_key, _value) {
+        // TODO: check that cache is an array.
+        packerCache.feed(_key, _value);
+      });
+    }
+
+    return name ? _raw[name] : _raw;
+  };
+
+  var pack = function(_resource, _raw) {
+    var name = null,
+        root = this.getProperty('jsonRoot', {});
+
+    if(root === false || typeof root === 'string') {
+      name = root;
+    } else {
+      if(_resource.$isCollection) name = root.sendMany;
+      if(!name && name !== false) name = root.send;
+      if(!name && name !== false) name = this.identity(_resource.$isCollection);
+    }
+
+    if(name) {
+      var result = {};
+      result[name] = _raw;
+      return result;
+    } else {
+      return _raw;
+    }
+  };
+
   /**
    * @class DefaultPacker
    *
    * @description
    *
-   * Simple `$unpack` implementation that attempts to cover the standard proposed by
+   * Simple `$unpack` and `$pack` implementation that attempts to cover the standard proposed by
    * [active_model_serializers](https://github.com/rails-api/active_model_serializers.
    *
-   * This is a simplified version of the wrapping structure recommented by the jsonapi.org standard,
-   * it supports side loaded associated resources (via supporting relations) and metadata extraction.
+   * This used to match the wrapping structure recommented by the jsonapi.org standard. The current
+   * standard is much more complex and we intend to support it via a special style.
    *
-   * To activate add mixin to model chain
+   * This mixin gives support for json root, side loaded associated resources (via supporting relations)
+   * and response metadata.
+   *
+   * To activate add the mixin to model chain
    *
    * ```javascript
    * restmodProvide.rebase('DefaultPacker');
@@ -51,12 +106,24 @@ RMModule.factory('DefaultPacker', ['restmod', 'inflector', 'RMPackerCache', func
    * By default the mixin will use the singular model name as json root for single resource requests
    * and pluralized name for collection requests. Make sure the model name is correctly set.
    *
-   * To override the name used by the mixin set the **jsonRootSingle** and **jsonRootMany** variables.
-   * Or set **jsonRoot** to override both.
+   * To change or disable the response/request json root use the *jsonRoot** configuration variable:
+   *
+   * ```javascript
+   * {
+   *   $config: {
+   *     jsonRoot: "data" // set json root to "data" for both requests and responses.
+   *     // OR
+   *     jsonRoot: {
+   *       send: false, // disable json root for requests
+   *       fetch: "data" // expect response to use "data" as json root.
+   *     }
+   *   }
+   * }
+   * ```
    *
    * ### Side loaded resources
    *
-   * By default the mixin will look for links to other resources in the 'linked' root property, you
+   * By default the mixin will look for links to other resources in the 'included' root property, you
    * can change this by setting the jsonLinks variable. To use the root element as link source
    * use `jsonLinks: '.'`. You can also explicitly select which properties to consider links using an
    * array of property names. To skip links processing altogether, set it to false.
@@ -85,41 +152,17 @@ RMModule.factory('DefaultPacker', ['restmod', 'inflector', 'RMPackerCache', func
    * it to '.' to capture the entire raw response or set it to false to skip metadata and set it to an array of properties
    * to be extract selected properties.
    *
-   * @property {mixed} single The expected single resource wrapper property name
-   * @property {object} plural The expected collection wrapper property name
-   * @property {mixed} links The links repository property name
-   * @property {object} meta The metadata repository property name
+   * ### Request root object
+   *
+   * By default the packer will use the same naming criteria for responses and requests.
+   *
+   * You can disable request wrapping by setting the `jsonRoot`
    *
    */
   return restmod.mixin(function() {
-    this.define('Model.unpack', function(_resource, _raw) {
-      var name = null,
-          links = this.getProperty('jsonLinks', 'included'),
-          meta = this.getProperty('jsonMeta', 'meta');
-
-      if(_resource.$isCollection) {
-        name = this.getProperty('jsonRootMany') || this.getProperty('jsonRoot') || this.identity(true);
-      } else {
-        // TODO: use plural for single resource option.
-        name = this.getProperty('jsonRootSingle') || this.getProperty('jsonRoot') || this.identity();
-      }
-
-      if(meta) {
-        _resource.$metadata = {};
-        processFeature(_raw, name, meta, links, function(_key, _value) {
-          _resource.$metadata[_key] = _value;
-        });
-      }
-
-      if(links) {
-        processFeature(_raw, name, links, meta, function(_key, _value) {
-          // TODO: check that cache is an array.
-          packerCache.feed(_key, _value);
-        });
-      }
-
-      return _raw[name];
-    });
+    this
+      .define('Model.unpack', unpack)
+      .define('Model.pack', pack);
   });
 
 }]);
