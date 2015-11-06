@@ -9,25 +9,45 @@ describe('Plugin: Nested Dirty Model', function() {
   beforeEach(module(function($provide, restmodProvider) {
     restmodProvider.rebase('NestedDirtyModel');
     $provide.factory('Bike', function(restmod) {
-      return restmod.model('/api/bikes');
+      return restmod.model('/api/bikes', {
+        model: { init: 'Meta 2' },
+        brandName: { init: 'Commencal' },
+        customisations: { init: { wheels: 2, seat: { material: 'lycra' } } },
+        colours: { init: { frame: 'red' } },
+        stickers: { init: ['bmx', 'bandits'] }
+      });
     });
   }));
 
-  beforeEach(inject(function($httpBackend, Bike) {
-    // generate a model instance with server loaded data:
-    $httpBackend.when('GET', '/api/bikes/1').respond(200, {
-      model: 'Meta 2',
-      colours: { frame: 'red' },
-      brandName: 'Commencal',
-      stickers: ['bmx', 'bandits'],
-      customisations: { wheels: 2, seat: { material: 'lycra' } }
-    });
-    bike = Bike.$find(1);
-    $httpBackend.flush();
+  beforeEach(inject(function(Bike) {
+    bike = Bike.$new(1);
   }));
 
   describe('`$dirty` function', function() {
-    it('should list changes on nested objects', function() {
+    it('considers default values as pristine values', function() {
+      expect(bike.model).toBe('Meta 2');
+      expect(bike.$dirty('model')).toBe(false);
+      expect(bike.customisations.seat.material).toBe('lycra');
+      expect(bike.$dirty('customisations.seat.material')).toBe(false);
+      expect(bike.$dirty()).toEqual([]);
+    });
+
+    it('considers extended properties as dirty', function() {
+      bike.$extend({ category: 'enduro' });
+      bike.color = 'red';
+
+      expect(bike.$dirty('category')).toBe(true);
+      expect(bike.$dirty('color')).toBe(true);
+      expect(bike.$dirty()).toEqual(['category', 'color']);
+    });
+
+    it('detects simple property changes', function() {
+      bike.model = 'Meta AM';
+      expect(bike.$dirty('model')).toBe(true);
+      expect(bike.$dirty()).toEqual(['model']);
+    });
+
+    it('lists changes on nested objects', function() {
       bike.brandName = 'BMX';
       expect(bike.$dirty()).not.toContain('customisations.wheels');
 
@@ -40,24 +60,24 @@ describe('Plugin: Nested Dirty Model', function() {
       expect(bike.$dirty()).toContain('customisations.seat.material');
     });
 
-    it('should compare arrays', function() {
+    it('compares arrays', function() {
       bike.brandName = 'BMX';
       expect(bike.$dirty()).not.toContain('stickers');
       bike.stickers.pop();
       expect(bike.$dirty()).toContain('stickers');
     });
 
-    it('should detect missing object properties', function() {
+    it('detects missing object properties', function() {
       bike.customisations = null;
       expect(bike.$dirty()).toContain('customisations');
     });
 
-    it('should detect properties that change type from object', function() {
+    it('detects properties that change type from object', function() {
       bike.customisations = 0;
       expect(bike.$dirty()).toContain('customisations');
     });
 
-    it('should not consider changes on child properties when parent object changes', function() {
+    it('avoids changes on child properties when parent object changes', function() {
       bike.customisations = null;
       expect(bike.$dirty('customisations.wheels')).toBeFalsy();
 
@@ -65,14 +85,14 @@ describe('Plugin: Nested Dirty Model', function() {
       expect(bike.$dirty('model.name')).toBeFalsy();
     });
 
-    it('should compare with comparator function', function() {
+    it('compares with comparator function', function() {
       bike.customisations.wheels = 3;
       expect(bike.$dirty('customisations.wheels', function (newVal, oldVal) {
         return newVal * oldVal > 5;
       })).toBe(true);
     });
 
-    it('should let you pass comparator as first argument', function() {
+    it('allows you to pass comparator as first argument', function() {
       bike.colours.frame = 'Brown';
       bike.brandName = 'BMX';
       bike.model = 'Strider';
@@ -82,10 +102,27 @@ describe('Plugin: Nested Dirty Model', function() {
       }).length).toEqual(2);
     });
 
+    describe('fetching data', function() {
+      beforeEach(inject(function($httpBackend) {
+        $httpBackend.when('GET', '/api/bikes/1').respond(200, {
+          model: 'Meta 3',
+          stickers: ['cool']
+        });
+        bike.$fetch();
+        $httpBackend.flush();
+      }));
+
+      it('sets pristine state for responded properties', function() {
+        expect(bike.model).toBe('Meta 3');
+        expect(bike.$dirty('model')).toBe(false);
+        expect(bike.stickers).toEqual(['cool']);
+        expect(bike.$dirty('stickers')).toBe(false);
+      });
+    });
   });
 
   describe('$restore', function() {
-    it('should restore nested property', function() {
+    it('restores nested property', function() {
       bike.customisations.wheels = 4;
       bike.customisations.seat.material = 'leather';
       bike.$restore('customisations.wheels');
@@ -93,12 +130,22 @@ describe('Plugin: Nested Dirty Model', function() {
       expect(bike.customisations.seat.material).toEqual('leather');
     });
 
-    it('should restore an entire nested object', function() {
+    it('restores an entire nested object', function() {
       bike.customisations.wheels = 8;
       bike.customisations.seat.material = 'cloth';
       bike.$restore('customisations');
       expect(bike.customisations.wheels).toEqual(2);
       expect(bike.customisations.seat.material).toEqual('lycra');
+    });
+
+    it('restores extended properties to undefined values', function() {
+      bike.$extend({ category: 'enduro' });
+      bike.color = 'red';
+
+      bike.$restore('category');
+      expect(bike.category).toBe(undefined);
+      bike.$restore('color');
+      expect(bike.category).toBe(undefined);
     });
   });
 });

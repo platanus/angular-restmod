@@ -12,18 +12,37 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
     return angular.isObject(_val) && !angular.isArray(_val);
   }
 
-  function copyOriginalData(_from) {
-    var Model = _from.$type, result = {};
+  function getModelProperties(_model) {
+    var Model = _model.$type, result = {};
 
-    _from.$each(function(value, key) {
+    _model.$each(function(value, key) {
       var meta = Model.$$getDescription(key);
       if(!meta || !meta.relation) {
-        // TODO: skip masked properties too?
         result[key] = angular.copy(value);
       }
     });
 
     return result;
+  }
+
+  function loadOriginalData(_from) {
+    var original = _from.$cmStatus = {},
+        properties = getModelProperties(_from);
+
+    for(var prop in properties) {
+      original[prop] = angular.copy(properties[prop]);
+    }
+  }
+
+  function updateOriginalData(_from, _data) {
+    var Model = _from.$type, original = _from.$cmStatus;
+
+    for(var key in _data) {
+      var meta = Model.$$getDescription(key);
+      if(!meta || !meta.relation) {
+        original[key] = angular.copy(_data[key]);
+      }
+    }
   }
 
   function navigate(_target, _keys) {
@@ -42,7 +61,7 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
     _model = navigate(_model, _keys);
     _original = navigate(_original, _keys);
 
-    if(angular.isObject(_original) && angular.isObject(_model) && _original.hasOwnProperty(prop)) {
+    if(angular.isObject(_original) && angular.isObject(_model)) {
       if(typeof _comparator === 'function') {
         return !!_comparator(_model[prop], _original[prop]);
       } else {
@@ -56,16 +75,12 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
   function findChangedValues(_model, _original, _keys, _comparator) {
     var changes = [], childChanges;
 
-    if(_original) {
-      for(var key in _original) {
-        if(_original.hasOwnProperty(key)) {
-          if(isPlainObject(_original[key]) && isPlainObject(_model[key])) {
-            childChanges = findChangedValues(_model[key], _original[key], _keys.concat([key]), _comparator);
-            changes.push.apply(changes, childChanges);
-          } else if(hasValueChanged(_model, _original, [key], _comparator)) {
-            changes.push(_keys.concat([key]));
-          }
-        }
+    for(var key in _model) {
+      if(isPlainObject(_original[key]) && isPlainObject(_model[key])) {
+        childChanges = findChangedValues(_model[key], _original[key], _keys.concat([key]), _comparator);
+        changes.push.apply(changes, childChanges);
+      } else if(hasValueChanged(_model, _original, [key], _comparator)) {
+        changes.push(_keys.concat([key]));
       }
     }
 
@@ -84,15 +99,17 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
     _model = navigate(_model, _keys);
     _original = navigate(_original, _keys);
 
-    if(_original && _model && _original.hasOwnProperty(prop)) {
+    if(_original && _model) {
       _model[prop] = angular.copy(_original[prop]);
     }
   }
 
   return restmod.mixin(function() {
-    this.on('after-feed', function() {
-          // store original information in a model's special property
-          this.$cmStatus = copyOriginalData(this);
+    this.on('after-init', function() {
+          loadOriginalData(this);
+        })
+        .on('after-feed', function(_data) {
+          updateOriginalData(this, _data);
         })
         /**
          * @method $dirty
@@ -122,7 +139,8 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
             return hasValueChanged(this, original, _prop.split('.'), _comparator);
           } else {
             if(angular.isFunction(_prop)) _comparator = _prop;
-            return changesAsStrings(findChangedValues(this, original, [], _comparator));
+            var properties = getModelProperties(this);
+            return changesAsStrings(findChangedValues(properties, original, [], _comparator));
           }
         })
         /**
@@ -153,7 +171,8 @@ angular.module('restmod').factory('NestedDirtyModel', ['restmod', function(restm
               var keys = _prop.split('.');
               restoreValue(this, original, keys);
             } else {
-              var changes = findChangedValues(this, original, []);
+              var properties = getModelProperties(this),
+                  changes = findChangedValues(properties, original, []);
               for(var i = 0, l = changes.length; i < l; i++) {
                 restoreValue(this, original, changes[i]);
               }
