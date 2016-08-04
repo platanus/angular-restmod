@@ -151,13 +151,15 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
       Utils.assert(_obj.$type && _obj.$type === this.$type, 'Collection $add expects record of the same $type');
 
       return this.$action(function() {
-        if(_obj.$position === undefined) {
+        if(_obj.$in_collections.indexOf(this) === -1) {
           if(_idx !== undefined) {
             this.splice(_idx, 0, _obj);
           } else {
             this.push(_obj);
           }
-          _obj.$position = true; // use true for now, keeping position updated can be expensive
+           // Removed $position = use true since it was unimplemented.
+           // Previous comment: for now, keeping position updated can be expensive
+          _obj.$in_collections.push(this);
           this.$dispatch('after-add', [_obj]);
         }
       });
@@ -181,7 +183,7 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
         var idx = this.$indexOf(_obj);
         if(idx !== -1) {
           this.splice(idx, 1);
-          _obj.$position = undefined;
+          _obj.$in_collections.splice(_obj.$in_collections.indexOf(this),1);
           this.$dispatch('after-remove', [_obj]);
         }
       });

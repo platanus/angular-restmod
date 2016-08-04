@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.1.11 - 2015-10-26
+ * @version v1.1.11 - 2016-08-04
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -342,13 +342,15 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
       Utils.assert(_obj.$type && _obj.$type === this.$type, 'Collection $add expects record of the same $type');
 
       return this.$action(function() {
-        if(_obj.$position === undefined) {
+        if(_obj.$in_collections.indexOf(this) === -1) {
           if(_idx !== undefined) {
             this.splice(_idx, 0, _obj);
           } else {
             this.push(_obj);
           }
-          _obj.$position = true; // use true for now, keeping position updated can be expensive
+           // Removed $position = use true since it was unimplemented.
+           // Previous comment: for now, keeping position updated can be expensive
+          _obj.$in_collections.push(this);
           this.$dispatch('after-add', [_obj]);
         }
       });
@@ -372,7 +374,7 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
         var idx = this.$indexOf(_obj);
         if(idx !== -1) {
           this.splice(idx, 1);
-          _obj.$position = undefined;
+          _obj.$in_collections.splice(_obj.$in_collections.indexOf(this),1);
           this.$dispatch('after-remove', [_obj]);
         }
       });
@@ -398,6 +400,7 @@ RMModule.factory('RMCollectionApi', ['RMUtils', function(Utils) {
   };
 
 }]);
+
 RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', 'RMUtils', function($http, $q, $log, Utils) {
 
   var EMPTY_ARRAY = [];
@@ -1156,6 +1159,9 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * Note: Is better to add a hook to after-init than overriding this method.
      */
     $initialize: function() {
+
+        this.$in_collections = [];
+
       // apply defaults
       this.$super();
 
@@ -1399,7 +1405,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
               if(_response.data) this.$unwrap(_response.data);
 
               // reveal item (if not yet positioned)
-              if(this.$scope.$isCollection && this.$position === undefined && !this.$preventReveal) {
+              if(this.$scope.$isCollection && this.$in_collections.length === 0 && !this.$preventReveal) {
                 this.$scope.$add(this, this.$revealAt);
               }
 
@@ -1465,15 +1471,17 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @param  {integer} _to New object position (index)
      * @return {RecordApi} this
      */
-    $moveTo: function(_to) {
-      if(this.$position !== undefined) {
-        // TODO: move item to given index.
-        // TODO: callback
-      } else {
-        this.$revealAt = _to;
-      }
-      return this;
-    },
+     $moveTo: function(_to) {
+         if (this.$in_collections.length === 0) {
+             this.$revealAt = _to;
+         } else if(this.$in_collections.length === 1) {
+             // TODO: move item to given index.
+             // TODO: callback
+         } else {
+             console.warn('$moveTo ambigious because record is in more than 1 collection.');
+         }
+         return this;
+     },
 
     /**
      * @memberof RecordApi#
@@ -1499,6 +1507,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
   };
 
 }]);
+
 RMModule.factory('RMScopeApi', ['RMUtils', function(Utils) {
 
   /**
