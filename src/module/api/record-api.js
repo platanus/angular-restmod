@@ -106,6 +106,9 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * Note: Is better to add a hook to after-init than overriding this method.
      */
     $initialize: function() {
+
+        this.$in_collections = [];
+
       // apply defaults
       this.$super();
 
@@ -349,7 +352,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
               if(_response.data) this.$unwrap(_response.data);
 
               // reveal item (if not yet positioned)
-              if(this.$scope.$isCollection && this.$position === undefined && !this.$preventReveal) {
+              if(this.$scope.$isCollection && this.$in_collections.length === 0 && !this.$preventReveal) {
                 this.$scope.$add(this, this.$revealAt);
               }
 
@@ -415,15 +418,17 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @param  {integer} _to New object position (index)
      * @return {RecordApi} this
      */
-    $moveTo: function(_to) {
-      if(this.$position !== undefined) {
-        // TODO: move item to given index.
-        // TODO: callback
-      } else {
-        this.$revealAt = _to;
-      }
-      return this;
-    },
+     $moveTo: function(_to) {
+         if (this.$in_collections.length === 0) {
+             this.$revealAt = _to;
+         } else if(this.$in_collections.length === 1) {
+             // TODO: move item to given index.
+             // TODO: callback
+         } else {
+             console.warn('$moveTo ambigious because record is in more than 1 collection.');
+         }
+         return this;
+     },
 
     /**
      * @memberof RecordApi#
