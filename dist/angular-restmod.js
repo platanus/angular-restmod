@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.1.11 - 2015-10-26
+ * @version v1.1.11 - 2016-09-27
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -3128,7 +3128,9 @@ RMModule.factory('RMFastQ', [function() {
       simple: true,
 
       then: function(_success, _error) {
-        return simpleQ(_withError ? _error(_val) : _success(_val));
+        var successHandler = angular.isFunction(_success) ? _success :
+          function () {};
+        return simpleQ(_withError ? _error(_val) : successHandler(_val));
       },
       'catch': catchError,
       'finally': function(_cb) {

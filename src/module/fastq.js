@@ -23,7 +23,9 @@ RMModule.factory('RMFastQ', [function() {
       simple: true,
 
       then: function(_success, _error) {
-        return simpleQ(_withError ? _error(_val) : _success(_val));
+        var successHandler = angular.isFunction(_success) ? _success :
+          function () {};
+        return simpleQ(_withError ? _error(_val) : successHandler(_val));
       },
       'catch': catchError,
       'finally': function(_cb) {
