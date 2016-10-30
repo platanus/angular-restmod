@@ -3228,9 +3228,9 @@ RMModule.factory('RMPackerCache', [function() {
      */
     feed: function(_name, _raw, _pk) {
 
-      if(!packerCache) this.prepare();
-      if(!packerCache.hasOwnProperty(_name)) packerCache[_name] = {'indexed': true};
-      var indexed = (_pk != undefined && packerCache[_name]['indexed']);
+      if(!packerCache) {this.prepare();}
+      if(!packerCache.hasOwnProperty(_name)) {packerCache[_name] = {'indexed': true};}
+      var indexed = (_pk !== undefined && packerCache[_name].indexed);
 
       if(indexed){
         if(angular.isArray(_raw)){
@@ -3249,7 +3249,7 @@ RMModule.factory('RMPackerCache', [function() {
         }
       }
 
-      packerCache[_name]['indexed'] = indexed;
+      packerCache[_name].indexed = indexed;
 
     },
 
