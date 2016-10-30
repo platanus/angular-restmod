@@ -39,7 +39,7 @@ RMModule.factory('RMPackerCache', [function() {
      *
      * @param {string} _name Resource name (singular)
      * @param {array} _raw Raw data as an array of objects or a single object
-     * @param {string} _pk Primary key field name, mostly it will be id [optional]
+     * @param {string} _pk Primary key field name, mostly will be 'id' [optional]
      */
     feed: function(_name, _raw, _pk) {
 
