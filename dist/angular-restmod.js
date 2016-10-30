@@ -3206,10 +3206,12 @@ RMModule.factory('RMPackerCache', [function() {
    *
    * ### For extension developers:
    *
-   * Use the `feed` method to add new raw data to cache. You can feed array of objects or a singl object.
-   * It supports indexed and non-indexed cache feeding based on the 3rd paramter either `pk` is passed or not.
-   * If you pass `pk` e.g. 'id' cache will be managed with indexing, with indexed cache you can append more 
-   * data to cache store.
+   * Use the `feed` method to add new raw data to cache. 
+   * You can feed array of objects or a singl object.
+   * It supports indexed and non-indexed cache feeding 
+   * based on the 3rd paramter either `pk` is passed or not.
+   * If you pass `pk` e.g. 'id' cache will be managed with indexing, 
+   * with indexed cache you can append more data to cache store.
    *
    * ### For relation developers:
    *
@@ -3223,8 +3225,8 @@ RMModule.factory('RMPackerCache', [function() {
      * @description Feed data to the cache.
      *
      * @param {string} _name Resource name (singular)
-     * @param {array} _raw Raw record data as an array of objects or a single object
-     * @param {string} _pk Primary key field name, most of the time it wil lbe id, used for indexing
+     * @param {array} _raw Raw data as an array of objects or a single object
+     * @param {string} _pk Primary key field name, mostly it will be id [optional]
      */
     feed: function(_name, _raw, _pk) {
 
