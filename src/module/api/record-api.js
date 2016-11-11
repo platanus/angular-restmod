@@ -96,7 +96,7 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
    * @property {mixed} $pk The record primary key
    * @property {object} $scope The collection scope (hierarchical scope, not angular scope)
    */
-	return {
+  return {
 
     /**
      * @memberof RecordApi#
@@ -319,7 +319,11 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
               })
             };
           } else {
-            request = { method: 'PUT', url: url, data: this.$wrap(Utils.UPDATE_MASK) };
+            request = { 
+              method: this.$type.getProperty('putMethod', 'PUT'), // allow user to override put method
+              url: url, 
+              data: this.$wrap(Utils.UPDATE_MASK) 
+            };
           }
 
           this
@@ -341,7 +345,12 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
           url = this.$url('create') || this.$scope.$url();
           Utils.assert(!!url, 'Cant $create if parent scope is not bound');
 
-          request = { method: 'POST', url: url, data: this.$wrap(Utils.CREATE_MASK) };
+          request = { 
+            method: this.$type.getProperty('postMethod', 'POST'), // allow user to override post method
+            url: url, 
+            data: this.$wrap(Utils.CREATE_MASK) 
+          };
+
           this
             .$dispatch('before-save', [request])
             .$dispatch('before-create', [request])
@@ -379,7 +388,10 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
         var url = this.$url('destroy');
         if(url)
         {
-          var request = { method: 'DELETE', url: url };
+          var request = { 
+            method: this.$type.getProperty('deleteMethod', 'DELETE'), // allow user to override delete method 
+            url: url 
+          };
 
           this
             .$dispatch('before-destroy', [request])
