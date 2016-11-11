@@ -35,11 +35,24 @@ RMModule.factory('RMPackerCache', [function() {
      * @param {string} _name Resource name (singular)
      * @param {array} _rawRecords Raw record data as an array
      */
-    feed: function(_name, _rawRecords) {
-      packerCache[_name] = _rawRecords; // TODO: maybe append new record to support extended scenarios.
-    },
+    feed: function(_name, _raw) {
 
-    // IDEA: feedSingle: would require two step resolve many -> single
+      var self = this;
+      if(!packerCache){ this.prepare(); }
+
+      if(angular.isArray(_raw)){
+        angular.forEach(_raw, function(_obj){
+          self.feed(_name, _obj);
+        });
+      }else if(angular.isObject(_raw)){
+        packerCache[_name] = packerCache[_name] || [];
+        packerCache[_name].unshift(_raw);
+      }else{
+        return false;
+      }
+
+      return true;
+    },
 
     /**
      * @memberof PackerCache#
