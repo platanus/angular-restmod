@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.1.11 - 2015-10-26
+ * @version v1.1.11 - 2016-11-11
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -10,7 +10,7 @@
 'use strict';
 /**
  * Angular inflection library
- * @version v0.2.0 - 2014-08-22
+ * @version v0.2.4 - 2016-10-10
  * @link https://github.com/platanus/angular-inflector
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -100,7 +100,8 @@ angular.module('platanus.inflector', [])
 
       if(_skip.indexOf(_string.toLowerCase()) === -1) {
         var i = 0, rule;
-        while(rule = _ruleSet[i++]) {
+        while(_ruleSet.length > i) {
+          rule = _ruleSet[i++];
           if(_string.match(rule[0])) {
             return _string.replace(rule[0], rule[1]);
           }
@@ -171,7 +172,7 @@ angular.module('platanus.inflector', [])
           camelize: function(_string, _constant) {
             if (typeof _string !== 'string') return _string;
             return _string.replace(/(?:^[-_\s]*|[-_\s]+)([A-Z\d])/gi, function (match, _first, _index) {
-              return (!_constant && _index === 0) ? _first : _first.toUpperCase();
+              return (!_constant && _index === 0) ? _first.toLowerCase() : _first.toUpperCase();
             });
           },
 
@@ -2127,7 +2128,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', func
        */
       extend: function(_name, _fun, _mapping) {
         if(typeof _name === 'string') {
-          this[_name] = Utils.override(this[name], _fun);
+          this[_name] = Utils.override(this[_name], _fun);
           if(_mapping) mappings.push({ fun: _name, sign: _mapping });
         } else Utils.extendOverriden(this, _name);
         return this;
