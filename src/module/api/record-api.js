@@ -271,6 +271,8 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      * @description Shortcut method used to extend and save a model.
      *
      * This method will not force a PUT, if object is new `$update` will attempt to POST.
+     * It is posible to change the methods used for PUT and POST operations by setting 
+     * the `putMethod` and `postMethod` configuration.
      *
      * @param {object} _other Data to change
      * @return {RecordApi} self
@@ -379,7 +381,8 @@ RMModule.factory('RMRecordApi', ['RMUtils', function(Utils) {
      *
      * @description Begin a server request to destroy the resource.
      *
-     * The request's promise can be accessed using the `$asPromise` method.
+     * The request's promise can be accessed using the `$asPromise` method. It is posible to change
+     * the methods used for DELETE operations by setting the `deleteMethod` configuration.
      *
      * @return {RecordApi} this
      */
