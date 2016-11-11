@@ -6,6 +6,9 @@ node_js:
 before_script:
   - npm install -g bower
   - bower install
-
+env:
+  - SAUCE_USERNAME=platanus
 addons:
   sauce_connect: true
+  jwt:
+    secure: TP3CGUxfYyL1VpRNuze5Y799AGZeXgbImeSLM00k+MseapUEqX56PfSA8HUSfAvhxPghr4o7NfouqEvihSBD5VoSySERfM2KNuFbFLDe4t1nJA7iYzs4ztF7oXESldjSbDDAUAS0sqOEG5q+LA/ZgHzvEBHz8YiiG4/ixNlCw/M=
