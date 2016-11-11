@@ -264,7 +264,7 @@ RMModule.factory('RMBuilder', ['$injector', 'inflector', '$log', 'RMUtils', func
        */
       extend: function(_name, _fun, _mapping) {
         if(typeof _name === 'string') {
-          this[_name] = Utils.override(this[name], _fun);
+          this[_name] = Utils.override(this[_name], _fun);
           if(_mapping) mappings.push({ fun: _name, sign: _mapping });
         } else Utils.extendOverriden(this, _name);
         return this;
