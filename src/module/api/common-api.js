@@ -381,6 +381,14 @@ RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', 'RMUtils', function
 
       return this.$always(function() {
 
+        var defaultOptions = {};
+
+        if(action && action.aborter) {
+          defaultOptions.timeout = action.aborter.promise;
+        }
+
+        _options = angular.extend(defaultOptions, _options);
+
         this.$response = null;
         this.$status = 'pending';
         this.$dispatch('before-request', [_options]);
@@ -431,7 +439,8 @@ RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', 'RMUtils', function
      */
     $action: function(_fun) {
       var status = {
-        canceled: false
+        canceled: false,
+        aborter: $q.defer()
       }, pending = this.$pending || (this.$pending = []);
 
       pending.push(status);
@@ -467,6 +476,24 @@ RMModule.factory('RMCommonApi', ['$http', 'RMFastQ', '$log', 'RMUtils', function
       if(this.$pending) {
         angular.forEach(this.$pending, function(_status) {
           _status.canceled = true;
+        });
+      }
+
+      return this;
+    },
+
+    /**
+     * @memberof CommonApi#
+     *
+     * @description Aborts all pending actions registered with $action.
+     *
+     * @return {CommonApi} self
+     */
+    $abort: function() {
+      // abort every pending request.
+      if(this.$pending) {
+        angular.forEach(this.$pending, function(_status) {
+          _status.aborter.resolve();
         });
       }
 

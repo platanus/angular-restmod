@@ -8,7 +8,7 @@
  * Synchronous promise implementation (partial)
  *
  */
-RMModule.factory('RMFastQ', [function() {
+RMModule.factory('RMFastQ', ['$q', function($q) {
 
   var isFunction = angular.isFunction,
       catchError = function(_error) {
@@ -78,6 +78,8 @@ RMModule.factory('RMFastQ', [function() {
       return simpleQ(_val, false);
     },
 
-    wrap: wrappedQ
+    wrap: wrappedQ,
+
+    defer: $q.defer
   };
 }]);

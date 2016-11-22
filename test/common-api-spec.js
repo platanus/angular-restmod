@@ -135,6 +135,33 @@ describe('Restmod model class:', function() {
     });
   });
 
+  describe('$abort', function() {
+    it('should abort every pending action', function() {
+      var bike = Bike.$new(),
+          spy = jasmine.createSpy('done');
+
+      $httpBackend.expect('GET', '/api/bikes/1').respond(200);
+
+      bike.$action(function() {
+        this.$send({ url: '/api/bikes/1', method: 'GET' }).$asPromise().catch(function(response) {
+          var response = response.$response;
+          expect(response.data).toBeUndefined();
+          expect(response.status).toBe(-1);
+          expect(response.config.url).toBe('/api/bikes/1');
+          spy();
+        });
+      });
+
+      $rootScope.$apply(function() {
+        bike.$abort();
+      });
+
+      expect(spy).toHaveBeenCalled();
+      $httpBackend.verifyNoOutstandingExpectation();
+      $httpBackend.verifyNoOutstandingRequest();
+    });
+  });
+
   describe('$action', function() {
 
     it('should keep action in pending action list until its done', function() {
