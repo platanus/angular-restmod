@@ -19,7 +19,12 @@ RMModule.factory('RMPackerCache', [function() {
    *
    * ### For extension developers:
    *
-   * Use the `feed` method to add new raw data to cache.
+   * Use the `feed` method to add new raw data to cache. 
+   * You can feed array of objects or a singl object.
+   * It supports indexed and non-indexed cache feeding 
+   * based on the 3rd paramter either `pk` is passed or not.
+   * If you pass `pk` e.g. 'id' cache will be managed with indexing, 
+   * with indexed cache you can append more data to cache store.
    *
    * ### For relation developers:
    *
@@ -33,10 +38,34 @@ RMModule.factory('RMPackerCache', [function() {
      * @description Feed data to the cache.
      *
      * @param {string} _name Resource name (singular)
-     * @param {array} _rawRecords Raw record data as an array
+     * @param {array} _raw Raw data as an array of objects or a single object
+     * @param {string} _pk Primary key field name, mostly will be 'id' [optional]
      */
-    feed: function(_name, _rawRecords) {
-      packerCache[_name] = _rawRecords; // TODO: maybe append new record to support extended scenarios.
+    feed: function(_name, _raw, _pk) {
+
+      if(!packerCache) {this.prepare();}
+      if(!packerCache.hasOwnProperty(_name)) {packerCache[_name] = {'indexed': true};}
+      var indexed = (_pk !== undefined && packerCache[_name].indexed);
+
+      if(indexed){
+        if(angular.isArray(_raw)){
+          for(var i = 0, l = _raw.length; i < l; i++){
+            this.feed(_name, _raw[i], _pk);
+          }
+        }else{
+          packerCache[_name] = packerCache[_name] || {};
+          packerCache[_name][_raw[_pk]] = _raw;
+        }
+      }else{
+        if(angular.isArray(_raw)){
+          packerCache[_name] = _raw;
+        }else{
+          packerCache[_name] = [_raw];
+        }
+      }
+
+      packerCache[_name].indexed = indexed;
+
     },
 
     // IDEA: feedSingle: would require two step resolve many -> single
@@ -57,10 +86,14 @@ RMModule.factory('RMPackerCache', [function() {
             cache = packerCache[modelType.identity(true)];
 
         if(cache && _record.$pk) {
-          for(var i = 0, l = cache.length; i < l; i++) {
-            if(_record.$pk === modelType.inferKey(cache[i])) { // this could be sort of slow? nah
-              _record.$decode(cache[i]);
-              break;
+          if(cache.indexed && cache[_record.$pk]){
+            _record.$decode(cache[_record.$pk]);
+          }else{
+            for(var i = 0, l = cache.length; i < l; i++) {
+              if(_record.$pk === modelType.inferKey(cache[i])) { // this could be sort of slow? nah
+                _record.$decode(cache[i]);
+                break;
+              }
             }
           }
         }

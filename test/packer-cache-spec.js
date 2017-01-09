@@ -44,6 +44,28 @@ describe('RMPackerCache', function() {
         expect(bike.model).toBeUndefined();
       });
 
+      it('shouldnt fail if record type is not cached', function() {
+        expect(function() {
+          var part = packerCache.resolve(Part.$new(1));
+          expect(part.model).toBeUndefined();
+        }).not.toThrow();
+      });
+
+    });
+
+    describe('appending records to cache', function() {
+
+      beforeEach(function() {
+        packerCache.prepare();
+        packerCache.feed('bikes', { id: 1, model: 'Meta' }, 'id');
+        packerCache.feed('bikes', { id: 2, model: 'Slash' }, 'id');
+      });
+
+      it('should feed data if record id is found', function() {
+        var bike = packerCache.resolve(Bike.$new(1));
+        expect(bike.model).toEqual('Meta');
+      });
+
       it('shouldnt feed data if record is not found', function() {
         var bike = packerCache.resolve(Bike.$new(4));
         expect(bike.model).toBeUndefined();

@@ -1,6 +1,6 @@
 /**
  * API Bound Models for AngularJS
- * @version v1.1.11 - 2015-10-26
+ * @version v1.1.11 - 2016-10-30
  * @link https://github.com/angular-platanus/restmod
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -10,7 +10,7 @@
 'use strict';
 /**
  * Angular inflection library
- * @version v0.2.0 - 2014-08-22
+ * @version v0.2.4 - 2016-10-10
  * @link https://github.com/platanus/angular-inflector
  * @author Ignacio Baixas <ignacio@platan.us>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -100,7 +100,8 @@ angular.module('platanus.inflector', [])
 
       if(_skip.indexOf(_string.toLowerCase()) === -1) {
         var i = 0, rule;
-        while(rule = _ruleSet[i++]) {
+        while(_ruleSet.length > i) {
+          rule = _ruleSet[i++];
           if(_string.match(rule[0])) {
             return _string.replace(rule[0], rule[1]);
           }
@@ -171,7 +172,7 @@ angular.module('platanus.inflector', [])
           camelize: function(_string, _constant) {
             if (typeof _string !== 'string') return _string;
             return _string.replace(/(?:^[-_\s]*|[-_\s]+)([A-Z\d])/gi, function (match, _first, _index) {
-              return (!_constant && _index === 0) ? _first : _first.toUpperCase();
+              return (!_constant && _index === 0) ? _first.toLowerCase() : _first.toUpperCase();
             });
           },
 
@@ -3444,7 +3445,12 @@ RMModule.factory('RMPackerCache', [function() {
    *
    * ### For extension developers:
    *
-   * Use the `feed` method to add new raw data to cache.
+   * Use the `feed` method to add new raw data to cache. 
+   * You can feed array of objects or a singl object.
+   * It supports indexed and non-indexed cache feeding 
+   * based on the 3rd paramter either `pk` is passed or not.
+   * If you pass `pk` e.g. 'id' cache will be managed with indexing, 
+   * with indexed cache you can append more data to cache store.
    *
    * ### For relation developers:
    *
@@ -3458,10 +3464,34 @@ RMModule.factory('RMPackerCache', [function() {
      * @description Feed data to the cache.
      *
      * @param {string} _name Resource name (singular)
-     * @param {array} _rawRecords Raw record data as an array
+     * @param {array} _raw Raw data as an array of objects or a single object
+     * @param {string} _pk Primary key field name, mostly will be 'id' [optional]
      */
-    feed: function(_name, _rawRecords) {
-      packerCache[_name] = _rawRecords; // TODO: maybe append new record to support extended scenarios.
+    feed: function(_name, _raw, _pk) {
+
+      if(!packerCache) {this.prepare();}
+      if(!packerCache.hasOwnProperty(_name)) {packerCache[_name] = {'indexed': true};}
+      var indexed = (_pk !== undefined && packerCache[_name].indexed);
+
+      if(indexed){
+        if(angular.isArray(_raw)){
+          for(var i = 0, l = _raw.length; i < l; i++){
+            this.feed(_name, _raw[i], _pk);
+          }
+        }else{
+          packerCache[_name] = packerCache[_name] || {};
+          packerCache[_name][_raw[_pk]] = _raw;
+        }
+      }else{
+        if(angular.isArray(_raw)){
+          packerCache[_name] = _raw;
+        }else{
+          packerCache[_name] = [_raw];
+        }
+      }
+
+      packerCache[_name].indexed = indexed;
+
     },
 
     // IDEA: feedSingle: would require two step resolve many -> single
@@ -3482,10 +3512,14 @@ RMModule.factory('RMPackerCache', [function() {
             cache = packerCache[modelType.identity(true)];
 
         if(cache && _record.$pk) {
-          for(var i = 0, l = cache.length; i < l; i++) {
-            if(_record.$pk === modelType.inferKey(cache[i])) { // this could be sort of slow? nah
-              _record.$decode(cache[i]);
-              break;
+          if(cache.indexed && cache[_record.$pk]){
+            _record.$decode(cache[_record.$pk]);
+          }else{
+            for(var i = 0, l = cache.length; i < l; i++) {
+              if(_record.$pk === modelType.inferKey(cache[i])) { // this could be sort of slow? nah
+                _record.$decode(cache[i]);
+                break;
+              }
             }
           }
         }
