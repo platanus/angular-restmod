@@ -18,7 +18,7 @@ Angular Restmod
 
 Angular Restmod is open source software kindly sponsored by:
 
-![Supporter](http://placehold.it/350x150)
+![Supporter](https://cloud.githubusercontent.com/assets/313750/11634534/d1f7c0fc-9cef-11e5-839a-17c3080d626c.png)
 
 (We need a sponsor for this library, please write to contact@platan.us if you want to help.)
 
