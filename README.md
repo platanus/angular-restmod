@@ -474,7 +474,13 @@ If the child collection model is nested then all CRUD routes for the collection 
 So if 'Part' was defined like:
 
 ```javascript
-restmod.model();
+module.factory('Part', function() {
+    return restmod.model().mix({
+        $config: {
+            name: 'part'
+        }
+    });
+});
 ```
 
 <!-- section: $fetch -->
@@ -576,7 +582,11 @@ If 'User' was to be defined like a nested resource:
 
 ```javascript
 module.factory('User', function() {
-	return restmod.model();
+	return restmod.model().mix({
+		$config: {
+			name: 'user'
+		}	
+	});
 });
 ```
 
