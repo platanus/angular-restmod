@@ -1131,6 +1131,91 @@ var Bike = restmod.model('/bikes').mix('Vehicle', {
 
 ```
 
+# Packers (Serialization/Transformation of Request/Response)
+
+Packers allow you to transform the request/response of your model. A good use case is when your backend uses JSON roots. Packers must define 3 methods; pack, unpack, and unpackMany.
+
+```javascript
+pack: function(_rawData, _record) {
+	return _rawData;
+},
+unpack: function(_rawData, _record) {
+	return _rawData;
+},
+unpackMany: function(_rawData, _collection) {
+	return _rawData;
+}
+```
+
+Packers can be set on a per model basis, but you probably want a base packer which contains all the logic for unwrapping/wrapping the records, in the interest of consistency.
+
+Here is an example of a packer / base model implementation, used to communicate with a Rails backend, with JSON roots. (with ability to configure the resource/collection json root keys, on a per model basis)
+
+### JSON Root Packer
+
+``` javascript
+angular.module('myapp').factory("JsonRootPacker", ["$restmod", function($restmod) {
+  return function(model) {
+    return {
+      pack: function(_rawData, _record) {
+        var request_json = {};
+        request_json[model.$$m.resource_key] = _rawData;
+
+        return request_json;
+      },
+      unpack: function(_rawData, _record) {
+        return _rawData[model.$$m.resource_key];
+      },
+      unpackMany: function(_rawData, _collection) {
+        return _rawData[model.$$m.collection_key];
+      }
+    };
+  }
+}]);
+```
+
+### Base Model using JSON Root Packer
+
+``` javascript
+angular.module('myapp').factory("BaseModel", ["$restmod", "JsonRootPacker", function($restmod, JsonRootPacker) {
+  return $restmod.mixin(function() {
+           this.setUrlPrefix(API_URL);
+           this.setPacker(new JsonRootPacker(this));
+         });
+}]);
+```
+
+### Model using JSON Root Packer / Base Model
+
+``` javascript
+angular.module('myapp').factory("Category", ["BaseModel", "$restmod", function(BaseModel, $restmod) {
+  var model = $restmod.model('/categories', BaseModel, {
+
+  });
+
+  model.collection_key = 'categories';
+  model.resource_key = 'category';
+
+  return model;
+}]);
+```
+
+Using this implementation, you will be able to unwrap responses from the server with json roots (which is very useful for returning meta information in responses ), such as:
+
+``` json
+{
+	"category": {
+		"id": 1,
+		"name": "blah"
+	},
+	"meta": {
+
+	}
+}
+```
+
+In addition, your create/updates, will be wrapped with the json root.
+
 <!-- end -->
 
 Some links:
